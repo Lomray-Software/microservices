@@ -1,0 +1,8 @@
+version: '3.7'
+
+services:
+  ijson:
+    image: lega911/ijson
+    container_name: ijson
+    ports:
+      - "8001:8001"

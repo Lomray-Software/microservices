@@ -1,0 +1,56 @@
+{
+	"name": "@lomray/microservices",
+	"version": "1.0.0",
+	"description": "Microservices based on NodeJS & inverted json.",
+	"keywords": [
+		"node",
+		"js",
+		"microservice",
+		"inverted",
+		"json",
+		"gateway",
+		"worker",
+		"typescript"
+	],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+		"type": "git",
+		"url": "https://github.com/Lomray-Software/microservices.git"
+	},
+	"bugs": {
+		"url": "https://github.com/Lomray-Software/microservices/issues"
+	},
+	"homepage": "https://github.com/Lomray-Software/microservices",
+	"author": "Mikhail Yarmaliuk",
+	"license": "Apache-2.0",
+	"scripts": {
+		"prettier:format": "prettier --write 'microservices/**/*.{ts,tsx,*.ts,*tsx}'",
+		"prettier:check": "prettier --check --debug-check 'microservices/**/*.{ts,tsx,*.ts,*tsx}'",
+		"lint:check": "eslint --ext '.ts,.tsx' 'microservices/**/*.{ts,tsx,*.ts,*tsx}'",
+		"lint:format": "eslint --fix --ext '.ts,.tsx' 'microservices/**/*.{ts,tsx,*.ts,*tsx}'",
+		"prepare": "husky install",
+		"create-microservice": "./operations.sh create-ms",
+		"global-install": "./operations.sh global-install"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"@commitlint/cli": "^13.1.0",
+		"@commitlint/config-conventional": "^13.1.0",
+		"@lomray/eslint-config": "^1.1.0",
+		"@lomray/prettier-config": "^1.0.1",
+		"@types/chai": "^4.2.22",
+		"@types/mocha": "^9.0.0",
+		"@types/node": "^16.9.6",
+		"@types/sinon": "^10.0.4",
+		"@types/sinon-chai": "^3.2.5",
+		"eslint": "^7.32.0",
+		"eslint-config-prettier": "^8.3.0",
+		"eslint-plugin-prettier": "^4.0.0",
+		"husky": "^7.0.2",
+		"lint-staged": "^11.1.2",
+		"prettier": "^2.4.1",
+		"semantic-release": "^18.0.0"
+	}
+}
