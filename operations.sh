@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 ACTION=$1
 MICROSERVICE_TEMPLATE_DIR=template
 MICROSERVICES_DIR=microservices
@@ -52,9 +54,9 @@ function globalInstall() {
 
   for microserviceDir in "$MICROSERVICES_DIR"/* ; do
     if [ "$SHOULD_UPDATE" == "update" ]; then
-      (cd "$microserviceDir" && npm i)
+      (set -e && cd "$microserviceDir" && npm i)
     else
-      (cd "$microserviceDir" && npm ci)
+      (set -e && cd "$microserviceDir" && npm ci)
     fi
 
     echo "${microserviceDir} - installed!"
@@ -64,7 +66,7 @@ function globalInstall() {
 # check typescript for each microservice
 function checkTypescript() {
   for microserviceDir in "$MICROSERVICES_DIR"/* ; do
-    (cd "$microserviceDir" && npm run ts:check)
+    (set -e && cd "$microserviceDir" && npm run ts:check)
 
     echo "${microserviceDir} - checked!"
   done
@@ -73,7 +75,7 @@ function checkTypescript() {
 # run tests for each microservice
 function runTests() {
   for microserviceDir in "$MICROSERVICES_DIR"/* ; do
-    (cd "$microserviceDir" && npm run test)
+    (set -e && cd "$microserviceDir" && npm run test)
 
     echo "${microserviceDir} - passed!"
   done
@@ -84,7 +86,7 @@ function runLint() {
   ACTION="${1:-check}"
 
   for microserviceDir in "$MICROSERVICES_DIR"/* ; do
-    (cd "$microserviceDir" && npm run lint:"$ACTION")
+    (set -e && cd "$microserviceDir" && npm run lint:"$ACTION")
 
     echo "${microserviceDir} - done!"
   done
@@ -95,7 +97,7 @@ function runPrettier() {
   ACTION="${1:-check}"
 
   for microserviceDir in "$MICROSERVICES_DIR"/* ; do
-    (cd "$microserviceDir" && npm run prettier:"$ACTION")
+    (set -e && cd "$microserviceDir" && npm run prettier:"$ACTION")
 
     echo "${microserviceDir} - done!"
   done
@@ -104,7 +106,7 @@ function runPrettier() {
 # run lint-staged for each microservice
 function runLintStaged() {
   for microserviceDir in "$MICROSERVICES_DIR"/* ; do
-    (cd "$microserviceDir" && npx lint-staged)
+    (set -e && cd "$microserviceDir" && npx lint-staged)
 
     echo "${microserviceDir} - done!"
   done
