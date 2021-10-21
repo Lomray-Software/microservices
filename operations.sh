@@ -33,13 +33,13 @@ function createMicroservice() {
     exit
   fi
 
-
   cp -R "$MICROSERVICE_TEMPLATE_DIR" "$MICROSERVICE_PATH"
 
-  universalSed "s/microservices-name/$NAME/g" "$MICROSERVICE_PATH/index.ts"
+  universalSed "s/microservices-name/$NAME/g" "$MICROSERVICE_PATH/src/constants/environment.ts"
   universalSed "s/microservices-name/microservices-$NAME/g" "$MICROSERVICE_PATH/package.json"
   universalSed "s/microservices-name/microservices-$NAME/g" "$MICROSERVICE_PATH/package-lock.json"
   universalSed "s/microservices-name/$NAME/g" "$MICROSERVICE_PATH/README.md"
+  universalSed "s/.eslintrc.js/..\/.eslintrc.js/g" "$MICROSERVICE_PATH/.eslintrc.js"
 
   cd "$MICROSERVICE_PATH" && npm ci
 
@@ -61,6 +61,55 @@ function globalInstall() {
   done
 }
 
+# check typescript for each microservice
+function checkTypescript() {
+  for microserviceDir in "$MICROSERVICES_DIR"/* ; do
+    (cd "$microserviceDir" && npm run ts:check)
+
+    echo "${microserviceDir} - checked!"
+  done
+}
+
+# run tests for each microservice
+function runTests() {
+  for microserviceDir in "$MICROSERVICES_DIR"/* ; do
+    (cd "$microserviceDir" && npm run test)
+
+    echo "${microserviceDir} - passed!"
+  done
+}
+
+# run linter for each microservice
+function runLint() {
+  ACTION="${1:-check}"
+
+  for microserviceDir in "$MICROSERVICES_DIR"/* ; do
+    (cd "$microserviceDir" && npm run lint:"$ACTION")
+
+    echo "${microserviceDir} - done!"
+  done
+}
+
+# run prettier for each microservice
+function runPrettier() {
+  ACTION="${1:-check}"
+
+  for microserviceDir in "$MICROSERVICES_DIR"/* ; do
+    (cd "$microserviceDir" && npm run prettier:"$ACTION")
+
+    echo "${microserviceDir} - done!"
+  done
+}
+
+# run lint-staged for each microservice
+function runLintStaged() {
+  for microserviceDir in "$MICROSERVICES_DIR"/* ; do
+    (cd "$microserviceDir" && npx lint-staged)
+
+    echo "${microserviceDir} - done!"
+  done
+}
+
 case "$ACTION" in
 
   "create-ms")
@@ -69,6 +118,26 @@ case "$ACTION" in
 
   "global-install")
     globalInstall "${@:2}"
+    ;;
+
+  "ts-check")
+    checkTypescript
+    ;;
+
+  "tests")
+    runTests
+    ;;
+
+  "lint")
+    runLint "${@:2}"
+    ;;
+
+  "prettier")
+    runPrettier "${@:2}"
+    ;;
+
+  "lint-staged")
+    runLintStaged
     ;;
 
 esac

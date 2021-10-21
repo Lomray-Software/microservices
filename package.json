@@ -26,16 +26,20 @@
 	"author": "Mikhail Yarmaliuk",
 	"license": "Apache-2.0",
 	"scripts": {
-		"prettier:format": "prettier --write 'microservices/**/*.{ts,tsx,*.ts,*tsx}'",
-		"prettier:check": "prettier --check --debug-check 'microservices/**/*.{ts,tsx,*.ts,*tsx}'",
-		"lint:check": "eslint --ext '.ts,.tsx' 'microservices/**/*.{ts,tsx,*.ts,*tsx}'",
-		"lint:format": "eslint --fix --ext '.ts,.tsx' 'microservices/**/*.{ts,tsx,*.ts,*tsx}'",
-		"prepare": "husky install",
+		"prettier:check": "./operations.sh prettier",
+		"lint:check": "./operations.sh lint",
+		"ts:check": "./operations.sh ts-check",
+		"test": "./operations.sh tests",
 		"create-microservice": "./operations.sh create-ms",
-		"global-install": "./operations.sh global-install"
+		"global-install": "./operations.sh global-install",
+		"lint-staged": "./operations.sh lint-staged",
+		"prepare": "husky install"
 	},
 	"dependencies": {},
 	"devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.1",
+    "@wessberg/rollup-plugin-ts": "^1.3.14",
+    "@zerollup/ts-transform-paths": "^1.7.18",
 		"@commitlint/cli": "^13.1.0",
 		"@commitlint/config-conventional": "^13.1.0",
 		"@lomray/eslint-config": "^1.1.0",
@@ -51,6 +55,16 @@
 		"husky": "^7.0.2",
 		"lint-staged": "^11.1.2",
 		"prettier": "^2.4.1",
-		"semantic-release": "^18.0.0"
-	}
+		"semantic-release": "^18.0.0",
+    "chai": "^4.3.4",
+    "mocha": "^9.1.2",
+    "nyc": "^15.1.0",
+    "rollup": "^2.58.0",
+    "sinon": "^11.1.2",
+    "sinon-chai": "^3.7.0",
+    "ts-node": "^10.2.1",
+    "tsconfig-paths": "^3.11.0",
+    "typescript": "^4.4.3",
+    "ttypescript": "^1.5.12"
+  }
 }
