@@ -1,10 +1,12 @@
 // import { Microservice } from '@lomray/microservice-nodejs-lib';
-// import { MICROSERVICE_NAME, IJSON_CONNECTION } from '@constants/environment';
+// import { MS_NAME, MS_CONNECTION } from '@constants/environment';
 // import Endpoint from '@methods/index'
+// import { version } from '../package.json';
 
 // const microservice = Microservice.create({
-//   name: MICROSERVICE_NAME,
-//   connection: IJSON_CONNECTION,
+//   name: MS_NAME,
+//   connection: MS_CONNECTION,
+//   version,
 // });
 
 // microservice.addEndpoint(Endpoint.endpoint, Endpoint.handler);

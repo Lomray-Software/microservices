@@ -12,10 +12,10 @@
 		"worker",
 		"typescript"
 	],
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": {
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
 		"type": "git",
 		"url": "https://github.com/Lomray-Software/microservices.git"
 	},
@@ -34,38 +34,41 @@
 		"create-microservice": "./operations.sh create-ms",
 		"global-install": "./operations.sh global-install",
 		"lint-staged": "./operations.sh lint-staged",
+		"semantic-release": "./operations.sh semantic-release",
 		"prepare": "husky install"
 	},
-	"dependencies": {},
 	"devDependencies": {
-    "@istanbuljs/nyc-config-typescript": "^1.0.1",
-    "@wessberg/rollup-plugin-ts": "^1.3.14",
-    "@zerollup/ts-transform-paths": "^1.7.18",
 		"@commitlint/cli": "^13.1.0",
 		"@commitlint/config-conventional": "^13.1.0",
+		"@istanbuljs/nyc-config-typescript": "^1.0.1",
 		"@lomray/eslint-config": "^1.1.0",
 		"@lomray/prettier-config": "^1.0.1",
+		"@rollup/plugin-json": "^4.1.0",
+		"@semantic-release/update-package-json": "file:./packages/@semantic-release/update-package-json",
 		"@types/chai": "^4.2.22",
 		"@types/mocha": "^9.0.0",
 		"@types/node": "^16.9.6",
 		"@types/sinon": "^10.0.4",
 		"@types/sinon-chai": "^3.2.5",
+		"@wessberg/rollup-plugin-ts": "^1.3.14",
+		"@zerollup/ts-transform-paths": "^1.7.18",
+		"chai": "^4.3.4",
 		"eslint": "^7.32.0",
 		"eslint-config-prettier": "^8.3.0",
 		"eslint-plugin-prettier": "^4.0.0",
 		"husky": "^7.0.2",
 		"lint-staged": "^11.1.2",
+		"mocha": "^9.1.2",
+		"nyc": "^15.1.0",
 		"prettier": "^2.4.1",
+		"rollup": "^2.58.0",
 		"semantic-release": "^18.0.0",
-    "chai": "^4.3.4",
-    "mocha": "^9.1.2",
-    "nyc": "^15.1.0",
-    "rollup": "^2.58.0",
-    "sinon": "^11.1.2",
-    "sinon-chai": "^3.7.0",
-    "ts-node": "^10.2.1",
-    "tsconfig-paths": "^3.11.0",
-    "typescript": "^4.4.3",
-    "ttypescript": "^1.5.12"
-  }
+		"semantic-release-monorepo": "^7.0.5",
+		"sinon": "^11.1.2",
+		"sinon-chai": "^3.7.0",
+		"ts-node": "^10.2.1",
+		"tsconfig-paths": "^3.11.0",
+		"ttypescript": "^1.5.12",
+		"typescript": "^4.4.3"
+	}
 }

@@ -1,10 +1,12 @@
 import { Gateway } from '@lomray/microservice-nodejs-lib';
 import cors from 'cors';
-import { MICROSERVICE_NAME, IJSON_CONNECTION } from '@constants/environment';
+import { MS_NAME, MS_CONNECTION } from '@constants/environment';
+import { version } from '../package.json';
 
 const microservice = Gateway.create({
-  name: MICROSERVICE_NAME,
-  connection: IJSON_CONNECTION,
+  name: MS_NAME,
+  connection: MS_CONNECTION,
+  version,
 });
 const express = microservice.getExpress();
 

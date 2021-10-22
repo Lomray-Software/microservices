@@ -1,4 +1,5 @@
 import typescript from '@wessberg/rollup-plugin-ts';
+import json from '@rollup/plugin-json';
 import ttypescript from 'ttypescript'
 
 export default {
@@ -8,6 +9,7 @@ export default {
     format: 'cjs'
   },
   plugins: [
+    json(),
     typescript({
       typescript: ttypescript,
       tsconfig: resolvedConfig => ({

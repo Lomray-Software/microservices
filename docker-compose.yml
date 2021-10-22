@@ -6,3 +6,7 @@ services:
     container_name: ijson
     ports:
       - "8001:8001"
+
+  gateway:
+    image: ghcr.io/lomray-software/microservices/gateway:latest-staging
+    container_name: gateway

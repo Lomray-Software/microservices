@@ -2,3 +2,23 @@ microservices-name
 -------------------
 
 RPC 2.0 Microservice.
+
+## Navigation
+- [ENVIRONMENTS](#environments)
+- [HOW TO DEVELOP](#how-to-develop)
+
+### <a id="environments"></a>ENVIRONMENTS:
+- `MS_CONNECTION` - Invert json host and port (with protocol). Default: `http://127.0.0.1:8001`
+- `MS_NAME` - Microservice name. Default: `gateway`
+
+### <a id="how-to-develop"></a>HOW TO DEVELOP:
+1. Run `Inverted Json` job server.
+```bash
+docker run -it -p 8001:8001 lega911/ijson --log 47
+```
+2. Run microservice
+```
+npm run start:dev
+```
+3. That is all. **Don't forget install npm dependencies**
+   (in root folder & local folder run:  `npm ci`)

@@ -59,6 +59,7 @@ function createMicroservice() {
   universalSed "s/microservices-name/microservices-$NAME/g" "$MICROSERVICE_PATH/package.json"
   universalSed "s/microservices-name/microservices-$NAME/g" "$MICROSERVICE_PATH/package-lock.json"
   universalSed "s/microservices-name/$NAME/g" "$MICROSERVICE_PATH/README.md"
+  universalSed "s/microservices-name/microservices-$NAME/g" "$MICROSERVICE_PATH/sonar-project.properties"
   universalSed "s/.eslintrc.js/..\/.eslintrc.js/g" "$MICROSERVICE_PATH/.eslintrc.js"
 
   cd "$MICROSERVICE_PATH" && npm ci
@@ -92,8 +93,14 @@ function checkTypescript() {
 
 # run tests for each microservice
 function runTests() {
+  with_coverage="${1:-}"
+
   for microservice_dir in $(getMicroservices yes yes) ; do
-    (set -e && cd "$microservice_dir" && npm run test)
+    if [ "$with_coverage" == "yes" ]; then
+      (set -e && cd "$microservice_dir" && nyc npm run test)
+    else
+      (set -e && cd "$microservice_dir" && npm run test)
+    fi
 
     echo "$microservice_dir - passed!"
   done
@@ -139,6 +146,26 @@ function runLintStaged() {
   done
 }
 
+# run semantic release
+function runSemanticRelease() {
+  with_dry_run="${1:-yes}"
+
+  token=${GITHUB_TOKEN:=}
+  branch=${GIT_BRANCH:=}
+
+  for microservice_dir in $(getMicroservices yes yes) ; do
+    if [ "$with_dry_run" == "yes" ]; then
+      # shellcheck disable=SC2030
+      (export GITHUB_TOKEN=$token && export GIT_BRANCH=$branch && set -e && cd "$microservice_dir" && npx semantic-release --dryRun)
+    else
+      # shellcheck disable=SC2031
+      (export GITHUB_TOKEN=$token && export GIT_BRANCH=$branch && set -e && cd "$microservice_dir" && npx semantic-release)
+    fi
+
+    echo "$microservice_dir - updated!"
+  done
+}
+
 case "$ACTION" in
 
   "create-ms")
@@ -171,6 +198,10 @@ case "$ACTION" in
 
   "lint-staged")
     runLintStaged
+    ;;
+
+  "semantic-release")
+    runSemanticRelease "${@:2}"
     ;;
 
 esac

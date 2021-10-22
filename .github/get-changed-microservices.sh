@@ -35,5 +35,7 @@ if [ "$names" != "" ]; then
   names="[$names]"
 fi
 
+echo "Result: $names"
+
 echo "::set-output name=list::$names"
 echo "::set-output name=list-spaced::$names_spaced"

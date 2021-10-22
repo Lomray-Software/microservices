@@ -1,8 +1,8 @@
-name: Build staging images
+name: Build production images
 
 on:
   push:
-    branches: [ staging ]
+    branches: [ prod ]
 
 jobs:
   changed-microservices:
@@ -25,37 +25,9 @@ jobs:
         env:
           FILES: ${{ steps.files.outputs.all }}
 
-  update-versions:
-    name: Update package.json microservice versions
-    needs: changed-microservices
-    runs-on: ubuntu-18.04
-    if: needs.changed-microservices.outputs.microservices-spaced != ''
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Install global dependencies
-        run: npm ci
-
-      - name: Extract branch name
-        id: current-branch
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-
-      - name: Update versions
-        run: npm run semantic-release
-        env:
-          GIT_BRANCH: ${{ steps.current-branch.outputs.branch }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: EndBug/add-and-commit@v7
-        with:
-          add: ./**/package.json
-          message: "chore(package.json): update versions [skip ci]"
-
   checks-compile:
     name: Run code checks & compile microservices
-    needs: [changed-microservices, update-versions]
+    needs: changed-microservices
     runs-on: ubuntu-18.04
     if: needs.changed-microservices.outputs.microservices-spaced != ''
 
@@ -92,16 +64,9 @@ jobs:
           path: |
             microservices/*/lib/*
 
-      - name: Archive code coverage artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: coverage-artifacts
-          path: |
-            microservices/*/coverage/*
-
   build:
     name: Build
-    needs: [changed-microservices, checks-compile, update-versions]
+    needs: [changed-microservices, checks-compile]
     runs-on: ubuntu-18.04
     if: needs.changed-microservices.outputs.microservices != ''
 
@@ -124,22 +89,11 @@ jobs:
           name: microservice-artifacts
           path: microservices
 
-      - name: Get npm package version
-        id: package-version
-        uses: Saionaro/extract-package-version@v1.1.1
-        with:
-          path: ${{ env.WORK_DIR }}
-
-      - name: Extract branch name
-        id: current-branch
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
           name: "Lomray-Software/microservices/${{ env.MICROSERVICE_NAME }}"
-          tags: "latest-${{ steps.current-branch.outputs.branch }},${{ steps.package-version.outputs.version}}-${{ steps.current-branch.outputs.branch }}"
+          tags: "latest,${{ steps.package-version.outputs.version}}"
           dockerfile: Dockerfile-nodejs
           context: ${{ env.WORK_DIR }}
           buildoptions: "--compress --force-rm --no-cache"
@@ -147,41 +101,25 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
 
-  sonarcube:
-    name: Sonarcube
-    needs: [changed-microservices, checks-compile, update-versions]
+  release:
+    name: Release
+    needs: [changed-microservices, checks-compile, build]
     runs-on: ubuntu-18.04
     if: needs.changed-microservices.outputs.microservices != ''
 
-    strategy:
-      matrix:
-        microservice: ${{ fromJson(needs.changed-microservices.outputs.microservices) }}
-
-    env:
-      MICROSERVICE_NAME: ${{ matrix.microservice }}
-      WORK_DIR: "microservices/${{ matrix.microservice }}"
-
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
-      - uses: actions/download-artifact@master
-        with:
-          name: coverage-artifacts
-          path: microservices
+      - name: Install global dependencies
+        run: npm ci
 
-      - name: Get npm package version
-        id: package-version
-        uses: Saionaro/extract-package-version@v1.1.1
-        with:
-          path: ${{ env.WORK_DIR }}
+      - name: Extract branch name
+        id: current-branch
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
 
-      - uses: sonarsource/sonarqube-scan-action@master
+      - name: Release
+        run: npm run semantic-release no
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        with:
-          projectBaseDir: ${{ env.WORK_DIR }}
-          args: >
-            -Dsonar.projectVersion=${{ steps.package-version.outputs.version }}
+          GIT_BRANCH: ${{ steps.current-branch.outputs.branch }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
