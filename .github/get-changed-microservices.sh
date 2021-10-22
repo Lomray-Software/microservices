@@ -13,9 +13,7 @@ for changed_file in $FILES; do
   root=${changed_file#*"microservices/"}
   microservice=${root%%"/"*}
 
-  echo $microservice
-
-  list+=("$microservice")
+  list+=("\"$microservice\"")
 done
 
 function join_by {
@@ -23,5 +21,9 @@ function join_by {
 }
 
 names=$(join_by , "${list[@]}")
+
+if [ "$names" != "" ]; then
+  names="[$names]"
+fi
 
 echo "::set-output name=list::$names"

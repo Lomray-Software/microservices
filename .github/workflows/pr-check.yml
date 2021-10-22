@@ -32,7 +32,7 @@ jobs:
 
     strategy:
       matrix:
-        microservice: ${{ needs.changed-microservices.outputs.microservices }}
+        microservice: ${{ fromJson(needs.changed-microservices.outputs.microservices) }}
 
     env:
       WORK_DIR: "microservices/${{ matrix.microservice }}"
