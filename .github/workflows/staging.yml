@@ -1,0 +1,150 @@
+name: Build staging images
+
+on:
+  push:
+    branches: [ staging ]
+
+jobs:
+  changed-microservices:
+    name: Get changed microservices
+    runs-on: ubuntu-18.04
+    outputs:
+      microservices: ${{ steps.microservices.outputs.list }}
+      microservices-spaced: ${{ steps.microservices.outputs.list-spaced }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+
+      - id: files
+        uses: jitterbit/get-changed-files@v1
+
+      - id: microservices
+        run: ./.github/get-changed-microservices.sh
+        env:
+          FILES: ${{ steps.files.outputs.all }}
+
+  checks-compile:
+    name: Run code checks & compile microservices
+    needs: changed-microservices
+    runs-on: ubuntu-18.04
+    if: needs.changed-microservices.outputs.microservices-spaced != ''
+
+    env:
+      ONLY_MICROSERVICES: ${{ needs.changed-microservices.outputs.microservices-spaced }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+
+      - name: Install global dependencies
+        run: npm ci
+
+      - name: Install microservice dependencies
+        run: npm run global-install
+        env:
+          ONLY: ${{ env.ONLY_MICROSERVICES }}
+
+      - name: Check microservice eslint
+        run: npm run lint:check
+        env:
+          ONLY: ${{ env.ONLY_MICROSERVICES }}
+
+      - name: Check microservice typescript
+        run: npm run ts:check
+        env:
+          ONLY: ${{ env.ONLY_MICROSERVICES }}
+
+      - name: Run microservices tests with coverage
+        run: npm run test yes
+        env:
+          ONLY: ${{ env.ONLY_MICROSERVICES }}
+
+      - name: Compile microservices
+        run: npm run build
+        env:
+          ONLY: ${{ env.ONLY_MICROSERVICES }}
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: microservice-artifacts
+          path: |
+            **/lib/*
+            coverage
+
+  build:
+    name: Build
+    needs: checks-compile
+    runs-on: ubuntu-18.04
+    if: needs.changed-microservices.outputs.microservices != ''
+
+    strategy:
+      matrix:
+        microservice: ${{ fromJson(needs.changed-microservices.outputs.microservices) }}
+
+    env:
+      MICROSERVICE_NAME: ${{ matrix.microservice }}
+      WORK_DIR: "microservices/${{ matrix.microservice }}"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+
+      - uses: actions/download-artifact@master
+        with:
+          name: microservice-artifacts
+
+      - name: Get npm package version
+        id: package-version
+        uses: Saionaro/extract-package-version@v1.1.1
+        with:
+          path: ${{ env.WORK_DIR }}
+
+      - name: Extract branch name
+        id: current-branch
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+
+      - name: Publish to Registry
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: "Lomray-Software/microservices/${{ env.MICROSERVICE_NAME }}"
+          tags: "latest-${{ steps.current-branch.outputs.branch }},${{ steps.package-version.outputs.version}}-${{ steps.current-branch.outputs.branch }}"
+          dockerfile: Dockerfile-nodejs
+          context: ${{ env.WORK_DIR }}
+          buildoptions: "--compress --force-rm --no-cache"
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+
+  sonarcube:
+    name: Sonarcube
+    needs: checks-compile
+    runs-on: ubuntu-18.04
+    if: needs.changed-microservices.outputs.microservices != ''
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@master
+        with:
+          name: microservice-artifacts
+
+      - name: Get npm package version
+        id: package-version
+        uses: Saionaro/extract-package-version@v1.1.1
+
+      - uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.projectVersion=${{ steps.package-version.outputs.version }}

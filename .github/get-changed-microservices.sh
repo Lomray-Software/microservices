@@ -35,3 +35,4 @@ if [ "$names" != "" ]; then
 fi
 
 echo "::set-output name=list::$names"
+echo "::set-output name=list-spaced::$names"

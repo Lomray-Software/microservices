@@ -30,6 +30,7 @@
 		"lint:check": "./operations.sh lint",
 		"ts:check": "./operations.sh ts-check",
 		"test": "./operations.sh tests",
+		"build": "./operations.sh build",
 		"create-microservice": "./operations.sh create-ms",
 		"global-install": "./operations.sh global-install",
 		"lint-staged": "./operations.sh lint-staged",

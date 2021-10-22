@@ -1,10 +1,11 @@
 module.exports = {
   extends: "@istanbuljs/nyc-config-typescript",
   include: [
-    'src/**/*.ts'
+    '**/src/**/*.ts'
   ],
   exclude: [
-    'src/interfaces'
+    '**/src/interfaces',
+    'template'
   ],
   all: true,
   cache: false,

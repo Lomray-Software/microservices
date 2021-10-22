@@ -121,6 +121,15 @@ function runPrettier() {
   done
 }
 
+# run build each microservice
+function runBuild() {
+  for microservice_dir in $(getMicroservices yes yes) ; do
+    (set -e && cd "$microservice_dir" && npm run build)
+
+    echo "$microservice_dir - done!"
+  done
+}
+
 # run lint-staged for each microservice
 function runLintStaged() {
   for microservice_dir in $(getMicroservices yes yes) ; do
@@ -145,7 +154,7 @@ case "$ACTION" in
     ;;
 
   "tests")
-    runTests
+    runTests "${@:2}"
     ;;
 
   "lint")
@@ -154,6 +163,10 @@ case "$ACTION" in
 
   "prettier")
     runPrettier "${@:2}"
+    ;;
+
+  "build")
+    runBuild
     ;;
 
   "lint-staged")

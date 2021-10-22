@@ -1,0 +1,17 @@
+FROM node:14.17-alpine
+
+MAINTAINER Yarmaliuk Mikhail <lukomi@mail.ru>
+
+ENV WEB_PATH=/var/www
+
+RUN mkdir -p $WEB_PATH
+
+WORKDIR $WEB_PATH
+
+COPY ./lib $WEB_PATH/lib
+COPY ./package.json $WEB_PATH/package.json
+COPY ./package-lock.json $WEB_PATH/package-lock.json
+
+RUN npm ci --production
+
+CMD npm run start:prod
