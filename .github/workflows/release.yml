@@ -1,8 +1,9 @@
 name: Release
+
 on:
   push:
-    branches:
-      - prod
+    branches: [ prod, staging ]
+
 jobs:
   release:
     name: Release

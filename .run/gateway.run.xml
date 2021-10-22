@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="gateway" type="NodeJSConfigurationType" folderName="microservices" node-parameters="--require ts-node/register" path-to-js-file="index.ts" working-dir="$PROJECT_DIR$/microservices/gateway">
+  <configuration default="false" name="gateway" type="NodeJSConfigurationType" folderName="microservices" node-parameters="--require ts-node/register" path-to-js-file="src/index.ts" working-dir="$PROJECT_DIR$/microservices/gateway">
     <method v="2" />
   </configuration>
 </component>
