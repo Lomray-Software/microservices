@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
-#FILES=${FILES:=""}
-
-FILES=".github/get-changed-microservices.sh .github/workflows/pr-check.yml .github/workflows/release.yml .run/gateway.run.xml microservices/gateway/__tests__/index-test.ts microservices/gateway/src/index.ts operations.sh"
+FILES=${FILES:=""}
 
 list=()
+list_spaced=()
 
 for changed_file in $FILES; do
   # skip not /microservices/ dir
@@ -17,11 +16,12 @@ for changed_file in $FILES; do
   microservice=${root%%"/"*}
 
   # skip duplicates
-  if [[ -n "${list[$microservice]}" ]]; then
+  if [[ ${list[*]} =~ $microservice ]]; then
     continue
   fi
 
   list+=("\"$microservice\"")
+  list_spaced+=("$microservice")
 done
 
 function join_by {
@@ -29,10 +29,11 @@ function join_by {
 }
 
 names=$(join_by , "${list[@]}")
+names_spaced="${list_spaced[*]}"
 
 if [ "$names" != "" ]; then
   names="[$names]"
 fi
 
 echo "::set-output name=list::$names"
-echo "::set-output name=list-spaced::$names"
+echo "::set-output name=list-spaced::$names_spaced"
