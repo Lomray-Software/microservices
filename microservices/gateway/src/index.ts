@@ -14,4 +14,4 @@ express.use(
   }),
 );
 
-microservice.start().catch((e) => `Failed to start: ${e.message as string}`);
+microservice.start().catch((e: Error) => `Failed to start: ${e.message}`);
