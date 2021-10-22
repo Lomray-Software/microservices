@@ -35,7 +35,7 @@ jobs:
         microservice: ${{ fromJson(needs.changed-microservices.outputs.microservices) }}
 
     env:
-      WORK_DIR: "microservices/${{ matrix.microservice }}"
+      MICROSERVICE_NAME: ${{ matrix.microservice }}
 
     steps:
       - uses: actions/checkout@v2
@@ -46,17 +46,21 @@ jobs:
         run: npm ci
 
       - name: Install microservice dependencies
-        run: npm ci
-        working-directory: ${{ env.WORK_DIR }}
+        run: npm run global-install
+        env:
+          ONLY: ${{ env.MICROSERVICE_NAME }}
 
       - name: Check microservice eslint
         run: npm run lint:check
-        working-directory: ${{ env.WORK_DIR }}
+        env:
+          ONLY: ${{ env.MICROSERVICE_NAME }}
 
       - name: Check microservice typescript
         run: npm run ts:check
-        working-directory: ${{ env.WORK_DIR }}
+        env:
+          ONLY: ${{ env.MICROSERVICE_NAME }}
 
       - name: Run microservices tests
         run: npm run test
-        working-directory: ${{ env.WORK_DIR }}
+        env:
+          ONLY: ${{ env.MICROSERVICE_NAME }}

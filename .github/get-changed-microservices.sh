@@ -5,7 +5,8 @@ FILES=${FILES:=""}
 list=()
 
 for changed_file in $FILES; do
-  if [[ "$changed_file" != *"microservices"* ]]; then
+  # skip not /microservices/ dir
+  if [[ "$changed_file" != *"microservices/"* ]]; then
     continue
   fi
 
