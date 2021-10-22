@@ -2,26 +2,61 @@ name: Check PR
 
 on:
   pull_request:
-    branches: [ staging ]
+    branches: [ prod, staging ]
 
 jobs:
-  check:
-    name: Check PR
+  changed-microservices:
+    name: Get changed microservices
     runs-on: ubuntu-18.04
+    outputs:
+      microservices: ${{ steps.microservices.outputs.list }}
 
     steps:
       - uses: actions/checkout@v2
 
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
 
-      - name: Install dependencies
+      - id: files
+        uses: jitterbit/get-changed-files@v1
+
+      - id: microservices
+        run: ./.github/get-changed-microservices.sh
+        env:
+          FILES: ${{ steps.files.outputs.all }}
+
+  checks:
+    name: Run code checks
+    needs: changed-microservices
+    runs-on: ubuntu-18.04
+    if: needs.changed-microservices.outputs.microservices != ''
+
+    strategy:
+      matrix:
+        microservice: [${{ needs.changed-microservices.outputs.microservices }}]
+
+    env:
+      WORK_DIR: "microservices/${{ matrix.microservice }}"
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+
+      - name: Install global dependencies
         run: npm ci
 
-      - name: Check eslint
+      - name: Install microservice dependencies
+        run: npm ci
+        working-directory: ${{ env.WORK_DIR }}
+
+      - name: Check microservice eslint
         run: npm run lint:check
+        working-directory: ${{ env.WORK_DIR }}
 
-      - name: Typescript check
+      - name: Check microservice typescript
         run: npm run ts:check
+        working-directory: ${{ env.WORK_DIR }}
 
-      - name: Run tests
+      - name: Run microservices tests
         run: npm run test
+        working-directory: ${{ env.WORK_DIR }}
