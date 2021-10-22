@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-FILES=${FILES:=""}
+#FILES=${FILES:=""}
+
+FILES=".github/get-changed-microservices.sh .github/workflows/pr-check.yml .github/workflows/release.yml .run/gateway.run.xml microservices/gateway/__tests__/index-test.ts microservices/gateway/src/index.ts operations.sh"
 
 list=()
 
@@ -13,6 +15,11 @@ for changed_file in $FILES; do
   # remove part of path before microservice name
   root=${changed_file#*"microservices/"}
   microservice=${root%%"/"*}
+
+  # skip duplicates
+  if [[ -n "${list[$microservice]}" ]]; then
+    continue
+  fi
 
   list+=("\"$microservice\"")
 done
