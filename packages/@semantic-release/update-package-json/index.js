@@ -1,5 +1,9 @@
 const { exec } = require("child_process");
 
+/**
+ * Update package.json version
+ * PS. We need update version without release!
+ */
 const verifyRelease = (pluginConfig, context) => {
   const { logger, nextRelease } = context;
   const nextReleaseVersion = nextRelease.version;

@@ -8,6 +8,7 @@ module.exports = {
     '@semantic-release/release-notes-generator',
     // only release
     ...(branch === 'prod' ? [
+      '@semantic-release/npm',
       '@semantic-release/github',
     ] : [
       // only update package.json version in staging branch

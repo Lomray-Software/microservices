@@ -44,6 +44,7 @@
 		"@lomray/eslint-config": "^1.1.0",
 		"@lomray/prettier-config": "^1.0.1",
 		"@rollup/plugin-json": "^4.1.0",
+		"@semantic-release/npm": "^8.0.3",
 		"@semantic-release/update-package-json": "file:./packages/@semantic-release/update-package-json",
 		"@types/chai": "^4.2.22",
 		"@types/mocha": "^9.0.0",

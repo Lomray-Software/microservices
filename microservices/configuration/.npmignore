@@ -1,5 +1,7 @@
 __tests__
 __helpers__
+lib/start.js
+lib/start.d.js
 src
 coverage
 .github

@@ -153,14 +153,15 @@ function runSemanticRelease() {
 
   token=${GITHUB_TOKEN:=}
   branch=${GIT_BRANCH:=}
+  npm_token=${NPM_TOKEN:=}
 
   for microservice_dir in $(getMicroservices yes yes) ; do
     if [ "$with_dry_run" == "yes" ]; then
       # shellcheck disable=SC2030
-      (export GITHUB_TOKEN=$token && export GIT_BRANCH=$branch && set -e && cd "$microservice_dir" && npx semantic-release --dryRun)
+      (export NPM_TOKEN=$npm_token && export GITHUB_TOKEN=$token && export GIT_BRANCH=$branch && set -e && cd "$microservice_dir" && npx semantic-release --dryRun)
     else
       # shellcheck disable=SC2031
-      (export GITHUB_TOKEN=$token && export GIT_BRANCH=$branch && set -e && cd "$microservice_dir" && npx semantic-release)
+      (export NPM_TOKEN=$npm_token && export GITHUB_TOKEN=$token && export GIT_BRANCH=$branch && set -e && cd "$microservice_dir" && npx semantic-release)
     fi
 
     echo "$microservice_dir - updated!"

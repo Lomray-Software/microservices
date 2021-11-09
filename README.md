@@ -7,14 +7,8 @@
 [![Build staging images](https://github.com/Lomray-Software/microservices/actions/workflows/staging.yml/badge.svg?branch=staging)](https://github.com/Lomray-Software/microservices/actions/workflows/staging.yml)
 
 ## List:
- - [Gateway](microservices/gateway)   
-   [![Quality Gate Status](https://sonarqube-proxy.lomray.com/status/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-   [![Reliability Rating](https://sonarqube-proxy.lomray.com/reliability/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-   [![Security Rating](https://sonarqube-proxy.lomray.com/security/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-   [![Vulnerabilities](https://sonarqube-proxy.lomray.com/vulnerabilities/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-   [![Lines of code](https://sonarqube-proxy.lomray.com/lines/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-   [![Coverage](https://sonarqube-proxy.lomray.com/coverage/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
- - Configuration (in progress)
+ - [Gateway](microservices/gateway)
+ - [Configuration](microservices/configuration)
  - Authentication (in progress)
  - Authorization (in progress)
  - Users (in progress)
