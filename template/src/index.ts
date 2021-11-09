@@ -1,15 +1,49 @@
-// import { Microservice } from '@lomray/microservice-nodejs-lib';
-// import { MS_NAME, MS_CONNECTION } from '@constants/environment';
-// import Endpoint from '@methods/index'
-// import { version } from '../package.json';
+import type { IMicroserviceOptions, IMicroserviceParams } from '@lomray/microservice-nodejs-lib';
+import { Microservice } from '@lomray/microservice-nodejs-lib';
+import { RemoteMiddlewareClient } from '@lomray/microservice-remote-middleware';
+import Endpoint from '@methods/index';
 
-// const microservice = Microservice.create({
-//   name: MS_NAME,
-//   connection: MS_CONNECTION,
-//   version,
-// });
+export interface IStartConfig {
+  msOptions: Partial<IMicroserviceOptions>;
+  msParams: Partial<IMicroserviceParams>;
+  isDisableRemoteMiddleware?: boolean;
+  hooks?: {
+    afterCreateMicroservice?: (ms: Microservice) => Promise<void> | void;
+    afterInitRemoteMiddleware?: (remoteMiddleware: RemoteMiddlewareClient) => Promise<void> | void;
+    beforeStart?: () => Promise<void> | void;
+  };
+}
 
-// microservice.addEndpoint(Endpoint.endpoint, Endpoint.handler);
+/**
+ * Initialize & start microservice
+ */
+const start = async ({
+  msOptions,
+  msParams,
+  isDisableRemoteMiddleware = false,
+  hooks: { afterCreateMicroservice, afterInitRemoteMiddleware, beforeStart } = {},
+}: IStartConfig): Promise<void> => {
+  try {
+    const microservice = Microservice.create(msOptions, msParams);
 
-// Start worker
-// microservice.start();
+    microservice.addEndpoint(Endpoint.endpoint, Endpoint.handler);
+
+    await afterCreateMicroservice?.(microservice);
+
+    // Enable remote middleware
+    if (!isDisableRemoteMiddleware) {
+      const remoteMiddleware = RemoteMiddlewareClient.create(microservice);
+
+      await afterInitRemoteMiddleware?.(remoteMiddleware);
+      await remoteMiddleware.addRegisterEndpoint().obtainMiddlewares();
+    }
+
+    await beforeStart?.();
+    await microservice.start();
+  } catch (e) {
+    console.info('\x1b[31m%s\x1b[0m', `Failed to start microservice: ${e.message as string}`);
+    process.exit(1);
+  }
+};
+
+export { start };

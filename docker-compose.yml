@@ -7,6 +7,17 @@ services:
     ports:
       - "8001:8001"
 
+  db:
+    image: postgres
+    container_name: db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example
+
   gateway:
     image: ghcr.io/lomray-software/microservices/gateway:latest-staging
     container_name: gateway
+    ports:
+      - "3000:3000"

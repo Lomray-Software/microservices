@@ -1,6 +1,8 @@
 import rootConfig from '../../rollup.config';
 
-export default {
-  ...rootConfig,
-  external: [...rootConfig.external, 'cors'],
-};
+const config = rootConfig.map((baseConfig) => ({
+  ...baseConfig,
+  external: [...baseConfig.external, 'cors'],
+}));
+
+export default config;

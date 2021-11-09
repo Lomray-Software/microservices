@@ -59,6 +59,7 @@ function createMicroservice() {
   universalSed "s/microservices-name/microservices-$NAME/g" "$MICROSERVICE_PATH/package.json"
   universalSed "s/microservices-name/microservices-$NAME/g" "$MICROSERVICE_PATH/package-lock.json"
   universalSed "s/microservices-name/$NAME/g" "$MICROSERVICE_PATH/README.md"
+  universalSed "s/microservices-name/$NAME/g" "$MICROSERVICE_PATH/__tests__/index-test.ts"
   universalSed "s/microservices-name/microservices-$NAME/g" "$MICROSERVICE_PATH/sonar-project.properties"
   universalSed "s/.eslintrc.js/..\/.eslintrc.js/g" "$MICROSERVICE_PATH/.eslintrc.js"
 

@@ -1,24 +1,63 @@
 import { Gateway } from '@lomray/microservice-nodejs-lib';
+import { RemoteMiddlewareClient } from '@lomray/microservice-remote-middleware';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { MS_NAME, MS_CONNECTION } from '@constants/environment';
+import { microserviceOptions, microserviceParams } from '@config/ms';
+import { MS_NAME, MS_CONNECTION } from '@constants/index';
+import { start } from '../src';
 
 describe('gateway', () => {
-  const microservice = Gateway.create();
+  before(() => {
+    sinon.stub(console, 'info');
+  });
 
-  const spyCreate = sinon.spy(Gateway, 'create');
-  const stubbedStart = sinon.stub(microservice, 'start').resolves();
-
-  after(() => {
+  afterEach(() => {
     sinon.restore();
   });
 
   it('should correct start gateway microservice', async () => {
-    await import('../src/index');
+    const spyCreate = sinon.spy(Gateway, 'create');
+    let stubbedStart;
+    let isRunBeforeStart = false;
+    let addRegisterEndpointSpy;
+    let obtainMiddlewares;
+
+    await start({
+      msOptions: microserviceOptions,
+      msParams: microserviceParams,
+      hooks: {
+        afterCreateMicroservice: (microservice) => {
+          stubbedStart = sinon.stub(microservice, 'start').resolves();
+        },
+        afterInitRemoteMiddleware: (remoteMiddleware) => {
+          addRegisterEndpointSpy = sinon.spy(remoteMiddleware, 'addRegisterEndpoint');
+          obtainMiddlewares = sinon.stub(remoteMiddleware, 'obtainMiddlewares').resolves();
+        },
+        beforeStart: () => {
+          isRunBeforeStart = true;
+        },
+      },
+    });
 
     const createOptions = spyCreate.firstCall.firstArg;
 
     expect(createOptions).to.includes({ name: MS_NAME, connection: MS_CONNECTION });
     expect(stubbedStart).to.calledOnce;
+    expect(isRunBeforeStart).to.ok;
+    expect(addRegisterEndpointSpy).to.calledOnce;
+    expect(obtainMiddlewares).to.calledOnce;
+  });
+
+  it('should correct start gateway without remote middleware', async () => {
+    sinon.stub(Gateway.getInstance(), 'start').resolves();
+    sinon.stub(RemoteMiddlewareClient, 'instance' as any).value(undefined);
+
+    await start({
+      msOptions: microserviceOptions,
+      msParams: microserviceParams,
+      isDisableRemoteMiddleware: true,
+    });
+
+    expect(RemoteMiddlewareClient.getInstance()).to.undefined;
   });
 });

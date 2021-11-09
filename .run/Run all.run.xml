@@ -1,5 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run all" type="CompoundRunConfigurationType">
+    <toRun name="configuration" type="NodeJSConfigurationType" />
     <toRun name="gateway" type="NodeJSConfigurationType" />
     <method v="2" />
   </configuration>

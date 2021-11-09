@@ -8,7 +8,7 @@ RUN mkdir -p $WEB_PATH
 
 WORKDIR $WEB_PATH
 
-COPY ./lib $WEB_PATH/lib
+COPY ./lib/start.js $WEB_PATH/lib/start.js
 COPY ./package.json $WEB_PATH/package.json
 COPY ./package-lock.json $WEB_PATH/package-lock.json
 

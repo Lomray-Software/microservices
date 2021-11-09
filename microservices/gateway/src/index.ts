@@ -1,19 +1,46 @@
+import type { IGatewayOptions, IGatewayParams } from '@lomray/microservice-nodejs-lib';
 import { Gateway } from '@lomray/microservice-nodejs-lib';
-import cors from 'cors';
-import { MS_NAME, MS_CONNECTION } from '@constants/environment';
-import { version } from '../package.json';
+import { RemoteMiddlewareClient } from '@lomray/microservice-remote-middleware';
 
-const microservice = Gateway.create({
-  name: MS_NAME,
-  connection: MS_CONNECTION,
-  version,
-});
-const express = microservice.getExpress();
+export interface IStartConfig {
+  msOptions: Partial<IGatewayOptions>;
+  msParams: Partial<IGatewayParams>;
+  isDisableRemoteMiddleware?: boolean;
+  hooks?: {
+    afterCreateMicroservice?: (ms: Gateway) => Promise<void> | void;
+    afterInitRemoteMiddleware?: (remoteMiddleware: RemoteMiddlewareClient) => Promise<void> | void;
+    beforeStart?: () => Promise<void> | void;
+  };
+}
 
-express.use(
-  cors({
-    exposedHeaders: ['Guest-Id', 'Jwt-Access-Token', 'Jwt-Refresh-Token'],
-  }),
-);
+/**
+ * Initialize & start microservice
+ */
+const start = async ({
+  msOptions,
+  msParams,
+  isDisableRemoteMiddleware = false,
+  hooks: { afterCreateMicroservice, afterInitRemoteMiddleware, beforeStart } = {},
+}: IStartConfig): Promise<void> => {
+  try {
+    const microservice = Gateway.create(msOptions, msParams);
 
-microservice.start().catch((e: Error) => `Failed to start: ${e.message}`);
+    await afterCreateMicroservice?.(microservice);
+
+    // Enable remote middleware
+    if (!isDisableRemoteMiddleware) {
+      const remoteMiddleware = RemoteMiddlewareClient.create(microservice);
+
+      await afterInitRemoteMiddleware?.(remoteMiddleware);
+      await remoteMiddleware.addRegisterEndpoint().obtainMiddlewares();
+    }
+
+    await beforeStart?.();
+    await microservice.start();
+  } catch (e) {
+    console.info('\x1b[31m%s\x1b[0m', `Failed to start microservice: ${e.message as string}`);
+    process.exit(1);
+  }
+};
+
+export { start };
