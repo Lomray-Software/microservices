@@ -12,7 +12,8 @@ const connectionDbOptions: ConnectionOptions = {
   username: USERNAME,
   password: PASSWORD,
   database: DATABASE,
-  entities: ['src/models/*.ts'],
+  entities: ['src/entities/*.ts'],
+  migrations: ['src/migrations/*.ts'],
   synchronize: true,
   logging: false,
 };

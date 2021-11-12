@@ -1,8 +1,7 @@
+import TypeormMock from '@lomray/microservice-helpers/mocks/typeorm';
+import TypeormExtensionMock from '@lomray/microservice-helpers/mocks/typeorm-extension';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
-import sinon from 'sinon';
-import TypeormMock from '@__mocks__/typeorm';
-import TypeormExtensionMock from '@__mocks__/typeorm-extension';
 
 const { createDbConnection, connectionDbOptions } = rewiremock.proxy(() => require('@config/db'), {
   typeorm: TypeormMock.mock,
@@ -13,14 +12,6 @@ describe('config/db', () => {
   beforeEach(() => {
     TypeormMock.sandbox.reset();
     TypeormExtensionMock.sandbox.reset();
-  });
-
-  before(() => {
-    sinon.stub(console, 'info');
-  });
-
-  after(() => {
-    sinon.restore();
   });
 
   it('should correct create db connection', async () => {

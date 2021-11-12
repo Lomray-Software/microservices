@@ -28,14 +28,16 @@
     "target": "es5",
     "baseUrl": "./src",
     "paths": {
+      "@__mocks__/*": ["./__mocks__/*"],
       "@__helpers__/*": ["./__helpers__/*"],
-      "@config/*": ["./config/*"],
-      "@constants/*": ["./constants/*"],
-      "@interfaces/*": ["./interfaces/*"],
-      "@helpers/*": ["./helpers/*"],
-      "@methods/*": ["./methods/*"],
-      "@services/*": ["./services/*"],
-      "@models/*": ["./models/*"]
+      "@config/*": ["./src/config/*"],
+      "@constants/*": ["./src/constants/*"],
+      "@interfaces/*": ["./src/interfaces/*"],
+      "@helpers/*": ["./src/helpers/*"],
+      "@methods/*": ["./src/methods/*"],
+      "@entities/*": ["./src/entities/*"],
+      "@repositories/*": ["./src/repositories/*"],
+      "@services/*": ["./src/services/*"]
     }
   },
   "exclude": [

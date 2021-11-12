@@ -39,15 +39,18 @@
 		"start:prod": "node lib/start.js"
 	},
 	"dependencies": {
+		"@lomray/microservice-helpers": "file:../../packages/@lomray/microservice-helpers/lomray-microservice-helpers-1.0.0.tgz",
 		"@lomray/microservice-nodejs-lib": "^2.1.1",
 		"@lomray/microservice-remote-middleware": "^1.0.0",
 		"axios": "^0.24.0",
+		"lodash": "^4.17.21",
 		"pg": "^8.7.1",
 		"reflect-metadata": "^0.1.13",
 		"typeorm": "^0.2.38",
-		"typeorm-extension": "^1.0.1"
+		"typeorm-extension": "^1.0.1",
+		"winston": "^3.3.3"
 	},
 	"devDependencies": {
-		"rewiremock": "^3.14.3"
+		"@types/lodash": "^4.14.176"
 	}
 }

@@ -1,6 +1,10 @@
+const ENV = process.env.NODE_ENV || 'development';
+const IS_PROD = ENV === 'production';
+
 const MS_NAME = process.env.MS_NAME || 'configuration';
 const MS_CONNECTION = process.env.MS_CONNECTION || undefined;
 const MS_DISABLE_REMOTE_MIDDLEWARE = Number(process.env.MS_DISABLE_REMOTE_MIDDLEWARE) || 0;
+const MS_CONFIGS = process.env.MS_CONNECTION || '[]';
 
 const DB_ENV = {
   HOST: process.env.DB_HOST || '127.0.0.1',
@@ -10,4 +14,4 @@ const DB_ENV = {
   DATABASE: process.env.DB_DATABASE || 'ms-configuration',
 };
 
-export { MS_NAME, MS_CONNECTION, DB_ENV, MS_DISABLE_REMOTE_MIDDLEWARE };
+export { MS_NAME, MS_CONNECTION, DB_ENV, MS_DISABLE_REMOTE_MIDDLEWARE, MS_CONFIGS, ENV, IS_PROD };

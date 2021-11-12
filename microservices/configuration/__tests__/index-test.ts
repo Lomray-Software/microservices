@@ -1,21 +1,31 @@
+import TypeormMock from '@lomray/microservice-helpers/mocks/typeorm';
 import { Microservice } from '@lomray/microservice-nodejs-lib';
 import { RemoteMiddlewareServer } from '@lomray/microservice-remote-middleware';
 import { expect } from 'chai';
+import rewiremock from 'rewiremock';
 import sinon from 'sinon';
 import type { Connection } from 'typeorm';
+import ConfigRepositoryMock from '@__mocks__/config-repository';
 import * as DBConfig from '@config/db';
 import { microserviceOptions, microserviceParams } from '@config/ms';
 import { MS_NAME, MS_CONNECTION } from '@constants/index';
-import { start } from '../src';
+import { start as OriginalStart } from '../src';
+
+const { start } = rewiremock.proxy<{ start: typeof OriginalStart }>(() => require('../src'), {
+  typeorm: TypeormMock.mock,
+});
 
 describe('start', () => {
-  const middlewareRepo = { middleware: 'repo' };
   const dbConnectionMock = {
-    getRepository: sinon.stub().returns(middlewareRepo),
+    getRepository: sinon.stub().returns({}),
   } as unknown as Promise<Connection>;
+  const configRepository = new ConfigRepositoryMock();
 
   before(() => {
     sinon.stub(console, 'info');
+    TypeormMock.sandbox.reset();
+
+    TypeormMock.stubs.getCustomRepository.returns(configRepository);
   });
 
   beforeEach(() => {
@@ -29,7 +39,8 @@ describe('start', () => {
   it('should correct start microservice', async () => {
     const spyCreate = sinon.spy(Microservice, 'create');
     let stubbedStart;
-    let remoteMiddlewareInstance;
+    let addRegisterEndpointSpy;
+    let addObtainEndpointSpy;
     let dbConnection;
     let isRunBeforeStart = false;
 
@@ -43,7 +54,8 @@ describe('start', () => {
           dbConnection = connection;
         },
         afterInitRemoteMiddleware: (remoteMiddleware) => {
-          remoteMiddlewareInstance = remoteMiddleware;
+          addRegisterEndpointSpy = sinon.spy(remoteMiddleware, 'addRegisterEndpoint');
+          addObtainEndpointSpy = sinon.spy(remoteMiddleware, 'addObtainEndpoint');
         },
         beforeStart: () => {
           isRunBeforeStart = true;
@@ -57,7 +69,9 @@ describe('start', () => {
     expect(stubbedStart).to.calledOnce;
     expect(isRunBeforeStart).to.ok;
     expect(dbConnection).to.deep.equal(dbConnectionMock);
-    expect(remoteMiddlewareInstance).property('repository').to.deep.equal(middlewareRepo);
+    expect(addRegisterEndpointSpy).to.calledOnce;
+    expect(addObtainEndpointSpy).to.calledOnce;
+    expect(configRepository.bulkSave).to.calledOnce;
   });
 
   it('should correct start microservice without remote middleware', async () => {

@@ -1,0 +1,36 @@
+{
+	"name": "@lomray/microservice-helpers",
+	"version": "1.0.0",
+	"description": "Microservice helpers",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+	"keywords": [
+		"js",
+		"microservice",
+		"helpers"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Lomray-Software/microservices.git"
+	},
+	"bugs": {
+		"url": "https://github.com/Lomray-Software/microservices/issues"
+	},
+	"homepage": "https://github.com/Lomray-Software/microservices",
+	"author": "Mikhail Yarmaliuk",
+	"license": "Apache-2.0",
+	"scripts": {
+		"build": "rollup -c",
+    "release": "npm run build && cp package.json lib/package.json && cd lib && npm pack && mv -f lomray-microservice-helpers*.tgz ../"
+	},
+	"peerDependencies": {
+		"@types/lodash": "^4.14.176",
+		"lodash": "^4.17.21",
+		"typeorm": "^0.2.38",
+		"typeorm-extension": "^1.0.1"
+	},
+  "bundledDependencies": ["tslib"]
+}

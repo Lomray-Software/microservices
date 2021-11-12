@@ -9,7 +9,7 @@ const stubs = {
 const TypeormExtensionMock = {
   sandbox,
   stubs,
-  mock: rewiremock('typeorm-extension').callThrough().with(stubs),
+  mock: rewiremock('typeorm-extension').callThrough().with(stubs) as any,
 };
 
 export default TypeormExtensionMock;

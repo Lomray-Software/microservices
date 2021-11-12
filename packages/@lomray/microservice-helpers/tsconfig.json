@@ -2,6 +2,8 @@
   "compilerOptions": {
     "outDir": "./lib",
     "allowJs": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "allowUnreachableCode": false,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
@@ -30,6 +32,7 @@
     "paths": {
       "@__mocks__/*": ["./__mocks__/*"],
       "@__helpers__/*": ["./__helpers__/*"],
+      "@mocks/*": ["./src/mocks/*"],
       "@config/*": ["./src/config/*"],
       "@constants/*": ["./src/constants/*"],
       "@interfaces/*": ["./src/interfaces/*"],
@@ -46,7 +49,7 @@
     "lib",
     "commitlint.config.js",
     "nyc.config.js",
-    "rollup.config.js"
+    "rollup.config.js",
   ],
   "ts-node": {
     "require": ["tsconfig-paths/register"]
