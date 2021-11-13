@@ -1,15 +1,15 @@
-import winston from 'winston';
+import { createLogger, format, transports } from 'winston';
 import { IS_TEST, MS_NAME } from '@constants/index';
 
-const Log = winston.createLogger({
+const Log = createLogger({
   level: 'info',
-  format: winston.format.json(),
+  format: format.json(),
   defaultMeta: { service: MS_NAME },
   transports: [
     ...(!IS_TEST
       ? [
-          new winston.transports.Console({
-            format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+          new transports.Console({
+            format: format.combine(format.colorize(), format.simple()),
           }),
         ]
       : []),

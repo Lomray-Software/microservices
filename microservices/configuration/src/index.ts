@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { Microservice } from '@lomray/microservice-nodejs-lib';
 import type { IMicroserviceOptions, IMicroserviceParams } from '@lomray/microservice-nodejs-lib';
 import {
