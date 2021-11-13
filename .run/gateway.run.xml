@@ -10,6 +10,7 @@
     <pass-parent-env>true</pass-parent-env>
     <envs>
       <env name="TS_NODE_COMPILER_OPTIONS" value="{&quot;target&quot;:&quot;es6&quot;}" />
+      <env name="NODE_ENV" value="tests" />
     </envs>
     <ui>bdd</ui>
     <extra-mocha-options>--require ts-node/register --watch</extra-mocha-options>

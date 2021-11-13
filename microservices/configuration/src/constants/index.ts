@@ -1,5 +1,7 @@
 const ENV = process.env.NODE_ENV || 'development';
 const IS_PROD = ENV === 'production';
+const IS_DEV = ENV === 'development';
+const IS_TEST = ENV === 'tests';
 
 const MS_NAME = process.env.MS_NAME || 'configuration';
 const MS_CONNECTION = process.env.MS_CONNECTION || undefined;
@@ -14,4 +16,14 @@ const DB_ENV = {
   DATABASE: process.env.DB_DATABASE || 'ms-configuration',
 };
 
-export { MS_NAME, MS_CONNECTION, DB_ENV, MS_DISABLE_REMOTE_MIDDLEWARE, MS_CONFIGS, ENV, IS_PROD };
+export {
+  MS_NAME,
+  MS_CONNECTION,
+  DB_ENV,
+  MS_DISABLE_REMOTE_MIDDLEWARE,
+  MS_CONFIGS,
+  ENV,
+  IS_PROD,
+  IS_DEV,
+  IS_TEST,
+};

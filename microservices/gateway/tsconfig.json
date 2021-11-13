@@ -2,6 +2,8 @@
   "compilerOptions": {
     "outDir": "./lib",
     "allowJs": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "allowUnreachableCode": false,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
@@ -26,7 +28,7 @@
     "pretty": true,
     "suppressImplicitAnyIndexErrors": true,
     "target": "es5",
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
       "@__mocks__/*": ["./__mocks__/*"],
       "@__helpers__/*": ["./__helpers__/*"],
@@ -37,7 +39,8 @@
       "@methods/*": ["./src/methods/*"],
       "@entities/*": ["./src/entities/*"],
       "@repositories/*": ["./src/repositories/*"],
-      "@services/*": ["./src/services/*"]
+      "@services/*": ["./src/services/*"],
+      "@subscribers/*": ["./src/subscribers/*"]
     }
   },
   "exclude": [

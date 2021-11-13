@@ -39,7 +39,8 @@
       "@methods/*": ["./src/methods/*"],
       "@entities/*": ["./src/entities/*"],
       "@repositories/*": ["./src/repositories/*"],
-      "@services/*": ["./src/services/*"]
+      "@services/*": ["./src/services/*"],
+      "@subscribers/*": ["./src/subscribers/*"]
     }
   },
   "exclude": [

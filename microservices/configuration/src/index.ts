@@ -36,7 +36,12 @@ const start = async ({
   isDisableRemoteMiddleware = false,
   hooks: { afterDbConnection, afterInitRemoteMiddleware, beforeStart } = {},
 }: IStartConfig): Promise<void> => {
-  Log.configure({ defaultMeta: { service: msOptions.name, msOptions, isDisableRemoteMiddleware } });
+  Log.defaultMeta = {
+    ...Log.defaultMeta,
+    service: msOptions.name,
+    msOptions,
+    isDisableRemoteMiddleware,
+  };
 
   try {
     const microservice = Microservice.create(msOptions, msParams);
