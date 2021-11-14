@@ -6,7 +6,6 @@ import ttypescript from 'ttypescript'
 const config = {
   input: 'src/index.ts',
   output: {
-    // file: 'lib/index.js',
     dir: 'lib',
     format: 'cjs',
     sourcemap: true,

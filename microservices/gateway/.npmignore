@@ -1,7 +1,6 @@
 __tests__
 __helpers__
-lib/start.js
-lib/start.d.js
+__mocks__
 src
 coverage
 .github
@@ -14,6 +13,7 @@ coverage
 .eslintrc.js
 .lintstagedrc.js
 commitlint.config.js
+release.config.js
 nyc.config.js
 rollup.config.js
 .mocharc.js

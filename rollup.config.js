@@ -1,6 +1,5 @@
 import typescript from '@wessberg/rollup-plugin-ts';
 import json from '@rollup/plugin-json';
-import multi from '@rollup/plugin-multi-entry';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import ttypescript from 'ttypescript'
 
@@ -27,24 +26,27 @@ const config = {
 };
 
 const libEntrypoint = {
-  input: [
-    'src/index.ts',
-    'src/exports.ts',
-  ],
+  input: 'src/index.ts',
   output: {
-    file: 'lib/index.js',
+    dir: 'lib',
     format: 'cjs',
     sourcemap: true,
+    preserveModules: true,
+    preserveModulesRoot: 'src',
+    exports: 'auto',
   },
   ...config,
-  plugins: [multi(), ...config.plugins],
 };
 
 const microserviceEntrypoint = {
   input: 'src/start.ts',
   output: {
-    file: 'lib/start.js',
-    format: 'cjs'
+    dir: 'lib',
+    format: 'cjs',
+    sourcemap: true,
+    preserveModules: true,
+    preserveModulesRoot: 'src',
+    exports: 'auto',
   },
   ...config,
 };
