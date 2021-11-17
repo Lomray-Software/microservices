@@ -5,8 +5,8 @@ import {
   RemoteMiddlewareServer,
 } from '@lomray/microservice-remote-middleware';
 import type { ConnectionOptions, Connection } from 'typeorm';
-import { getCustomRepository } from 'typeorm';
 import { createDbConnection } from '@config/db';
+import { IS_TEST } from '@constants/index';
 import Middleware from '@entities/middleware';
 import ConfigRepository from '@repositories/config-repository';
 import Log from '@services/log';
@@ -15,6 +15,7 @@ export interface IStartConfig {
   msOptions: Partial<IMicroserviceOptions>;
   msParams: Partial<IMicroserviceParams>;
   dbOptions: ConnectionOptions;
+  registerMethods?: (ms: Microservice) => Promise<void> | void;
   initConfigs?: Record<string, any>[];
   isDisableRemoteMiddleware?: boolean;
   hooks?: {
@@ -31,6 +32,7 @@ const start = async ({
   msOptions,
   msParams,
   dbOptions,
+  registerMethods,
   initConfigs = [],
   isDisableRemoteMiddleware = false,
   hooks: { afterDbConnection, afterInitRemoteMiddleware, beforeStart } = {},
@@ -45,10 +47,11 @@ const start = async ({
   try {
     const microservice = Microservice.create(msOptions, msParams);
     const connection = await createDbConnection(dbOptions);
-    const configRepository = getCustomRepository(ConfigRepository);
+    const configRepository = connection.getCustomRepository(ConfigRepository);
 
     await configRepository.bulkSave(initConfigs);
     await afterDbConnection?.(microservice, connection);
+    await registerMethods?.(microservice);
 
     // Enable remote middleware
     if (!isDisableRemoteMiddleware) {
@@ -64,7 +67,10 @@ const start = async ({
     await microservice.start();
   } catch (e) {
     Log.error(`Failed to start microservice: ${e.message as string}`, e);
-    process.exit(1);
+
+    if (!IS_TEST) {
+      process.exit(1);
+    }
   }
 };
 

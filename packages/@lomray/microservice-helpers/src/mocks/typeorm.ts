@@ -17,7 +17,18 @@ const sandbox = sinon.createSandbox();
  * (prevent trying create connection and original requests to database)
  */
 class EntityManagerMock extends EntityManager {
+  reset() {
+    this.getCustomRepository = sandbox.stub().callsFake((repo) => super.getCustomRepository(repo));
+    this.getRepository = sandbox.stub().callsFake((repo) => super.getRepository(repo));
+  }
+
   save = sandbox.stub();
+  getCustomRepository = sandbox.stub().callsFake((repo) => super.getCustomRepository(repo));
+  getRepository = sandbox.stub().callsFake((repo) => super.getRepository(repo));
+  find = sandbox.stub();
+  finOne = sandbox.stub();
+  findByIds = sandbox.stub();
+  delete = sandbox.stub();
 }
 
 // Create fake connection
@@ -29,7 +40,6 @@ const fakeConnection = getConnectionManager().create({
   synchronize: true,
   logging: false,
 });
-const entityManager = new EntityManagerMock(fakeConnection);
 
 // @ts-ignore
 fakeConnection.buildMetadatas();
@@ -58,7 +68,8 @@ fakeConnection.findMetadata = function (target) {
   return metadata;
 };
 
-// Mock entity manager for fake connection
+const entityManager = new EntityManagerMock(fakeConnection);
+
 sandbox.stub(fakeConnection, 'manager').value(entityManager);
 
 const stubs = {
@@ -97,6 +108,16 @@ const stubs = {
 
     return Entity(nameOrOptions, maybeOptions);
   },
+};
+
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const prevReset = sandbox.reset;
+
+sandbox.reset = () => {
+  prevReset();
+  stubs.createConnection.resolves(fakeConnection);
+  sandbox.stub(fakeConnection, 'manager').value(entityManager);
+  entityManager.reset();
 };
 
 const TypeormMock = {

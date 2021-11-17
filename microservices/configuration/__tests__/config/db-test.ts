@@ -11,7 +11,7 @@ const { createDbConnection, connectionDbOptions } = rewiremock.proxy(() => requi
 describe('config/db', () => {
   beforeEach(() => {
     TypeormMock.sandbox.reset();
-    TypeormExtensionMock.sandbox.reset();
+    TypeormExtensionMock.sandbox.resetHistory();
   });
 
   it('should correct create db connection', async () => {

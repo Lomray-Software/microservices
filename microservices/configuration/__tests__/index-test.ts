@@ -4,7 +4,6 @@ import { RemoteMiddlewareServer } from '@lomray/microservice-remote-middleware';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
-import type { Connection } from 'typeorm';
 import ConfigRepositoryMock from '@__mocks__/config-repository';
 import * as DBConfig from '@config/db';
 import { microserviceOptions, microserviceParams } from '@config/ms';
@@ -12,24 +11,17 @@ import { MS_NAME, MS_CONNECTION } from '@constants/index';
 import { start as OriginalStart } from '../src';
 
 const { start } = rewiremock.proxy<{ start: typeof OriginalStart }>(() => require('../src'), {
-  typeorm: TypeormMock.mock,
+  '@config/db': { createDbConnection: TypeormMock.stubs.createConnection },
 });
 
 describe('start', () => {
-  const dbConnectionMock = {
-    getRepository: sinon.stub().returns({}),
-  } as unknown as Promise<Connection>;
   const configRepository = new ConfigRepositoryMock();
 
   before(() => {
     sinon.stub(console, 'info');
     TypeormMock.sandbox.reset();
 
-    TypeormMock.stubs.getCustomRepository.returns(configRepository);
-  });
-
-  beforeEach(() => {
-    sinon.stub(DBConfig, 'createDbConnection').resolves(dbConnectionMock);
+    TypeormMock.entityManager.getCustomRepository.returns(configRepository);
   });
 
   afterEach(() => {
@@ -68,7 +60,7 @@ describe('start', () => {
     expect(createOptions).to.includes({ name: MS_NAME, connection: MS_CONNECTION });
     expect(stubbedStart).to.calledOnce;
     expect(isRunBeforeStart).to.ok;
-    expect(dbConnection).to.deep.equal(dbConnectionMock);
+    expect(dbConnection).to.deep.equal(TypeormMock.entityManager.connection);
     expect(addRegisterEndpointSpy).to.calledOnce;
     expect(addObtainEndpointSpy).to.calledOnce;
     expect(configRepository.bulkSave).to.calledOnce;
