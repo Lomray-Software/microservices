@@ -42,6 +42,7 @@ jobs:
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
 
+      # this is will update package.json only (without create release and publish package, dry-run by default)
       - name: Update versions
         run: npm run semantic-release
         env:

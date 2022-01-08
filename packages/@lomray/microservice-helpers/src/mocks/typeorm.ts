@@ -1,14 +1,6 @@
-import _ from 'lodash';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
-import {
-  getConnectionManager,
-  EntityManager,
-  getMetadataArgsStorage,
-  EntityRepository,
-  Entity,
-} from 'typeorm';
-import { EntitySchema } from 'typeorm/entity-schema/EntitySchema';
+import { getConnectionManager, EntityManager, SelectQueryBuilder } from 'typeorm';
 
 const sandbox = sinon.createSandbox();
 
@@ -17,24 +9,57 @@ const sandbox = sinon.createSandbox();
  * (prevent trying create connection and original requests to database)
  */
 class EntityManagerMock extends EntityManager {
-  reset() {
-    this.getCustomRepository = sandbox.stub().callsFake((repo) => super.getCustomRepository(repo));
+  queryBuilders: SelectQueryBuilder<any>[] = [];
+
+  stubReturns() {
+    this.save = sandbox.stub().callsFake((__, entities) => {
+      if (Array.isArray(entities)) {
+        return [{}];
+      }
+
+      return {};
+    });
+    this.find = sandbox.stub().resolves({});
+    this.findOne = sandbox.stub().resolves({});
+    this.findByIds = sandbox.stub().resolves([]);
+    this.delete = sandbox.stub().resolves({ affected: 0 });
+    this.restore = sandbox.stub().resolves({ affected: 0, generatedMaps: [] });
+    this.recover = sandbox.stub().resolves([]);
+    this.remove = sandbox.stub().resolves({});
+    this.softRemove = sandbox.stub().resolves({});
+    this.softDelete = sandbox.stub().resolves({ affected: 0, generatedMaps: [] });
+
     this.getRepository = sandbox.stub().callsFake((repo) => super.getRepository(repo));
+    this.getCustomRepository = sandbox.stub().callsFake((repo) => super.getCustomRepository(repo));
+    this.createQueryBuilder = sandbox.stub().callsFake((...args) => {
+      const qb = super.createQueryBuilder(...args);
+
+      this.queryBuilders.push(qb);
+
+      return qb;
+    });
   }
 
-  save = sandbox.stub();
-  getCustomRepository = sandbox.stub().callsFake((repo) => super.getCustomRepository(repo));
-  getRepository = sandbox.stub().callsFake((repo) => super.getRepository(repo));
-  find = sandbox.stub();
-  finOne = sandbox.stub();
-  findByIds = sandbox.stub();
-  delete = sandbox.stub();
+  // @ts-ignore
+  constructor(...args) {
+    // @ts-ignore
+    super(...args);
+    this.stubReturns();
+  }
+
+  reset(shouldKeepBuilders = false) {
+    if (!shouldKeepBuilders) {
+      this.queryBuilders = [];
+    }
+
+    this.stubReturns();
+  }
 }
 
 // Create fake connection
 const fakeConnection = getConnectionManager().create({
   type: 'postgres',
-  entities: ['src/entities/*.ts'],
+  entities: ['src/entities/*.ts', '__mocks__/entities/*.ts'],
   migrations: ['src/migrations/*.ts'],
   subscribers: ['src/subscribers/*.ts'],
   synchronize: true,
@@ -68,63 +93,94 @@ fakeConnection.findMetadata = function (target) {
   return metadata;
 };
 
-const entityManager = new EntityManagerMock(fakeConnection);
+const queryBuilderUpdateMock = () =>
+  ({
+    execute: { affected: 0, generatedMaps: [] },
+  } as const);
+
+const queryBuilderMock = () =>
+  ({
+    getManyAndCount: [[], 0],
+    getMany: [],
+    getCount: 0,
+    getOne: {},
+    getOneOrFail: {},
+    getRawMany: [],
+    getRawOne: {},
+    insert: { identifiers: [], generatedMaps: [] },
+    execute: {},
+  } as const);
+
+const queryBuilder = Object.entries(queryBuilderMock()).reduce(
+  (res, [method, value]) => ({ ...res, [method]: sandbox.stub().resolves(value) }),
+  {},
+) as { [key in keyof ReturnType<typeof queryBuilderMock>]: sinon.SinonStub };
+
+const queryUpdateBuilder = Object.entries(queryBuilderUpdateMock()).reduce(
+  (res, [method, value]) => ({ ...res, [method]: sandbox.stub().resolves(value) }),
+  {},
+) as { [key in keyof ReturnType<typeof queryBuilderUpdateMock>]: sinon.SinonStub };
+
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const prevCreateQueryBuilder = fakeConnection.createQueryBuilder;
+
+// @ts-ignore
+fakeConnection.createQueryBuilder = function (...args) {
+  const qb = Object.assign(prevCreateQueryBuilder.call(fakeConnection, ...args), queryBuilder);
+  const qbPrevUpdate = qb.update;
+  // @ts-ignore
+  const mockUpdate = (...args2) =>
+    Object.assign(qbPrevUpdate.call(qb, ...args2), queryUpdateBuilder);
+
+  qb.update = mockUpdate;
+  qb.clone = () =>
+    Object.assign(prevCreateQueryBuilder.call(fakeConnection, ...args), queryBuilder, {
+      update: mockUpdate,
+    });
+
+  return qb;
+};
+
+type TEntityManagerMock = InstanceType<typeof EntityManagerMock>;
+
+const entityManager = new EntityManagerMock(fakeConnection) as EntityManagerMock & {
+  [key in keyof TEntityManagerMock]: TEntityManagerMock[key] extends (...args: any[]) => any
+    ? sinon.SinonStub
+    : TEntityManagerMock[key];
+};
 
 sandbox.stub(fakeConnection, 'manager').value(entityManager);
 
 const stubs = {
   createConnection: sandbox.stub().resolves(fakeConnection),
-  getCustomRepository: sandbox.stub(),
-  /**
-   * We need this implementation because when tests run with --watch flag,
-   * every rerun tests add new entities to 'getMetadataArgsStorage'
-   * and we prevent memory leak
-   */
-  EntityRepository: (entity?: () => void | EntitySchema): ClassDecorator => {
-    const { entityRepositories } = getMetadataArgsStorage();
-    const existEntityIndex = _.findIndex(entityRepositories, { entity });
-
-    if (existEntityIndex) {
-      entityRepositories.splice(existEntityIndex, 1);
-    }
-
-    return EntityRepository(entity);
-  },
-  /**
-   * We need this implementation because when tests run with --watch flag,
-   * every rerun tests add new entities to 'getMetadataArgsStorage'
-   * and we prevent memory leak
-   */
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  Entity: (nameOrOptions: any, maybeOptions: any): ClassDecorator => {
-    const { tables } = getMetadataArgsStorage();
-    const options = (typeof nameOrOptions === 'object' ? nameOrOptions : maybeOptions) || {};
-    const name = typeof nameOrOptions === 'string' ? nameOrOptions : options.name;
-    const existEntityIndex = _.findIndex(tables, { name });
-
-    if (existEntityIndex) {
-      tables.splice(existEntityIndex, 1);
-    }
-
-    return Entity(nameOrOptions, maybeOptions);
-  },
 };
 
-// eslint-disable-next-line @typescript-eslint/unbound-method
-const prevReset = sandbox.reset;
+const prevReset = sandbox.reset.bind(sandbox);
 
 sandbox.reset = () => {
   prevReset();
   stubs.createConnection.resolves(fakeConnection);
   sandbox.stub(fakeConnection, 'manager').value(entityManager);
   entityManager.reset();
+
+  const qbMock = queryBuilderMock();
+  const qbMockUpdate = queryBuilderUpdateMock();
+
+  Object.entries(queryBuilder).forEach(([method, stub]) => {
+    stub.resolves(qbMock[method]);
+  });
+  Object.entries(queryUpdateBuilder).forEach(([method, stub]) => {
+    stub.resolves(qbMockUpdate[method]);
+  });
 };
 
-const TypeormMock = {
+const Typeorm = {
   sandbox,
   stubs,
   entityManager,
+  queryBuilder,
+  queryUpdateBuilder,
   mock: rewiremock('typeorm').callThrough().with(stubs) as any,
 };
 
-export default TypeormMock;
+export default Typeorm;

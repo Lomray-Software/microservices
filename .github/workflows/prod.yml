@@ -118,6 +118,7 @@ jobs:
         shell: bash
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
 
+      # flag "no" - disable dry run
       - name: Release
         run: npm run semantic-release no
         env:

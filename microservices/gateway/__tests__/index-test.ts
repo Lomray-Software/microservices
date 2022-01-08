@@ -1,3 +1,4 @@
+import { Log } from '@lomray/microservice-helpers';
 import { Gateway } from '@lomray/microservice-nodejs-lib';
 import { RemoteMiddlewareClient } from '@lomray/microservice-remote-middleware';
 import { expect } from 'chai';
@@ -7,16 +8,15 @@ import { MS_NAME, MS_CONNECTION } from '@constants/index';
 import { start } from '../src';
 
 describe('gateway', () => {
-  before(() => {
-    sinon.stub(console, 'info');
-  });
+  const sandbox = sinon.createSandbox();
 
   afterEach(() => {
-    sinon.restore();
+    sandbox.restore();
   });
 
   it('should correct start gateway microservice', async () => {
-    const spyCreate = sinon.spy(Gateway, 'create');
+    const spyCreate = sandbox.spy(Gateway, 'create');
+    const registerMethodsStub = sandbox.stub();
     let stubbedStart;
     let isRunBeforeStart = false;
     let addRegisterEndpointSpy;
@@ -27,16 +27,17 @@ describe('gateway', () => {
       msParams: microserviceParams,
       hooks: {
         afterCreateMicroservice: (microservice) => {
-          stubbedStart = sinon.stub(microservice, 'start').resolves();
+          stubbedStart = sandbox.stub(microservice, 'start').resolves();
         },
         afterInitRemoteMiddleware: (remoteMiddleware) => {
-          addRegisterEndpointSpy = sinon.spy(remoteMiddleware, 'addRegisterEndpoint');
-          obtainMiddlewares = sinon.stub(remoteMiddleware, 'obtainMiddlewares').resolves();
+          addRegisterEndpointSpy = sandbox.spy(remoteMiddleware, 'addRegisterEndpoint');
+          obtainMiddlewares = sandbox.stub(remoteMiddleware, 'obtainMiddlewares').resolves();
         },
         beforeStart: () => {
           isRunBeforeStart = true;
         },
       },
+      registerMethods: registerMethodsStub,
     });
 
     const createOptions = spyCreate.firstCall.firstArg;
@@ -46,11 +47,12 @@ describe('gateway', () => {
     expect(isRunBeforeStart).to.ok;
     expect(addRegisterEndpointSpy).to.calledOnce;
     expect(obtainMiddlewares).to.calledOnce;
+    expect(registerMethodsStub).to.calledOnceWith(Gateway.getInstance());
   });
 
   it('should correct start gateway without remote middleware', async () => {
-    sinon.stub(Gateway.getInstance(), 'start').resolves();
-    sinon.stub(RemoteMiddlewareClient, 'instance' as any).value(undefined);
+    sandbox.stub(Gateway.getInstance(), 'start').resolves();
+    sandbox.stub(RemoteMiddlewareClient, 'instance' as any).value(undefined);
 
     await start({
       msOptions: microserviceOptions,
@@ -59,5 +61,20 @@ describe('gateway', () => {
     });
 
     expect(RemoteMiddlewareClient.getInstance()).to.undefined;
+  });
+
+  it('should log error if gateway start failed', async () => {
+    const startStub = sandbox.stub(Gateway.getInstance(), 'start').rejects();
+    const logSpy = sandbox.spy(Log, 'error');
+
+    await start({
+      msOptions: microserviceOptions,
+      msParams: microserviceParams,
+    });
+
+    logSpy.restore();
+    startStub.restore();
+
+    expect(logSpy).to.calledOnce;
   });
 });

@@ -1,3 +1,4 @@
+import { Log } from '@lomray/microservice-helpers';
 import { Microservice } from '@lomray/microservice-nodejs-lib';
 import type { IMicroserviceOptions, IMicroserviceParams } from '@lomray/microservice-nodejs-lib';
 import {
@@ -9,7 +10,6 @@ import { createDbConnection } from '@config/db';
 import { IS_TEST } from '@constants/index';
 import Middleware from '@entities/middleware';
 import ConfigRepository from '@repositories/config-repository';
-import Log from '@services/log';
 
 export interface IStartConfig {
   msOptions: Partial<IMicroserviceOptions>;
@@ -37,14 +37,14 @@ const start = async ({
   isDisableRemoteMiddleware = false,
   hooks: { afterDbConnection, afterInitRemoteMiddleware, beforeStart } = {},
 }: IStartConfig): Promise<void> => {
-  Log.defaultMeta = {
-    ...Log.defaultMeta,
-    service: msOptions.name,
-    msOptions,
-    isDisableRemoteMiddleware,
-  };
-
   try {
+    Log.defaultMeta = {
+      ...Log.defaultMeta,
+      service: msOptions.name,
+      msOptions,
+      isDisableRemoteMiddleware,
+    };
+
     const microservice = Microservice.create(msOptions, msParams);
     const connection = await createDbConnection(dbOptions);
     const configRepository = connection.getCustomRepository(ConfigRepository);
@@ -66,7 +66,7 @@ const start = async ({
     await beforeStart?.();
     await microservice.start();
   } catch (e) {
-    Log.error(`Failed to start microservice: ${e.message as string}`, e);
+    Log.error('Failed to start microservice:', e);
 
     if (!IS_TEST) {
       process.exit(1);

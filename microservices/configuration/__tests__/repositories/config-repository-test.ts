@@ -1,4 +1,4 @@
-import TypeormMock from '@lomray/microservice-helpers/mocks/typeorm';
+import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import { getCustomRepository } from 'typeorm';
@@ -12,22 +12,31 @@ const { default: ConfigRepository } = rewiremock.proxy<{
 });
 
 describe('repositories/config-repository', () => {
+  const instance = getCustomRepository(ConfigRepository);
+  const sampleConfigs: Partial<Config>[] = Array(20).fill({
+    microservice: 'demo',
+    type: 'db',
+  });
+
   beforeEach(() => {
     TypeormMock.sandbox.reset();
   });
 
-  it('should correct split by chunks and create configs', async () => {
-    const instance = getCustomRepository(ConfigRepository);
-    const sampleConfigs: Partial<Config>[] = Array(5).fill({
-      microservice: 'demo',
-      type: 'db',
-    });
-
+  it('should correctly split by chunks and create configs', async () => {
     await instance.bulkSave(sampleConfigs, 2);
 
     const [, entities, config] = TypeormMock.entityManager.save.firstCall.args;
 
     expect(entities).to.length(sampleConfigs.length);
     expect(config.chunk).to.equal(2);
+  });
+
+  it('should correctly split by chunks and create configs: default chunk size', async () => {
+    await instance.bulkSave(sampleConfigs);
+
+    const [, entities, config] = TypeormMock.entityManager.save.firstCall.args;
+
+    expect(entities).to.length(sampleConfigs.length);
+    expect(config.chunk).to.equal(10);
   });
 });

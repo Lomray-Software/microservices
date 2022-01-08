@@ -28,7 +28,7 @@
 	"author": "Mikhail Yarmaliuk",
 	"license": "Apache-2.0",
 	"scripts": {
-		"test": "TS_NODE_COMPILER_OPTIONS='{\"target\":\"es6\"}' mocha --harmony --no-warnings  __tests__ --require ts-node/register --recursive --unhandled-rejections=strict --exit",
+		"test": "NODE_ENV=tests TS_NODE_COMPILER_OPTIONS='{\"target\":\"es6\"}' mocha --harmony --no-warnings  __tests__ --require ts-node/register --recursive --unhandled-rejections=strict --exit",
 		"prettier:format": "prettier --write 'src/**/*.{ts,tsx,*.ts,*tsx}'",
 		"prettier:check": "prettier --check --debug-check 'src/**/*.{ts,tsx,*.ts,*tsx}'",
 		"lint:check": "eslint --ext '.ts,.tsx' 'src/**/*.{ts,tsx,*.ts,*tsx}'",
@@ -40,15 +40,14 @@
 	},
 	"dependencies": {
 		"@lomray/microservice-helpers": "file:../../packages/@lomray/microservice-helpers/lomray-microservice-helpers-1.0.0.tgz",
-		"@lomray/microservice-nodejs-lib": "^2.1.1",
+		"@lomray/microservice-nodejs-lib": "^2.2.0",
 		"@lomray/microservice-remote-middleware": "^1.0.0",
 		"axios": "^0.24.0",
+		"class-validator": "^0.13.2",
 		"lodash": "^4.17.21",
 		"pg": "^8.7.1",
-		"reflect-metadata": "^0.1.13",
 		"typeorm": "^0.2.38",
-		"typeorm-extension": "^1.0.1",
-		"winston": "^3.3.3"
+		"typeorm-extension": "^1.0.1"
 	},
 	"devDependencies": {
 		"@types/lodash": "^4.14.176"

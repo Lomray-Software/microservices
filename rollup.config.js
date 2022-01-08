@@ -1,8 +1,14 @@
-import typescript from '@wessberg/rollup-plugin-ts';
+import typescript from 'rollup-plugin-ts';
 import json from '@rollup/plugin-json';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import ttypescript from 'ttypescript'
 
+/**
+ * This is root config for microservices
+ * 1. Microservice entrypoint
+ * 2. Microservice library entrypoint
+ * All microservices extends from this config
+ */
 const config = {
   plugins: [
     peerDepsExternal({

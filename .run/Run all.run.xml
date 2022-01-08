@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run all" type="CompoundRunConfigurationType">
-    <toRun name="configuration" type="NodeJSConfigurationType" />
-    <toRun name="gateway" type="NodeJSConfigurationType" />
+  <configuration default="false" name="Run all ms" type="CompoundRunConfigurationType">
+    <toRun name="configuration" type="mocha-javascript-test-runner" />
+    <toRun name="gateway" type="mocha-javascript-test-runner" />
     <method v="2" />
   </configuration>
 </component>

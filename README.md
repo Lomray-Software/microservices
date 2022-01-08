@@ -6,7 +6,7 @@
 
 [![Build staging images](https://github.com/Lomray-Software/microservices/actions/workflows/staging.yml/badge.svg?branch=staging)](https://github.com/Lomray-Software/microservices/actions/workflows/staging.yml)
 
-## List:
+## Microservices list:
  - [Gateway](microservices/gateway)
  - [Configuration](microservices/configuration)
  - Authentication (in progress)

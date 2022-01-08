@@ -1,5 +1,4 @@
-import TypeormMock from '@lomray/microservice-helpers/mocks/typeorm';
-import TypeormExtensionMock from '@lomray/microservice-helpers/mocks/typeorm-extension';
+import { TypeormMock, TypeormExtensionMock } from '@lomray/microservice-helpers/mocks';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 
@@ -14,7 +13,7 @@ describe('config/db', () => {
     TypeormExtensionMock.sandbox.resetHistory();
   });
 
-  it('should correct create db connection', async () => {
+  it('should correctly create db connection', async () => {
     await createDbConnection(connectionDbOptions);
 
     expect(TypeormExtensionMock.stubs.createDatabase).to.calledOnce;

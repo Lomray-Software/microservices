@@ -6,10 +6,10 @@ const stubs = {
   createDatabase: sandbox.stub().resolves(),
 };
 
-const TypeormExtensionMock = {
+const TypeormExtension = {
   sandbox,
   stubs,
   mock: rewiremock('typeorm-extension').callThrough().with(stubs) as any,
 };
 
-export default TypeormExtensionMock;
+export default TypeormExtension;

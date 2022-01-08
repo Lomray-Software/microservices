@@ -1,3 +1,7 @@
+/**
+ * This is root config for microservices
+ * All microservices extends from this
+ */
 module.exports = {
   root: true,
   extends: [
@@ -24,7 +28,6 @@ module.exports = {
   },
   settings: {},
   rules: {
-    '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-unsafe-return': 'off',
     'no-await-in-loop': 'off',
     'prettier/prettier': [
@@ -32,6 +35,6 @@ module.exports = {
       {
         endOfLine: 'auto'
       }
-    ]
+    ],
   }
 }

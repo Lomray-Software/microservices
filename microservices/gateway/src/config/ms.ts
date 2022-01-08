@@ -1,4 +1,6 @@
+import { Log } from '@lomray/microservice-helpers';
 import type { IGatewayOptions, IGatewayParams } from '@lomray/microservice-nodejs-lib';
+import { ConsoleLogDriver } from '@lomray/microservice-nodejs-lib';
 import cors from 'cors';
 import { MS_BATCH_LIMIT, MS_CONNECTION, MS_NAME } from '@constants/index';
 import { version } from '../../package.json';
@@ -18,6 +20,7 @@ const microserviceParams: Partial<IGatewayParams> = {
       }),
     );
   },
+  logDriver: ConsoleLogDriver((_, message) => Log.info(message)),
 };
 
 export { microserviceOptions, microserviceParams };

@@ -31,16 +31,10 @@
     "baseUrl": ".",
     "paths": {
       "@__mocks__/*": ["./__mocks__/*"],
-      "@__helpers__/*": ["./__helpers__/*"],
       "@mocks/*": ["./src/mocks/*"],
-      "@config/*": ["./src/config/*"],
-      "@constants/*": ["./src/constants/*"],
-      "@interfaces/*": ["./src/interfaces/*"],
-      "@helpers/*": ["./src/helpers/*"],
-      "@methods/*": ["./src/methods/*"],
-      "@entities/*": ["./src/entities/*"],
-      "@repositories/*": ["./src/repositories/*"],
-      "@services/*": ["./src/services/*"]
+      "@services/*": ["./src/services/*"],
+      "@test-helpers/*": ["./src/test-helpers/*"],
+      "@validators/*": ["./src/validators/*"],
     }
   },
   "exclude": [

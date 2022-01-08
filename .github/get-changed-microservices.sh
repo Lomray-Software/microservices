@@ -37,5 +37,7 @@ fi
 
 echo "Result: $names"
 
+# output example: "[demo1,demo2,demo3]"
 echo "::set-output name=list::$names"
+# output example: "demo1 demo2 demo3"
 echo "::set-output name=list-spaced::$names_spaced"

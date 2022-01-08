@@ -1,5 +1,9 @@
 const branch = process.env.GIT_BRANCH;
 
+/**
+ * This is root config for microservices
+ * All microservices extends from this
+ */
 module.exports = {
   branches: ['prod', 'staging'],
   extends: 'semantic-release-monorepo',

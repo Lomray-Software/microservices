@@ -1,7 +1,7 @@
 import { createConnection } from 'typeorm';
 import type { ConnectionOptions } from 'typeorm';
 import { createDatabase } from 'typeorm-extension';
-import { DB_ENV } from '@constants/index';
+import { DB_ENV, IS_DEV } from '@constants/index';
 
 const { HOST, PORT, USERNAME, PASSWORD, DATABASE } = DB_ENV;
 
@@ -15,7 +15,7 @@ const connectionDbOptions: ConnectionOptions = {
   entities: ['src/entities/*.ts'],
   migrations: ['src/migrations/*.ts'],
   subscribers: ['src/subscribers/*.ts'],
-  synchronize: true,
+  synchronize: IS_DEV,
   logging: false,
 };
 

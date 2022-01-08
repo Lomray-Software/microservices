@@ -1,6 +1,7 @@
 import { microserviceOptions, microserviceParams } from '@config/ms';
 import { MS_DISABLE_REMOTE_MIDDLEWARE } from '@constants/index';
-import { start } from '.';
+// eslint-disable-next-line unicorn/import-index
+import { start } from './index';
 
 // Entrypoint for nodejs
 void start({
