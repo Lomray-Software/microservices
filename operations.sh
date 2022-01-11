@@ -134,6 +134,9 @@ function runBuild() {
   for microservice_dir in $(getMicroservices yes yes) ; do
     (set -e && cd "$microservice_dir" && npm run build)
 
+    # @TODO Extra step, remove it after publish package
+    cp ./packages/@lomray/microservice-helpers/lomray-microservice-helpers-1.0.0.tgz "$microservice_dir/lib/lomray-microservice-helpers-1.0.0.tgz"
+
     echo "$microservice_dir - done!"
   done
 }

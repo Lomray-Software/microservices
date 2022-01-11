@@ -32,6 +32,7 @@
     "paths": {
       "@__mocks__/*": ["./__mocks__/*"],
       "@mocks/*": ["./src/mocks/*"],
+      "@entities/*": ["./src/entities/*"],
       "@services/*": ["./src/services/*"],
       "@test-helpers/*": ["./src/test-helpers/*"],
       "@validators/*": ["./src/validators/*"],

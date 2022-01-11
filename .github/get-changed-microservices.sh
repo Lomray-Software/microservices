@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 
 FILES=${FILES:=""}
+ARRAY_FILES=()
+
+while IFS= read -r line; do
+    ARRAY_FILES+=("$line")
+done <<<"$(jq -r '.[]' <<< "$FILES")"
 
 list=()
 list_spaced=()
 
-for changed_file in $FILES; do
+for changed_file in "${ARRAY_FILES[@]}"; do
   # skip not /microservices/ dir
   if [[ "$changed_file" != *"microservices/"* ]]; then
     continue

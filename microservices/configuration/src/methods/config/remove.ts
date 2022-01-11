@@ -1,11 +1,11 @@
-import { CRUD } from '@lomray/microservice-helpers';
+import { Endpoint } from '@lomray/microservice-helpers';
 import { getCustomRepository } from 'typeorm';
 import ConfigRepository from '@repositories/config-repository';
 
 /**
  * Remove config(s)
  */
-const remove = CRUD.remove(() => ({
+const remove = Endpoint.remove(() => ({
   repository: getCustomRepository(ConfigRepository),
 }));
 

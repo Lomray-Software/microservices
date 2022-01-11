@@ -4,6 +4,7 @@ import ConfigCreate from '@methods/config/create';
 import ConfigList from '@methods/config/list';
 import ConfigRemove from '@methods/config/remove';
 import ConfigView from '@methods/config/view';
+import MetaEndpoint from '@methods/meta';
 import CrudMiddleware from '@methods/middleware/crud';
 
 /**
@@ -30,4 +31,9 @@ export default (ms: Microservice): void => {
       isPrivate: true,
     });
   });
+
+  /**
+   * Microservice metadata endpoint
+   */
+  ms.addEndpoint('meta', MetaEndpoint, { isDisableMiddlewares: true, isPrivate: true });
 };

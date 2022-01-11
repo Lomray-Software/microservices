@@ -27,17 +27,19 @@
 		"release": "npm run build && cp package.json lib/package.json && cd lib && npm pack && mv -f lomray-microservice-helpers*.tgz ../",
 		"test": "NODE_ENV=tests TS_NODE_COMPILER_OPTIONS='{\"target\":\"es6\"}' mocha --harmony --no-warnings  __tests__ --require ts-node/register --recursive --unhandled-rejections=strict --exit"
 	},
-  "dependencies": {
-    "winston": "^3.3.3"
-  },
-  "devDependencies": {
+	"dependencies": {
+		"winston": "^3.3.3"
+	},
+	"devDependencies": {
 		"@types/lodash": "^4.14.176",
 		"pg": "^8.7.1"
 	},
 	"peerDependencies": {
-		"@lomray/microservice-nodejs-lib": "^2.1.1",
-		"@lomray/typeorm-json-query": "^1.0.0",
+		"@lomray/microservice-nodejs-lib": "^2.3.0",
+		"@lomray/typeorm-json-query": "^1.0.1",
 		"class-validator": "^0.13.2",
+    "class-transformer": "^0.4.1",
+    "class-validator-jsonschema": "^3.1.0",
 		"lodash": "^4.17.21",
 		"typeorm": "^0.2.38",
 		"typeorm-extension": "^1.0.1"

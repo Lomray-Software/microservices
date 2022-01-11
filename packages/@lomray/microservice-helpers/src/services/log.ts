@@ -12,6 +12,7 @@ const Log = createLogger({
         format.printf((info) => `${info.level} ${info.message}`),
       ),
     }),
+    // @TODO add implementation https://www.npmjs.com/package/winston-loki
   ],
 });
 

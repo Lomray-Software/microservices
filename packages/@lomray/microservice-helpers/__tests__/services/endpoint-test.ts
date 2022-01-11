@@ -1,10 +1,18 @@
 /* eslint-disable @typescript-eslint/unbound-method */
+import TypeormJsonQuery from '@lomray/typeorm-json-query';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { SelectQueryBuilder } from 'typeorm/query-builder/SelectQueryBuilder';
 import TestEntity from '@__mocks__/entities/test-entity';
 import { TypeormMock } from '@mocks/index';
-import CRUD from '@services/crud';
+import {
+  CreateRequestParams,
+  Endpoint,
+  ListOutputParams,
+  RemoveOutputParams,
+  RestoreOutputParams,
+  UpdateRequestParams,
+} from '@services/endpoint';
 import {
   countResult,
   removeResult,
@@ -15,7 +23,7 @@ import {
 } from '@test-helpers/mock-args';
 import waitResult from '@test-helpers/wait-result';
 
-describe('services/crud', () => {
+describe('services/endpoint', () => {
   const sandbox = sinon.createSandbox();
   const handler = sandbox.stub();
   const entity = { id: 1, param: 'test' };
@@ -28,15 +36,17 @@ describe('services/crud', () => {
   });
 
   describe('count', () => {
-    const countHandler = CRUD.count?.(() => ({ repository }), handler);
-    const defaultHandlerStub = sandbox.stub(CRUD.defaultHandler, 'count').resolves(countResult());
+    const countHandler = Endpoint.count?.(() => ({ repository }), handler);
+    const defaultHandlerStub = sandbox
+      .stub(Endpoint.defaultHandler, 'count')
+      .resolves(countResult());
 
     beforeEach(() => {
       defaultHandlerStub.resetHistory();
     });
 
     it('should run default count handler with query builder: typeorm case', async () => {
-      const countWithDefaultHandler = CRUD.count?.(() => ({ repository }));
+      const countWithDefaultHandler = Endpoint.count?.(() => ({ repository }));
 
       const result = await countWithDefaultHandler(
         { hasRemoved: true, payload: { authorization: {} } },
@@ -97,7 +107,7 @@ describe('services/crud', () => {
     it('handler - should return count entities without removed: default handler', async () => {
       defaultHandlerStub.restore();
 
-      const result = await CRUD.defaultHandler.count(repository.createQueryBuilder());
+      const result = await Endpoint.defaultHandler.count(repository.createQueryBuilder());
 
       expect(TypeormMock.queryBuilder.getCount).to.be.calledOnce;
       expect(result).to.deep.equal({ count: 0 });
@@ -106,24 +116,39 @@ describe('services/crud', () => {
     it('handler - should return count entities with removed: default handler', async () => {
       const qb = repository.createQueryBuilder();
       const withDeletedSpy = sandbox.spy(qb, 'withDeleted');
-      const result = await CRUD.defaultHandler.count(qb, true);
+      const result = await Endpoint.defaultHandler.count(qb, true);
 
       expect(withDeletedSpy).to.be.calledOnce;
       expect(TypeormMock.queryBuilder.getCount).to.be.calledOnce;
       expect(result).to.deep.equal({ count: 0 });
     });
+
+    it('should run default handler metadata: count', () => {
+      const countDefaultHandler = Endpoint.count?.(() => ({ repository }));
+
+      expect(countDefaultHandler.getMeta()).to.deep.equal({
+        input: [Endpoint.defaultParams.count.input.name, new Endpoint.defaultParams.count.input()],
+        output: [
+          Endpoint.defaultParams.count.output.name,
+          new Endpoint.defaultParams.count.output(),
+        ],
+      });
+    });
   });
 
   describe('list', () => {
-    const listHandler = CRUD.list?.(() => ({ repository }), handler);
-    const defaultHandlerStub = sandbox.stub(CRUD.defaultHandler, 'list').resolves(listResult());
+    const listHandler = Endpoint.list?.(() => ({ repository }), handler);
+    const defaultHandlerStub = sandbox.stub(Endpoint.defaultHandler, 'list').resolves(listResult());
 
     beforeEach(() => {
       defaultHandlerStub.resetHistory();
     });
 
     it('should run default list handler with query builder: typeorm case', async () => {
-      const listWithDefaultHandler = CRUD.list?.(() => ({ repository, isListWithCount: false }));
+      const listWithDefaultHandler = Endpoint.list?.(() => ({
+        repository,
+        isListWithCount: false,
+      }));
 
       const result = await listWithDefaultHandler({ hasRemoved: true }, endpointOptions);
       const [queryBuilder, isListWithCount, hasRemoved] = defaultHandlerStub.firstCall.args;
@@ -182,26 +207,10 @@ describe('services/crud', () => {
       expect(result).to.deep.equal({ ...listResult(), payloadParam: 1 });
     });
 
-    it("should throw error if custom result don't return 'list'", async () => {
-      handler.callsFake(() => ({ ...listResult(), payloadParam: 1, list: undefined }));
-
-      const result = listHandler({}, endpointOptions);
-
-      expect(await waitResult(result)).to.throw('Internal error: property "list"');
-    });
-
-    it("should throw error if custom result don't return 'count'", async () => {
-      handler.callsFake(() => ({ ...listResult(), payloadParam: 1, count: undefined }));
-
-      const result = listHandler({}, endpointOptions);
-
-      expect(await waitResult(result)).to.throw('Internal error: property "count"');
-    });
-
     it('handler - should return list entities without removed & without count: default handler', async () => {
       defaultHandlerStub.restore();
 
-      const result = await CRUD.defaultHandler.list(repository.createQueryBuilder(), false);
+      const result = await Endpoint.defaultHandler.list(repository.createQueryBuilder(), false);
 
       expect(TypeormMock.queryBuilder.getMany).to.be.calledOnce;
       expect(result).to.deep.equal({ list: [] });
@@ -211,11 +220,23 @@ describe('services/crud', () => {
       const qb = repository.createQueryBuilder();
       const withDeletedSpy = sandbox.spy(qb, 'withDeleted');
 
-      const result = await CRUD.defaultHandler.list(qb, true, true);
+      const result = await Endpoint.defaultHandler.list(qb, true, true);
 
       expect(withDeletedSpy).to.be.calledOnce;
       expect(TypeormMock.queryBuilder.getManyAndCount).to.be.calledOnce;
       expect(result).to.deep.equal({ list: [], count: 0 });
+    });
+
+    it('should run default handler metadata: list', () => {
+      const listDefaultHandler = Endpoint.list?.(() => ({ repository }));
+
+      expect(listDefaultHandler.getMeta()).to.deep.equal({
+        input: [Endpoint.defaultParams.list.input.name, new Endpoint.defaultParams.list.input()],
+        output: [
+          Endpoint.defaultParams.list.output.name,
+          new Endpoint.defaultParams.list.output(repository),
+        ],
+      });
     });
   });
 
@@ -227,7 +248,7 @@ describe('services/crud', () => {
       const customHandler = sandbox
         .stub<Record<string, any>[], TestEntity>()
         .callsFake((reqEntityFields) => ({ ...reqEntityFields, id: 1 } as TestEntity));
-      const createWithCustomHandler = CRUD.create?.(() => ({ repository }), customHandler);
+      const createWithCustomHandler = Endpoint.create?.(() => ({ repository }), customHandler);
 
       const result = await createWithCustomHandler(reqParams, endpointOptions);
       const [fields, params, options] = customHandler.firstCall.args;
@@ -239,8 +260,8 @@ describe('services/crud', () => {
     });
 
     it('should call default create handler with fields', async () => {
-      const defaultHandlerStub = sandbox.stub(CRUD.defaultHandler, 'create');
-      const createHandler = CRUD.create?.(() => ({ repository, isAllowMultiple: true }));
+      const defaultHandlerStub = sandbox.stub(Endpoint.defaultHandler, 'create');
+      const createHandler = Endpoint.create?.(() => ({ repository, isAllowMultiple: true }));
 
       await createHandler(reqParams, endpointOptions);
 
@@ -254,8 +275,10 @@ describe('services/crud', () => {
     });
 
     it('handler - should throw error if we can try create multiple entities: isAllowMultiple disable', async () => {
-      const result = CRUD.defaultHandler.create({
-        fields: [{}, {}],
+      const fields = [{}, {}];
+
+      const result = Endpoint.defaultHandler.create({
+        fields,
         repository,
         isAllowMultiple: false,
       });
@@ -265,7 +288,7 @@ describe('services/crud', () => {
 
     it('handler - should throw error if entity not valid: validation failed', async () => {
       try {
-        await CRUD.defaultHandler.create({
+        await Endpoint.defaultHandler.create({
           fields: {},
           repository,
         });
@@ -280,7 +303,7 @@ describe('services/crud', () => {
     it('handler - should success create entity', async () => {
       const fields = { param: 'test' };
 
-      await CRUD.defaultHandler.create({
+      await Endpoint.defaultHandler.create({
         fields,
         repository,
       });
@@ -294,7 +317,7 @@ describe('services/crud', () => {
     it('handler - should success create multiple entities', async () => {
       const fields = [{ param: 'test' }, { param: 'test2' }];
 
-      await CRUD.defaultHandler.create({
+      await Endpoint.defaultHandler.create({
         fields,
         repository,
         isAllowMultiple: true,
@@ -307,9 +330,11 @@ describe('services/crud', () => {
     });
 
     it('handler - should validation failed for multiple entities', async () => {
+      const fields = [{}, {}];
+
       try {
-        await CRUD.defaultHandler.create({
-          fields: [{}, {}],
+        await Endpoint.defaultHandler.create({
+          fields,
           repository,
           isAllowMultiple: true,
         });
@@ -324,7 +349,7 @@ describe('services/crud', () => {
     it('handler - should throw error: duplicate entity', async () => {
       TypeormMock.entityManager.save.rejects(new Error('duplicate key'));
 
-      const result = CRUD.defaultHandler.create({
+      const result = Endpoint.defaultHandler.create({
         fields: { param: 'duplicate' },
         repository,
       });
@@ -335,25 +360,37 @@ describe('services/crud', () => {
     it('handler - should throw error: unknown error', async () => {
       TypeormMock.entityManager.save.rejects(new Error('Unknown'));
 
-      const result = CRUD.defaultHandler.create({
+      const result = Endpoint.defaultHandler.create({
         fields: { param: 'unknown' },
         repository,
       });
 
       expect(await waitResult(result)).to.throw('Unknown');
     });
+
+    it('should run default handler metadata: create', () => {
+      const createDefaultHandler = Endpoint.create?.(() => ({ repository }));
+
+      expect(createDefaultHandler.getMeta()).to.deep.equal({
+        input: [
+          Endpoint.defaultParams.create.input.name,
+          new Endpoint.defaultParams.create.input(repository),
+        ],
+        output: [TestEntity.name, undefined],
+      });
+    });
   });
 
   describe('view', () => {
-    const viewHandler = CRUD.view?.(() => ({ repository }), handler);
-    const defaultHandlerStub = sandbox.stub(CRUD.defaultHandler, 'view').resolves(entity);
+    const viewHandler = Endpoint.view?.(() => ({ repository }), handler);
+    const defaultHandlerStub = sandbox.stub(Endpoint.defaultHandler, 'view').resolves(entity);
 
     beforeEach(() => {
       defaultHandlerStub.resetHistory();
     });
 
     it('should run default view handler with query builder: typeorm case', async () => {
-      const viewWithDefaultHandler = CRUD.view?.(() => ({ repository }));
+      const viewWithDefaultHandler = Endpoint.view?.(() => ({ repository }));
 
       const result = await viewWithDefaultHandler({ query: {} }, endpointOptions);
       const [queryBuilder] = defaultHandlerStub.firstCall.args;
@@ -386,7 +423,7 @@ describe('services/crud', () => {
     it('handler - should throw error: empty view condition', async () => {
       defaultHandlerStub.restore();
 
-      const result = CRUD.defaultHandler.view(repository.createQueryBuilder());
+      const result = Endpoint.defaultHandler.view(repository.createQueryBuilder());
 
       expect(await waitResult(result)).to.throw(emptyConditionMessage);
     });
@@ -394,7 +431,7 @@ describe('services/crud', () => {
     it('handler - should throw error: condition for multiple entities', async () => {
       TypeormMock.queryBuilder.getMany.resolves([entity, entity]);
 
-      const result = CRUD.defaultHandler.view(repository.createQueryBuilder().where('id = 1'));
+      const result = Endpoint.defaultHandler.view(repository.createQueryBuilder().where('id = 1'));
 
       expect(await waitResult(result)).to.throw('condition invalid');
     });
@@ -402,7 +439,7 @@ describe('services/crud', () => {
     it('handler - view should throw error: entity not found', async () => {
       TypeormMock.queryBuilder.getMany.resolves([]);
 
-      const result = CRUD.defaultHandler.view(repository.createQueryBuilder().where('id = 1'));
+      const result = Endpoint.defaultHandler.view(repository.createQueryBuilder().where('id = 1'));
 
       expect(await waitResult(result)).to.throw(entityNotFoundMessage);
     });
@@ -410,26 +447,35 @@ describe('services/crud', () => {
     it('handler - should success return entity', async () => {
       TypeormMock.queryBuilder.getMany.resolves([entity]);
 
-      const result = await CRUD.defaultHandler.view(
+      const result = await Endpoint.defaultHandler.view(
         repository.createQueryBuilder().where('id = 1'),
       );
 
       expect(result).to.deep.equal(entity);
     });
+
+    it('should run default handler metadata: view', () => {
+      const viewDefaultHandler = Endpoint.view?.(() => ({ repository }));
+
+      expect(viewDefaultHandler.getMeta()).to.deep.equal({
+        input: [Endpoint.defaultParams.view.input.name, new Endpoint.defaultParams.view.input()],
+        output: [TestEntity.name, undefined],
+      });
+    });
   });
 
   describe('update', () => {
-    const updateHandler = CRUD.update?.(() => ({ repository }), handler);
-    const defaultHandlerStub = sandbox.stub(CRUD.defaultHandler, 'update').resolves(entity);
+    const updateHandler = Endpoint.update?.(() => ({ repository }), handler);
+    const defaultHandlerStub = sandbox.stub(Endpoint.defaultHandler, 'update').resolves(entity);
 
     beforeEach(() => {
       defaultHandlerStub.resetHistory();
     });
 
     it('should run default update handler with query builder: typeorm case', async () => {
-      const updateWithDefaultHandler = CRUD.update?.(() => ({ repository }));
+      const updateWithDefaultHandler = Endpoint.update?.(() => ({ repository }));
 
-      const result = await updateWithDefaultHandler({ fields: entity }, endpointOptions);
+      const result = await updateWithDefaultHandler({ fields: entity, query: {} }, endpointOptions);
       const [queryBuilder, passedFields, passedRepo] = defaultHandlerStub.firstCall.args;
 
       expect(queryBuilder).to.be.instanceof(SelectQueryBuilder);
@@ -496,13 +542,17 @@ describe('services/crud', () => {
     it('handler - should throw error: empty fields', async () => {
       defaultHandlerStub.restore();
 
-      const result = CRUD.defaultHandler.update(repository.createQueryBuilder(), {}, repository);
+      const result = Endpoint.defaultHandler.update(
+        repository.createQueryBuilder(),
+        {},
+        repository,
+      );
 
       expect(await waitResult(result)).to.throw('empty fields');
     });
 
     it('handler - should throw error: empty update condition', async () => {
-      const result = CRUD.defaultHandler.update(
+      const result = Endpoint.defaultHandler.update(
         repository.createQueryBuilder(),
         entity,
         repository,
@@ -514,7 +564,7 @@ describe('services/crud', () => {
     it('handler - should throw error: condition for multiple entities', async () => {
       TypeormMock.queryBuilder.getMany.resolves([entity, entity]);
 
-      const result = CRUD.defaultHandler.update(
+      const result = Endpoint.defaultHandler.update(
         repository.createQueryBuilder().where('id = 1'),
         entity,
         repository,
@@ -526,7 +576,7 @@ describe('services/crud', () => {
     it('handler - update should throw error: entity not found', async () => {
       TypeormMock.queryBuilder.getMany.resolves([]);
 
-      const result = CRUD.defaultHandler.update(
+      const result = Endpoint.defaultHandler.update(
         repository.createQueryBuilder().where('id = 1'),
         entity,
         repository,
@@ -539,7 +589,7 @@ describe('services/crud', () => {
       TypeormMock.queryBuilder.getMany.resolves([repository.create(entity)]);
 
       try {
-        await CRUD.defaultHandler.update(
+        await Endpoint.defaultHandler.update(
           repository.createQueryBuilder().where('id = 1'),
           // @ts-ignore
           { asd: 1 },
@@ -557,7 +607,7 @@ describe('services/crud', () => {
       TypeormMock.entityManager.save.rejects(new Error('Unknown'));
       TypeormMock.queryBuilder.getMany.resolves([repository.create(entity)]);
 
-      const result = CRUD.defaultHandler.update(
+      const result = Endpoint.defaultHandler.update(
         repository.createQueryBuilder().where('id = 1'),
         { param: 'unknown' },
         repository,
@@ -569,7 +619,7 @@ describe('services/crud', () => {
     it('handler - should success update entity', async () => {
       TypeormMock.queryBuilder.getMany.resolves([repository.create(entity)]);
 
-      await CRUD.defaultHandler.update(
+      await Endpoint.defaultHandler.update(
         repository.createQueryBuilder().where('id = 1'),
         { param: 'success' },
         repository,
@@ -579,19 +629,33 @@ describe('services/crud', () => {
 
       expect(updatedEntity).to.deep.equal({ ...entity, param: 'success' });
     });
+
+    it('should run default handler metadata: update', () => {
+      const updateDefaultHandler = Endpoint.update?.(() => ({ repository }));
+
+      expect(updateDefaultHandler.getMeta()).to.deep.equal({
+        input: [
+          Endpoint.defaultParams.update.input.name,
+          new Endpoint.defaultParams.update.input(repository),
+        ],
+        output: [TestEntity.name, undefined],
+      });
+    });
   });
 
   describe('remove', () => {
-    const defaultHandlerStub = sandbox.stub(CRUD.defaultHandler, 'remove').resolves(removeResult());
+    const defaultHandlerStub = sandbox
+      .stub(Endpoint.defaultHandler, 'remove')
+      .resolves(removeResult());
     const defaultOptions = {
       isAllowMultiple: false,
       isSoftDelete: false,
     };
 
     it('should run default remove handler with query builder: typeorm case', async () => {
-      const removeHandler = CRUD.remove?.(() => ({ repository }));
+      const removeHandler = Endpoint.remove?.(() => ({ repository }));
 
-      const result = await removeHandler({}, endpointOptions);
+      const result = await removeHandler({ query: {} }, endpointOptions);
       const [passedRepo, queryBuilder, passedOptions] = defaultHandlerStub.firstCall.args;
 
       expect(queryBuilder).to.be.instanceof(SelectQueryBuilder);
@@ -606,7 +670,7 @@ describe('services/crud', () => {
       handler.callsFake((query) => query.toQuery());
       defaultHandlerStub.resetHistory();
 
-      const removeHandler = CRUD.remove?.(
+      const removeHandler = Endpoint.remove?.(
         () => ({ repository, isSoftDelete: true, isAllowMultiple: false }),
         handler,
       );
@@ -625,7 +689,7 @@ describe('services/crud', () => {
       // return custom result
       handler.callsFake(() => [entity]);
 
-      const removeHandler = CRUD.remove?.(() => ({ repository }), handler);
+      const removeHandler = Endpoint.remove?.(() => ({ repository }), handler);
       const result = await removeHandler({}, endpointOptions);
 
       expect(result).to.deep.equal([entity]);
@@ -634,7 +698,7 @@ describe('services/crud', () => {
     it('handler - should throw error: empty remove condition', async () => {
       defaultHandlerStub.restore();
 
-      const result = CRUD.defaultHandler.remove(
+      const result = Endpoint.defaultHandler.remove(
         repository,
         repository.createQueryBuilder(),
         defaultOptions,
@@ -644,7 +708,7 @@ describe('services/crud', () => {
     });
 
     it('handler - remove should throw error: entity not found', async () => {
-      const result = CRUD.defaultHandler.remove(
+      const result = Endpoint.defaultHandler.remove(
         repository,
         repository.createQueryBuilder().where('id = 1'),
         defaultOptions,
@@ -656,7 +720,7 @@ describe('services/crud', () => {
     it('handler - should throw error: try remove multiple entities (isAllowMultiple - false)', async () => {
       TypeormMock.queryBuilder.getMany.resolves([entity, entity]);
 
-      const result = CRUD.defaultHandler.remove(
+      const result = Endpoint.defaultHandler.remove(
         repository,
         repository.createQueryBuilder().where('id = 1'),
         defaultOptions,
@@ -669,7 +733,7 @@ describe('services/crud', () => {
       TypeormMock.entityManager.remove.rejects(new Error('Unknown'));
       TypeormMock.queryBuilder.getMany.resolves([entity]);
 
-      const result = CRUD.defaultHandler.remove(
+      const result = Endpoint.defaultHandler.remove(
         repository,
         repository.createQueryBuilder().where('id = 1'),
         defaultOptions,
@@ -681,7 +745,7 @@ describe('services/crud', () => {
     it('handler - should success remove entity', async () => {
       TypeormMock.queryBuilder.getMany.resolves([entity]);
 
-      const result = await CRUD.defaultHandler.remove(
+      const result = await Endpoint.defaultHandler.remove(
         repository,
         repository.createQueryBuilder().where('id = 1'),
         defaultOptions,
@@ -694,7 +758,7 @@ describe('services/crud', () => {
     it('handler - should success soft remove entity', async () => {
       TypeormMock.queryBuilder.getMany.resolves([entity]);
 
-      const result = await CRUD.defaultHandler.remove(
+      const result = await Endpoint.defaultHandler.remove(
         repository,
         repository.createQueryBuilder().where('id = 1'),
         { isAllowMultiple: false, isSoftDelete: true },
@@ -703,17 +767,32 @@ describe('services/crud', () => {
       expect(TypeormMock.entityManager.softRemove).to.be.calledOnce;
       expect(result).to.deep.equal(removeResult([{ id: entity.id }]));
     });
+
+    it('should run default handler metadata: remove', () => {
+      const removeDefaultHandler = Endpoint.remove?.(() => ({ repository }));
+
+      expect(removeDefaultHandler.getMeta()).to.deep.equal({
+        input: [
+          Endpoint.defaultParams.remove.input.name,
+          new Endpoint.defaultParams.remove.input(),
+        ],
+        output: [
+          Endpoint.defaultParams.remove.output.name,
+          new Endpoint.defaultParams.remove.output(repository),
+        ],
+      });
+    });
   });
 
   describe('restore', () => {
     const defaultHandlerStub = sandbox
-      .stub(CRUD.defaultHandler, 'restore')
+      .stub(Endpoint.defaultHandler, 'restore')
       .resolves(restoreResult());
 
     it('should run default restore handler with query builder: typeorm case', async () => {
-      const restoreHandler = CRUD.restore?.(() => ({ repository }));
+      const restoreHandler = Endpoint.restore?.(() => ({ repository }));
 
-      const result = await restoreHandler({}, endpointOptions);
+      const result = await restoreHandler({ query: {} }, endpointOptions);
       const [passedRepo, queryBuilder, isAllowMultiple] = defaultHandlerStub.firstCall.args;
 
       expect(queryBuilder).to.be.instanceof(SelectQueryBuilder);
@@ -727,7 +806,7 @@ describe('services/crud', () => {
       handler.callsFake((query) => query.toQuery());
       defaultHandlerStub.resetHistory();
 
-      const restoreHandler = CRUD.restore?.(
+      const restoreHandler = Endpoint.restore?.(
         () => ({ repository, isAllowMultiple: false }),
         handler,
       );
@@ -745,7 +824,7 @@ describe('services/crud', () => {
       // return custom result
       handler.callsFake(() => restoreResult([entity]));
 
-      const restoreHandler = CRUD.restore?.(() => ({ repository }), handler);
+      const restoreHandler = Endpoint.restore?.(() => ({ repository }), handler);
       const result = await restoreHandler({}, endpointOptions);
 
       expect(result).to.deep.equal(restoreResult([entity]));
@@ -754,7 +833,7 @@ describe('services/crud', () => {
     it('handler - should throw error: empty restore condition', async () => {
       defaultHandlerStub.restore();
 
-      const result = CRUD.defaultHandler.restore(
+      const result = Endpoint.defaultHandler.restore(
         repository,
         repository.createQueryBuilder(),
         false,
@@ -764,7 +843,7 @@ describe('services/crud', () => {
     });
 
     it('handler - restore should throw error: entity not found', async () => {
-      const result = CRUD.defaultHandler.restore(
+      const result = Endpoint.defaultHandler.restore(
         repository,
         repository.createQueryBuilder().where('id = 1'),
         false,
@@ -776,7 +855,7 @@ describe('services/crud', () => {
     it('handler - should throw error: try restore multiple entities (isAllowMultiple - false)', async () => {
       TypeormMock.queryBuilder.getMany.resolves([entity, entity]);
 
-      const result = CRUD.defaultHandler.restore(
+      const result = Endpoint.defaultHandler.restore(
         repository,
         repository.createQueryBuilder().where('id = 1'),
         false,
@@ -789,7 +868,7 @@ describe('services/crud', () => {
       TypeormMock.entityManager.recover.rejects(new Error('Unknown'));
       TypeormMock.queryBuilder.getMany.resolves([entity]);
 
-      const result = CRUD.defaultHandler.restore(
+      const result = Endpoint.defaultHandler.restore(
         repository,
         repository.createQueryBuilder().where('id = 1'),
         false,
@@ -801,7 +880,7 @@ describe('services/crud', () => {
     it('handler - should success restore entity', async () => {
       TypeormMock.queryBuilder.getMany.resolves([entity]);
 
-      const result = await CRUD.defaultHandler.restore(
+      const result = await Endpoint.defaultHandler.restore(
         repository,
         repository.createQueryBuilder().where('id = 1'),
         false,
@@ -810,15 +889,148 @@ describe('services/crud', () => {
       expect(TypeormMock.entityManager.recover).to.be.calledOnce;
       expect(result).to.deep.equal(restoreResult());
     });
+
+    it('should run default handler metadata: restore', () => {
+      const restoreDefaultHandler = Endpoint.restore?.(() => ({ repository }));
+
+      expect(restoreDefaultHandler.getMeta()).to.deep.equal({
+        input: [
+          Endpoint.defaultParams.restore.input.name,
+          new Endpoint.defaultParams.restore.input(),
+        ],
+        output: [
+          Endpoint.defaultParams.restore.output.name,
+          new Endpoint.defaultParams.restore.output(repository),
+        ],
+      });
+    });
+  });
+
+  describe('customWithQuery', () => {
+    it('should run handler without input params', async () => {
+      const res = { sample: 'result' };
+      const defaultHandler = sandbox.stub().resolves(res);
+      const customHandler = Endpoint.customWithQuery(
+        () => ({ repository, output: {} }),
+        defaultHandler,
+      );
+
+      const result = await customHandler({}, endpointOptions);
+      const [typeormQuery, , passOptions] = defaultHandler.firstCall.args;
+
+      expect(typeormQuery).to.be.instanceof(TypeormJsonQuery);
+      expect(passOptions).to.deep.equal(endpointOptions);
+      expect(result).to.deep.equal(res);
+    });
+
+    it('should run handler with input params', async () => {
+      const params = { id: 1, param: 'hi' };
+      const res = { sample: 'result2' };
+      const defaultHandler = sandbox.stub().resolves(res);
+      const customHandler = Endpoint.customWithQuery(
+        () => ({ repository, output: {}, input: TestEntity }),
+        defaultHandler,
+      );
+
+      const result = await customHandler(params, endpointOptions);
+      const [typeormQuery, passParams, passOptions] = defaultHandler.firstCall.args;
+
+      expect(typeormQuery).to.be.instanceof(TypeormJsonQuery);
+      expect(passParams).to.deep.equal(params);
+      expect(passOptions).to.deep.equal(endpointOptions);
+      expect(result).to.deep.equal(res);
+    });
+
+    it('should throw error: invalid params', async () => {
+      const params = { id: 1, param: '' };
+      const defaultHandler = sandbox.stub();
+      const customHandler = Endpoint.customWithQuery(
+        () => ({ repository, output: {}, input: TestEntity }),
+        defaultHandler,
+      );
+
+      const result = customHandler(params, endpointOptions);
+
+      expect(await waitResult(result)).to.throw('invalid request params');
+    });
+
+    it('should run default handler metadata: custom with query', () => {
+      const customWithQueryDefaultHandler = Endpoint.customWithQuery?.(
+        () => ({ repository, input: TestEntity, output: TestEntity }),
+        sandbox.stub(),
+      );
+
+      expect(customWithQueryDefaultHandler.getMeta()).to.deep.equal({
+        input: [TestEntity.name, undefined],
+        output: [TestEntity.name, undefined],
+      });
+    });
+  });
+
+  describe('custom', () => {
+    it('should run handler without input params', async () => {
+      const res = { sample: 'result' };
+      const defaultHandler = sandbox.stub().resolves(res);
+      const customHandler = Endpoint.custom(() => ({ output: {} }), defaultHandler);
+
+      const result = await customHandler({}, endpointOptions);
+      const [passParams, passOptions] = defaultHandler.firstCall.args;
+
+      expect(passParams).to.deep.equal({});
+      expect(passOptions).to.deep.equal(endpointOptions);
+      expect(result).to.deep.equal(res);
+    });
+
+    it('should run handler with input params', async () => {
+      const params = { id: 1, param: 'hi' };
+      const res = { sample: 'result2' };
+      const defaultHandler = sandbox.stub().resolves(res);
+      const customHandler = Endpoint.custom(
+        () => ({ output: {}, input: TestEntity }),
+        defaultHandler,
+      );
+
+      const result = await customHandler(params, endpointOptions);
+      const [passParams, passOptions] = defaultHandler.firstCall.args;
+
+      expect(passParams).to.deep.equal(params);
+      expect(passOptions).to.deep.equal(endpointOptions);
+      expect(result).to.deep.equal(res);
+    });
+
+    it('should throw error: invalid params', async () => {
+      const params = { id: 1, param: '' };
+      const defaultHandler = sandbox.stub();
+      const customHandler = Endpoint.custom(
+        () => ({ output: {}, input: TestEntity }),
+        defaultHandler,
+      );
+
+      const result = customHandler(params, endpointOptions);
+
+      expect(await waitResult(result)).to.throw('invalid request params');
+    });
+
+    it('should return custom handler metadata', () => {
+      const customHandler = Endpoint.custom(
+        () => ({ output: {}, input: TestEntity }),
+        sandbox.stub(),
+      );
+
+      expect(customHandler.getMeta()).to.deep.equal({
+        input: [TestEntity.name, undefined],
+        output: [undefined, undefined],
+      });
+    });
   });
 
   describe('controller', () => {
     it('should return default controller methods', () => {
-      const result = CRUD.controller(() => repository);
+      const result = Endpoint.controller(() => repository);
       const handlers = Object.entries(result);
 
       for (const [method, methodHandler] of handlers) {
-        expect(typeof CRUD[method]).to.equal('function');
+        expect(typeof Endpoint[method]).to.equal('function');
         expect(typeof methodHandler).to.equal('function');
       }
 
@@ -826,15 +1038,15 @@ describe('services/crud', () => {
     });
 
     it('should return default controller methods: disable restore method', () => {
-      const result = CRUD.controller(() => repository, { restore: false });
+      const result = Endpoint.controller(() => repository, { restore: false });
 
       expect(result).to.not.have.property('restore');
     });
 
     it('should return custom restore controller method with custom options', async () => {
-      const defaultHandlerStub = sandbox.stub(CRUD.defaultHandler, 'restore');
+      const defaultHandlerStub = sandbox.stub(Endpoint.defaultHandler, 'restore');
       const customMethodName = 'custom-restore';
-      const methods = CRUD.controller(() => repository, {
+      const methods = Endpoint.controller(() => repository, {
         restore: {
           path: customMethodName,
           options: () => ({ isAllowMultiple: false }),
@@ -851,6 +1063,38 @@ describe('services/crud', () => {
       expect(passedRepo).to.equal(repository);
       expect(qb).to.instanceof(SelectQueryBuilder);
       expect(isAllowMultiple).to.false;
+    });
+  });
+
+  describe('input/output classes', () => {
+    it('should correctly instantiate: list output', () => {
+      const instance = new ListOutputParams(repository);
+
+      expect(instance.list).to.deep.equal([repository.metadata.name]);
+    });
+
+    it('should correctly instantiate: create input', () => {
+      const instance = new CreateRequestParams(repository);
+
+      expect(instance.fields).to.deep.equal(repository.metadata.name);
+    });
+
+    it('should correctly instantiate: update input', () => {
+      const instance = new UpdateRequestParams(repository);
+
+      expect(instance.fields).to.deep.equal(repository.metadata.name);
+    });
+
+    it('should correctly instantiate: remove output', () => {
+      const instance = new RemoveOutputParams(repository);
+
+      expect(instance.deleted).to.deep.equal([repository.metadata.name]);
+    });
+
+    it('should correctly instantiate: restore input', () => {
+      const instance = new RestoreOutputParams(repository);
+
+      expect(instance.restored).to.deep.equal([repository.metadata.name]);
     });
   });
 });

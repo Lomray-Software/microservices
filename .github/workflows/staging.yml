@@ -18,12 +18,14 @@ jobs:
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
 
       - id: files
-        uses: jitterbit/get-changed-files@v1
+        uses: Ana06/get-changed-files@v2.1.0
+        with:
+          format: 'json'
 
       - id: microservices
         run: ./.github/get-changed-microservices.sh
         env:
-          FILES: ${{ steps.files.outputs.all }}
+          FILES: '${{ steps.files.outputs.all }}'
 
   update-versions:
     name: Update package.json microservice versions

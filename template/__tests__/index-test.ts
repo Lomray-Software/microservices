@@ -77,4 +77,15 @@ describe('microservices-name', () => {
 
     expect(logSpy).to.calledOnce;
   });
+
+  it('should have microservice custom logger', () => {
+    const { logDriver } = microserviceParams;
+    const LogInfoSpy = sandbox.spy(Log, 'info');
+
+    if (typeof logDriver !== 'boolean') {
+      logDriver?.(() => 'test');
+    }
+
+    expect(LogInfoSpy).to.calledOnce;
+  });
 });

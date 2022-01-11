@@ -1,14 +1,23 @@
 import type { IEndpointOptions } from '@lomray/microservice-nodejs-lib';
-import type { ICountResult, IRemoveResult, IListResult, IRestoreResult } from '@services/crud';
+import type {
+  CountOutputParams,
+  RemoveOutputParams,
+  ListOutputParams,
+  RestoreOutputParams,
+} from '@services/endpoint';
 
 // @ts-ignore
 const endpointOptions: IEndpointOptions = { app: {}, req: {} };
-const listResult = (): IListResult<Record<string, any>> => ({ list: [], count: 0 });
-const countResult = (): ICountResult<Record<string, any>> => ({ count: 0 });
-const removeResult = (res: Record<string, any>[] = []): IRemoveResult<Record<string, any>> => ({
+const listResult = (): ListOutputParams<Record<string, any>> => ({ list: [], count: 0 });
+const countResult = (): CountOutputParams => ({ count: 0 });
+const removeResult = (
+  res: Record<string, any>[] = [],
+): RemoveOutputParams<Record<string, any>> => ({
   deleted: res,
 });
-const restoreResult = (res: Record<string, any>[] = []): IRestoreResult<Record<string, any>> => ({
+const restoreResult = (
+  res: Record<string, any>[] = [],
+): RestoreOutputParams<Record<string, any>> => ({
   restored: res,
 });
 

@@ -25,7 +25,7 @@ describe('methods/config/create', () => {
     const failedInput = Create({ fields: {} }, endpointOptions);
     // @ts-ignore
     const failedInput2 = Create({ fields: null }, endpointOptions);
-    const failedInput3 = Create({}, endpointOptions);
+    const failedInput3 = Create({ fields: {} }, endpointOptions);
 
     expect(await waitResult(failedInput)).to.throw();
     expect(await waitResult(failedInput2)).to.throw();
