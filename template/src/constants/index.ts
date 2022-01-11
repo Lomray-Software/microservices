@@ -5,6 +5,19 @@ const IS_TEST = ENV === 'tests';
 
 const MS_NAME = process.env.MS_NAME || 'microservices-name';
 const MS_CONNECTION = process.env.MS_CONNECTION || undefined;
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const MS_CONNECTION_SRV = Boolean(process.env.MS_CONNECTION_SRV) || false;
+const MS_WORKERS = Number(process.env.MS_WORKERS) || undefined;
 const MS_DISABLE_REMOTE_MIDDLEWARE = Number(process.env.MS_DISABLE_REMOTE_MIDDLEWARE) || 0;
 
-export { MS_NAME, MS_CONNECTION, MS_DISABLE_REMOTE_MIDDLEWARE, ENV, IS_PROD, IS_DEV, IS_TEST };
+export {
+  MS_NAME,
+  MS_CONNECTION,
+  MS_CONNECTION_SRV,
+  MS_WORKERS,
+  MS_DISABLE_REMOTE_MIDDLEWARE,
+  ENV,
+  IS_PROD,
+  IS_DEV,
+  IS_TEST,
+};

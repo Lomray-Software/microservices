@@ -22,7 +22,9 @@ This microservice provides configuration for all other microservices. Single poi
 ### <a id="environments"></a>ENVIRONMENTS:
 - `NODE_ENV` - Can be `production` or `development` or `tests`. Default: `development`
 - `MS_CONNECTION` - Invert json host and port (with protocol). Default: `http://127.0.0.1:8001`
+- `MS_CONNECTION_SRV` - Invert json connection it is SRV record. Default: `false`
 - `MS_NAME` - Microservice name. Default: `gateway`
+- `MS_WORKERS` - Microservice queue workers count. Default: `1`
 - `MS_DISABLE_REMOTE_MIDDLEWARE` - Disable remote middleware feature. Default: `0`
 - `DB_HOST` - Database host. Default: `127.0.0.1`
 - `DB_PORT` - Database host. Default: `5432`

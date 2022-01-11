@@ -21,3 +21,7 @@ services:
 #    container_name: gateway
 #    ports:
 #      - "3000:3000"
+
+#  configuration:
+#    image: ghcr.io/lomray-software/microservices/configuration:latest-staging
+#    container_name: configuration
