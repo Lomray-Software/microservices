@@ -41,7 +41,7 @@
 	"dependencies": {
 		"@lomray/microservice-helpers": "file:../../packages/@lomray/microservice-helpers/lomray-microservice-helpers-1.0.0.tgz",
 		"@lomray/microservice-nodejs-lib": "^2.3.0",
-		"@lomray/microservice-remote-middleware": "^1.0.0",
+		"@lomray/microservice-remote-middleware": "^1.1.0",
 		"axios": "^0.24.0",
 		"class-validator": "^0.13.2",
 		"class-validator-jsonschema": "^3.1.0",

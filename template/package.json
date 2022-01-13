@@ -40,8 +40,8 @@
 	},
 	"dependencies": {
     "@lomray/microservice-helpers": "file:../../packages/@lomray/microservice-helpers/lomray-microservice-helpers-1.0.0.tgz",
-		"@lomray/microservice-nodejs-lib": "^2.3.0",
-    "@lomray/microservice-remote-middleware": "^1.0.0"
+		"@lomray/microservice-nodejs-lib": "^2.4.2",
+    "@lomray/microservice-remote-middleware": "^1.1.0"
   },
 	"devDependencies": {}
 }
