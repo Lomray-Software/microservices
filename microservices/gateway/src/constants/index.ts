@@ -4,6 +4,7 @@ const IS_DEV = ENV === 'development';
 const IS_TEST = ENV === 'tests';
 
 const MS_NAME = process.env.MS_NAME || 'gateway';
+const MS_CONFIG_NAME = process.env.MS_CONFIG_NAME || 'configuration';
 const MS_CONNECTION = process.env.MS_CONNECTION || undefined;
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MS_CONNECTION_SRV = Boolean(process.env.MS_CONNECTION_SRV) || undefined;
@@ -14,6 +15,7 @@ const MS_DISABLE_REMOTE_MIDDLEWARE = Number(process.env.MS_DISABLE_REMOTE_MIDDLE
 
 export {
   MS_NAME,
+  MS_CONFIG_NAME,
   MS_CONNECTION,
   MS_CONNECTION_SRV,
   MS_BATCH_LIMIT,

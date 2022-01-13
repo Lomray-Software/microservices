@@ -55,7 +55,7 @@ function createMicroservice() {
 
   cp -R "$MICROSERVICE_TEMPLATE_DIR" "$MICROSERVICE_PATH"
 
-  universalSed "s/microservices-name/$NAME/g" "$MICROSERVICE_PATH/src/constants/environment.ts"
+  universalSed "s/microservices-name/$NAME/g" "$MICROSERVICE_PATH/src/constants/index.ts"
   universalSed "s/microservices-name/microservices-$NAME/g" "$MICROSERVICE_PATH/package.json"
   universalSed "s/microservices-name/microservices-$NAME/g" "$MICROSERVICE_PATH/package-lock.json"
   universalSed "s/microservices-name/$NAME/g" "$MICROSERVICE_PATH/README.md"

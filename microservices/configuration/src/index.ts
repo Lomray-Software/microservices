@@ -8,15 +8,18 @@ import {
 import type { ConnectionOptions, Connection } from 'typeorm';
 import { createDbConnection } from '@config/db';
 import { IS_TEST } from '@constants/index';
+import Config from '@entities/config';
 import Middleware from '@entities/middleware';
 import ConfigRepository from '@repositories/config-repository';
+import MiddlewareRepository from '@repositories/middleware-repository';
 
 export interface IStartConfig {
   msOptions: Partial<IMicroserviceOptions>;
   msParams: Partial<IMicroserviceParams>;
   dbOptions: ConnectionOptions;
   registerMethods?: (ms: Microservice) => Promise<void> | void;
-  initConfigs?: Record<string, any>[];
+  initConfigs?: Config[];
+  initMiddlewares?: Middleware[];
   isDisableRemoteMiddleware?: boolean;
   hooks?: {
     afterDbConnection?: (ms: Microservice, connection: Connection) => Promise<void> | void;
@@ -34,6 +37,7 @@ const start = async ({
   dbOptions,
   registerMethods,
   initConfigs = [],
+  initMiddlewares = [],
   isDisableRemoteMiddleware = false,
   hooks: { afterDbConnection, afterInitRemoteMiddleware, beforeStart } = {},
 }: IStartConfig): Promise<void> => {
@@ -48,15 +52,22 @@ const start = async ({
     const microservice = Microservice.create(msOptions, msParams);
     const connection = await createDbConnection(dbOptions);
     const configRepository = connection.getCustomRepository(ConfigRepository);
+    const middlewareRepository = connection.getCustomRepository(MiddlewareRepository);
 
     await configRepository.bulkSave(initConfigs);
+    await middlewareRepository.bulkSave(initMiddlewares);
     await afterDbConnection?.(microservice, connection);
     await registerMethods?.(microservice);
 
     // Enable remote middleware
     if (!isDisableRemoteMiddleware) {
-      const middlewareRepository = connection.getRepository(Middleware) as IMiddlewareRepository;
-      const remoteMiddleware = RemoteMiddlewareServer.create(microservice, middlewareRepository);
+      const remoteMiddleware = RemoteMiddlewareServer.create(
+        microservice,
+        middlewareRepository as IMiddlewareRepository,
+        {
+          logDriver: msParams.logDriver,
+        },
+      );
 
       await afterInitRemoteMiddleware?.(remoteMiddleware);
 

@@ -65,7 +65,7 @@ describe('microservice: module', () => {
     expect(dbConnection).to.deep.equal(TypeormMock.entityManager.connection);
     expect(addRegisterEndpointSpy).to.calledOnce;
     expect(addObtainEndpointSpy).to.calledOnce;
-    expect(configRepository.bulkSave).to.calledOnce;
+    expect(configRepository.bulkSave).to.calledTwice; // config & middleware
     expect(registerMethodsStub).to.calledOnceWith(Microservice.getInstance());
   });
 

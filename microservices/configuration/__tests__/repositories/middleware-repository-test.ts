@@ -1,21 +1,25 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
+import { MiddlewareType } from '@lomray/microservice-nodejs-lib';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import { getCustomRepository } from 'typeorm';
-import Config from '@entities/config';
-import OriginalConfigRepository from '@repositories/config-repository';
+import Middleware from '@entities/middleware';
+import OriginalMiddlewareRepository from '@repositories/config-repository';
 
-const { default: ConfigRepository } = rewiremock.proxy<{
-  default: typeof OriginalConfigRepository;
-}>(() => require('@repositories/config-repository'), {
+const { default: MiddlewareRepository } = rewiremock.proxy<{
+  default: typeof OriginalMiddlewareRepository;
+}>(() => require('@repositories/middleware-repository'), {
   typeorm: TypeormMock.mock,
 });
 
-describe('repositories/config-repository', () => {
-  const instance = getCustomRepository(ConfigRepository);
-  const sampleConfigs: Partial<Config>[] = Array<Partial<Config>>(20).fill({
-    microservice: 'demo',
-    type: 'db',
+describe('repositories/middleware-repository', () => {
+  const instance = getCustomRepository(MiddlewareRepository);
+  const sampleConfigs: Partial<Middleware>[] = Array<Partial<Middleware>>(20).fill({
+    target: 'demo',
+    targetMethod: 'test',
+    senderMethod: 'method',
+    sender: 'sender',
+    type: MiddlewareType.response,
   });
 
   beforeEach(() => {

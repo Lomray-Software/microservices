@@ -32,6 +32,7 @@ This microservice provides configuration for all other microservices. Single poi
 - `DB_PASSWORD` - Database host. Default: `example`
 - `DB_DATABASE` - Database host. Default: `ms-configuration`
 - `MS_CONFIGS` - JSON string for configure initial `Config` values. Default: `[]`
+- `MS_MIDDLEWARES` - JSON string for configure initial `Middleware` values. Default: `[]`
 
 ### <a id="how-to-develop"></a>HOW TO DEVELOP:
 1. Run `Inverted Json` job server.

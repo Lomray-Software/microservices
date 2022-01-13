@@ -10,6 +10,7 @@ const MS_CONNECTION_SRV = Boolean(process.env.MS_CONNECTION_SRV) || false;
 const MS_WORKERS = Number(process.env.MS_WORKERS) || undefined;
 const MS_DISABLE_REMOTE_MIDDLEWARE = Number(process.env.MS_DISABLE_REMOTE_MIDDLEWARE) || 0;
 const MS_CONFIGS = process.env.MS_CONNECTION || '[]';
+const MS_MIDDLEWARES = process.env.MS_MIDDLEWARES || '[]';
 
 const DB_ENV = {
   HOST: process.env.DB_HOST || '127.0.0.1',
@@ -27,6 +28,7 @@ export {
   DB_ENV,
   MS_DISABLE_REMOTE_MIDDLEWARE,
   MS_CONFIGS,
+  MS_MIDDLEWARES,
   ENV,
   IS_PROD,
   IS_DEV,

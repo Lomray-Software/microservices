@@ -2,7 +2,7 @@ import { Log } from '@lomray/microservice-helpers';
 import type { IGatewayOptions, IGatewayParams } from '@lomray/microservice-nodejs-lib';
 import { Gateway } from '@lomray/microservice-nodejs-lib';
 import { RemoteMiddlewareClient } from '@lomray/microservice-remote-middleware';
-import { IS_TEST } from '@constants/index';
+import { IS_TEST, MS_CONFIG_NAME } from '@constants/index';
 
 export interface IStartConfig {
   msOptions: Partial<IGatewayOptions>;
@@ -41,7 +41,10 @@ const start = async ({
 
     // Enable remote middleware
     if (!isDisableRemoteMiddleware) {
-      const remoteMiddleware = RemoteMiddlewareClient.create(microservice);
+      const remoteMiddleware = RemoteMiddlewareClient.create(microservice, {
+        logDriver: msParams.logDriver,
+        configurationMsName: MS_CONFIG_NAME,
+      });
 
       await afterInitRemoteMiddleware?.(remoteMiddleware);
       await remoteMiddleware.addRegisterEndpoint().obtainMiddlewares();

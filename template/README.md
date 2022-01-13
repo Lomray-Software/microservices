@@ -12,6 +12,7 @@ RPC 2.0 Microservice.
 - `MS_CONNECTION` - Invert json host and port (with protocol). Default: `http://127.0.0.1:8001`
 - `MS_CONNECTION_SRV` - Invert json connection it is SRV record. Default: `false`
 - `MS_NAME` - Microservice name. Default: `microservices-name`
+- `MS_CONFIG_NAME` - Configuration microservice name. Default: `configuration` 
 - `MS_WORKERS` - Microservice queue workers count. Default: `1`
 - `MS_DISABLE_REMOTE_MIDDLEWARE` - Disable remote middleware feature. Default: `0`
 

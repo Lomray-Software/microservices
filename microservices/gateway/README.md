@@ -23,6 +23,7 @@ RPC 2.0 Microservice. This is a single entry point for all clients.
 - `MS_CONNECTION` - Invert json host and port (with protocol). Default: `http://127.0.0.1:8001`
 - `MS_CONNECTION_SRV` - Invert json connection it is SRV record. Default: `false`
 - `MS_NAME` - Microservice name. Default: `gateway`
+- `MS_CONFIG_NAME` - Configuration microservice name. Default: `configuration`
 - `MS_DISABLE_REMOTE_MIDDLEWARE` - Disable remote middleware feature. Default: `0`
 - `MS_BATCH_LIMIT` - Batch JSON_RPC request size. Default: `5`
 - `MS_INFO_ROUTE` - Gateway info route. Default: `/`
