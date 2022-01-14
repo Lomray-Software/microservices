@@ -83,6 +83,17 @@ function globalInstall() {
   done
 }
 
+# Run "npm update package" in each microservice dir
+function globalUpdatePackage() {
+  PACKAGE=$1
+
+  for microservice_dir in $(getMicroservices yes yes) ; do
+    (set -e && cd "$microservice_dir" && grep -q "$PACKAGE" "package.json" && npm update $PACKAGE)
+
+    echo "$microservice_dir - updated package $PACKAGE!"
+  done
+}
+
 # check typescript for each microservice
 function checkTypescript() {
   for microservice_dir in $(getMicroservices yes yes) ; do
@@ -179,6 +190,10 @@ case "$ACTION" in
 
   "global-install")
     globalInstall "${@:2}"
+    ;;
+
+  "global-update-package")
+    globalUpdatePackage "${@:2}"
     ;;
 
   "ts-check")

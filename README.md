@@ -9,7 +9,7 @@
 ## Microservices list:
  - [Gateway](microservices/gateway)
  - [Configuration](microservices/configuration)
- - Authentication (in progress)
+ - [Authentication](microservices/authentication)
  - Authorization (in progress)
  - Users (in progress)
  

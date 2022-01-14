@@ -14,13 +14,13 @@ import { IJsonQueryFilter } from '@entities/ijson-query-filter';
 import IsUndefinable from '@validators/is-undefinable';
 
 enum CRUD_EXCEPTION_CODE {
-  VALIDATION_FAILED = 33481,
-  MULTIPLE_INSERT_FORBIDDEN = 33482,
-  FAILED_INSERT = 33483,
-  FAILED_UPDATE = 33484,
-  FAILED_DELETE = 33485,
-  FAILED_RESTORE = 33486,
-  ENTITY_NOT_FOUND = 33487,
+  VALIDATION_FAILED = -33481,
+  MULTIPLE_INSERT_FORBIDDEN = -33482,
+  FAILED_INSERT = -33483,
+  FAILED_UPDATE = -33484,
+  FAILED_DELETE = -33485,
+  FAILED_RESTORE = -33486,
+  ENTITY_NOT_FOUND = -33487,
 }
 
 type EntityTarget<TEntity> =

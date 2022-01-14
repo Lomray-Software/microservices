@@ -33,6 +33,7 @@
 		"build": "./operations.sh build",
 		"create-microservice": "./operations.sh create-ms",
 		"global-install": "./operations.sh global-install",
+		"global-update-package": "./operations.sh global-update-package",
 		"lint-staged": "./operations.sh lint-staged",
 		"semantic-release": "./operations.sh semantic-release",
 		"prepare": "husky install"

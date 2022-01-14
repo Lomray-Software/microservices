@@ -1,0 +1,141 @@
+import { TypeormMock } from '@lomray/microservice-helpers/mocks';
+import { waitResult } from '@lomray/microservice-helpers/test-helpers';
+import { expect } from 'chai';
+import jsonwebtoken from 'jsonwebtoken';
+import rewiremock from 'rewiremock';
+import Token, { TokenType } from '@entities/token';
+import {
+  CreateAuthToken as OriginalCreateAuthToken,
+  TokenCreateReturnType,
+} from '@services/methods/create-auth-token';
+
+const { CreateAuthToken } = rewiremock.proxy<{ CreateAuthToken: typeof OriginalCreateAuthToken }>(
+  () => require('@services/methods/create-auth-token'),
+  {
+    typeorm: TypeormMock.mock,
+  },
+);
+
+describe('services/methods/create-auth-token', () => {
+  const repository = TypeormMock.entityManager.getRepository(Token);
+  const userId = 'test-personal-id';
+  const jwtConfig = {
+    secretKey: 'secret',
+    options: { issuer: 'test-issuer' },
+  };
+  const service = new CreateAuthToken(repository, jwtConfig);
+
+  /**
+   * Helper for mock first save jwt
+   */
+  const fakeSaveJwt = (_: any, fields: Record<string, any>): Record<string, any> => ({
+    id: fields.id ? fields.id : 'uuid-id-test',
+    ...fields,
+  });
+
+  afterEach(() => {
+    TypeormMock.sandbox.reset();
+  });
+
+  it('should correctly create personal token: directly', async () => {
+    const result = await service.create({
+      type: TokenType.personal,
+      returnType: TokenCreateReturnType.directly,
+      userId,
+    });
+
+    const [, token] = TypeormMock.entityManager.save.firstCall.args;
+
+    expect(result.token).to.length(32);
+    expect(token.type).to.equal(TokenType.personal);
+    expect(token.userId).to.equal(userId);
+    expect(token.personal).to.equal(result.token);
+  });
+
+  it('should correctly create personal token: payload', async () => {
+    const result = await service.create({
+      type: TokenType.personal,
+      returnType: TokenCreateReturnType.payload,
+      userId,
+    });
+
+    expect((result.payload as Record<string, string>)?.token).to.length(32);
+  });
+
+  it('should throw error create personal token: cookies', async () => {
+    const result = service.create({
+      type: TokenType.personal,
+      returnType: TokenCreateReturnType.cookies,
+      userId,
+    });
+
+    expect(await waitResult(result)).to.throw(
+      'Return type "cookies" available only with type "jwt"',
+    );
+  });
+
+  it('should correctly create jwt token: directly', async () => {
+    TypeormMock.entityManager.save.callsFake(fakeSaveJwt);
+
+    const { access, refresh } = await service.create({
+      type: TokenType.jwt,
+      returnType: TokenCreateReturnType.directly,
+      userId,
+    });
+
+    const [, token] = TypeormMock.entityManager.save.lastCall.args;
+
+    expect(token.id).to.equal('uuid-id-test');
+    expect(token.type).to.equal(TokenType.jwt);
+    expect(token.userId).to.equal(userId);
+    expect(token.access).to.equal(access);
+    expect(token.refresh).to.equal(refresh);
+    expect(String(token.expirationAt)).to.length(10);
+    expect(() => jsonwebtoken.verify(access as string, jwtConfig.secretKey)).to.not.throw();
+    expect(() => jsonwebtoken.verify(refresh as string, jwtConfig.secretKey)).to.not.throw();
+  });
+
+  it('should correctly create jwt token: payload', async () => {
+    TypeormMock.entityManager.save.callsFake(fakeSaveJwt);
+
+    const result = await service.create({
+      type: TokenType.jwt,
+      returnType: TokenCreateReturnType.payload,
+      userId,
+    });
+
+    const [, token] = TypeormMock.entityManager.save.lastCall.args;
+
+    expect(token.access).to.not.empty;
+    expect(result).to.deep.equal({
+      payload: { access: token.access, refresh: token.refresh },
+    });
+  });
+
+  it('should correctly create jwt token: cookies', async () => {
+    TypeormMock.entityManager.save.callsFake(fakeSaveJwt);
+
+    const result = await service.create({
+      type: TokenType.jwt,
+      returnType: TokenCreateReturnType.cookies,
+      userId,
+    });
+
+    const [, token] = TypeormMock.entityManager.save.lastCall.args;
+
+    expect(token.access).to.not.empty;
+    expect(result).to.deep.equal({
+      payload: {
+        refresh: token.refresh,
+        cookies: [
+          {
+            action: 'add',
+            name: 'jwt-access',
+            value: token.access,
+            options: { httpOnly: true },
+          },
+        ],
+      },
+    });
+  });
+});

@@ -21,7 +21,17 @@ services:
 #    container_name: gateway
 #    ports:
 #      - "3000:3000"
+#    depends_on:
+#      - configuration
 
 #  configuration:
 #    image: ghcr.io/lomray-software/microservices/configuration:latest-staging
 #    container_name: configuration
+#    depends_on:
+#      - db
+
+#  authentication:
+#    image: ghcr.io/lomray-software/microservices/authentication:latest-staging
+#    container_name: authentication
+#    depends_on:
+#      - configuration

@@ -24,30 +24,30 @@ describe('services/microservice-meta', () => {
   ms.addEndpoint('test-endpoint-with-meta', handlerWithMeta, handlerWithMetaOptions);
 
   it('should return endpoints meta', () => {
-    expect(MicroserviceMeta.getMeta(ms.getEndpoints())).to.deep.equal({
-      endpoints: {
-        'test-endpoint': {
-          options: { isDisableMiddlewares: false, isPrivate: false },
-          input: undefined,
-          output: undefined,
-        },
-        'test-endpoint-with-meta': {
-          options: { isDisableMiddlewares: false, isPrivate: true },
-          input: ['TestName', undefined],
-          output: [
-            'EndpointsTestEntity',
-            {
-              param: 1,
-            },
-          ],
-        },
+    const res = MicroserviceMeta.getMeta(ms.getEndpoints());
+
+    expect(res.endpoints).to.deep.equal({
+      'test-endpoint': {
+        options: { isDisableMiddlewares: false, isPrivate: false },
+        input: undefined,
+        output: undefined,
       },
-      entities: {
-        EndpointsTestEntity: {
-          properties: { id: { type: 'string' } },
-          type: 'object',
-          required: ['id'],
-        },
+      'test-endpoint-with-meta': {
+        options: { isDisableMiddlewares: false, isPrivate: true },
+        input: ['TestName', undefined],
+        output: [
+          'EndpointsTestEntity',
+          {
+            param: 1,
+          },
+        ],
+      },
+    });
+    expect(res.entities).to.deep.contains({
+      EndpointsTestEntity: {
+        properties: { id: { type: 'string' } },
+        type: 'object',
+        required: ['id'],
       },
     });
   });
