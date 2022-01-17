@@ -14,7 +14,7 @@ RPC 2.0 Microservice.
 - `MS_NAME` - Microservice name. Default: `microservices-name`
 - `MS_CONFIG_NAME` - Configuration microservice name. Default: `configuration` 
 - `MS_WORKERS` - Microservice queue workers count. Default: `1`
-- `MS_DISABLE_REMOTE_MIDDLEWARE` - Disable remote middleware feature. Default: `0`
+- `MS_DISABLE_REMOTE_MIDDLEWARE` - Disable remote middleware feature. Set `1` to disable. Default: `0` (enabled)
 
 ### <a id="how-to-develop"></a>HOW TO DEVELOP:
 1. Run `Inverted Json` job server.

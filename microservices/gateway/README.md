@@ -24,7 +24,7 @@ RPC 2.0 Microservice. This is a single entry point for all clients.
 - `MS_CONNECTION_SRV` - Invert json connection it is SRV record. Default: `false`
 - `MS_NAME` - Microservice name. Default: `gateway`
 - `MS_CONFIG_NAME` - Configuration microservice name. Default: `configuration`
-- `MS_DISABLE_REMOTE_MIDDLEWARE` - Disable remote middleware feature. Default: `0`
+- `MS_DISABLE_REMOTE_MIDDLEWARE` - Disable remote middleware feature. Set `1` to disable. Default: `0` (enabled)
 - `MS_BATCH_LIMIT` - Batch JSON_RPC request size. Default: `5`
 - `MS_INFO_ROUTE` - Gateway info route. Default: `/`
 - `MS_REQ_TIMEOUT` - Gateway request timeout in sec. Default: `15`

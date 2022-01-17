@@ -25,16 +25,16 @@ This microservice provides authentication mechanism for microservices.
 - `MS_CONNECTION_SRV` - Invert json connection it is SRV record. Default: `false`
 - `MS_NAME` - Microservice name. Default: `authentication`
 - `MS_WORKERS` - Microservice queue workers count. Default: `1`
-- `MS_DISABLE_REMOTE_MIDDLEWARE` - Disable remote middleware feature. Default: `0`
-- `DB_FROM_CONFIG_MS` - Get db credentials from configuration microservice. Set `0` to disable. Default: `true`
+- `MS_DISABLE_REMOTE_MIDDLEWARE` - Disable remote middleware feature. Set `1` to disable. Default: `0` (enabled)
+- `DB_FROM_CONFIG_MS` - Get db credentials from configuration microservice. Set `0` to disable. Default: `1`
 - `MS_JWT_SECRET_KEY` - Secret key for generation JWT tokens. Required if you want to use JWT auth. Default: `undefined`
 - `MS_JWT_PARAMS` - JSON string for configure JWT creation tokens method. See [IJwtParams](src/services/tokens/jwt.ts). Default: `{}`
-- `MS_REMOTE_CONFIG` - Enable remote config (get from configuration microservice). Default: `1`
+- `MS_REMOTE_CONFIG` - Enable remote config (get from configuration microservice). Set `0` to disable. Default: `1`
 - `DB_HOST` - Database host. Default: `127.0.0.1`
-- `DB_PORT` - Database host. Default: `5432`
-- `DB_USERNAME` - Database host. Default: `postgres`
-- `DB_PASSWORD` - Database host. Default: `example`
-- `DB_DATABASE` - Database host. Default: `ms-authentication`
+- `DB_PORT` - Database port. Default: `5432`
+- `DB_USERNAME` - Database user name. Default: `postgres`
+- `DB_PASSWORD` - Database password. Default: `example`
+- `DB_DATABASE` - Database db name. Default: `ms-authentication`
 
 ### <a id="how-to-develop"></a>HOW TO DEVELOP:
 1. Run `Inverted Json` job server.
