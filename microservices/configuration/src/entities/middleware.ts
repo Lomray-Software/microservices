@@ -14,19 +14,19 @@ class Middleware implements IMiddlewareEntity {
   @Allow()
   id: number;
 
-  @Column()
+  @Column({ type: 'varchar', length: 30 })
   @Length(1, 30)
   sender: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 30 })
   @Length(1, 30)
   senderMethod: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 30 })
   @Length(1, 30)
   target: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 30 })
   @Length(1, 30)
   targetMethod: string;
 

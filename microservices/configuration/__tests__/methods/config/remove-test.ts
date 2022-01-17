@@ -15,7 +15,7 @@ describe('methods/config/remove', () => {
     TypeormMock.sandbox.reset();
   });
 
-  it('should correctly return entity', async () => {
+  it('should correctly remove entity', async () => {
     const entity = { id: 1 };
 
     TypeormMock.queryBuilder.getMany.returns([entity]);

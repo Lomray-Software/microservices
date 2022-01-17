@@ -12,14 +12,14 @@ class Config<TParams = Record<string, any>> {
   /**
    * This field can be '*', it means - for all microservices
    */
-  @Column()
+  @Column({ type: 'varchar', length: 50 })
   @Length(1, 50)
   microservice: string;
 
   /**
    * db, aws, mail, microservice (personal configs) and etc.
    */
-  @Column()
+  @Column({ type: 'varchar', length: 30 })
   @Length(1, 30)
   type: string;
 
