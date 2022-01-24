@@ -14,7 +14,7 @@ const { start } = rewiremock.proxy<{ start: typeof OriginalStart }>(() => requir
   '@config/db': { createDbConnection: TypeormMock.stubs.createConnection },
 });
 
-describe('authentication', () => {
+describe('authorization', () => {
   const sandbox = sinon.createSandbox();
 
   before(() => {

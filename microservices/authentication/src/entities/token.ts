@@ -50,7 +50,6 @@ class Token {
   @IsRFC3339() // timestamp validator
   expirationAt: number | null;
 
-  @Column({ type: 'json', default: {} })
   @JSONSchema({
     description: 'Some token data, like device type and etc.',
     example: {
@@ -58,6 +57,7 @@ class Token {
       userAgent: '....',
     },
   })
+  @Column({ type: 'json', default: {} })
   @IsObject()
   @IsUndefinable()
   params: Record<string, any>;

@@ -1,8 +1,9 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run all tests" type="CompoundRunConfigurationType">
-    <toRun name="authentication" type="mocha-javascript-test-runner" />
     <toRun name="configuration" type="mocha-javascript-test-runner" />
+    <toRun name="authorization" type="mocha-javascript-test-runner" />
     <toRun name="gateway" type="mocha-javascript-test-runner" />
+    <toRun name="authentication" type="mocha-javascript-test-runner" />
     <method v="2" />
   </configuration>
 </component>

@@ -10,7 +10,7 @@
  - [Gateway](microservices/gateway)
  - [Configuration](microservices/configuration)
  - [Authentication](microservices/authentication)
- - Authorization (in progress)
+ - [Authorization](microservices/authorization)
  - Users (in progress)
  
 Use `npm run create-microservice name` for create new microservice from template.
