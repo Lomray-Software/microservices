@@ -37,16 +37,10 @@ describe('services/methods/renew-auth-token', () => {
         expectedResult: (token: Token) => ({ access: token.access, refresh: token.refresh }),
       },
       {
-        returnType: TokenCreateReturnType.payload,
-        expectedResult: (token: Token) => ({
-          payload: { access: token.access, refresh: token.refresh },
-        }),
-      },
-      {
         returnType: TokenCreateReturnType.cookies,
         expectedResult: (token: Token) => ({
+          refresh: token.refresh,
           payload: {
-            refresh: token.refresh,
             cookies: [
               {
                 action: 'add',

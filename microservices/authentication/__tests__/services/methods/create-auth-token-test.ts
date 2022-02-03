@@ -52,16 +52,6 @@ describe('services/methods/create-auth-token', () => {
     expect(token.personal).to.equal(result.token);
   });
 
-  it('should correctly create personal token: payload', async () => {
-    const result = await service.create({
-      type: TokenType.personal,
-      returnType: TokenCreateReturnType.payload,
-      userId,
-    });
-
-    expect((result.payload as Record<string, string>)?.token).to.length(32);
-  });
-
   it('should throw error create personal token: cookies', async () => {
     const result = service.create({
       type: TokenType.personal,
@@ -95,23 +85,6 @@ describe('services/methods/create-auth-token', () => {
     expect(() => jsonwebtoken.verify(refresh as string, jwtConfig.secretKey)).to.not.throw();
   });
 
-  it('should correctly create jwt token: payload', async () => {
-    TypeormMock.entityManager.save.callsFake(fakeSaveJwt);
-
-    const result = await service.create({
-      type: TokenType.jwt,
-      returnType: TokenCreateReturnType.payload,
-      userId,
-    });
-
-    const [, token] = TypeormMock.entityManager.save.lastCall.args;
-
-    expect(token.access).to.not.empty;
-    expect(result).to.deep.equal({
-      payload: { access: token.access, refresh: token.refresh },
-    });
-  });
-
   it('should correctly create jwt token: cookies', async () => {
     TypeormMock.entityManager.save.callsFake(fakeSaveJwt);
 
@@ -125,8 +98,8 @@ describe('services/methods/create-auth-token', () => {
 
     expect(token.access).to.not.empty;
     expect(result).to.deep.equal({
+      refresh: token.refresh,
       payload: {
-        refresh: token.refresh,
         cookies: [
           {
             action: 'add',

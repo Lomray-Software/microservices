@@ -16,11 +16,11 @@ const identify = Endpoint.custom(
     input: TokenIdentifyInput,
     output: TokenIdentifyOutput,
   }),
-  async ({ returnType, token, payload }) => {
+  async ({ token, payload }) => {
     const jwtOptions = await getJwtOptions();
     const service = new IdentifyAuthToken(getRepository(Token), jwtOptions);
 
-    return service.identify({ returnType, token }, payload?.headers);
+    return service.identify({ token }, payload?.headers);
   },
 );
 

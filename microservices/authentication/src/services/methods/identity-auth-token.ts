@@ -1,6 +1,6 @@
 import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
-import { IsBoolean, IsEnum, IsObject, Length } from 'class-validator';
+import { IsBoolean, IsEnum, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import Cookie from 'cookie';
 import { Repository } from 'typeorm';
@@ -10,33 +10,20 @@ import UnauthorizedCode from '@constants/unauthorized-code';
 import Token from '@entities/token';
 import Jwt from '@services/tokens/jwt';
 
-enum IdentityReturnType {
-  payload = 'payload',
-  directly = 'directly',
-}
-
 class TokenIdentifyInput {
-  @IsEnum(IdentityReturnType)
-  returnType: IdentityReturnType;
-
   @Length(1, 300)
   @IsUndefinable()
   token?: string;
 }
 
 @JSONSchema({
-  description:
-    'Return structure for this method depends on ReturnIdentityType (see input param "type").',
-  examples: [
-    { userId: 'sample-user-id', isAuth: true, provider: 'jwt' },
-    { payload: { userId: null, isAuth: false, provider: null } },
-  ],
+  examples: [{ userId: 'sample-user-id', isAuth: true, provider: 'jwt' }],
 })
 class TokenIdentifyOutput {
   @Length(1, 36)
   @IsNullable()
   @IsUndefinable()
-  userId?: string | null;
+  userId?: string | number | null;
 
   @IsBoolean()
   @IsUndefinable()
@@ -45,12 +32,6 @@ class TokenIdentifyOutput {
   @IsEnum(AuthProviders)
   @IsUndefinable()
   provider?: AuthProviders | null;
-
-  @IsUndefinable()
-  @IsObject()
-  payload?: {
-    authentication: { userId: string | null; isAuth: boolean; provider: AuthProviders | null };
-  };
 }
 
 /**
@@ -155,41 +136,26 @@ class IdentifyAuthToken {
   }
 
   /**
-   * Return identify result
-   * @private
-   */
-  private static returnResponse(
-    type: IdentityReturnType,
-    result: Required<Omit<TokenIdentifyOutput, 'payload'>>,
-  ): TokenIdentifyOutput {
-    if (type === IdentityReturnType.directly) {
-      return result;
-    }
-
-    return { payload: { authentication: result } };
-  }
-
-  /**
    * Identify token
    */
-  async identify(
+  identify(
     params: TokenIdentifyInput,
     headers?: Record<string, any>,
   ): Promise<TokenIdentifyOutput> {
-    const { returnType, token } = params;
+    const { token } = params;
     const authToken =
       token ?? IdentifyAuthToken.getHeaderAuth(headers) ?? IdentifyAuthToken.getCookieAuth(headers);
 
     if (!authToken) {
-      return IdentifyAuthToken.returnResponse(returnType, {
+      return Promise.resolve({
         userId: null,
         isAuth: false,
         provider: null,
       });
     }
 
-    return IdentifyAuthToken.returnResponse(returnType, await this.findToken(authToken));
+    return this.findToken(authToken);
   }
 }
 
-export { IdentifyAuthToken, TokenIdentifyInput, TokenIdentifyOutput, IdentityReturnType };
+export { IdentifyAuthToken, TokenIdentifyInput, TokenIdentifyOutput };

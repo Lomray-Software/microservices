@@ -31,11 +31,10 @@ class TokenRenewInput {
 
 @JSONSchema({
   description:
-    'Return structure for this method depends on ReturnType (see input param "type"). In case with "cookie" return type, you will get only refresh token, because access token will be set on Cookies (it will handle itself).',
+    'Return structure for this method depends on ReturnType (see input param "returnType"). In case with "cookie" return type, you will get only refresh token, because access token will be set on Cookies (it will handle itself).',
   examples: [
     { access: 'access-token', refresh: 'refresh-token' },
-    { payload: { access: 'access-token', refresh: 'refresh-token' } },
-    { payload: { refresh: 'refresh-token-if-type-is-cookies' } },
+    { refresh: 'refresh-token-in-case-with-cookies' },
   ],
 })
 class TokenRenewOutput {
@@ -49,9 +48,7 @@ class TokenRenewOutput {
 
   @IsUndefinable()
   @IsObject()
-  payload?:
-    | { access: string; refresh: string }
-    | { refresh: string; cookies: IMicroserviceResponseCookie[] };
+  payload?: { cookies: IMicroserviceResponseCookie[] };
 }
 
 /**
@@ -129,27 +126,21 @@ class RenewAuthToken {
 
     const result = await this.renewJwtTokens(options);
 
-    switch (returnType) {
-      case TokenCreateReturnType.directly:
-        return result;
-
-      case TokenCreateReturnType.payload:
-        return { payload: result };
-    }
-
-    return {
-      payload: {
-        refresh: result['refresh'],
-        cookies: [
-          {
-            action: 'add',
-            name: 'jwt-access',
-            value: result['access'],
-            options: { httpOnly: true },
+    return returnType === TokenCreateReturnType.cookies
+      ? {
+          refresh: result['refresh'],
+          payload: {
+            cookies: [
+              {
+                action: 'add',
+                name: 'jwt-access',
+                value: result['access'],
+                options: { httpOnly: true },
+              },
+            ],
           },
-        ],
-      },
-    };
+        }
+      : result;
   }
 }
 

@@ -10,7 +10,6 @@ import Personal from '@services/tokens/personal';
 
 enum TokenCreateReturnType {
   cookies = 'cookies',
-  payload = 'payload',
   directly = 'directly',
 }
 
@@ -40,13 +39,11 @@ class TokenCreateInput {
 
 @JSONSchema({
   description:
-    'Return structure for this method depends on ReturnType (see input param "type"). In case with "cookie" return type, you will get only refresh token, because access token will be set on Cookies (it will handle itself).',
+    'Return structure for this method depends on "TokenType" (see input param "type"). In case with "cookie" return type, you will get only refresh token, because access token will be set on Cookies (it will handle itself).',
   examples: [
     { access: 'access-token', refresh: 'refresh-token' },
+    { refresh: 'refresh-token-in-case-with-cookies' },
     { token: 'bearer-token' },
-    { payload: { access: 'access-token', refresh: 'refresh-token' } },
-    { payload: { refresh: 'refresh-token-if-type-is-cookies' } },
-    { payload: { token: 'bearer-token' } },
   ],
 })
 class TokenCreateOutput {
@@ -64,10 +61,7 @@ class TokenCreateOutput {
 
   @IsUndefinable()
   @IsObject()
-  payload?:
-    | { access: string; refresh: string }
-    | { token: string }
-    | { refresh: string; cookies: IMicroserviceResponseCookie[] };
+  payload?: { cookies: IMicroserviceResponseCookie[] };
 }
 
 /**
@@ -161,27 +155,21 @@ class CreateAuthToken {
         ? await this.createJwtTokens(options)
         : await this.createPersonalToken(options);
 
-    switch (returnType) {
-      case TokenCreateReturnType.directly:
-        return result;
-
-      case TokenCreateReturnType.payload:
-        return { payload: result };
-    }
-
-    return {
-      payload: {
-        refresh: result['refresh'],
-        cookies: [
-          {
-            action: 'add',
-            name: 'jwt-access',
-            value: result['access'],
-            options: { httpOnly: true },
+    return returnType === TokenCreateReturnType.cookies
+      ? {
+          refresh: result['refresh'],
+          payload: {
+            cookies: [
+              {
+                action: 'add',
+                name: 'jwt-access',
+                value: result['access'],
+                options: { httpOnly: true },
+              },
+            ],
           },
-        ],
-      },
-    };
+        }
+      : result;
   }
 }
 

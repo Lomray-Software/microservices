@@ -5,10 +5,7 @@ import rewiremock from 'rewiremock';
 import AuthProviders from '@constants/auth-providers';
 import UnauthorizedCode from '@constants/unauthorized-code';
 import Token from '@entities/token';
-import {
-  IdentifyAuthToken as OriginalIdentifyAuthToken,
-  IdentityReturnType,
-} from '@services/methods/identity-auth-token';
+import { IdentifyAuthToken as OriginalIdentifyAuthToken } from '@services/methods/identity-auth-token';
 import Jwt from '@services/tokens/jwt';
 import Personal from '@services/tokens/personal';
 
@@ -64,7 +61,6 @@ describe('services/methods/identify-auth-token', () => {
     const cases = [
       {
         token: personalToken,
-        returnType: IdentityReturnType.directly,
         expectedResult: {
           userId,
           isAuth: true,
@@ -73,21 +69,16 @@ describe('services/methods/identify-auth-token', () => {
       },
       {
         headers: { Authorization: `Bearer ${personalToken}` },
-        returnType: IdentityReturnType.payload,
         expectedResult: {
-          payload: {
-            authentication: {
-              userId,
-              isAuth: true,
-              provider: AuthProviders.personal,
-            },
-          },
+          userId,
+          isAuth: true,
+          provider: AuthProviders.personal,
         },
       },
     ];
 
-    for (const { returnType, expectedResult, token, headers } of cases) {
-      const result = await service.identify({ token, returnType }, headers);
+    for (const { expectedResult, token, headers } of cases) {
+      const result = await service.identify({ token }, headers);
 
       expect(result).to.deep.equal(expectedResult);
     }
@@ -101,7 +92,6 @@ describe('services/methods/identify-auth-token', () => {
     const cases = [
       {
         token: access,
-        returnType: IdentityReturnType.directly,
         expectedResult: {
           userId,
           isAuth: true,
@@ -110,22 +100,16 @@ describe('services/methods/identify-auth-token', () => {
       },
       {
         headers: { Authorization: `Bearer ${access}` },
-        returnType: IdentityReturnType.payload,
         expectedResult: {
-          payload: {
-            authentication: {
-              userId,
-              isAuth: true,
-              provider: AuthProviders.jwt,
-            },
-          },
+          userId,
+          isAuth: true,
+          provider: AuthProviders.jwt,
         },
       },
       {
         headers: {
           cookie: `_octo=GH1.1.410839147.1623154775; _device_id=bd16babbc28b1bd75915ce011104d00c; jwt-access=${access};`,
         },
-        returnType: IdentityReturnType.directly,
         expectedResult: {
           userId,
           isAuth: true,
@@ -134,15 +118,15 @@ describe('services/methods/identify-auth-token', () => {
       },
     ];
 
-    for (const { returnType, expectedResult, token, headers } of cases) {
-      const result = await service.identify({ token, returnType }, headers);
+    for (const { expectedResult, token, headers } of cases) {
+      const result = await service.identify({ token }, headers);
 
       expect(result).to.deep.equal(expectedResult);
     }
   });
 
   it('should correctly return empty response: token not exist', async () => {
-    const result = await service.identify({ returnType: IdentityReturnType.directly });
+    const result = await service.identify({ token: undefined });
 
     expect(result).to.deep.equal({
       userId: null,
@@ -158,7 +142,6 @@ describe('services/methods/identify-auth-token', () => {
 
     const result = service.identify({
       token: Personal.generate(),
-      returnType: IdentityReturnType.directly,
     });
 
     expect(await waitResult(result))
@@ -172,7 +155,6 @@ describe('services/methods/identify-auth-token', () => {
 
     const result = service.identify({
       token: Personal.generate(),
-      returnType: IdentityReturnType.directly,
     });
 
     expect(await waitResult(result))
@@ -187,7 +169,6 @@ describe('services/methods/identify-auth-token', () => {
 
     const result = service.identify({
       token: access,
-      returnType: IdentityReturnType.directly,
     });
 
     expect(await waitResult(result))
