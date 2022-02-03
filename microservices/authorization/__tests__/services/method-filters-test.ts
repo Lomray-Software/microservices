@@ -102,6 +102,9 @@ describe('services/method-filters', () => {
       }),
     ]);
 
+    const datetimeFilled = filters?.and?.[1].datetime;
+
+    expect(datetimeFilled.split('T')[0]).to.equal(new Date().toISOString().split('T')[0]);
     expect(filters).to.deep.equal({
       and: [
         {
@@ -111,7 +114,7 @@ describe('services/method-filters', () => {
           hi: 'world',
           it: null,
           userId: 'string-user-id',
-          datetime: new Date().toISOString(),
+          datetime: datetimeFilled,
         },
       ],
     });
