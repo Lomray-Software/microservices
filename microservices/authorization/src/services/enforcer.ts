@@ -7,7 +7,7 @@ import RolesTree from '@entities/roles-tree';
 import UserRole from '@entities/user-role';
 
 export interface IEnforcerParams {
-  userId?: string | number;
+  userId?: string;
   defaultRole: string;
   userRoleRepository: Repository<UserRole>;
   rolesTreeRepository: Repository<RolesTree>;

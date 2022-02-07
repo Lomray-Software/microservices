@@ -1,9 +1,4 @@
-import {
-  Endpoint,
-  IJsonQueryWhereFilter,
-  IsType,
-  IsUndefinable,
-} from '@lomray/microservice-helpers';
+import { Endpoint, IJsonQueryWhereFilter, IsUndefinable } from '@lomray/microservice-helpers';
 import type { IJsonQueryWhere } from '@lomray/typeorm-json-query';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsObject, IsString } from 'class-validator';
@@ -13,8 +8,8 @@ import { FilterType } from '@services/fields-filter';
 
 class EndpointEnforceInput {
   @IsUndefinable()
-  @IsType(['string', 'number'])
-  userId?: string | number;
+  @IsString()
+  userId?: string;
 
   @IsString()
   method: string;

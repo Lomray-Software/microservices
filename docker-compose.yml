@@ -35,3 +35,15 @@ services:
 #    container_name: authentication
 #    depends_on:
 #      - configuration
+
+#  authorization:
+#    image: ghcr.io/lomray-software/microservices/authorization:latest-staging
+#    container_name: authorization
+#    depends_on:
+#      - configuration
+
+#  users:
+#    image: ghcr.io/lomray-software/microservices/users:latest-staging
+#    container_name: users
+#    depends_on:
+#      - configuration

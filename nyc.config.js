@@ -5,6 +5,7 @@ module.exports = {
   ],
   exclude: [
     '**/src/interfaces',
+    '**/services/external/api.ts',
     'template'
   ],
   all: true,

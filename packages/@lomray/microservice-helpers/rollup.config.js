@@ -15,7 +15,7 @@ export default {
     preserveModulesRoot: 'src',
     exports: 'auto',
   },
-  external: ['rewiremock', 'sinon', 'winston'],
+  external: ['rewiremock', 'sinon', 'winston', 'firebase-admin'],
   plugins: [
     peerDepsExternal(),
     json(),

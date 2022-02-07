@@ -20,7 +20,7 @@ interface IFieldCondition {
 }
 
 export interface IRolePermissions {
-  [roleAliasOrUserId: string | number]: FieldPolicy | IFieldCondition;
+  [roleAliasOrUserId: string]: FieldPolicy | IFieldCondition;
 }
 
 export interface IModelSchema {

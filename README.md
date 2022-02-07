@@ -11,7 +11,7 @@
  - [Configuration](microservices/configuration)
  - [Authentication](microservices/authentication)
  - [Authorization](microservices/authorization)
- - Users (in progress)
+ - [Users](microservices/users)
  
 Use `npm run create-microservice name` for create new microservice from template.
 
@@ -33,3 +33,8 @@ curl -X POST http://127.0.0.1:3000
    -H 'Content-Type: application/json'
    -d '{"id":"unique-id-1","method":"microservice-name.method","params":{}}'
 ```
+
+## TODO
+- [ ] Add complete example
+- [ ] Add api service generator (backend) (generate api service for microservices based on metadata endpoint)
+- [ ] Add api service generator (frontend)

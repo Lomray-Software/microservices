@@ -12,4 +12,6 @@ export { default as Log } from '@services/log';
 
 export { default as RemoteConfig } from '@services/remote-config';
 
+export { default as FirebaseSdk } from '@services/firebase-sdk';
+
 export * from '@entities/ijson-query-filter';

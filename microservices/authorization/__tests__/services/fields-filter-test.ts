@@ -4,7 +4,7 @@ import Model, { FieldPolicy } from '@entities/model';
 import FieldsFilter, { FilterType } from '@services/fields-filter';
 
 describe('services/fields-filter', () => {
-  const userId = 1;
+  const userId = 'user-id-1';
   const userRoles = ['users', 'guests']; // order matters
   const modelRepository = TypeormMock.entityManager.getRepository(Model);
   const service = FieldsFilter.init({
@@ -92,9 +92,9 @@ describe('services/fields-filter', () => {
     });
     const cases = [
       { userId, userRoles, type: FilterType.IN, result: input },
-      { userId: 5, userRoles, type: FilterType.IN, result: {} },
-      { userId: 1, userRoles: ['guests'], type: FilterType.IN, result: {} },
-      { userId: 0, userRoles: ['guests'], type: FilterType.OUT, result: input },
+      { userId: '5', userRoles, type: FilterType.IN, result: {} },
+      { userId: '1', userRoles: ['guests'], type: FilterType.IN, result: {} },
+      { userId: 'user-0', userRoles: ['guests'], type: FilterType.OUT, result: input },
     ] as const;
 
     for (const testCase of cases) {
@@ -219,7 +219,7 @@ describe('services/fields-filter', () => {
 
   it('should correctly filter field: field empty template', async () => {
     const input = {
-      userId: 100,
+      userId: 'user-100',
     };
     const model = modelRepository.create({
       alias: 'inputTest',

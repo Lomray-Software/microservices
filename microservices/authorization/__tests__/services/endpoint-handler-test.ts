@@ -23,7 +23,7 @@ describe('services/endpoint-handler', () => {
   const microservice = 'demo';
   const methodPath = 'run.something';
   const methodName = [microservice, methodPath].join('.');
-  const userId = 1;
+  const userId = 'user-id-1';
   const service = EndpointHandler.init(methodName, {
     userId,
     hasFilters: true,

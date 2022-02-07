@@ -6,7 +6,7 @@ import Role from '@entities/role';
 class UserRole {
   @PrimaryColumn({ type: 'varchar', length: 36 })
   @Length(1, 36)
-  userId: number | string;
+  userId: string;
 
   @PrimaryColumn({ type: 'varchar', length: 30 })
   @Length(3, 30)

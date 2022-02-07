@@ -13,7 +13,7 @@ export interface IEndpointHandlerParams {
   hasFilters: boolean;
   hasFilterInput: boolean;
   hasFilterOutput: boolean;
-  userId?: string | number;
+  userId?: string;
 }
 
 class EndpointHandler {

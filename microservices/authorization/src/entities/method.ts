@@ -37,7 +37,7 @@ class Method {
   @Column({ type: 'text', array: true, default: {} })
   @IsArray()
   @IsUndefinable()
-  allowGroup: (string | number)[];
+  allowGroup: string[];
 
   @JSONSchema({
     description: 'List of roles or userId who cannot access to this method.',
@@ -46,7 +46,7 @@ class Method {
   @Column({ type: 'text', array: true, default: {} })
   @IsArray()
   @IsUndefinable()
-  denyGroup: (string | number)[];
+  denyGroup: string[];
 
   @Column({ type: 'integer', nullable: true, default: null })
   @IsNumber()

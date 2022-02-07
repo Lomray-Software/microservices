@@ -9,7 +9,7 @@ import Enforcer from '@services/enforcer';
 
 describe('services/enforcer', () => {
   const sandbox = sinon.createSandbox();
-  const userId = 1;
+  const userId = 'user-id';
   const methodRepository = TypeormMock.entityManager.getRepository(Method);
   const userRoleRepository = TypeormMock.entityManager.getRepository(UserRole);
   const rolesTreeRepository = TypeormMock.entityManager.getRepository(RolesTree);
@@ -112,14 +112,14 @@ describe('services/enforcer', () => {
       userRoleRepository,
       rolesTreeRepository,
       defaultRole: 'user',
-      userId: 123,
+      userId: '123',
     });
 
     const result = await localService.findUserRoles();
 
     expect(result).to.deep.equal({
       roles: ['user'],
-      userId: 123,
+      userId: '123',
     });
   });
 });

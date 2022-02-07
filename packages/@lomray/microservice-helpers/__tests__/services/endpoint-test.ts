@@ -29,7 +29,7 @@ describe('services/endpoint', () => {
   const entity = { id: 1, param: 'test' };
   const repository = TypeormMock.entityManager.getRepository(TestEntity);
   const emptyConditionMessage = 'condition is empty';
-  const entityNotFoundMessage = 'entity not found';
+  const entityNotFoundMessage = 'Entity not found';
 
   beforeEach(() => {
     TypeormMock.sandbox.reset();
@@ -283,7 +283,7 @@ describe('services/endpoint', () => {
         isAllowMultiple: false,
       });
 
-      expect(await waitResult(result)).to.throw('Error: you can create');
+      expect(await waitResult(result)).to.throw('You can create');
     });
 
     it('handler - should throw error if entity not valid: validation failed', async () => {
@@ -951,7 +951,7 @@ describe('services/endpoint', () => {
 
       const result = customHandler(params, endpointOptions);
 
-      expect(await waitResult(result)).to.throw('invalid request params');
+      expect(await waitResult(result)).to.throw('Invalid request params');
     });
 
     it('should run default handler metadata: custom with query', () => {
@@ -1008,7 +1008,7 @@ describe('services/endpoint', () => {
 
       const result = customHandler(params, endpointOptions);
 
-      expect(await waitResult(result)).to.throw('invalid request params');
+      expect(await waitResult(result)).to.throw('Invalid request params');
     });
 
     it('should return custom handler metadata', () => {

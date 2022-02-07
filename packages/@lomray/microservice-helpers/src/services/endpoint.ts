@@ -460,7 +460,7 @@ const createDefaultHandler = async <TEntity, TResult>({
     throw new BaseException({
       code: CRUD_EXCEPTION_CODE.MULTIPLE_INSERT_FORBIDDEN,
       status: 422,
-      message: 'Error: you can create only one entity at a time.',
+      message: 'You can create only one entity at a time.',
     });
   }
 
@@ -475,11 +475,11 @@ const createDefaultHandler = async <TEntity, TResult>({
     entityErrors.map(({ value, property, constraints }) => ({ value, property, constraints })),
   );
 
-  if (errors[0].length > 0) {
+  if (errors.some((entityErrors) => entityErrors.length > 0)) {
     throw new BaseException({
       code: CRUD_EXCEPTION_CODE.VALIDATION_FAILED,
       status: 422,
-      message: 'Error: validation failed for one or more entities.',
+      message: 'Validation failed for one or more entities.',
       payload: isArray ? errors : errors[0],
     });
   }
@@ -495,7 +495,7 @@ const createDefaultHandler = async <TEntity, TResult>({
 
     if (message.includes('duplicate key')) {
       payload = { original: message, detail };
-      message = 'Error: this entry already exists.';
+      message = 'This entity already exists.';
     }
 
     throw new BaseException({
@@ -517,7 +517,7 @@ const viewDefaultHandler = async <TEntity>(
     throw new BaseException({
       code: CRUD_EXCEPTION_CODE.VALIDATION_FAILED,
       status: 422,
-      message: 'Error: entity view condition is empty.',
+      message: 'Entity view condition is empty.',
     });
   }
 
@@ -528,7 +528,7 @@ const viewDefaultHandler = async <TEntity>(
     throw new BaseException({
       code: CRUD_EXCEPTION_CODE.VALIDATION_FAILED,
       status: 422,
-      message: 'Error: entity condition invalid.',
+      message: 'Entity condition invalid.',
       payload: { count: targets.length },
     });
   }
@@ -537,7 +537,7 @@ const viewDefaultHandler = async <TEntity>(
     throw new BaseException({
       code: CRUD_EXCEPTION_CODE.ENTITY_NOT_FOUND,
       status: 404,
-      message: 'Error: entity not found.',
+      message: 'Entity not found.',
     });
   }
 
@@ -559,7 +559,7 @@ const updateDefaultHandler = async <TEntity>(
     throw new BaseException({
       code: CRUD_EXCEPTION_CODE.VALIDATION_FAILED,
       status: 422,
-      message: 'Error: validation failed for entity, empty fields.',
+      message: 'Validation failed for entity, empty fields.',
     });
   }
 
@@ -573,7 +573,7 @@ const updateDefaultHandler = async <TEntity>(
     throw new BaseException({
       code: CRUD_EXCEPTION_CODE.VALIDATION_FAILED,
       status: 422,
-      message: 'Error: validation failed for entity, invalid fields.',
+      message: 'Validation failed for entity, invalid fields.',
       payload: errors,
     });
   }
@@ -604,7 +604,7 @@ const removeDefaultHandler = async <TEntity>(
     throw new BaseException({
       code: CRUD_EXCEPTION_CODE.VALIDATION_FAILED,
       status: 422,
-      message: 'Error: entity remove condition is empty.',
+      message: 'Entity remove condition is empty.',
     });
   }
 
@@ -619,7 +619,7 @@ const removeDefaultHandler = async <TEntity>(
       throw new BaseException({
         code: CRUD_EXCEPTION_CODE.ENTITY_NOT_FOUND,
         status: 404,
-        message: 'Error: entity not found.',
+        message: 'Entity not found.',
       });
     }
 
@@ -627,7 +627,7 @@ const removeDefaultHandler = async <TEntity>(
       throw new BaseException({
         code: CRUD_EXCEPTION_CODE.VALIDATION_FAILED,
         status: 422,
-        message: 'Error: you can remove only one entity at a time.',
+        message: 'You can remove only one entity at a time.',
       });
     }
 
@@ -673,7 +673,7 @@ const restoreDefaultHandler = async <TEntity>(
     throw new BaseException({
       code: CRUD_EXCEPTION_CODE.VALIDATION_FAILED,
       status: 422,
-      message: 'Error: entity restore condition is empty.',
+      message: 'Entity restore condition is empty.',
     });
   }
 
@@ -684,7 +684,7 @@ const restoreDefaultHandler = async <TEntity>(
       throw new BaseException({
         code: CRUD_EXCEPTION_CODE.ENTITY_NOT_FOUND,
         status: 404,
-        message: 'Error: entity not found for restore.',
+        message: 'Entity not found for restore.',
       });
     }
 
@@ -692,7 +692,7 @@ const restoreDefaultHandler = async <TEntity>(
       throw new BaseException({
         code: CRUD_EXCEPTION_CODE.VALIDATION_FAILED,
         status: 422,
-        message: 'Error: you can restore only one entity at a time.',
+        message: 'You can restore only one entity at a time.',
       });
     }
 
@@ -1246,7 +1246,7 @@ class Endpoint {
           throw new BaseException({
             code: CRUD_EXCEPTION_CODE.VALIDATION_FAILED,
             status: 422,
-            message: 'Error: invalid request params.',
+            message: 'Invalid request params.',
             payload: errors,
           });
         }
@@ -1281,7 +1281,7 @@ class Endpoint {
           throw new BaseException({
             code: CRUD_EXCEPTION_CODE.VALIDATION_FAILED,
             status: 422,
-            message: 'Error: invalid request params.',
+            message: 'Invalid request params.',
             payload: errors,
           });
         }

@@ -8,7 +8,7 @@ export enum FilterType {
 }
 
 export interface IFieldsFilter {
-  userId?: string | number;
+  userId?: string;
   userRoles: string[];
   modelRepository: Repository<Model>;
 }
