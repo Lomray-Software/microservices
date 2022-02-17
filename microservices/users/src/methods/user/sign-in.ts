@@ -26,7 +26,7 @@ class SignInOutput {
  * Sign in user
  */
 const signIn = Endpoint.custom(
-  () => ({ input: SignInInput, output: SignInOutput }),
+  () => ({ input: SignInInput, output: SignInOutput, description: 'Sign in user' }),
   async ({ login, password }) => {
     const service = SignIn.init({
       login,

@@ -4,7 +4,7 @@ import { Endpoint, MicroserviceMeta, MicroserviceMetaOutput } from '@lomray/micr
  * Get microservice metadata
  */
 const meta = Endpoint.custom(
-  () => ({ output: MicroserviceMetaOutput }),
+  () => ({ output: MicroserviceMetaOutput, description: 'Get microservice metadata' }),
   (_, { app }) => MicroserviceMeta.getMeta(app.getEndpoints()),
 );
 

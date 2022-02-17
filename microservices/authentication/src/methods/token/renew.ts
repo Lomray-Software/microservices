@@ -15,6 +15,7 @@ const renew = Endpoint.custom(
   () => ({
     input: TokenRenewInput,
     output: TokenRenewOutput,
+    description: 'Renew authentication token',
   }),
   async (params) => {
     const jwtOptions = await getJwtOptions();

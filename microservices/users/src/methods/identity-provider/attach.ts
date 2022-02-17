@@ -37,7 +37,11 @@ class IdentityProviderAttachOutput {
  * Attach new identity provider to existing user
  */
 const attach = Endpoint.custom(
-  () => ({ input: IdentityProviderAttachInput, output: IdentityProviderAttachOutput }),
+  () => ({
+    input: IdentityProviderAttachInput,
+    output: IdentityProviderAttachOutput,
+    description: 'Attach new identity provider to existing user',
+  }),
   async ({ userId, provider, token, params }) => {
     const service = Factory.create(provider, token, getManager());
 

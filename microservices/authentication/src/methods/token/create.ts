@@ -15,6 +15,7 @@ const create = Endpoint.custom(
   () => ({
     input: TokenCreateInput,
     output: TokenCreateOutput,
+    description: 'Create authentication token',
   }),
   async (params) => {
     const jwtOptions = await getJwtOptions();

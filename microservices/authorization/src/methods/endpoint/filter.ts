@@ -32,6 +32,7 @@ const filter = Endpoint.custom(
   () => ({
     input: EndpointFilterInput,
     output: EndpointFilterOutput,
+    description: 'Filter input/output endpoint params',
   }),
   async ({ userId, method, type, filterInput }) => {
     const hasFilterInput = type === FilterType.IN;

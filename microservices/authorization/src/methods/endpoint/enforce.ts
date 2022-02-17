@@ -57,6 +57,7 @@ const enforce = Endpoint.custom(
   () => ({
     input: EndpointEnforceInput,
     output: EndpointEnforceOutput,
+    description: 'Check access user to microservice method',
   }),
   async ({ userId, method, filterInput, shouldThrowError = true, hasFilters = true }) => {
     const hasFilterInput = Boolean(filterInput);

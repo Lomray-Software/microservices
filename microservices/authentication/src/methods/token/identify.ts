@@ -15,6 +15,7 @@ const identify = Endpoint.custom(
   () => ({
     input: TokenIdentifyInput,
     output: TokenIdentifyOutput,
+    description: 'Identify authentication token',
   }),
   async ({ token, payload }) => {
     const jwtOptions = await getJwtOptions();

@@ -735,10 +735,16 @@ const withMeta = <TFunc>(
      * If default input/output - get class name & class params
      * If custom input/output - get class name
      *
-     * Default: [ClassName, { fields: repository.target }] - this need helps make doc relations and other..
+     * Default: [ClassName, { fields: repository.target }] - this helps understand relations
      * Custom: [ClassName, null] - make doc automatically because it's custom defined class
      *
-     * If output === null - set repository target class name
+     * Example:
+     * List endpoint:
+     *  - Input: [ListRequestParams, null]
+     *  - Output: [ListOutputParams, { list: [EntityClassName] }]
+     * Create endpoint:
+     *  - Input: [CreateRequestParams, { fields: EntityClassName }]
+     *  - Output: [EntityClassName, null]
      */
     getMeta: () => {
       const { repository, description, input, output } = Object.assign(getOptions(), defaults);
@@ -756,6 +762,7 @@ const withMeta = <TFunc>(
         inputParams,
       ];
       const resOutput: ReturnType<IWithEndpointMeta['getMeta']>['output'] = [
+        // If output.name not exist - try to set repository target class name
         typeof output === 'string' ? output : output?.name ?? repository?.metadata.name,
         outputParams,
       ];
@@ -771,7 +778,7 @@ const withMeta = <TFunc>(
 
 /**
  * Class with helpers for create endpoint handlers
- * It's provide easily manage endpoints meta, validation params and etc.
+ * It's provide easily manage endpoints meta, validation params etc.
  */
 class Endpoint {
   static defaultHandler = {
