@@ -241,11 +241,14 @@ type IRestoreLazyResult<TEntity> =
   | SelectQueryBuilder<TEntity>
   | RestoreOutputParams<TEntity>;
 
+type EndpointDescription = ((entityName?: string) => string) | string;
+
 interface ICrudParams<TEntity, TParams = ObjectLiteral, TResult = ObjectLiteral> {
   repository: Repository<TEntity>;
   queryOptions?: Partial<ITypeormJsonQueryOptions>;
   input?: EntityTarget<TParams> | TParams;
   output?: EntityTarget<TResult> | TResult;
+  description?: EndpointDescription;
 }
 
 interface ICountParams<TEntity, TParams, TResult> extends ICrudParams<TEntity, TParams, TResult> {}
@@ -280,6 +283,7 @@ interface ICustomWithQueryParams<TEntity, TParams = ObjectLiteral, TResult = Obj
 interface ICustomParams<TParams = ObjectLiteral, TResult = ObjectLiteral> {
   input?: ICrudParams<never, TParams, TResult>['input'];
   output: ICrudParams<never, TParams, TResult>['output'];
+  description?: EndpointDescription;
 }
 
 interface IReturn<TEntity, TParams, TPayload, TResult>
@@ -355,12 +359,20 @@ interface IControllerReturn<TEntity> {
 interface IEndpointMeta<TInput = ObjectLiteral, TOutput = ObjectLiteral> {
   input?: ICrudParams<any, TInput, TOutput>['input'];
   output?: ICrudParams<any, TInput, TOutput>['output'];
+  description?: EndpointDescription;
+}
+
+interface IEndpointMetaDefault<TInput = ObjectLiteral, TOutput = ObjectLiteral> {
+  input: IEndpointMeta<TInput, TOutput>['input'];
+  output: IEndpointMeta<TInput, TOutput>['output'];
+  description?: EndpointDescription;
 }
 
 export interface IWithEndpointMeta {
   getMeta: () => {
     input: [string | undefined, ObjectLiteral | undefined];
     output: [string | undefined, ObjectLiteral | undefined];
+    description?: string;
   };
 }
 
@@ -716,7 +728,7 @@ interface IParamsConstructor {
 const withMeta = <TFunc>(
   handler: TFunc,
   getOptions: TOptions<{ repository?: Repository<any> } & IEndpointMeta>,
-  defaults?: Required<IEndpointMeta<IParamsConstructor, IParamsConstructor | null>>,
+  defaults?: IEndpointMetaDefault<IParamsConstructor, IParamsConstructor | null>,
 ): TFunc & IWithEndpointMeta =>
   Object.assign(handler, {
     /**
@@ -724,12 +736,12 @@ const withMeta = <TFunc>(
      * If custom input/output - get class name
      *
      * Default: [ClassName, { fields: repository.target }] - this need helps make doc relations and other..
-     * Custom: [ClassName, null] - make doc automatically because it custom defined class
+     * Custom: [ClassName, null] - make doc automatically because it's custom defined class
      *
      * If output === null - set repository target class name
      */
     getMeta: () => {
-      const { repository, input, output } = Object.assign(getOptions(), defaults);
+      const { repository, description, input, output } = Object.assign(getOptions(), defaults);
       const inputParams =
         typeof input === 'function' && input === defaults?.input
           ? new input(repository)
@@ -751,6 +763,8 @@ const withMeta = <TFunc>(
       return {
         input: resInput,
         output: resOutput,
+        description:
+          typeof description === 'function' ? description(repository?.metadata.name) : description,
       };
     },
   });
@@ -774,30 +788,37 @@ class Endpoint {
     count: {
       input: CountRequestParams,
       output: CountOutputParams,
+      description: (name = 'entities'): string => `Returns count of ${name} by given condition`,
     },
     list: {
       input: ListRequestParams,
       output: ListOutputParams,
+      description: (name = 'entities'): string => `Returns list of ${name} by given condition`,
     },
     view: {
       input: ViewRequestParams,
       output: null,
+      description: (name = 'entity'): string => `Returns ${name} by given condition`,
     },
     create: {
       input: CreateRequestParams,
       output: null,
+      description: (name = 'entity'): string => `Create a new ${name}`,
     },
     update: {
       input: UpdateRequestParams,
       output: null,
+      description: (name = 'entity'): string => `Update ${name} by given condition`,
     },
     remove: {
       input: RemoveRequestParams,
       output: RemoveOutputParams,
+      description: (name = 'entity'): string => `Remove ${name} by given condition`,
     },
     restore: {
       input: RestoreRequestParams,
       output: RestoreOutputParams,
+      description: (name = 'entity'): string => `Restore ${name} by given condition`,
     },
   };
 
@@ -851,10 +872,7 @@ class Endpoint {
   > {
     const countHandler: IReturn<TEntity, TParams, TPayload, CountOutputParams | TResult> =
       async function (params, options) {
-        const { repository, queryOptions } = Object.assign(
-          countOptions(),
-          Endpoint.defaultParams.count,
-        );
+        const { repository, queryOptions } = countOptions();
         const typeQuery = createTypeQuery(repository.createQueryBuilder(), params, {
           ...queryOptions,
           isDisableOrderBy: true,
@@ -904,11 +922,7 @@ class Endpoint {
   ): IReturnWithMeta<TEntity, TParams, TPayload, ListOutputParams<TEntity> | TResult> {
     const listHandler: IReturn<TEntity, TParams, TPayload, ListOutputParams<TEntity> | TResult> =
       async function (params, options) {
-        const {
-          repository,
-          queryOptions,
-          isListWithCount = true,
-        } = Object.assign(listOptions(), Endpoint.defaultParams.list);
+        const { repository, queryOptions, isListWithCount = true } = listOptions();
         const typeQuery = createTypeQuery(repository.createQueryBuilder(), params, queryOptions);
         const result = await handler(typeQuery, params, options);
         const { hasRemoved } = params;
@@ -966,10 +980,7 @@ class Endpoint {
       params,
       options,
     ) {
-      const { repository, queryOptions } = Object.assign(
-        viewOptions(),
-        Endpoint.defaultParams.view,
-      );
+      const { repository, queryOptions } = viewOptions();
       const typeQuery = createTypeQuery(repository.createQueryBuilder(), params, {
         ...queryOptions,
         isDisableOrderBy: true,
@@ -1015,10 +1026,7 @@ class Endpoint {
       TPayload,
       ICreateLazyResult<TEntity, TResult>
     > = (params, options) => {
-      const { repository, isAllowMultiple } = Object.assign(
-        createOptions(),
-        Endpoint.defaultParams.create,
-      );
+      const { repository, isAllowMultiple } = createOptions();
       const { fields } = params ?? {};
 
       if (handler) {
@@ -1047,10 +1055,7 @@ class Endpoint {
       params,
       options,
     ) {
-      const { repository, queryOptions } = Object.assign(
-        updateOptions(),
-        Endpoint.defaultParams.update,
-      );
+      const { repository, queryOptions } = updateOptions();
       const typeQuery = createTypeQuery(repository.createQueryBuilder(), params, {
         ...queryOptions,
         isDisableRelations: true,
@@ -1135,7 +1140,7 @@ class Endpoint {
         isAllowMultiple = true,
         isSoftDelete = false,
         queryOptions,
-      } = Object.assign(removeOptions(), Endpoint.defaultParams.remove);
+      } = removeOptions();
       const typeQuery = createTypeQuery(repository.createQueryBuilder(), params, {
         ...queryOptions,
         isDisableRelations: true,
@@ -1189,11 +1194,7 @@ class Endpoint {
       TPayload,
       RestoreOutputParams<TEntity> | TResult
     > = async function (params, options) {
-      const {
-        repository,
-        isAllowMultiple = true,
-        queryOptions,
-      } = Object.assign(restoreOptions(), Endpoint.defaultParams.restore);
+      const { repository, isAllowMultiple = true, queryOptions } = restoreOptions();
       const typeQuery = createTypeQuery(repository.createQueryBuilder(), params, {
         ...queryOptions,
         isDisableRelations: true,

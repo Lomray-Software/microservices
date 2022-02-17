@@ -132,6 +132,7 @@ describe('services/endpoint', () => {
           Endpoint.defaultParams.count.output.name,
           new Endpoint.defaultParams.count.output(),
         ],
+        description: 'Returns count of TestEntity by given condition',
       });
     });
   });
@@ -236,6 +237,7 @@ describe('services/endpoint', () => {
           Endpoint.defaultParams.list.output.name,
           new Endpoint.defaultParams.list.output(repository),
         ],
+        description: 'Returns list of TestEntity by given condition',
       });
     });
   });
@@ -293,7 +295,7 @@ describe('services/endpoint', () => {
           repository,
         });
 
-        expect(1).to.be.equal(shouldNotCall);
+        expect(shouldNotCall).to.be.undefined;
       } catch (e) {
         expect(e.payload.length).to.equal(1);
         expect(e.payload[0].property).to.equal('param');
@@ -339,7 +341,7 @@ describe('services/endpoint', () => {
           isAllowMultiple: true,
         });
 
-        expect(1).to.be.equal(shouldNotCall);
+        expect(shouldNotCall).to.be.undefined;
       } catch (e) {
         expect(e.payload.length).to.equal(2);
         expect(e.payload[0][0].property).to.equal('param');
@@ -377,6 +379,7 @@ describe('services/endpoint', () => {
           new Endpoint.defaultParams.create.input(repository),
         ],
         output: [TestEntity.name, undefined],
+        description: 'Create a new TestEntity',
       });
     });
   });
@@ -460,6 +463,7 @@ describe('services/endpoint', () => {
       expect(viewDefaultHandler.getMeta()).to.deep.equal({
         input: [Endpoint.defaultParams.view.input.name, new Endpoint.defaultParams.view.input()],
         output: [TestEntity.name, undefined],
+        description: 'Returns TestEntity by given condition',
       });
     });
   });
@@ -596,7 +600,7 @@ describe('services/endpoint', () => {
           repository,
         );
 
-        expect(1).to.be.equal(shouldNotCall);
+        expect(shouldNotCall).to.be.undefined;
       } catch (e) {
         expect(e.payload.length).to.equal(1);
         expect(e.payload[0].property).to.equal('asd');
@@ -639,6 +643,7 @@ describe('services/endpoint', () => {
           new Endpoint.defaultParams.update.input(repository),
         ],
         output: [TestEntity.name, undefined],
+        description: 'Update TestEntity by given condition',
       });
     });
   });
@@ -780,6 +785,7 @@ describe('services/endpoint', () => {
           Endpoint.defaultParams.remove.output.name,
           new Endpoint.defaultParams.remove.output(repository),
         ],
+        description: 'Remove TestEntity by given condition',
       });
     });
   });
@@ -902,6 +908,7 @@ describe('services/endpoint', () => {
           Endpoint.defaultParams.restore.output.name,
           new Endpoint.defaultParams.restore.output(repository),
         ],
+        description: 'Restore TestEntity by given condition',
       });
     });
   });
@@ -963,6 +970,7 @@ describe('services/endpoint', () => {
       expect(customWithQueryDefaultHandler.getMeta()).to.deep.equal({
         input: [TestEntity.name, undefined],
         output: [TestEntity.name, undefined],
+        description: undefined,
       });
     });
   });
@@ -1012,14 +1020,16 @@ describe('services/endpoint', () => {
     });
 
     it('should return custom handler metadata', () => {
+      const description = 'custom description for endpoint';
       const customHandler = Endpoint.custom(
-        () => ({ output: {}, input: TestEntity }),
+        () => ({ output: {}, input: TestEntity, description }),
         sandbox.stub(),
       );
 
       expect(customHandler.getMeta()).to.deep.equal({
         input: [TestEntity.name, undefined],
         output: [undefined, undefined],
+        description,
       });
     });
   });

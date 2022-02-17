@@ -18,6 +18,7 @@ describe('services/microservice-meta', () => {
   handlerWithMeta.getMeta = () => ({
     input: ['TestName', undefined],
     output: [EndpointsTestEntity.name, { param: 1 }],
+    description: 'description',
   });
 
   ms.addEndpoint('test-endpoint', handlerWithoutMeta);
@@ -31,6 +32,7 @@ describe('services/microservice-meta', () => {
         options: { isDisableMiddlewares: false, isPrivate: false },
         input: undefined,
         output: undefined,
+        description: undefined,
       },
       'test-endpoint-with-meta': {
         options: { isDisableMiddlewares: false, isPrivate: true },
@@ -41,6 +43,7 @@ describe('services/microservice-meta', () => {
             param: 1,
           },
         ],
+        description: 'description',
       },
     });
     expect(res.entities).to.deep.contains({

@@ -35,5 +35,5 @@ export default (ms: Microservice): void => {
   /**
    * Microservice metadata endpoint
    */
-  ms.addEndpoint('meta', MetaEndpoint, { isDisableMiddlewares: true, isPrivate: true });
+  ms.addEndpoint('meta', MetaEndpoint, { isDisableMiddlewares: true, isPrivate: false });
 };

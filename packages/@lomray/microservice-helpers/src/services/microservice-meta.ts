@@ -13,6 +13,7 @@ interface IMicroserviceMeta {
       options: IEndpointHandlerOptions;
       input: ReturnType<IWithEndpointMeta['getMeta']>['input'];
       output: ReturnType<IWithEndpointMeta['getMeta']>['output'];
+      description?: string;
     };
   };
   entities: Record<string, SchemaObject>;
@@ -66,7 +67,8 @@ class MicroserviceMeta {
   public static getMeta(msEndpoints: IEndpoints): IMicroserviceMeta {
     const entities = MicroserviceMeta.getEntitiesMeta();
     const endpoints = Object.entries(msEndpoints).reduce((res, [path, { handler, options }]) => {
-      const { input, output } = (handler as unknown as IWithEndpointMeta).getMeta?.() ?? {};
+      const { input, output, description } =
+        (handler as unknown as IWithEndpointMeta).getMeta?.() ?? {};
 
       return {
         ...res,
@@ -74,6 +76,7 @@ class MicroserviceMeta {
           options,
           input,
           output,
+          description,
         },
       };
     }, {});
