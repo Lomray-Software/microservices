@@ -1,5 +1,5 @@
 import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, Length, IsNumber, IsArray } from 'class-validator';
+import { Allow, Length, IsNumber, IsArray, IsString } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -29,6 +29,11 @@ class Method {
   @Column({ type: 'varchar', length: 100 })
   @Length(5, 100)
   method: string;
+
+  @Column({ type: 'varchar', length: 255, default: '' })
+  @IsString()
+  @IsUndefinable()
+  description: string;
 
   @JSONSchema({
     description: 'List of roles or userId who can be access to this method.',

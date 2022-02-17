@@ -24,7 +24,7 @@ describe('methods/confirm-code/send', () => {
     // @ts-ignore
     const res = Send({}, endpointOptions);
 
-    expect(await waitResult(res)).to.throw('invalid request params');
+    expect(await waitResult(res)).to.throw('Invalid request params');
   });
 
   it('should correctly end confirmation code', async () => {

@@ -25,7 +25,7 @@ describe('methods/user/change-password', () => {
     // @ts-ignore
     const res = ChangePassword({}, endpointOptions);
 
-    expect(await waitResult(res)).to.throw('invalid request params');
+    expect(await waitResult(res)).to.throw('Invalid request params');
   });
 
   it('should correctly change password', async () => {

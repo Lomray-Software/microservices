@@ -70,6 +70,7 @@ describe('gateway', () => {
     await start({
       msOptions: microserviceOptions,
       msParams: microserviceParams,
+      isDisableRemoteMiddleware: true,
     });
 
     logSpy.restore();

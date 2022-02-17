@@ -27,7 +27,7 @@ describe('methods/endpoint/enforce', () => {
     // @ts-ignore
     const res = Enforce({}, endpointOptions);
 
-    expect(await waitResult(res)).to.throw('invalid request params');
+    expect(await waitResult(res)).to.throw('Invalid request params');
   });
 
   it('should return enforce check', async () => {

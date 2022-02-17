@@ -33,7 +33,7 @@ describe('methods/token/renew', () => {
     // @ts-ignore
     const result = method({}, endpointOptions);
 
-    expect(await waitResult(result)).to.throw('invalid request params');
+    expect(await waitResult(result)).to.throw('Invalid request params');
   });
 
   it('should correct renew tokens', async () => {

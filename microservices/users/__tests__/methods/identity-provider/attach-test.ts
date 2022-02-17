@@ -26,7 +26,7 @@ describe('methods/identity-provider/attach', () => {
     // @ts-ignore
     const res = Attach({}, endpointOptions);
 
-    expect(await waitResult(res)).to.throw('invalid request params');
+    expect(await waitResult(res)).to.throw('Invalid request params');
   });
 
   it('should correctly attach identity provider to user', async () => {

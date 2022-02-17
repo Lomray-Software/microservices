@@ -26,7 +26,7 @@ describe('methods/user/sign-up', () => {
     // @ts-ignore
     const res = SignUp({}, endpointOptions);
 
-    expect(await waitResult(res)).to.throw('invalid request params');
+    expect(await waitResult(res)).to.throw('Invalid request params');
   });
 
   it('should correctly sign up', async () => {
