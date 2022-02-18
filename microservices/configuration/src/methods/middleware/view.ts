@@ -3,10 +3,10 @@ import { getRepository } from 'typeorm';
 import Middleware from '@entities/middleware';
 
 /**
- * CRUD controller for middleware entity
+ * Get middleware
  */
-const crud = Endpoint.controller(() => getRepository(Middleware), {
-  restore: false,
-});
+const view = Endpoint.view(() => ({
+  repository: getRepository(Middleware),
+}));
 
-export default crud;
+export default view;

@@ -1,32 +1,49 @@
 import type { Microservice } from '@lomray/microservice-nodejs-lib';
-import ConfigCount from '@methods/config/count';
-import ConfigCreate from '@methods/config/create';
-import ConfigList from '@methods/config/list';
-import ConfigRemove from '@methods/config/remove';
-import ConfigView from '@methods/config/view';
+import CrudConfig from '@methods/config/crud';
 import MetaEndpoint from '@methods/meta';
-import CrudMiddleware from '@methods/middleware/crud';
+import MiddlewareCount from '@methods/middleware/count';
+import MiddlewareCreate from '@methods/middleware/create';
+import MiddlewareList from '@methods/middleware/list';
+import MiddlewareRemove from '@methods/middleware/remove';
+import MiddlewareView from '@methods/middleware/view';
 
 /**
  * Register methods
  */
 export default (ms: Microservice): void => {
   /**
-   * Config entity CRUD methods
-   * NOTE: create through separated methods just for example
-   */
-  ms.addEndpoint('config.count', ConfigCount, { isDisableMiddlewares: true, isPrivate: true });
-  ms.addEndpoint('config.list', ConfigList, { isDisableMiddlewares: true, isPrivate: true });
-  ms.addEndpoint('config.view', ConfigView, { isDisableMiddlewares: true, isPrivate: true });
-  ms.addEndpoint('config.create', ConfigCreate, { isDisableMiddlewares: true, isPrivate: true });
-  ms.addEndpoint('config.update', ConfigCreate, { isDisableMiddlewares: true, isPrivate: true });
-  ms.addEndpoint('config.remove', ConfigRemove, { isDisableMiddlewares: true, isPrivate: true });
-
-  /**
    * Middleware entity CRUD methods
    */
-  Object.entries(CrudMiddleware).forEach(([method, handler]) => {
-    ms.addEndpoint(`middleware.${method}`, handler, {
+  ms.addEndpoint('middleware.count', MiddlewareCount, {
+    isDisableMiddlewares: true,
+    isPrivate: true,
+  });
+  ms.addEndpoint('middleware.list', MiddlewareList, {
+    isDisableMiddlewares: true,
+    isPrivate: true,
+  });
+  ms.addEndpoint('middleware.view', MiddlewareView, {
+    isDisableMiddlewares: true,
+    isPrivate: true,
+  });
+  ms.addEndpoint('middleware.create', MiddlewareCreate, {
+    isDisableMiddlewares: true,
+    isPrivate: true,
+  });
+  ms.addEndpoint('middleware.update', MiddlewareCreate, {
+    isDisableMiddlewares: true,
+    isPrivate: true,
+  });
+  ms.addEndpoint('middleware.remove', MiddlewareRemove, {
+    isDisableMiddlewares: true,
+    isPrivate: true,
+  });
+
+  /**
+   * Config entity CRUD methods
+   */
+  Object.entries(CrudConfig).forEach(([method, handler]) => {
+    ms.addEndpoint(`config.${method}`, handler, {
       isDisableMiddlewares: true,
       isPrivate: true,
     });

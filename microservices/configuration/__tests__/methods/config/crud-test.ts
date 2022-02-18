@@ -4,20 +4,19 @@ import {
   endpointOptions,
   listResult,
 } from '@lomray/microservice-helpers/test-helpers';
-import { MiddlewareType } from '@lomray/microservice-nodejs-lib';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
-import { getRepository } from 'typeorm';
-import Middleware from '@entities/middleware';
-import OriginalMiddlewareCrud from '@methods/middleware/crud';
+import { getCustomRepository } from 'typeorm';
+import OriginalConfigCrud from '@methods/config/crud';
+import ConfigRepository from '@repositories/config-repository';
 
 const { default: Crud } = rewiremock.proxy<{
-  default: typeof OriginalMiddlewareCrud;
-}>(() => require('@methods/middleware/crud'), {
+  default: typeof OriginalConfigCrud;
+}>(() => require('@methods/config/crud'), {
   typeorm: TypeormMock.mock,
 });
 
-describe('methods/middleware/crud', () => {
+describe('methods/config/crud', () => {
   beforeEach(() => {
     TypeormMock.sandbox.reset();
   });
@@ -34,7 +33,7 @@ describe('methods/middleware/crud', () => {
     expect(res).to.deep.equal(listResult());
   });
 
-  it('should correctly entity view', async () => {
+  it('should correctly view entity', async () => {
     const entity = { id: 1 };
 
     TypeormMock.queryBuilder.getMany.returns([entity]);
@@ -45,13 +44,7 @@ describe('methods/middleware/crud', () => {
   });
 
   it('should correctly entity create', async () => {
-    const fields = {
-      sender: 'sender',
-      senderMethod: 'senderMethod',
-      target: 'target',
-      targetMethod: 'targetMethod',
-      type: MiddlewareType.request,
-    };
+    const fields = { type: 'test', microservice: 'demo' };
 
     TypeormMock.entityManager.save.resolves([fields]);
 
@@ -61,15 +54,12 @@ describe('methods/middleware/crud', () => {
   });
 
   it('should correctly entity update', async () => {
-    const entity = getRepository(Middleware).create({
+    const entity = getCustomRepository(ConfigRepository).create({
       id: 1,
-      sender: 'sender',
-      senderMethod: 'senderMethod',
-      target: 'target',
-      targetMethod: 'targetMethod',
-      type: MiddlewareType.request,
+      type: 'test',
+      microservice: 'demo',
     });
-    const fields = { target: 'target2' };
+    const fields = { type: 'test2', microservice: 'demo2' };
 
     TypeormMock.queryBuilder.getMany.returns([entity]);
     TypeormMock.entityManager.save.resolves(fields);

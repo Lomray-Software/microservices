@@ -3,10 +3,10 @@ import { getCustomRepository } from 'typeorm';
 import ConfigRepository from '@repositories/config-repository';
 
 /**
- * Count configs
+ * CRUD controller for config entity
  */
-const count = Endpoint.count(() => ({
-  repository: getCustomRepository(ConfigRepository),
-}));
+const crud = Endpoint.controller(() => getCustomRepository(ConfigRepository), {
+  restore: false,
+});
 
-export default count;
+export default crud;

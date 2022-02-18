@@ -2,15 +2,15 @@ import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { endpointOptions } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
-import OriginalConfigView from '@methods/config/view';
+import OriginalMiddlewareView from '@methods/middleware/view';
 
 const { default: View } = rewiremock.proxy<{
-  default: typeof OriginalConfigView;
-}>(() => require('@methods/config/view'), {
+  default: typeof OriginalMiddlewareView;
+}>(() => require('@methods/middleware/view'), {
   typeorm: TypeormMock.mock,
 });
 
-describe('methods/config/view', () => {
+describe('methods/middleware/view', () => {
   beforeEach(() => {
     TypeormMock.sandbox.reset();
   });

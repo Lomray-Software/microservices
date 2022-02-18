@@ -655,6 +655,7 @@ describe('services/endpoint', () => {
     const defaultOptions = {
       isAllowMultiple: false,
       isSoftDelete: false,
+      shouldReturnEntity: false,
     };
 
     it('should run default remove handler with query builder: typeorm case', async () => {
@@ -766,11 +767,24 @@ describe('services/endpoint', () => {
       const result = await Endpoint.defaultHandler.remove(
         repository,
         repository.createQueryBuilder().where('id = 1'),
-        { isAllowMultiple: false, isSoftDelete: true },
+        { isAllowMultiple: false, isSoftDelete: true, shouldReturnEntity: false },
       );
 
       expect(TypeormMock.entityManager.softRemove).to.be.calledOnce;
       expect(result).to.deep.equal(removeResult([{ id: entity.id }]));
+    });
+
+    it('handler - should include entities to output', async () => {
+      TypeormMock.queryBuilder.getMany.resolves([entity]);
+
+      const result = await Endpoint.defaultHandler.remove(
+        repository,
+        repository.createQueryBuilder().where('id = 1'),
+        { isAllowMultiple: false, isSoftDelete: false, shouldReturnEntity: true },
+      );
+
+      expect(TypeormMock.entityManager.remove).to.be.calledOnce;
+      expect(result).to.deep.equal({ ...removeResult([{ id: entity.id }]), entities: [entity] });
     });
 
     it('should run default handler metadata: remove', () => {

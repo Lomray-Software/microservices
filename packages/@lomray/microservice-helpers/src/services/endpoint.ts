@@ -182,6 +182,13 @@ class RemoveOutputParams<TEntity> {
   })
   @IsArray()
   deleted: Partial<TEntity>[];
+
+  @JSONSchema({
+    description: 'Return removed entities if "shouldReturnEntity" enabled',
+  })
+  @IsArray()
+  @IsUndefinable()
+  entities?: TEntity[];
 }
 
 class RestoreRequestParams<TEntity> {
@@ -269,6 +276,7 @@ interface IUpdateParams<TEntity, TParams, TResult> extends ICrudParams<TEntity, 
 interface IRemoveParams<TEntity, TParams, TResult> extends ICrudParams<TEntity, TParams, TResult> {
   isAllowMultiple?: boolean;
   isSoftDelete?: boolean;
+  shouldReturnEntity?: boolean;
 }
 
 interface IRestoreParams<TEntity, TParams, TResult> extends ICrudParams<TEntity, TParams, TResult> {
@@ -610,7 +618,11 @@ const removeDefaultHandler = async <TEntity>(
   {
     isAllowMultiple,
     isSoftDelete,
-  }: Pick<IRemoveParams<TEntity, never, never>, 'isSoftDelete' | 'isAllowMultiple'>,
+    shouldReturnEntity,
+  }: Pick<
+    IRemoveParams<TEntity, never, never>,
+    'isSoftDelete' | 'isAllowMultiple' | 'shouldReturnEntity'
+  >,
 ): Promise<RemoveOutputParams<TEntity>> => {
   if (hasEmptyCondition(query)) {
     throw new BaseException({
@@ -663,7 +675,7 @@ const removeDefaultHandler = async <TEntity>(
       await repository.remove(entities);
     }
 
-    return { deleted };
+    return { deleted, ...(shouldReturnEntity ? { entities } : {}) };
   } catch (e) {
     throw new BaseException({
       code: CRUD_EXCEPTION_CODE.FAILED_DELETE,
@@ -1144,9 +1156,10 @@ class Endpoint {
     > = async function (params, options) {
       const {
         repository,
+        queryOptions,
         isAllowMultiple = true,
         isSoftDelete = false,
-        queryOptions,
+        shouldReturnEntity = false,
       } = removeOptions();
       const typeQuery = createTypeQuery(repository.createQueryBuilder(), params, {
         ...queryOptions,
@@ -1161,6 +1174,7 @@ class Endpoint {
         return Endpoint.defaultHandler.remove(repository, result.toQuery(), {
           isAllowMultiple,
           isSoftDelete,
+          shouldReturnEntity,
         });
       }
 
@@ -1168,6 +1182,7 @@ class Endpoint {
         return Endpoint.defaultHandler.remove(repository, result, {
           isAllowMultiple,
           isSoftDelete,
+          shouldReturnEntity,
         });
       }
 
