@@ -15,7 +15,6 @@ This microservice provides authorization mechanism for all other microservices.
 [![Lines of code](https://sonarqube-proxy.lomray.com/lines/microservices-authorization?token=99cc3d48918d78fe3ca52bc927ce7c62)](https://sonarqube.lomray.com/dashboard?id=microservices-authorization)
 [![Coverage](https://sonarqube-proxy.lomray.com/coverage/microservices-authorization?token=99cc3d48918d78fe3ca52bc927ce7c62)](https://sonarqube.lomray.com/dashboard?id=microservices-authorization)
 
-
 ## Navigation
 - [ENVIRONMENTS](#environments)
 - [HOW TO RUN](#how-to-run)
@@ -36,7 +35,7 @@ This microservice provides authorization mechanism for all other microservices.
 - `DB_USERNAME` - Database user name. Default: `postgres`
 - `DB_PASSWORD` - Database password. Default: `example`
 - `DB_DATABASE` - Database db name. Default: `ms-authorization`
-- `MS_DEFAULT_ROLE_ALIAS` - Default user role alias. Default: `user`
+- `MS_DEFAULT_ROLE_ALIAS` - Default `user` (authenticated) role alias. Default: `user`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.

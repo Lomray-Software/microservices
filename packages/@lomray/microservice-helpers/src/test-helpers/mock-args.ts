@@ -7,7 +7,7 @@ import type {
 } from '@services/endpoint';
 
 // @ts-ignore
-const endpointOptions: IEndpointOptions = { app: {}, req: {} };
+const endpointOptions: IEndpointOptions = { app: { msInstanceMock: true }, req: {} };
 const listResult = (): ListOutputParams<Record<string, any>> => ({ list: [], count: 0 });
 const countResult = (): CountOutputParams => ({ count: 0 });
 const removeResult = (

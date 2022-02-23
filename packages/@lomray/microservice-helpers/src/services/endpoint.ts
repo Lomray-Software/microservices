@@ -144,7 +144,7 @@ class CreateRequestParams<TEntity> {
   }
 
   @JSONSchema({
-    description: "It's can be array of entities fields.",
+    description: "It's can be array of entities fields (if enabled).",
     format: 'fields: { field: 1, field2: "demo" }',
   })
   @IsObject()

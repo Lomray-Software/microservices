@@ -1,6 +1,6 @@
 import { BaseException, Microservice, MicroserviceResponse } from '@lomray/microservice-nodejs-lib';
 import { expect } from 'chai';
-import sinon from 'sinon';
+import sinon, { SinonStub } from 'sinon';
 import RemoteConfig from '@services/remote-config';
 import waitResult from '@test-helpers/wait-result';
 
@@ -10,9 +10,11 @@ describe('services/remote-config', () => {
   const params = {
     msName: 'msName',
     msConfigName: 'msConfigName',
+    resetCacheEndpoint: 'reset-cache',
   };
   const result = { param: 1 };
   const otherParams = { other: true };
+  let msAddEndpointStub: SinonStub | undefined;
 
   afterEach(() => {
     sandbox.restore();
@@ -23,13 +25,15 @@ describe('services/remote-config', () => {
   });
 
   it('should correctly instantiate', () => {
+    msAddEndpointStub = sandbox.stub(ms, 'addEndpoint');
+
     const config = RemoteConfig.create(ms, params);
 
     expect(config).instanceof(RemoteConfig);
   });
 
   it('should return null if cached config not exist', () => {
-    expect(RemoteConfig.getSync('db')).to.null;
+    expect(RemoteConfig.getCachedSync('db')).to.null;
   });
 
   it('should correctly get remote config', async () => {
@@ -45,7 +49,7 @@ describe('services/remote-config', () => {
   });
 
   it('should correctly get cached config', async () => {
-    const res1 = RemoteConfig.getSync('db');
+    const res1 = RemoteConfig.getCachedSync('db');
     const res2 = await RemoteConfig.get('db');
 
     expect(res1).to.deep.equal(result);
@@ -82,5 +86,17 @@ describe('services/remote-config', () => {
     const res = RemoteConfig.get('ms-conf', { isThrowNotExist: true });
 
     expect(await waitResult(res)).to.throw('Configuration for param');
+  });
+
+  it('should have reset cache endpoint', async () => {
+    const [endpoint, handler] = msAddEndpointStub?.firstCall.args ?? [];
+    const cachedResult = RemoteConfig.getCachedSync('db');
+
+    const res = await handler();
+
+    expect(endpoint).to.equal(params.resetCacheEndpoint);
+    expect(cachedResult).to.not.deep.equal({}); // not empty
+    expect(res).to.deep.equal({ isReset: true });
+    expect(RemoteConfig.getCachedSync('db')).to.null; // success reset cache
   });
 });

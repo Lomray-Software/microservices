@@ -43,7 +43,7 @@ class Model {
   @Column({ type: 'varchar', length: 50, nullable: true })
   @Length(1, 50)
   @IsNullable()
-  microservice: string;
+  microservice: string | null;
 
   @Column({ type: 'varchar', length: 30 })
   @Unique(['alias'])
@@ -60,9 +60,10 @@ class Model {
     examples: [
       { '*': 'allow' },
       { '*': 'deny' },
-      { field1: 'aliasAnotherModel', field2: { object: { nestedField: 'aliasModel' } } },
-      { simpleField: { in: { guests: 'deny', users: 'allow' }, out: { guest: 'allow' } } },
+      { field1: 'aliasAnotherModel', field2: { object: { nestedField: 'aliasModel' } } }, // aliases
+      { simpleField: { in: { guests: 'deny', users: 'allow' }, out: { guest: 'allow' } } }, // standard fields
       {
+        // standard field
         userId: {
           in: {
             guests: FieldPolicy.deny,

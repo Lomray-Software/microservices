@@ -1,9 +1,17 @@
 import { Microservice } from '@lomray/microservice-nodejs-lib';
 import { IJsonQuery } from '@lomray/typeorm-json-query';
+import { IsBoolean } from 'class-validator';
+import { Endpoint } from '@services/endpoint';
 
 interface IRemoteConfigParams {
   msName: string;
   msConfigName: string;
+  resetCacheEndpoint?: string;
+}
+
+class RemoteConfigOutput {
+  @IsBoolean()
+  isReset: boolean;
 }
 
 /**
@@ -19,12 +27,12 @@ class RemoteConfig {
   /**
    * @private
    */
-  private ms: Microservice;
+  private readonly ms: Microservice;
 
   /**
    * @private
    */
-  private params: IRemoteConfigParams;
+  private readonly params: IRemoteConfigParams;
 
   /**
    * Cached configs
@@ -38,6 +46,8 @@ class RemoteConfig {
   protected constructor(ms: Microservice, params: IRemoteConfigParams) {
     this.ms = ms;
     this.params = params;
+
+    this.addResetCacheEndpoint();
   }
 
   /**
@@ -63,9 +73,31 @@ class RemoteConfig {
   }
 
   /**
+   * Add endpoint for reset config cache
+   * @private
+   */
+  private addResetCacheEndpoint() {
+    const { resetCacheEndpoint = 'config-reset' } = this.params;
+
+    this.ms.addEndpoint(
+      resetCacheEndpoint,
+      Endpoint.custom(
+        () => ({ output: RemoteConfigOutput, description: 'Reset RemoteConfig cache' }),
+        () => {
+          this.configs = {};
+
+          return { isReset: true };
+        },
+      ),
+    );
+  }
+
+  /**
    * Get cached config synchronously
    */
-  static getSync<TParams = Record<string, any> | undefined>(paramName: string): TParams | null {
+  static getCachedSync<TParams = Record<string, any> | undefined>(
+    paramName: string,
+  ): TParams | null {
     const self = RemoteConfig.getInstance();
 
     if (self.configs[paramName]) {
@@ -84,7 +116,7 @@ class RemoteConfig {
   ): Promise<TParams> {
     const { isForce = false, isThrowNotExist = false } = options ?? {};
     const self = RemoteConfig.getInstance();
-    const cachedConfig = RemoteConfig.getSync<TParams>(paramName);
+    const cachedConfig = RemoteConfig.getCachedSync<TParams>(paramName);
 
     if (!isForce && cachedConfig !== null) {
       return cachedConfig;

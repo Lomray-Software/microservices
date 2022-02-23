@@ -7,7 +7,7 @@ import type { IWithEndpointMeta } from '@services/endpoint';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { defaultMetadataStorage } = require('class-transformer/cjs/storage');
 
-interface IMicroserviceMeta {
+export interface IMicroserviceMeta {
   endpoints: {
     [path: string]: {
       options: IEndpointHandlerOptions;
