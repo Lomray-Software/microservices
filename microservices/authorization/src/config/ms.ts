@@ -4,7 +4,10 @@ import { ConsoleLogDriver } from '@lomray/microservice-nodejs-lib';
 import { MS_CONNECTION, MS_NAME, MS_CONNECTION_SRV, MS_WORKERS } from '@constants/index';
 import { version } from '../../package.json';
 
-const microserviceOptions: Partial<IMicroserviceOptions> = {
+/**
+ * Microservice options
+ */
+const msOptions: Partial<IMicroserviceOptions> = {
   name: MS_NAME,
   connection: MS_CONNECTION,
   isSRV: MS_CONNECTION_SRV,
@@ -12,8 +15,11 @@ const microserviceOptions: Partial<IMicroserviceOptions> = {
   version,
 };
 
-const microserviceParams: Partial<IMicroserviceParams> = {
+/**
+ * Microservice params
+ */
+const msParams: Partial<IMicroserviceParams> = {
   logDriver: ConsoleLogDriver((_, message) => Log.info(message)),
 };
 
-export { microserviceOptions, microserviceParams };
+export { msOptions, msParams };

@@ -27,9 +27,10 @@ This microservice provides mechanism for store/manage user data.
 - `MS_NAME` - Microservice name. Default: `users`
 - `MS_CONFIG_NAME` - Configuration microservice name. Default: `configuration` 
 - `MS_WORKERS` - Microservice queue workers count. Default: `1`
-- `MS_DISABLE_REMOTE_MIDDLEWARE` - Disable remote middleware feature. Set `1` to disable. Default: `0` (enabled)
+- `MS_ENABLE_REMOTE_MIDDLEWARE` - Enable remote middleware feature. Set `0` to disable. Default: `1` (enabled)
 - `MS_USER_PASSWORD_SALT_ROUNDS` - Bcrypt salt rounds. Default: `10`
 - `DB_FROM_CONFIG_MS` - Get db credentials from configuration microservice. Set `0` to disable. Default: `1`
+- `DB_URL` - Database url connection string. Default: `undefined`. Please use URL or credentials.
 - `DB_HOST` - Database host. Default: `127.0.0.1`
 - `DB_PORT` - Database port. Default: `5432`
 - `DB_USERNAME` - Database user name. Default: `postgres`

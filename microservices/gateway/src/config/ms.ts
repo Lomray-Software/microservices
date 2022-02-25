@@ -12,7 +12,10 @@ import {
 } from '@constants/index';
 import { version } from '../../package.json';
 
-const microserviceOptions: Partial<IGatewayOptions> = {
+/**
+ * Microservice options
+ */
+const msOptions: Partial<IGatewayOptions> = {
   name: MS_NAME,
   connection: MS_CONNECTION,
   isSRV: MS_CONNECTION_SRV,
@@ -22,7 +25,10 @@ const microserviceOptions: Partial<IGatewayOptions> = {
   version,
 };
 
-const microserviceParams: Partial<IGatewayParams> = {
+/**
+ * Microservice params
+ */
+const msParams: Partial<IGatewayParams> = {
   beforeRoute: (express) => {
     express.use(
       cors({
@@ -33,4 +39,4 @@ const microserviceParams: Partial<IGatewayParams> = {
   logDriver: ConsoleLogDriver((_, message) => Log.info(message)),
 };
 
-export { microserviceOptions, microserviceParams };
+export { msOptions, msParams };

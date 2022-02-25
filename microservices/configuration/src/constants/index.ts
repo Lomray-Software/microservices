@@ -8,11 +8,12 @@ const MS_CONNECTION = process.env.MS_CONNECTION || undefined;
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MS_CONNECTION_SRV = Boolean(process.env.MS_CONNECTION_SRV) || false;
 const MS_WORKERS = Number(process.env.MS_WORKERS) || undefined;
-const MS_DISABLE_REMOTE_MIDDLEWARE = Number(process.env.MS_DISABLE_REMOTE_MIDDLEWARE) || 0;
+const MS_ENABLE_REMOTE_MIDDLEWARE = Number(process.env.MS_ENABLE_REMOTE_MIDDLEWARE ?? 1);
 const MS_CONFIGS = process.env.MS_CONNECTION || '[]';
 const MS_MIDDLEWARES = process.env.MS_MIDDLEWARES || '[]';
 
 const DB_ENV = {
+  URL: process.env.DB_URL || undefined,
   HOST: process.env.DB_HOST || '127.0.0.1',
   PORT: Number(process.env.DB_PORT) || 5432,
   USERNAME: process.env.DB_USERNAME || 'postgres',
@@ -26,7 +27,7 @@ export {
   MS_CONNECTION_SRV,
   MS_WORKERS,
   DB_ENV,
-  MS_DISABLE_REMOTE_MIDDLEWARE,
+  MS_ENABLE_REMOTE_MIDDLEWARE,
   MS_CONFIGS,
   MS_MIDDLEWARES,
   ENV,

@@ -1,83 +1,22 @@
-import { Log, RemoteConfig } from '@lomray/microservice-helpers';
-import type { IMicroserviceOptions, IMicroserviceParams } from '@lomray/microservice-nodejs-lib';
-import { Microservice } from '@lomray/microservice-nodejs-lib';
-import { RemoteMiddlewareClient } from '@lomray/microservice-remote-middleware';
-import { Connection, ConnectionOptions } from 'typeorm';
-import { createDbConnection } from '@config/db';
-import { IS_TEST, MS_CONFIG_NAME } from '@constants/index';
-
-export interface IStartConfig {
-  msOptions: Partial<IMicroserviceOptions>;
-  msParams: Partial<IMicroserviceParams>;
-  dbOptions: ConnectionOptions;
-  dbOptionsObtain?: boolean | number;
-  registerMethods?: (ms: Microservice) => Promise<void> | void;
-  isDisableRemoteMiddleware?: boolean;
-  hooks?: {
-    afterCreateMicroservice?: (ms: Microservice, connection: Connection) => Promise<void> | void;
-    afterInitRemoteMiddleware?: (remoteMiddleware: RemoteMiddlewareClient) => Promise<void> | void;
-    beforeStart?: () => Promise<void> | void;
-  };
-}
+import { startWithDb } from '@lomray/microservice-helpers';
+import dbOptions from '@config/db';
+import { msOptions, msParams } from '@config/ms';
+import { DB_FROM_CONFIG_MS, MS_ENABLE_REMOTE_MIDDLEWARE } from '@constants/index';
+import registerMethods from '@methods/index';
 
 /**
- * Initialize & start microservice
+ * Entrypoint for nodejs (run microservice)
  */
-const start = async ({
+export default startWithDb({
+  type: 'microservice',
   msOptions,
   msParams,
   dbOptions,
-  dbOptionsObtain,
   registerMethods,
-  isDisableRemoteMiddleware = false,
-  hooks: { afterCreateMicroservice, afterInitRemoteMiddleware, beforeStart } = {},
-}: IStartConfig): Promise<void> => {
-  try {
-    Log.defaultMeta = {
-      ...Log.defaultMeta,
-      service: msOptions.name,
-      msOptions,
-      isDisableRemoteMiddleware,
-    };
-
-    const microservice = Microservice.create(msOptions, msParams);
-
-    RemoteConfig.create(microservice, {
-      msName: msOptions.name as string,
-      msConfigName: MS_CONFIG_NAME,
-    });
-
-    let dbOptionsResult = {};
-
-    if (dbOptionsObtain) {
-      dbOptionsResult = await RemoteConfig.get<ConnectionOptions>('db', { isThrowNotExist: true });
-    }
-
-    const connection = await createDbConnection({ ...dbOptions, ...dbOptionsResult });
-
-    await afterCreateMicroservice?.(microservice, connection);
-    await registerMethods?.(microservice);
-
-    // Enable remote middleware
-    if (!isDisableRemoteMiddleware) {
-      const remoteMiddleware = RemoteMiddlewareClient.create(microservice, {
-        logDriver: msParams.logDriver,
-        configurationMsName: MS_CONFIG_NAME,
-      });
-
-      await afterInitRemoteMiddleware?.(remoteMiddleware);
-      await remoteMiddleware.addRegisterEndpoint().obtainMiddlewares();
-    }
-
-    await beforeStart?.();
-    await microservice.start();
-  } catch (e) {
-    Log.error('Failed to start microservice:', e);
-
-    if (!IS_TEST) {
-      process.exit(1);
-    }
-  }
-};
-
-export { start };
+  // for local run without configuration ms this should be set to false (or use RunConfiguration IDE)
+  shouldUseDbRemoteOptions: Boolean(DB_FROM_CONFIG_MS),
+  remoteMiddleware: {
+    isEnable: Boolean(MS_ENABLE_REMOTE_MIDDLEWARE),
+    type: 'client',
+  },
+});

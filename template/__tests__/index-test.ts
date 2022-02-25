@@ -1,81 +1,30 @@
 import { Log } from '@lomray/microservice-helpers';
-import { Microservice } from '@lomray/microservice-nodejs-lib';
-import { RemoteMiddlewareClient } from '@lomray/microservice-remote-middleware';
 import { expect } from 'chai';
+import rewiremock from 'rewiremock';
 import sinon from 'sinon';
-import { microserviceOptions, microserviceParams } from '@config/ms';
-import { MS_NAME, MS_CONNECTION } from '@constants/index';
-import { start } from '../src';
+import { microserviceParams } from '@config/ms';
 
-describe('microservices-name', () => {
+describe('microservice: start', () => {
   const sandbox = sinon.createSandbox();
+  const startWithDb = sandbox.stub();
+
+  rewiremock.proxy(() => require('../src'), {
+    '@lomray/microservice-helpers': rewiremock('@lomray/microservice-helpers')
+      .callThrough()
+      .with({ startWithDb }),
+  });
 
   afterEach(() => {
     sandbox.restore();
   });
 
-  it('should correctly start microservice', async () => {
-    const spyCreate = sandbox.spy(Microservice, 'create');
-    const registerMethodsStub = sandbox.stub();
-    let stubbedStart;
-    let isRunBeforeStart = false;
-    let addRegisterEndpointSpy;
-    let obtainMiddlewares;
+  it('should correctly start microservice', () => {
+    const args = startWithDb.firstCall.firstArg;
 
-    await start({
-      msOptions: microserviceOptions,
-      msParams: microserviceParams,
-      hooks: {
-        afterCreateMicroservice: (microservice) => {
-          stubbedStart = sandbox.stub(microservice, 'start').resolves();
-        },
-        afterInitRemoteMiddleware: (remoteMiddleware) => {
-          addRegisterEndpointSpy = sandbox.spy(remoteMiddleware, 'addRegisterEndpoint');
-          obtainMiddlewares = sandbox.stub(remoteMiddleware, 'obtainMiddlewares').resolves();
-        },
-        beforeStart: () => {
-          isRunBeforeStart = true;
-        },
-      },
-      registerMethods: registerMethodsStub,
-    });
-
-    const createOptions = spyCreate.firstCall.firstArg;
-
-    expect(createOptions).to.includes({ name: MS_NAME, connection: MS_CONNECTION });
-    expect(stubbedStart).to.calledOnce;
-    expect(isRunBeforeStart).to.ok;
-    expect(addRegisterEndpointSpy).to.calledOnce;
-    expect(obtainMiddlewares).to.calledOnce;
-    expect(registerMethodsStub).to.calledOnceWith(Microservice.getInstance());
-  });
-
-  it('should correctly start gateway without remote middleware', async () => {
-    sandbox.stub(Microservice.getInstance(), 'start').resolves();
-    sandbox.stub(RemoteMiddlewareClient, 'instance' as any).value(undefined);
-
-    await start({
-      msOptions: microserviceOptions,
-      msParams: microserviceParams,
-      isDisableRemoteMiddleware: true,
-    });
-
-    expect(RemoteMiddlewareClient.getInstance()).to.undefined;
-  });
-
-  it('should log error if microservice start failed', async () => {
-    const startStub = sandbox.stub(Microservice.getInstance(), 'start').rejects();
-    const logSpy = sandbox.spy(Log, 'error');
-
-    await start({
-      msOptions: microserviceOptions,
-      msParams: microserviceParams,
-    });
-
-    logSpy.restore();
-    startStub.restore();
-
-    expect(logSpy).to.calledOnce;
+    expect(startWithDb).to.calledOnce;
+    expect(args).to.have.property('msOptions');
+    expect(args).to.have.property('msParams');
+    expect(args).to.have.property('registerMethods');
   });
 
   it('should have microservice custom logger', () => {

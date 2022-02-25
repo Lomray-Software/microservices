@@ -15,7 +15,10 @@
     <test-pattern>__tests__/**/*.ts</test-pattern>
     <method v="2" />
   </configuration>
-  <configuration default="false" name="authentication" type="NodeJSConfigurationType" folderName="microservices" node-parameters="--require ts-node/register" path-to-js-file="src/start.ts" working-dir="$PROJECT_DIR$/microservices/authentication">
+  <configuration default="false" name="authentication" type="NodeJSConfigurationType" folderName="microservices" node-parameters="--require ts-node/register" path-to-js-file="src/index.ts" working-dir="$PROJECT_DIR$/microservices/authentication">
+    <envs>
+      <env name="DB_FROM_CONFIG_MS" value="0" />
+    </envs>
     <method v="2" />
   </configuration>
 </component>

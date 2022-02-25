@@ -1,5 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="gateway" type="NodeJSConfigurationType" folderName="microservices" node-parameters="--require ts-node/register" path-to-js-file="src/start.ts" working-dir="$PROJECT_DIR$/microservices/gateway">
+  <configuration default="false" name="gateway" type="NodeJSConfigurationType" folderName="microservices" node-parameters="--require ts-node/register" path-to-js-file="src/index.ts" working-dir="$PROJECT_DIR$/microservices/gateway">
+    <envs>
+      <env name="DB_FROM_CONFIG_MS" value="0" />
+    </envs>
     <method v="2" />
   </configuration>
   <configuration default="false" name="gateway" type="mocha-javascript-test-runner" folderName="tests">

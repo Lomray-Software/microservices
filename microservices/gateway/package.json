@@ -35,8 +35,8 @@
 		"lint:format": "eslint --fix --ext '.ts,.tsx' 'src/**/*.{ts,tsx,*.ts,*tsx}'",
 		"ts:check": "tsc --project ./tsconfig.json --skipLibCheck --noemit",
 		"build": "rollup -c",
-		"start:dev": "node --require ts-node/register src/start.ts",
-		"start:prod": "node lib/start.js"
+		"start:dev": "node --require ts-node/register src/index.ts",
+		"start:prod": "node lib/index.js"
 	},
 	"dependencies": {
     "@lomray/microservice-helpers": "file:../../packages/@lomray/microservice-helpers/lomray-microservice-helpers-1.0.0.tgz",

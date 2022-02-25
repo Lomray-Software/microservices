@@ -26,7 +26,8 @@ This microservice provides configuration for all other microservices. Single poi
 - `MS_CONNECTION_SRV` - Invert json connection it is SRV record. Default: `false`
 - `MS_NAME` - Microservice name. Default: `gateway`
 - `MS_WORKERS` - Microservice queue workers count. Default: `1`
-- `MS_DISABLE_REMOTE_MIDDLEWARE` - Disable remote middleware feature. Set `1` to disable. Default: `0` (enabled)
+- `MS_ENABLE_REMOTE_MIDDLEWARE` - Enable remote middleware feature. Set `0` to disable. Default: `1` (enabled)
+- `DB_URL` - Database url connection string. Default: `undefined`. Please use URL or credentials.
 - `DB_HOST` - Database host. Default: `127.0.0.1`
 - `DB_PORT` - Database port. Default: `5432`
 - `DB_USERNAME` - Database user name. Default: `postgres`

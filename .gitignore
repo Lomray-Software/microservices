@@ -11,3 +11,4 @@ build
 lib
 cache
 .env.*
+ormconfig.json

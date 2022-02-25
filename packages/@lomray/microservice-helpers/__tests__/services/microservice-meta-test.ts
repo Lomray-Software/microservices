@@ -27,7 +27,7 @@ describe('services/microservice-meta', () => {
   it('should return endpoints meta', () => {
     const res = MicroserviceMeta.getMeta(ms.getEndpoints());
 
-    expect(res.endpoints).to.deep.equal({
+    expect(res.endpoints).to.deep.includes({
       'test-endpoint': {
         options: { isDisableMiddlewares: false, isPrivate: false },
         input: undefined,

@@ -27,9 +27,9 @@ describe('services/remote-config', () => {
   it('should correctly instantiate', () => {
     msAddEndpointStub = sandbox.stub(ms, 'addEndpoint');
 
-    const config = RemoteConfig.create(ms, params);
+    RemoteConfig.init(ms, params);
 
-    expect(config).instanceof(RemoteConfig);
+    expect(RemoteConfig.getInstance()).instanceof(RemoteConfig);
   });
 
   it('should return null if cached config not exist', () => {
@@ -76,7 +76,7 @@ describe('services/remote-config', () => {
     expect(await waitResult(res)).to.throw('Not Available');
   });
 
-  it('should throw error if remote config is not available', async () => {
+  it('should throw error if remote config is not exist', async () => {
     sandbox.stub(ms, 'sendRequest').resolves(
       new MicroserviceResponse({
         result: {},
@@ -86,6 +86,18 @@ describe('services/remote-config', () => {
     const res = RemoteConfig.get('ms-conf', { isThrowNotExist: true });
 
     expect(await waitResult(res)).to.throw('Configuration for param');
+  });
+
+  it('should throw error if remote config return error', async () => {
+    sandbox.stub(ms, 'sendRequest').resolves(
+      new MicroserviceResponse({
+        error: new BaseException({ message: 'Some message' }),
+      }),
+    );
+
+    const res = RemoteConfig.get('ms-conf');
+
+    expect(await waitResult(res)).to.throw('Some message');
   });
 
   it('should have reset cache endpoint', async () => {

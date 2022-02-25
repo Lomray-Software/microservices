@@ -6,7 +6,8 @@ module.exports = {
   exclude: [
     '**/src/interfaces',
     '**/services/external/api.ts',
-    'template'
+    '**/migrations',
+    'template',
   ],
   all: true,
   cache: false,

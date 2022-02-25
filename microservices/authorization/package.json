@@ -35,8 +35,10 @@
 		"lint:format": "eslint --fix --ext '.ts,.tsx' 'src/**/*.{ts,tsx,*.ts,*tsx}'",
 		"ts:check": "tsc --project ./tsconfig.json --skipLibCheck --noemit",
 		"build": "rollup -c",
-		"start:dev": "node --require ts-node/register src/start.ts",
-		"start:prod": "node lib/start.js"
+		"start:dev": "node --require ts-node/register src/index.ts",
+    "start:prod": "NODE_ENV=production node lib/index.js",
+    "typeorm": "node node_modules/typeorm/cli.js",
+    "typeorm:ts": "node --require ts-node/register node_modules/typeorm/cli.js"
 	},
 	"dependencies": {
 		"@lomray/microservice-helpers": "file:../../packages/@lomray/microservice-helpers/lomray-microservice-helpers-1.0.0.tgz",
@@ -49,7 +51,7 @@
 		"lodash": "^4.17.21",
 		"pg": "^8.7.1",
 		"typeorm": "^0.2.41",
-    "typeorm-extension": "^1.0.3"
+    "typeorm-extension": "^1.1.0"
 	},
 	"devDependencies": {
 		"@types/lodash": "^4.14.178"

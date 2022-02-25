@@ -1,4 +1,4 @@
-import { Microservice } from '@lomray/microservice-nodejs-lib';
+import { AbstractMicroservice } from '@lomray/microservice-nodejs-lib';
 import { IJsonQuery } from '@lomray/typeorm-json-query';
 import { IsBoolean } from 'class-validator';
 import { Endpoint } from '@services/endpoint';
@@ -27,7 +27,7 @@ class RemoteConfig {
   /**
    * @private
    */
-  private readonly ms: Microservice;
+  private readonly ms: AbstractMicroservice;
 
   /**
    * @private
@@ -43,7 +43,7 @@ class RemoteConfig {
   /**
    * @protected
    */
-  protected constructor(ms: Microservice, params: IRemoteConfigParams) {
+  protected constructor(ms: AbstractMicroservice, params: IRemoteConfigParams) {
     this.ms = ms;
     this.params = params;
 
@@ -51,14 +51,12 @@ class RemoteConfig {
   }
 
   /**
-   * Create service instance
+   * Init service instance
    */
-  static create(ms: Microservice, params: IRemoteConfigParams): RemoteConfig {
+  static init(ms: AbstractMicroservice, params: IRemoteConfigParams): void {
     if (!RemoteConfig.instance) {
       RemoteConfig.instance = new RemoteConfig(ms, params);
     }
-
-    return RemoteConfig.instance;
   }
 
   /**
