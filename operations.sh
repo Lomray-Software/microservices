@@ -55,12 +55,12 @@ function createMicroservice() {
 
   cp -R "$MICROSERVICE_TEMPLATE_DIR" "$MICROSERVICE_PATH"
 
-  universalSed "s/microservices-name/$NAME/g" "$MICROSERVICE_PATH/src/constants/index.ts"
-  universalSed "s/microservices-name/microservices-$NAME/g" "$MICROSERVICE_PATH/package.json"
-  universalSed "s/microservices-name/microservices-$NAME/g" "$MICROSERVICE_PATH/package-lock.json"
-  universalSed "s/microservices-name/$NAME/g" "$MICROSERVICE_PATH/README.md"
-  universalSed "s/microservices-name/$NAME/g" "$MICROSERVICE_PATH/__tests__/index-test.ts"
-  universalSed "s/microservices-name/microservices-$NAME/g" "$MICROSERVICE_PATH/sonar-project.properties"
+  universalSed "s/microservice-name/$NAME/g" "$MICROSERVICE_PATH/src/constants/index.ts"
+  universalSed "s/microservice-name/microservice-$NAME/g" "$MICROSERVICE_PATH/package.json"
+  universalSed "s/microservice-name/microservice-$NAME/g" "$MICROSERVICE_PATH/package-lock.json"
+  universalSed "s/microservice-name/$NAME/g" "$MICROSERVICE_PATH/README.md"
+  universalSed "s/microservice-name/$NAME/g" "$MICROSERVICE_PATH/__tests__/index-test.ts"
+  universalSed "s/microservice-name/microservice-$NAME/g" "$MICROSERVICE_PATH/sonar-project.properties"
   universalSed "s/.eslintrc.js/..\/.eslintrc.js/g" "$MICROSERVICE_PATH/.eslintrc.js"
 
   cd "$MICROSERVICE_PATH" && npm ci
@@ -163,7 +163,7 @@ function runLintStaged() {
 
 # run semantic release
 function runSemanticRelease() {
-  with_dry_run="${1:-yes}"
+  with_dry_run="${1:-no}"
 
   token=${GITHUB_TOKEN:=}
   branch=${GIT_BRANCH:=}
@@ -178,7 +178,7 @@ function runSemanticRelease() {
       (export NPM_TOKEN=$npm_token && export GITHUB_TOKEN=$token && export GIT_BRANCH=$branch && set -e && cd "$microservice_dir" && npx semantic-release)
     fi
 
-    echo "$microservice_dir - updated!"
+    echo "$microservice_dir - released!"
   done
 }
 

@@ -1,5 +1,5 @@
 {
-	"name": "@lomray/microservices-gateway",
+	"name": "@lomray/microservice-gateway",
 	"version": "1.0.0",
 	"description": "Microservice based on NodeJS & inverted json.",
 	"main": "lib/index.js",
@@ -24,7 +24,7 @@
 	"bugs": {
 		"url": "https://github.com/Lomray-Software/microservices/issues"
 	},
-	"homepage": "https://github.com/Lomray-Software/microservices",
+	"homepage": "https://github.com/Lomray-Software/microservices/configuration",
 	"author": "Mikhail Yarmaliuk",
 	"license": "Apache-2.0",
 	"scripts": {

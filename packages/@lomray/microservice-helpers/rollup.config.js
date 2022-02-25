@@ -1,7 +1,6 @@
 import typescript from 'rollup-plugin-ts';
 import json from '@rollup/plugin-json';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
-import ttypescript from 'ttypescript'
 
 export default {
   // build mocks for generate tslib with all helpers
@@ -20,7 +19,6 @@ export default {
     peerDepsExternal(),
     json(),
     typescript({
-      typescript: ttypescript,
       tsconfig: resolvedConfig => ({
         ...resolvedConfig,
         declaration: true,

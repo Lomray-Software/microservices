@@ -1,4 +1,4 @@
-microservices-name
+microservice-name
 -------------------
 
 RPC 2.0 Microservice.
@@ -11,7 +11,7 @@ RPC 2.0 Microservice.
 - `NODE_ENV` - Can be `production` or `development` or `tests`. Default: `development`
 - `MS_CONNECTION` - Invert json host and port (with protocol). Default: `http://127.0.0.1:8001`
 - `MS_CONNECTION_SRV` - Invert json connection it is SRV record. Default: `false`
-- `MS_NAME` - Microservice name. Default: `microservices-name`
+- `MS_NAME` - Microservice name. Default: `microservice-name`
 - `MS_CONFIG_NAME` - Configuration microservice name. Default: `configuration` 
 - `MS_WORKERS` - Microservice queue workers count. Default: `1`
 - `MS_ENABLE_REMOTE_MIDDLEWARE` - Enable remote middleware feature. Set `0` to disable. Default: `1` (enabled)

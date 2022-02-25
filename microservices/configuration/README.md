@@ -52,6 +52,11 @@ curl localhost:8001/microservice-name -d '{"id": "unique-id", "method": "demo", 
 
 If you use `JetBrains` IDE, try to find run configurations in `.run`
 
+You can also install microservice like npm package:
+```bash
+npm i --save @lomray/microservice-configuration
+```
+
 ### <a id="how-to-develop"></a>HOW TO DEVELOP:
 For develop this microservice, preferred use TDD technique.
 You can run all tests with `watch` flag or run one test:

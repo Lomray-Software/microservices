@@ -1,6 +1,7 @@
 __tests__
 __helpers__
 __mocks__
+migrations
 src
 coverage
 .github
@@ -22,3 +23,4 @@ sonar-project.properties
 scratch.http
 docker-compose.yml
 tsconfig.json
+ormconfig.json

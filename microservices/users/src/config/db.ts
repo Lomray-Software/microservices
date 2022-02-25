@@ -18,9 +18,9 @@ const db: ConnectionOptions = {
       }),
   entities: ['src/entities/*.ts'],
   subscribers: ['src/subscribers/*.ts'],
-  migrations: ['migrations/*.{ts,js}'],
+  migrations: ['**/migrations/*.{ts,js}'],
   cli: {
-    migrationsDir: 'migrations',
+    migrationsDir: '**/migrations',
     // we shouldn't work with this in production
     entitiesDir: 'src/entities',
     subscribersDir: 'src/subscribers',

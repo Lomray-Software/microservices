@@ -3,7 +3,7 @@ const IS_PROD = ENV === 'production';
 const IS_DEV = ENV === 'development';
 const IS_TEST = ENV === 'tests';
 
-const MS_NAME = process.env.MS_NAME || 'microservices-name';
+const MS_NAME = process.env.MS_NAME || 'microservice-name';
 const MS_CONFIG_NAME = process.env.MS_CONFIG_NAME || 'configuration';
 const MS_CONNECTION = process.env.MS_CONNECTION || undefined;
 // eslint-disable-next-line @typescript-eslint/naming-convention
