@@ -8,14 +8,10 @@ import {
   PrimaryColumn,
   Unique,
 } from 'typeorm';
-import Filter from '@entities/filter';
-import Method from '@entities/method';
-import Role from '@entities/role';
-
-export enum FilterOperator {
-  only = 'only',
-  and = 'and',
-}
+import { FilterOperator } from '@constants/filter';
+import type Filter from '@entities/filter';
+import type Method from '@entities/method';
+import type Role from '@entities/role';
 
 @Entity()
 @Unique(['methodId', 'filterId', 'roleAlias'])
@@ -47,13 +43,13 @@ class MethodFilter {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => Filter, (filter) => filter.filterMethods, { onDelete: 'CASCADE' })
+  @ManyToOne('Filter', 'filterMethods', { onDelete: 'CASCADE' })
   filter: Filter;
 
-  @ManyToOne(() => Method, (method) => method.methodFilters, { onDelete: 'CASCADE' })
+  @ManyToOne('Method', 'methodFilters', { onDelete: 'CASCADE' })
   method: Method;
 
-  @ManyToOne(() => Role, { onDelete: 'CASCADE' })
+  @ManyToOne('Role', { onDelete: 'CASCADE' })
   role: Role;
 }
 

@@ -19,6 +19,7 @@ This microservice provides authorization mechanism for all other microservices.
 - [ENVIRONMENTS](#environments)
 - [HOW TO RUN](#how-to-run)
 - [HOW TO DEVELOP](#how-to-develop)
+- [MEMORY USAGE](#memory-usage)
 
 ### <a id="environments"></a>ENVIRONMENTS:
 - `NODE_ENV` - Can be `production` or `development` or `tests`. Default: `development`
@@ -36,7 +37,8 @@ This microservice provides authorization mechanism for all other microservices.
 - `DB_USERNAME` - Database user name. Default: `postgres`
 - `DB_PASSWORD` - Database password. Default: `example`
 - `DB_DATABASE` - Database db name. Default: `ms-authorization`
-- `MS_DEFAULT_ROLE_ALIAS` - Default `user` (authenticated) role alias. Default: `user`
+- `MS_DEFAULT_ROLE_ALIAS` - Default role alias for authenticated users. Default: `user`
+- `MS_DEFAULT_PERMISSION_MIGRATION` - Apply migration with default permissions. Default: `0`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.
@@ -49,7 +51,7 @@ npm run start:dev
 ```
 3. Make some request
 ```bash
-curl localhost:8001/microservice-name -d '{"id": "unique-id", "method": "demo", "params": {}}'
+curl localhost:8001/ms/authorization -d '{"id": "unique-id", "method": "demo", "params": {}}'
 ```
 
 If you use `JetBrains` IDE, try to find run configurations in `.run`
@@ -75,3 +77,8 @@ nyc npm run test
 
 That is all. **Don't forget install npm dependencies**
 (in root folder & local folder run:  `npm ci`)
+
+### <a id="memory-usage"></a>MEMORY USAGE:
+
+__Run on typescript__: ~205 MB PEAK / ~181 MB  
+__Run on JS__: ~33 MB PEAK / ~26 MB

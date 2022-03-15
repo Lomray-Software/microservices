@@ -2,7 +2,11 @@ import { startWithDb } from '@lomray/microservice-helpers';
 import { getCustomRepository } from 'typeorm';
 import dbOptions from '@config/db';
 import { msOptions, msParams } from '@config/ms';
-import { MS_CONFIGS, MS_ENABLE_REMOTE_MIDDLEWARE, MS_MIDDLEWARES } from '@constants/index';
+import {
+  MS_INIT_CONFIGS,
+  MS_ENABLE_REMOTE_MIDDLEWARE,
+  MS_INIT_MIDDLEWARES,
+} from '@constants/index';
 import registerMethods from '@methods/index';
 import ConfigRepository from '@repositories/config-repository';
 import MiddlewareRepository from '@repositories/middleware-repository';
@@ -28,8 +32,18 @@ export default startWithDb({
       const configRepository = getCustomRepository(ConfigRepository);
       const middlewareRepository = getCustomRepository(MiddlewareRepository);
 
-      await configRepository.bulkSave(JSON.parse(MS_CONFIGS));
-      await middlewareRepository.bulkSave(JSON.parse(MS_MIDDLEWARES));
+      const [configExist, middlewareExist] = await Promise.all([
+        configRepository.count(),
+        middlewareRepository.count(),
+      ]);
+
+      if (!configExist) {
+        await configRepository.bulkSave(JSON.parse(MS_INIT_CONFIGS));
+      }
+
+      if (!middlewareExist) {
+        await middlewareRepository.bulkSave(JSON.parse(MS_INIT_MIDDLEWARES));
+      }
     },
   },
 });

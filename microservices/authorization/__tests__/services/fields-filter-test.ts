@@ -1,7 +1,9 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { expect } from 'chai';
-import Model, { FieldPolicy } from '@entities/model';
-import FieldsFilter, { FilterType } from '@services/fields-filter';
+import FieldPolicy from '@constants/field-policy';
+import { FilterType } from '@constants/filter';
+import Model from '@entities/model';
+import FieldsFilter from '@services/fields-filter';
 
 describe('services/fields-filter', () => {
   const userId = 'user-id-1';

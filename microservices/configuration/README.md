@@ -19,6 +19,7 @@ This microservice provides configuration for all other microservices. Single poi
 - [ENVIRONMENTS](#environments)
 - [HOW TO RUN](#how-to-run)
 - [HOW TO DEVELOP](#how-to-develop)
+- [MEMORY USAGE](#memory-usage)
 
 ### <a id="environments"></a>ENVIRONMENTS:
 - `NODE_ENV` - Can be `production` or `development` or `tests`. Default: `development`
@@ -33,8 +34,8 @@ This microservice provides configuration for all other microservices. Single poi
 - `DB_USERNAME` - Database user name. Default: `postgres`
 - `DB_PASSWORD` - Database password. Default: `example`
 - `DB_DATABASE` - Database db name. Default: `ms-configuration`
-- `MS_CONFIGS` - JSON string for configure initial `Config` values. Default: `[]`
-- `MS_MIDDLEWARES` - JSON string for configure initial `Middleware` values. Default: `[]`
+- `MS_INIT_CONFIGS` - JSON string for configure initial `Config` values. Default: `[]`
+- `MS_INIT_MIDDLEWARES` - JSON string for configure initial `Middleware` values. Default: `[]`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.
@@ -47,7 +48,7 @@ npm run start:dev
 ```
 3. Make some request
 ```bash
-curl localhost:8001/microservice-name -d '{"id": "unique-id", "method": "demo", "params": {}}'
+curl localhost:8001/ms/configuration -d '{"id": "unique-id", "method": "demo", "params": {}}'
 ```
 
 If you use `JetBrains` IDE, try to find run configurations in `.run`
@@ -73,3 +74,8 @@ nyc npm run test
 
 That is all. **Don't forget install npm dependencies**
 (in root folder & local folder run:  `npm ci`)
+
+### <a id="memory-usage"></a>MEMORY USAGE:
+
+__Run on typescript__: ~200 MB PEAK / ~180 MB  
+__Run on JS__: ~36 MB PEAK / ~25 MB

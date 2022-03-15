@@ -19,6 +19,7 @@ class EntityManagerMock extends EntityManager {
 
       return {};
     });
+    this.count = sandbox.stub().resolves(0);
     this.find = sandbox.stub().resolves({});
     this.findOne = sandbox.stub().resolves({});
     this.findByIds = sandbox.stub().resolves([]);

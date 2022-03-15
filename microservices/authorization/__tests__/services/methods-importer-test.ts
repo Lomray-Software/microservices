@@ -3,8 +3,9 @@ import { BaseException, Microservice, MicroserviceResponse } from '@lomray/micro
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
+import FieldPolicy from '@constants/field-policy';
 import Method from '@entities/method';
-import Model, { FieldPolicy } from '@entities/model';
+import Model from '@entities/model';
 import OriginalEndpointHandler from '@services/methods-importer';
 
 const { default: MethodsImporter } = rewiremock.proxy<{
@@ -38,6 +39,16 @@ describe('services/methods-importer', () => {
     sandbox
       .stub(ms, 'sendRequest')
       .resolves(new MicroserviceResponse({ error: new BaseException() }));
+
+    await service.import();
+
+    // 'getRepository' inside transaction
+    expect(TypeormMock.entityManager.getRepository).to.not.called;
+  });
+
+  it("should skip import microservice metadata: microservice meta endpoint doesn't exist.", async () => {
+    sandbox.stub(ms, 'lookup').resolves(['demo1']);
+    sandbox.stub(ms, 'sendRequest').rejects(new BaseException());
 
     await service.import();
 

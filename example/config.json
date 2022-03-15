@@ -1,0 +1,21 @@
+[
+  {
+    "microservice": "*",
+    "type": "db",
+    "params": {
+      "host": "127.0.0.1",
+      "port": 5432,
+      "username": "postgres",
+      "password": "example"
+    }
+  },
+  {
+    "microservice": "authentication",
+    "type": "config",
+    "params": {
+      "jwtOptions": {
+        "secretKey": "DemoSecretKey"
+      }
+    }
+  }
+]

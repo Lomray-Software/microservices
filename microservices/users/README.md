@@ -19,6 +19,7 @@ This microservice provides mechanism for store/manage user data.
 - [ENVIRONMENTS](#environments)
 - [HOW TO RUN](#how-to-run)
 - [HOW TO DEVELOP](#how-to-develop)
+- [MEMORY USAGE](#memory-usage)
 
 ### <a id="environments"></a>ENVIRONMENTS:
 - `NODE_ENV` - Can be `production` or `development` or `tests`. Default: `development`
@@ -50,7 +51,7 @@ npm run start:dev
 ```
 3. Make some request
 ```bash
-curl localhost:8001/microservice-name -d '{"id": "unique-id", "method": "demo", "params": {}}'
+curl localhost:8001/ms/users -d '{"id": "unique-id", "method": "demo", "params": {}}'
 ```
 
 If you use `JetBrains` IDE, try to find run configurations in `.run`
@@ -76,3 +77,8 @@ nyc npm run test
 
 That is all. **Don't forget install npm dependencies**
    (in root folder & local folder run:  `npm ci`)
+
+### <a id="memory-usage"></a>MEMORY USAGE:
+
+__Run on typescript__: ~194 MB PEAK / ~162 MB  
+__Run on JS__: ~38 MB PEAK / ~26 MB

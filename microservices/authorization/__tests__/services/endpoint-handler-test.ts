@@ -3,13 +3,14 @@ import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon, { SinonSpy } from 'sinon';
 import { Repository } from 'typeorm';
+import { FilterType } from '@constants/filter';
 import { MS_DEFAULT_ROLE_ALIAS } from '@constants/index';
 import Method from '@entities/method';
 import MethodFilter from '@entities/method-filter';
 import Model from '@entities/model';
 import OriginalEndpointHandler from '@services/endpoint-handler';
 import Enforcer, { IEnforcerParams } from '@services/enforcer';
-import FieldsFilter, { FilterType, IFieldsFilter } from '@services/fields-filter';
+import FieldsFilter, { IFieldsFilter } from '@services/fields-filter';
 import MethodFilters, { IMethodFiltersParams } from '@services/method-filters';
 
 const { default: EndpointHandler } = rewiremock.proxy<{

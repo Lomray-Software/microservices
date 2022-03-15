@@ -5,7 +5,7 @@ import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
 import { Repository } from 'typeorm';
-import { TokenType } from '@entities/token';
+import TokenType from '@constants/token-type';
 import OriginalMethod from '@methods/token/create';
 import { CreateAuthToken, TokenCreateReturnType } from '@services/methods/create-auth-token';
 

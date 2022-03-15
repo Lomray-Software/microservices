@@ -1,7 +1,8 @@
 import { IJsonQueryWhere } from '@lomray/typeorm-json-query';
 import _ from 'lodash';
+import { FilterOperator } from '@constants/filter';
 import Filter from '@entities/filter';
-import MethodFiltersEntity, { FilterOperator } from '@entities/method-filter';
+import MethodFiltersEntity from '@entities/method-filter';
 
 export interface IMethodFiltersParams {
   userRoles: string[];

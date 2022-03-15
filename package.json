@@ -45,6 +45,7 @@
 		"@lomray/eslint-config": "^1.1.0",
 		"@lomray/prettier-config": "^1.0.1",
 		"@rollup/plugin-json": "^4.1.0",
+		"@rollup/plugin-replace": "^4.0.0",
 		"@semantic-release/exec": "^6.0.3",
 		"@semantic-release/npm": "^9.0.0",
 		"@types/chai": "^4.2.22",

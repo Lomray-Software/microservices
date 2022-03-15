@@ -3,9 +3,9 @@ import { endpointOptions, waitResult } from '@lomray/microservice-helpers/test-h
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon, { SinonSpy } from 'sinon';
+import { FilterType } from '@constants/filter';
 import OriginalEndpointFilter from '@methods/endpoint/filter';
 import EndpointHandler, { IEndpointHandlerParams } from '@services/endpoint-handler';
-import { FilterType } from '@services/fields-filter';
 
 const { default: Filter } = rewiremock.proxy<{
   default: typeof OriginalEndpointFilter;

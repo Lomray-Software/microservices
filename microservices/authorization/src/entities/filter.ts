@@ -18,8 +18,8 @@ class Filter {
   @Allow()
   id: number;
 
-  @Column({ type: 'varchar', length: 30 })
-  @Length(3, 30)
+  @Column({ type: 'varchar', length: 50 })
+  @Length(3, 50)
   title: string;
 
   @JSONSchema({

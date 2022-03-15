@@ -9,7 +9,8 @@ import {
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import { getRepository } from 'typeorm';
-import IdentityProvider, { IdProvider } from '@entities/identity-provider';
+import IdProvider from '@constants/id-provider';
+import IdentityProvider from '@entities/identity-provider';
 import OriginalIdentityProviderCrud from '@methods/identity-provider/crud';
 
 const { default: Crud } = rewiremock.proxy<{

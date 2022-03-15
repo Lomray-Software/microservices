@@ -48,6 +48,34 @@ describe('services/remote-config', () => {
     expect(res).to.deep.equal(result);
   });
 
+  it('should correctly get common remote config if personal not exist', async () => {
+    const stub = sandbox.stub(ms, 'sendRequest').resolves(
+      new MicroserviceResponse({
+        result: { params: result },
+      }),
+    );
+
+    const res = await RemoteConfig.get('common', { isCommon: true });
+    const [, condition] = stub.firstCall.args;
+
+    expect(res).to.deep.equal(result);
+    expect(condition).to.deep.equal({
+      query: {
+        where: {
+          or: [
+            {
+              microservice: 'msName',
+            },
+            {
+              microservice: '*',
+            },
+          ],
+          type: 'common',
+        },
+      },
+    });
+  });
+
   it('should correctly get cached config', async () => {
     const res1 = RemoteConfig.getCachedSync('db');
     const res2 = await RemoteConfig.get('db');

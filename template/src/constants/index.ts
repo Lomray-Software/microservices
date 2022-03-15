@@ -2,6 +2,8 @@ const ENV = process.env.NODE_ENV || 'development';
 const IS_PROD = ENV === 'production';
 const IS_DEV = ENV === 'development';
 const IS_TEST = ENV === 'tests';
+const IS_BUILD = process.env.__IS_BUILD__;
+const SRC_FOLDER = IS_BUILD ? 'lib' : 'src';
 
 const MS_NAME = process.env.MS_NAME || 'microservice-name';
 const MS_CONFIG_NAME = process.env.MS_CONFIG_NAME || 'configuration';
@@ -22,4 +24,6 @@ export {
   IS_PROD,
   IS_DEV,
   IS_TEST,
+  IS_BUILD,
+  SRC_FOLDER,
 };

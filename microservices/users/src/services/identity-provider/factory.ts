@@ -1,5 +1,5 @@
 import { EntityManager } from 'typeorm';
-import { IdProvider } from '@entities/identity-provider';
+import IdProvider from '@constants/id-provider';
 import Abstract from '@services/identity-provider/abstract';
 import Firebase from '@services/identity-provider/firebase';
 

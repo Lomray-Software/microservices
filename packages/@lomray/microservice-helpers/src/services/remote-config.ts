@@ -110,9 +110,9 @@ class RemoteConfig {
    */
   static async get<TParams = Record<string, any> | undefined>(
     paramName: string,
-    options?: { isForce?: boolean; isThrowNotExist?: boolean },
+    options?: { isForce?: boolean; isThrowNotExist?: boolean; isCommon?: boolean },
   ): Promise<TParams> {
-    const { isForce = false, isThrowNotExist = false } = options ?? {};
+    const { isForce = false, isThrowNotExist = false, isCommon = false } = options ?? {};
     const self = RemoteConfig.getInstance();
     const cachedConfig = RemoteConfig.getCachedSync<TParams>(paramName);
 
@@ -122,9 +122,12 @@ class RemoteConfig {
 
     const { msName, msConfigName } = self.params;
 
-    const config = await self.ms.sendRequest<{ query: IJsonQuery }>(`${msConfigName}.view`, {
+    const config = await self.ms.sendRequest<{ query: IJsonQuery }>(`${msConfigName}.config.view`, {
       query: {
-        where: { type: paramName, or: [{ microservice: msName }, { microservice: '*' }] },
+        where: {
+          type: paramName,
+          or: [{ microservice: msName }, ...(isCommon ? [{ microservice: '*' }] : [])],
+        },
       },
     });
 

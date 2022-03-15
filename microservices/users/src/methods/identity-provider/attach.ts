@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsObject, IsString } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { getManager } from 'typeorm';
-import { IdProvider } from '@entities/identity-provider';
+import IdProvider from '@constants/id-provider';
 import User from '@entities/user';
 import Factory from '@services/identity-provider/factory';
 

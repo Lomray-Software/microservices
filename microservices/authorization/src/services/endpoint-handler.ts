@@ -1,12 +1,13 @@
 import { IJsonQueryWhere } from '@lomray/typeorm-json-query';
 import { getRepository } from 'typeorm';
+import { FilterType } from '@constants/filter';
 import { MS_DEFAULT_ROLE_ALIAS } from '@constants/index';
 import Method from '@entities/method';
 import Model from '@entities/model';
 import RolesTree from '@entities/roles-tree';
 import UserRole from '@entities/user-role';
 import Enforcer from '@services/enforcer';
-import FieldsFilter, { FilterType } from '@services/fields-filter';
+import FieldsFilter from '@services/fields-filter';
 import MethodFilters from '@services/method-filters';
 
 export interface IEndpointHandlerParams {

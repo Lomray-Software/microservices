@@ -1,6 +1,7 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { expect } from 'chai';
-import MethodFiltersEntity, { FilterOperator } from '@entities/method-filter';
+import { FilterOperator } from '@constants/filter';
+import MethodFiltersEntity from '@entities/method-filter';
 import MethodFilters from '@services/method-filters';
 
 describe('services/method-filters', () => {

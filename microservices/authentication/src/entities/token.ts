@@ -2,14 +2,7 @@ import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsEnum, IsObject, IsRFC3339, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Unique } from 'typeorm';
-
-/**
- * Auth token types
- */
-export enum TokenType {
-  jwt = 'jwt',
-  personal = 'personal',
-}
+import TokenType from '@constants/token-type';
 
 @Entity()
 @Unique(['type', 'userId', 'personal', 'access'])

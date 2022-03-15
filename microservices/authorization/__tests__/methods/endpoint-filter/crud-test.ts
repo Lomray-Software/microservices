@@ -7,7 +7,8 @@ import {
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import { getRepository } from 'typeorm';
-import MethodFilter, { FilterOperator } from '@entities/method-filter';
+import { FilterOperator } from '@constants/filter';
+import MethodFilter from '@entities/method-filter';
 import OriginalEndpointFilterCrud from '@methods/endpoint-filter/crud';
 
 const { default: Crud } = rewiremock.proxy<{

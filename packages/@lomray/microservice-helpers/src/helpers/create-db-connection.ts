@@ -14,7 +14,10 @@ const createDbConnection = async (
   let remoteDbOptions: ConnectionOptions | undefined;
 
   if (shouldUseRemoteOptions) {
-    remoteDbOptions = await RemoteConfig.get<ConnectionOptions>('db', { isThrowNotExist: true });
+    remoteDbOptions = await RemoteConfig.get<ConnectionOptions>('db', {
+      isThrowNotExist: true,
+      isCommon: true,
+    });
   }
 
   const dbOptions = { ...options, ...remoteDbOptions } as ConnectionOptions;

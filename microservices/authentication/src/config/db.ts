@@ -1,5 +1,5 @@
 import type { ConnectionOptions } from 'typeorm';
-import { DB_ENV } from '@constants/index';
+import { DB_ENV, SRC_FOLDER } from '@constants/index';
 
 const { URL, HOST, PORT, USERNAME, PASSWORD, DATABASE } = DB_ENV;
 
@@ -16,14 +16,14 @@ const db: ConnectionOptions = {
         password: PASSWORD,
         database: DATABASE,
       }),
-  entities: ['src/entities/*.ts'],
-  subscribers: ['src/subscribers/*.ts'],
-  migrations: ['**/migrations/*.{ts,js}'],
+  entities: [`${SRC_FOLDER}/entities/*.{ts,js}`],
+  subscribers: [`${SRC_FOLDER}/subscribers/*.{ts,js}`],
+  migrations: [`${SRC_FOLDER}/migrations/*.{ts,js}`],
   cli: {
-    migrationsDir: '**/migrations',
+    migrationsDir: `${SRC_FOLDER}/migrations`,
     // we shouldn't work with this in production
-    entitiesDir: 'src/entities',
-    subscribersDir: 'src/subscribers',
+    entitiesDir: `${SRC_FOLDER}/entities`,
+    subscribersDir: `${SRC_FOLDER}/subscribers`,
   },
   migrationsRun: true,
   synchronize: false,

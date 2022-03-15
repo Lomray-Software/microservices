@@ -1,11 +1,8 @@
 import _ from 'lodash';
 import type { Repository } from 'typeorm';
-import Model, { FieldPolicy, IModelSchema, IRolePermissions } from '@entities/model';
-
-export enum FilterType {
-  IN = 'in',
-  OUT = 'out',
-}
+import FieldPolicy from '@constants/field-policy';
+import { FilterType } from '@constants/filter';
+import Model, { IModelSchema, IRolePermissions } from '@entities/model';
 
 export interface IFieldsFilter {
   userId?: string;

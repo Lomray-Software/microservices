@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
 import { EntityManager } from 'typeorm';
-import { IdProvider } from '@entities/identity-provider';
+import IdProvider from '@constants/id-provider';
 import User from '@entities/user';
 import OriginalEndpointSignIn from '@methods/identity-provider/sign-in';
 import Factory from '@services/identity-provider/factory';

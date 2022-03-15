@@ -3,7 +3,8 @@ import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import jsonwebtoken from 'jsonwebtoken';
 import rewiremock from 'rewiremock';
-import Token, { TokenType } from '@entities/token';
+import TokenType from '@constants/token-type';
+import Token from '@entities/token';
 import {
   CreateAuthToken as OriginalCreateAuthToken,
   TokenCreateReturnType,

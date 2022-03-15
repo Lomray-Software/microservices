@@ -4,7 +4,7 @@ import type { TFirebaseAdmin } from '@lomray/microservice-helpers/services/fireb
 import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { IdProvider } from '@entities/identity-provider';
+import IdProvider from '@constants/id-provider';
 import Profile from '@entities/profile';
 import User from '@entities/user';
 import Firebase from '@services/identity-provider/firebase';

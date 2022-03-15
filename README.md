@@ -45,7 +45,17 @@ npm i --save @lomray/microservice-NAME
 npm i --save @lomray/microservice-configuration
 ```
 
+## Complete example
+
+Just run:
+```bash
+git clone git@github.com:Lomray-Software/microservices.git
+cd example
+docker-compose up
+```
+
+see example requests in file `requests.http`
+
 ## TODO
-- [ ] Add complete example
 - [ ] Add api service generator (backend) (generate api service for microservices based on metadata endpoint)
 - [ ] Add api service generator (frontend)

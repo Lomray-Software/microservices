@@ -14,7 +14,7 @@ import { ViewEntity, ViewColumn } from 'typeorm';
     ORDER BY alias, depth DESC;
   `,
 })
-export class RolesTree {
+class RolesTree {
   @ViewColumn()
   alias: string;
 

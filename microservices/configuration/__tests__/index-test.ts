@@ -37,17 +37,38 @@ describe('microservice: start', () => {
     expect(getRepository()).to.instanceof(MiddlewareRepository);
   });
 
-  it('should correctly run hooks', async () => {
+  it('should correctly create init configs & middlewares', async () => {
     const {
       hooks: { afterCreateMicroservice },
     } = startWithDb.firstCall.firstArg;
     const bulkSaveStub = sandbox.stub();
+    const countStub = sandbox.stub();
 
-    TypeormMock.entityManager.getCustomRepository.callsFake(() => ({ bulkSave: bulkSaveStub }));
+    TypeormMock.entityManager.getCustomRepository.callsFake(() => ({
+      bulkSave: bulkSaveStub,
+      count: countStub,
+    }));
 
     await afterCreateMicroservice();
 
     expect(bulkSaveStub).calledTwice;
+  });
+
+  it('should prevent create init configs & middlewares: already exist', async () => {
+    const {
+      hooks: { afterCreateMicroservice },
+    } = startWithDb.firstCall.firstArg;
+    const bulkSaveStub = sandbox.stub();
+    const countStub = sandbox.stub().resolves(1);
+
+    TypeormMock.entityManager.getCustomRepository.callsFake(() => ({
+      bulkSave: bulkSaveStub,
+      count: countStub,
+    }));
+
+    await afterCreateMicroservice();
+
+    expect(bulkSaveStub).not.called;
   });
 
   it('should have microservice custom logger', () => {

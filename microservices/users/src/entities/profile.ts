@@ -9,14 +9,8 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import User from '@entities/user';
-
-export enum Gender {
-  NOT_KNOWN = 'notKnown',
-  MALE = 'male',
-  FEMALE = 'female',
-  NOT_SPECIFIED = 'notSpecified',
-}
+import Gender from '@constants/gender';
+import type User from '@entities/user';
 
 export interface IProfileParams {
   isEmailVerified?: boolean;
@@ -61,7 +55,7 @@ class Profile {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @OneToOne(() => User, (user) => user.profile)
+  @OneToOne('User', 'profile')
   @JoinColumn()
   user: User;
 }

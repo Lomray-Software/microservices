@@ -1262,7 +1262,6 @@ class Endpoint {
       if (typeof input === 'function') {
         const errors = await validate(Object.assign(new input(), params), {
           whitelist: true,
-          forbidNonWhitelisted: true,
         });
 
         if (errors.length > 0) {
@@ -1297,7 +1296,6 @@ class Endpoint {
       if (typeof input === 'function') {
         const errors = await validate(Object.assign(new input(), params), {
           whitelist: true,
-          forbidNonWhitelisted: true,
         });
 
         if (errors.length > 0) {

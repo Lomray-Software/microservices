@@ -10,11 +10,8 @@ import {
   DeleteDateColumn,
   ManyToOne,
 } from 'typeorm';
-import User from '@entities/user';
-
-export enum IdProvider {
-  FIREBASE = 'firebase',
-}
+import IdProvider from '@constants/id-provider';
+import type User from '@entities/user';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IProviderParams {}
@@ -56,7 +53,7 @@ class IdentityProvider {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.identityProviders)
+  @ManyToOne('User', 'identityProviders')
   @JoinColumn()
   user: User;
 }

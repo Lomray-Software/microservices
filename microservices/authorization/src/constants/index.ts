@@ -2,6 +2,8 @@ const ENV = process.env.NODE_ENV || 'development';
 const IS_PROD = ENV === 'production';
 const IS_DEV = ENV === 'development';
 const IS_TEST = ENV === 'tests';
+const IS_BUILD = process.env.__IS_BUILD__;
+const SRC_FOLDER = IS_BUILD ? 'lib' : 'src';
 
 const MS_NAME = process.env.MS_NAME || 'authorization';
 const MS_CONFIG_NAME = process.env.MS_CONFIG_NAME || 'configuration';
@@ -12,6 +14,7 @@ const MS_WORKERS = Number(process.env.MS_WORKERS) || undefined;
 const MS_ENABLE_REMOTE_MIDDLEWARE = Number(process.env.MS_ENABLE_REMOTE_MIDDLEWARE ?? 1);
 const MS_REMOTE_CONFIG = Number(process.env.MS_REMOTE_CONFIG || 1);
 const MS_DEFAULT_ROLE_ALIAS = process.env.MS_DEFAULT_ROLE_ALIAS || 'user';
+const MS_DEFAULT_PERMISSION_MIGRATION = Number(process.env.MS_DEFAULT_PERMISSION_MIGRATION || 0);
 
 const DB_FROM_CONFIG_MS = Number(process.env.DB_FROM_CONFIG_MS ?? 1);
 const DB_ENV = {
@@ -34,8 +37,11 @@ export {
   DB_ENV,
   MS_REMOTE_CONFIG,
   MS_DEFAULT_ROLE_ALIAS,
+  MS_DEFAULT_PERMISSION_MIGRATION,
   ENV,
   IS_PROD,
   IS_DEV,
   IS_TEST,
+  IS_BUILD,
+  SRC_FOLDER,
 };

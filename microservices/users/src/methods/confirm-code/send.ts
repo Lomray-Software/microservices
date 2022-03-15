@@ -21,7 +21,7 @@ class ConfirmSendOutput {
  * Send confirm code
  */
 const send = Endpoint.custom(
-  () => ({ input: ConfirmSendInput, output: ConfirmSendOutput }),
+  () => ({ input: ConfirmSendInput, output: ConfirmSendOutput, description: 'Send confirm code' }),
   async ({ type, login }) => {
     const service = Factory.create(type, getRepository(ConfirmCode));
 

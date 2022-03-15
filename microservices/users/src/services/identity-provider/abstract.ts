@@ -1,7 +1,8 @@
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { validate } from 'class-validator';
 import { EntityManager, ObjectLiteral, Repository } from 'typeorm';
-import IdentityProvider, { IdProvider } from '@entities/identity-provider';
+import IdProvider from '@constants/id-provider';
+import IdentityProvider from '@entities/identity-provider';
 import Profile from '@entities/profile';
 import User from '@entities/user';
 import UserRepository from '@repositories/user';

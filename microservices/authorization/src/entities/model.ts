@@ -9,11 +9,7 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-
-export enum FieldPolicy {
-  allow = 'allow',
-  deny = 'deny',
-}
+import FieldPolicy from '@constants/field-policy';
 
 interface IFieldCondition {
   template: string; // lodash template
@@ -45,13 +41,13 @@ class Model {
   @IsNullable()
   microservice: string | null;
 
-  @Column({ type: 'varchar', length: 30 })
+  @Column({ type: 'varchar', length: 50 })
   @Unique(['alias'])
-  @Length(1, 30)
+  @Length(1, 50)
   alias: string;
 
-  @Column({ type: 'varchar', length: 30 })
-  @Length(3, 30)
+  @Column({ type: 'varchar', length: 50 })
+  @Length(3, 50)
   title: string;
 
   @JSONSchema({

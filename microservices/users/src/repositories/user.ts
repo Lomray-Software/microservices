@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { EntityRepository, Repository } from 'typeorm';
+import IdProvider from '@constants/id-provider';
 import { MS_USER_PASSWORD_SALT_ROUNDS } from '@constants/index';
-import { IdProvider } from '@entities/identity-provider';
 import UserEntity from '@entities/user';
 
 @EntityRepository(UserEntity)

@@ -7,6 +7,7 @@ import CrudFilter from '@methods/filter/crud';
 import MetaEndpoint from '@methods/meta';
 import CrudModel from '@methods/model/crud';
 import CrudRole from '@methods/role/crud';
+import ServiceSyncMetadata from '@methods/service/sync-metadata';
 import UserRoleAssign from '@methods/user-role/assign';
 import UserRoleRemove from '@methods/user-role/remove';
 
@@ -42,6 +43,11 @@ export default (ms: Microservice): void => {
    */
   ms.addEndpoint('endpoint.enforce', EndpointEnforce, { isPrivate: true });
   ms.addEndpoint('endpoint.filter', EndpointFilter, { isPrivate: true });
+
+  /**
+   * Service methods
+   */
+  ms.addEndpoint('service.sync-metadata', ServiceSyncMetadata, { isPrivate: true });
 
   /**
    * Microservice metadata endpoint

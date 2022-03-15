@@ -27,8 +27,9 @@ class SyncMetadataInput {
 class SyncMetadataOutput {
   @JSONSchema({
     example: {
-      msName: { isSuccess: true },
-      msAnother: { error: 'Error message' },
+      msName1: { isSuccess: true },
+      msName2: { error: 'Error message' },
+      msName3: { isSuccess: true },
     },
   })
   @IsObject()

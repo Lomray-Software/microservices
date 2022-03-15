@@ -3,8 +3,8 @@ import type { IJsonQueryWhere } from '@lomray/typeorm-json-query';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsObject, IsString } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
+import { FilterType } from '@constants/filter';
 import EndpointHandler from '@services/endpoint-handler';
-import { FilterType } from '@services/fields-filter';
 
 class EndpointEnforceInput {
   @IsUndefinable()
@@ -57,7 +57,8 @@ const enforce = Endpoint.custom(
   () => ({
     input: EndpointEnforceInput,
     output: EndpointEnforceOutput,
-    description: 'Check access user to microservice method',
+    description:
+      'Check access user to microservice method, filter req params, get entities filters',
   }),
   async ({ userId, method, filterInput, shouldThrowError = true, hasFilters = true }) => {
     const hasFilterInput = Boolean(filterInput);

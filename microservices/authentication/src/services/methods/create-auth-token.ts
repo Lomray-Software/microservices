@@ -4,7 +4,8 @@ import { IsEnum, IsObject, IsRFC3339, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Repository } from 'typeorm';
 import type { IJwtConfig } from '@config/jwt';
-import Token, { TokenType } from '@entities/token';
+import TokenType from '@constants/token-type';
+import Token from '@entities/token';
 import Jwt from '@services/tokens/jwt';
 import Personal from '@services/tokens/personal';
 

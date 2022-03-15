@@ -2,8 +2,9 @@ import { IMicroserviceMeta, Log } from '@lomray/microservice-helpers';
 import { AbstractMicroservice } from '@lomray/microservice-nodejs-lib';
 import _ from 'lodash';
 import { EntityManager, Repository } from 'typeorm';
+import FieldPolicy from '@constants/field-policy';
 import Method from '@entities/method';
-import Model, { FieldPolicy, IModelSchema } from '@entities/model';
+import Model, { IModelSchema } from '@entities/model';
 
 export interface IMethodsImporterParams {
   metaEndpoint?: string | { [msName: string]: string };
@@ -79,31 +80,36 @@ class MethodsImporter {
     const result = {};
 
     for (const msName of availableMs) {
-      const msMetaResponse = await this.ms.sendRequest<never, IMicroserviceMeta>(
-        this.getMetaEndpoint(msName),
-      );
+      try {
+        const msMetaResponse = await this.ms.sendRequest<never, IMicroserviceMeta>(
+          this.getMetaEndpoint(msName),
+        );
 
-      if (msMetaResponse.getError()) {
-        result[msName] = {
-          error: `Failed to import microservice metadata: ${
-            msMetaResponse.getError()?.message ?? ''
-          }`,
-        };
-        Log.error(result[msName].error, msMetaResponse.getError());
-        continue;
-      }
+        if (msMetaResponse.getError()) {
+          result[msName] = {
+            error: `Failed to import microservice metadata: ${
+              msMetaResponse.getError()?.message ?? ''
+            }`,
+          };
+          Log.error(result[msName].error, msMetaResponse.getError());
+          continue;
+        }
 
-      const { endpoints, entities } = msMetaResponse.getResult() ?? {};
+        const { endpoints, entities } = msMetaResponse.getResult() ?? {};
 
-      if (!endpoints) {
-        result[msName] = { error: `Microservice endpoints not found: ${msName}` };
+        if (!endpoints) {
+          result[msName] = { error: `Microservice endpoints not found: ${msName}` };
+          Log.error(result[msName].error);
+          continue;
+        }
+
+        await this.loadMethods(msName, endpoints, entities);
+
+        result[msName] = { isSuccess: true };
+      } catch (e) {
+        result[msName] = { error: "Microservice meta endpoint doesn't exist." };
         Log.error(result[msName].error);
-        continue;
       }
-
-      await this.loadMethods(msName, endpoints, entities);
-
-      result[msName] = { isSuccess: true };
     }
 
     return result;
@@ -288,7 +294,7 @@ class MethodsImporter {
           res[fieldName] = this.getSchemaAlias(alias, microservice);
 
           related.add(alias);
-        } else if (fieldSchema.$ref) {
+        } else if (fieldSchema.$ref && !fieldSchema.$ref.endsWith('/Object')) {
           // this field should be related to another schema (nested model)
           const [alias, uniqueAlias] = this.getRefSchemaAlias(fieldSchema.$ref, microservice);
 

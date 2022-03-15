@@ -1,0 +1,51 @@
+POST http://127.0.0.1:3000
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "users.user.view"
+}
+
+###
+POST http://127.0.0.1:3000
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "users.user.list"
+}
+
+### Special system request for import authorization entities
+
+#POST http://127.0.0.1:8001/ms/authorization
+#Accept: application/json
+#Content-Type: application/json
+#
+#{
+#  "id": "1",
+#  "method": "service.sync-metadata",
+#  "params": {
+#    "defaultSchemaRoles": ["admin"],
+#    "defaultAllowGroup": ["admin"],
+#    "commonModelAliases": [
+#      "CountRequestParams",
+#      "CountOutputParams",
+#      "ListRequestParams",
+#      "ViewRequestParams",
+#      "RemoveRequestParams",
+#      "RestoreRequestParams",
+#      "MicroserviceMetaOutput",
+#      "RemoteConfigOutput",
+#      "ClientRegisterMiddlewareInput",
+#      "ClientRegisterMiddlewareOutput",
+#      "RemoteConfigOutput"
+#    ],
+#    "payload": {
+#      "isInternal": true
+#    }
+#  }
+#}
+
+###
