@@ -16,7 +16,7 @@ This microservice provides notifications mechanism.
 - `MS_CONNECTION_SRV` - Invert json connection it is SRV record. Default: `false`
 - `MS_NAME` - Microservice name. Default: `notification`
 - `MS_CONFIG_NAME` - Configuration microservice name. Default: `configuration` 
-- `MS_WORKERS` - Microservice queue workers count. Default: `1`
+- `MS_WORKERS` - Microservice queue workers count. Default: `5`
 - `MS_ENABLE_REMOTE_MIDDLEWARE` - Enable remote middleware feature. Set `0` to disable. Default: `1` (enabled)
 - `DB_FROM_CONFIG_MS` - Get db credentials from configuration microservice. Set `0` to disable. Default: `1`
 - `DB_URL` - Database url connection string. Default: `undefined`. Please use URL or credentials.

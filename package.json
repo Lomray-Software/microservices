@@ -47,7 +47,7 @@
 		"@rollup/plugin-json": "^4.1.0",
 		"@rollup/plugin-replace": "^4.0.0",
 		"@semantic-release/exec": "^6.0.3",
-		"@semantic-release/npm": "^9.0.0",
+		"@semantic-release/npm": "^9.0.1",
 		"@types/chai": "^4.2.22",
 		"@types/mocha": "^9.1.0",
 		"@types/node": "^16.9.6",

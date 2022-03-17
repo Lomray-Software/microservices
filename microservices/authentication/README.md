@@ -26,7 +26,7 @@ This microservice provides authentication mechanism for microservices.
 - `MS_CONNECTION` - Invert json host and port (with protocol). Default: `http://127.0.0.1:8001`
 - `MS_CONNECTION_SRV` - Invert json connection it is SRV record. Default: `false`
 - `MS_NAME` - Microservice name. Default: `authentication`
-- `MS_WORKERS` - Microservice queue workers count. Default: `1`
+- `MS_WORKERS` - Microservice queue workers count. Default: `5`
 - `MS_ENABLE_REMOTE_MIDDLEWARE` - Enable remote middleware feature. Set `0` to disable. Default: `1` (enabled)
 - `DB_FROM_CONFIG_MS` - Get db credentials from configuration microservice. Set `0` to disable. Default: `1`
 - `MS_JWT_SECRET_KEY` - Secret key for generation JWT tokens. Required if you want to use JWT auth. Default: `undefined`

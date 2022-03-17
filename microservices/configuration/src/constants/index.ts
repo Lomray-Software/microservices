@@ -9,7 +9,7 @@ const MS_NAME = process.env.MS_NAME || 'configuration';
 const MS_CONNECTION = process.env.MS_CONNECTION || undefined;
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const MS_CONNECTION_SRV = Boolean(process.env.MS_CONNECTION_SRV) || false;
-const MS_WORKERS = Number(process.env.MS_WORKERS) || undefined;
+const MS_WORKERS = Number(process.env.MS_WORKERS) || 5;
 const MS_ENABLE_REMOTE_MIDDLEWARE = Number(process.env.MS_ENABLE_REMOTE_MIDDLEWARE ?? 1);
 const MS_INIT_CONFIGS = process.env.MS_CONFIGS || '[]';
 const MS_INIT_MIDDLEWARES = process.env.MS_MIDDLEWARES || '[]';

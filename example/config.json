@@ -17,5 +17,21 @@
         "secretKey": "DemoSecretKey"
       }
     }
+  },
+  {
+    "microservice": "notification",
+    "type": "emailTransportOptions",
+    "params": {
+      "defaultEmailFrom": "change@me.com",
+      "transportOptions": {
+        "host": "smtp.ethereal.email",
+        "port": 587,
+        "secure": false,
+        "auth": {
+          "user": "generated ethereal user",
+          "pass": "generated ethereal password"
+        }
+      }
+    }
   }
 ]

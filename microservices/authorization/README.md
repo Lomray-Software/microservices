@@ -27,7 +27,7 @@ This microservice provides authorization mechanism for all other microservices.
 - `MS_CONNECTION_SRV` - Invert json connection it is SRV record. Default: `false`
 - `MS_NAME` - Microservice name. Default: `authorization`
 - `MS_CONFIG_NAME` - Configuration microservice name. Default: `configuration` 
-- `MS_WORKERS` - Microservice queue workers count. Default: `1`
+- `MS_WORKERS` - Microservice queue workers count. Default: `5`
 - `MS_ENABLE_REMOTE_MIDDLEWARE` - Enable remote middleware feature. Set `0` to disable. Default: `1` (enabled)
 - `MS_REMOTE_CONFIG` - Enable remote config (get from configuration microservice). Set `0` to disable. Default: `1`
 - `DB_FROM_CONFIG_MS` - Get db credentials from configuration microservice. Set `0` to disable. Default: `1`
