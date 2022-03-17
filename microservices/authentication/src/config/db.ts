@@ -1,7 +1,8 @@
 import type { ConnectionOptions } from 'typeorm';
-import { DB_ENV, SRC_FOLDER } from '@constants/index';
+import { IS_BUILD, DB_ENV, SRC_FOLDER } from '@constants/index';
 
 const { URL, HOST, PORT, USERNAME, PASSWORD, DATABASE } = DB_ENV;
+const migrationsSrc = IS_BUILD ? 'lib/' : '';
 
 const db: ConnectionOptions = {
   type: 'postgres',
@@ -18,9 +19,9 @@ const db: ConnectionOptions = {
       }),
   entities: [`${SRC_FOLDER}/entities/*.{ts,js}`],
   subscribers: [`${SRC_FOLDER}/subscribers/*.{ts,js}`],
-  migrations: [`${SRC_FOLDER}/migrations/*.{ts,js}`],
+  migrations: [`${migrationsSrc}migrations/*.{ts,js}`],
   cli: {
-    migrationsDir: `${SRC_FOLDER}/migrations`,
+    migrationsDir: `${migrationsSrc}migrations`,
     // we shouldn't work with this in production
     entitiesDir: `${SRC_FOLDER}/entities`,
     subscribersDir: `${SRC_FOLDER}/subscribers`,

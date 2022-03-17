@@ -7,6 +7,7 @@ import registerMethods from '@methods/index';
  * Entrypoint for nodejs (run microservice)
  */
 export default start({
+  type: 'microservice',
   msOptions: microserviceOptions,
   msParams: microserviceParams,
   registerMethods,

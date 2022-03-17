@@ -25,7 +25,7 @@ class Phone extends Abstract {
    */
   private static async sendCode(phone: string, code: string): Promise<boolean> {
     const result = await Api.notification.phoneSend({
-      to: phone,
+      to: [phone],
       message: `Confirmation code is: ${code}`,
     });
 

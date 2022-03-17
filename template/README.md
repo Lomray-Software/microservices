@@ -36,7 +36,7 @@ If you use `JetBrains` IDE, try to find run configurations in `.run`
 
 You can also install microservice like npm package:
 ```bash
-npm i --save @lomray/microservice-name
+npm i --save @lomray/microservice-microservice-name
 ```
 
 ### <a id="how-to-develop"></a>HOW TO DEVELOP:

@@ -25,7 +25,7 @@ class Email extends Abstract {
    */
   private static async sendEmail(email: string, code: string): Promise<boolean> {
     const result = await Api.notification.emailSend({
-      to: email,
+      to: [email],
       subject: 'Email confirmation code.',
       text: `Your confirmation code is: ${code}`,
       html: `<p>Your confirmation code is: <strong>${code}</strong></p>`,

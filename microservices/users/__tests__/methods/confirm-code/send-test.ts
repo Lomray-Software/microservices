@@ -27,7 +27,7 @@ describe('methods/confirm-code/send', () => {
     expect(await waitResult(res)).to.throw('Invalid request params');
   });
 
-  it('should correctly end confirmation code', async () => {
+  it('should correctly send confirmation code', async () => {
     let confirmParams: Parameters<typeof Factory.create> | undefined;
     let sendStub;
 

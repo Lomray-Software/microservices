@@ -44,7 +44,6 @@
 		"@lomray/microservice-helpers": "file:../../packages/@lomray/microservice-helpers/lomray-microservice-helpers-1.0.0.tgz",
 		"@lomray/microservice-nodejs-lib": "^2.4.5",
 		"@lomray/microservice-remote-middleware": "^1.1.1",
-		"@types/bcrypt": "^5.0.0",
 		"bcrypt": "^5.0.1",
 		"class-transformer": "^0.4.1",
 		"class-validator": "^0.13.2",
@@ -53,5 +52,8 @@
 		"typeorm": "^0.2.41",
 		"typeorm-extension": "^1.1.0",
     "firebase-admin": "^10.0.2"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.0"
   }
 }

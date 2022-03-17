@@ -2,14 +2,14 @@ import { Microservice, MicroserviceResponse } from '@lomray/microservice-nodejs-
 
 interface INotificationSendEmail {
   from?: string; // it can be default value
-  to: string | string[];
+  to: string[];
   subject: string;
   text: string;
   html: string;
 }
 
 interface INotificationSendPhone {
-  to: string | string[];
+  to: string[];
   message: string;
 }
 
