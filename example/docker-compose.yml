@@ -16,14 +16,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: example
 
-  gateway:
-    image: ghcr.io/lomray-software/microservices/gateway:latest-staging
-    container_name: gateway
-    ports:
-      - "3000:3000"
-    depends_on:
-      - configuration
-
   configuration:
     image: ghcr.io/lomray-software/microservices/configuration:latest-staging
     container_name: configuration
@@ -34,6 +26,14 @@ services:
       MS_MIDDLEWARES: '[{"target":"gateway","targetMethod":"*","sender":"authentication","senderMethod":"token.identify","type":"request","params":{"type":"request","isRequired":true,"strategy":"transform","convertResult":{"payload.authentication.userId":"$middleware.userId","payload.authentication.isAuth":"$middleware.isAuth","payload.authentication.provider":"$middleware.provider"}}},{"target":"gateway","targetMethod":"*","sender":"authorization","senderMethod":"endpoint.enforce","type":"request","params":{"type":"request","isRequired":true,"isCleanResult":true,"strategy":"transform","reqParams":{"isInternal":true},"convertParams":{"userId":"$task.payload.authentication.userId","method":"$task.method","filterInput":"$task.params"},"convertResult":{".":"$middleware.filteredInput","payload":"$task.payload","payload.authorization.isAllow":"$middleware.isAllow","payload.authorization.filter":"$middleware.filters"}}},{"target":"gateway","targetMethod":"*","sender":"authorization","senderMethod":"endpoint.filter","type":"response","params":{"type":"response","isRequired":true,"isCleanResult":true,"strategy":"transform","reqParams":{"isInternal":true},"convertParams":{"type":"out","userId":"$task.payload.authentication.userId","method":"$task.method","filterInput":"$result"},"convertResult":{".":"$middleware.filtered","payload":"$task.payload"}}},{"target":"users","targetMethod":"identity-provider.sign-in","sender":"authentication","senderMethod":"token.create","type":"response","params":{"type":"response","isRequired":true,"strategy":"transform","convertParams":{"type":"jwt","userId":"$result.user.id","returnType":"cookies"},"convertResult":{"payload.cookies":"$middleware.payload","tokens.refresh":"$middleware.refresh"}}},{"target":"users","targetMethod":"user.sign-in","sender":"authentication","senderMethod":"token.create","type":"response","params":{"type":"response","isRequired":true,"strategy":"transform","convertParams":{"type":"jwt","userId":"$result.user.id","returnType":"cookies"},"convertResult":{"payload.cookies":"$middleware.payload","tokens.refresh":"$middleware.refresh"}}},{"target":"users","targetMethod":"user.sign-up","sender":"authentication","senderMethod":"token.create","type":"response","params":{"type":"response","isRequired":true,"strategy":"transform","convertParams":{"type":"jwt","userId":"$result.user.id","returnType":"cookies"},"convertResult":{"payload.cookies":"$middleware.payload","tokens.refresh":"$middleware.refresh"}}},{"target":"users","targetMethod":"user.sign-out","sender":"authentication","senderMethod":"token.remove","type":"response","params":{"type":"response","isRequired":true,"strategy":"transform","convertParams":{"query.where.userId":"$task.params.userId"}}}]'
     depends_on:
       - db
+
+  gateway:
+    image: ghcr.io/lomray-software/microservices/gateway:latest-staging
+    container_name: gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - configuration
 
   authentication:
     image: ghcr.io/lomray-software/microservices/authentication:latest-staging
@@ -47,6 +47,12 @@ services:
     environment:
       MS_DEFAULT_PERMISSION_MIGRATION: 1
       MS_WORKERS: 2
+    depends_on:
+      - configuration
+
+  notification:
+    image: ghcr.io/lomray-software/microservices/notification:latest-staging
+    container_name: notification
     depends_on:
       - configuration
 

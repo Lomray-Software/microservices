@@ -12,6 +12,7 @@
  - [Configuration](microservices/configuration)
  - [Authentication](microservices/authentication)
  - [Authorization](microservices/authorization)
+ - [Notification](microservices/notification)
  - [Users](microservices/users)
  
 Use `npm run create-microservice name` for create new microservice from template.

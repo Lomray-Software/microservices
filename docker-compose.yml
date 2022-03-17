@@ -15,35 +15,3 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: example
-
-#  gateway:
-#    image: ghcr.io/lomray-software/microservices/gateway:latest-staging
-#    container_name: gateway
-#    ports:
-#      - "3000:3000"
-#    depends_on:
-#      - configuration
-
-#  configuration:
-#    image: ghcr.io/lomray-software/microservices/configuration:latest-staging
-#    container_name: configuration
-#    depends_on:
-#      - db
-
-#  authentication:
-#    image: ghcr.io/lomray-software/microservices/authentication:latest-staging
-#    container_name: authentication
-#    depends_on:
-#      - configuration
-
-#  authorization:
-#    image: ghcr.io/lomray-software/microservices/authorization:latest-staging
-#    container_name: authorization
-#    depends_on:
-#      - configuration
-
-#  users:
-#    image: ghcr.io/lomray-software/microservices/users:latest-staging
-#    container_name: users
-#    depends_on:
-#      - configuration

@@ -1,0 +1,24 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="notification" type="NodeJSConfigurationType" folderName="microservices" node-parameters="--require ts-node/register" path-to-js-file="src/index.ts" working-dir="$PROJECT_DIR$/microservices/notification">
+    <envs>
+      <env name="DB_FROM_CONFIG_MS" value="0" />
+    </envs>
+    <method v="2" />
+  </configuration>
+  <configuration default="false" name="notification" type="mocha-javascript-test-runner" folderName="tests">
+    <node-interpreter>project</node-interpreter>
+    <node-options>--no-warnings</node-options>
+    <mocha-package>$PROJECT_DIR$/node_modules/mocha</mocha-package>
+    <working-directory>$PROJECT_DIR$/microservices/notification</working-directory>
+    <pass-parent-env>true</pass-parent-env>
+    <envs>
+      <env name="TS_NODE_COMPILER_OPTIONS" value="{&quot;target&quot;:&quot;es6&quot;}" />
+      <env name="NODE_ENV" value="tests" />
+    </envs>
+    <ui>bdd</ui>
+    <extra-mocha-options>--require ts-node/register --watch</extra-mocha-options>
+    <test-kind>PATTERN</test-kind>
+    <test-pattern>__tests__/**/*.ts</test-pattern>
+    <method v="2" />
+  </configuration>
+</component>
