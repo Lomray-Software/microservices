@@ -63,7 +63,7 @@ function createMicroservice() {
   universalSed "s/microservice-name/microservice-$NAME/g" "$MICROSERVICE_PATH/sonar-project.properties"
   universalSed "s/.eslintrc.js/..\/.eslintrc.js/g" "$MICROSERVICE_PATH/.eslintrc.js"
 
-  cd "$MICROSERVICE_PATH" && npm ci
+  cd "$MICROSERVICE_PATH" && npm i
 
   echo "Done."
 }
