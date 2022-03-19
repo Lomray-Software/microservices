@@ -4,6 +4,17 @@ notification
 RPC 2.0 Microservice.  
 This microservice provides notifications mechanism.
 
+![Version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fraw.githubusercontent.com%2FLomray-Software%2Fmicroservices%2Fstaging%2Fmicroservices%2Fnotification%2Fpackage.json&label=Staging%20version&query=$.version&colorB=blue)  
+![GitHub](https://img.shields.io/github/license/Lomray-Software/microservices)
+![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
+
+[![Quality Gate Status](https://sonarqube-proxy.lomray.com/status/microservice-notification?token=142fb5190911f1cc533062a3dc38f92c)](https://sonarqube.lomray.com/dashboard?id=microservice-notification)
+[![Reliability Rating](https://sonarqube-proxy.lomray.com/reliability/microservice-notification?token=142fb5190911f1cc533062a3dc38f92c)](https://sonarqube.lomray.com/dashboard?id=microservice-notification)
+[![Security Rating](https://sonarqube-proxy.lomray.com/security/microservice-notification?token=142fb5190911f1cc533062a3dc38f92c)](https://sonarqube.lomray.com/dashboard?id=microservice-notification)
+[![Vulnerabilities](https://sonarqube-proxy.lomray.com/vulnerabilities/microservice-notification?token=142fb5190911f1cc533062a3dc38f92c)](https://sonarqube.lomray.com/dashboard?id=microservice-notification)
+[![Lines of code](https://sonarqube-proxy.lomray.com/lines/microservice-notification?token=142fb5190911f1cc533062a3dc38f92c)](https://sonarqube.lomray.com/dashboard?id=microservice-notification)
+[![Coverage](https://sonarqube-proxy.lomray.com/coverage/microservice-notification?token=142fb5190911f1cc533062a3dc38f92c)](https://sonarqube.lomray.com/dashboard?id=microservice-notification)
+
 ## Navigation
 - [ENVIRONMENTS](#environments)
 - [HOW TO RUN](#how-to-run)
