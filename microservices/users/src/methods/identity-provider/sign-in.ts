@@ -1,4 +1,4 @@
-import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
+import { Endpoint, IsMeta, IsUndefinable } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsObject, IsString } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
@@ -24,7 +24,7 @@ class IdentityProviderSignInInput {
 }
 
 class IdentityProviderSignInOutput {
-  @IsObject()
+  @IsMeta()
   @Type(() => User)
   user: User;
 }
@@ -33,7 +33,11 @@ class IdentityProviderSignInOutput {
  * Sign in through identity provider
  */
 const signIn = Endpoint.custom(
-  () => ({ input: IdentityProviderSignInInput, output: IdentityProviderSignInOutput }),
+  () => ({
+    input: IdentityProviderSignInInput,
+    output: IdentityProviderSignInOutput,
+    description: 'Sign in user through identity provider',
+  }),
   async ({ provider, token, params }) => {
     const service = Factory.create(provider, token, getManager());
 

@@ -1,12 +1,13 @@
-import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
+import { Endpoint, IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsEnum, IsObject, IsString } from 'class-validator';
 import { FilterType } from '@constants/filter';
 import EndpointHandler from '@services/endpoint-handler';
 
 class EndpointFilterInput {
   @IsUndefinable()
+  @IsNullable()
   @IsString()
-  userId?: string;
+  userId?: string | null;
 
   @IsString()
   method: string;

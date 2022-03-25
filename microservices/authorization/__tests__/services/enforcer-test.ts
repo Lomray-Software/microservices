@@ -74,7 +74,7 @@ describe('services/enforcer', () => {
 
     const spyTreeFind = sandbox
       .stub(rolesTreeRepository, 'findOne')
-      .resolves(rolesTreeRepository.create({ parents: ['users', 'guests'] }));
+      .resolves(rolesTreeRepository.create({ path: ['users', 'guests'] }));
 
     const result = await service.findUserRoles();
 

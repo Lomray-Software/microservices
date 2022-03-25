@@ -14,7 +14,7 @@ export interface IEndpointHandlerParams {
   hasFilters: boolean;
   hasFilterInput: boolean;
   hasFilterOutput: boolean;
-  userId?: string;
+  userId?: string | null;
 }
 
 class EndpointHandler {
@@ -104,7 +104,7 @@ class EndpointHandler {
    * Get method enforcer
    * @private
    */
-  private getEnforcer(): Enforcer {
+  public getEnforcer(): Enforcer {
     if (this.enforcer) {
       return this.enforcer;
     }

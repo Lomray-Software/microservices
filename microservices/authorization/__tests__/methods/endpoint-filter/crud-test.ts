@@ -1,8 +1,11 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import {
   countResult,
+  createResult,
   endpointOptions,
   listResult,
+  updateResult,
+  viewResult,
 } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
@@ -41,7 +44,7 @@ describe('methods/endpoint-filter/crud', () => {
 
     const res = await Crud.view?.({ query: { where: { methodId: 1 } } }, endpointOptions);
 
-    expect(res).to.deep.equal(entity);
+    expect(res).to.deep.equal(viewResult(entity));
   });
 
   it('should correctly entity create', async () => {
@@ -56,7 +59,7 @@ describe('methods/endpoint-filter/crud', () => {
 
     const res = await Crud.create?.({ fields }, endpointOptions);
 
-    expect(res).to.deep.equal(fields);
+    expect(res).to.deep.equal(createResult(fields));
   });
 
   it('should correctly entity update', async () => {
@@ -76,7 +79,7 @@ describe('methods/endpoint-filter/crud', () => {
       endpointOptions,
     );
 
-    expect(res).to.deep.equal(fields);
+    expect(res).to.deep.equal(updateResult(fields));
   });
 
   it('should correctly entity remove', async () => {

@@ -38,7 +38,7 @@ class Token {
   @Length(1, 300)
   refresh: string | null;
 
-  @Column('timestamp', { default: null })
+  @Column({ type: 'int', width: 10, default: null })
   @IsNullable()
   @IsRFC3339() // timestamp validator
   expirationAt: number | null;

@@ -81,7 +81,11 @@ class ChangeLogin {
 
     user[this.confirmBy] = this.login;
 
-    const errors = await validate(user, { whitelist: true, forbidNonWhitelisted: true });
+    const errors = await validate(user, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      validationError: { target: false },
+    });
 
     if (errors.length > 0) {
       throw new BaseException({

@@ -1,5 +1,9 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
-import { endpointOptions, waitResult } from '@lomray/microservice-helpers/test-helpers';
+import {
+  createResult,
+  endpointOptions,
+  waitResult,
+} from '@lomray/microservice-helpers/test-helpers';
 import { MiddlewareType } from '@lomray/microservice-nodejs-lib';
 import { RemoteMiddlewareServer } from '@lomray/microservice-remote-middleware';
 import { expect } from 'chai';
@@ -41,7 +45,7 @@ describe('methods/middleware/create', () => {
 
     const res = await Create({ fields }, endpointOptions);
 
-    expect(res).to.deep.equal(fields);
+    expect(res).to.deep.equal(createResult(fields));
     expect(remoteRegisterStub).to.calledOnce;
   });
 

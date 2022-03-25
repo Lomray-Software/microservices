@@ -91,6 +91,7 @@ describe('methods/endpoint/enforce', () => {
 
       expect(res).to.deep.equal({
         isAllow: isAllowed,
+        roles: [undefined],
         filters: shouldCallMethodFilters ? {} : undefined,
         filteredInput: shouldCallFilters ? {} : undefined,
       });

@@ -2,6 +2,7 @@
   <configuration default="false" name="gateway" type="NodeJSConfigurationType" folderName="microservices" node-parameters="--require ts-node/register" path-to-js-file="src/index.ts" working-dir="$PROJECT_DIR$/microservices/gateway">
     <envs>
       <env name="DB_FROM_CONFIG_MS" value="0" />
+      <env name="MS_LISTENER_PORT" value="3005" />
     </envs>
     <method v="2" />
   </configuration>

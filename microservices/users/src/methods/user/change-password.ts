@@ -43,7 +43,11 @@ class ChangePasswordOutput {
  * Change user password
  */
 const changePassword = Endpoint.custom(
-  () => ({ input: ChangePasswordInput, output: ChangePasswordOutput }),
+  () => ({
+    input: ChangePasswordInput,
+    output: ChangePasswordOutput,
+    description: 'Change user password',
+  }),
   async ({ userId, newPassword, oldPassword, confirmBy, confirmCode }) => {
     const service = ChangePassword.init({
       userId,

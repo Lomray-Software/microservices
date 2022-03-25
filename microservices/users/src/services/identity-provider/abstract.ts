@@ -69,12 +69,14 @@ abstract class Abstract {
    */
   private async validateEntities(entitiesObj: (ObjectLiteral | undefined)[]): Promise<void> {
     const entities = entitiesObj.filter(Boolean) as ObjectLiteral[];
-    const errors = (
-      await Promise.all(
-        entities.map((entity) => validate(entity, { whitelist: true, forbidNonWhitelisted: true })),
-      )
-    ).map((entityErrors) =>
-      entityErrors.map(({ value, property, constraints }) => ({ value, property, constraints })),
+    const errors = await Promise.all(
+      entities.map((entity) =>
+        validate(entity, {
+          whitelist: true,
+          forbidNonWhitelisted: true,
+          validationError: { target: false },
+        }),
+      ),
     );
 
     if (errors.some((entityErrors) => entityErrors.length > 0)) {

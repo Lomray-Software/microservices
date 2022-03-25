@@ -1,5 +1,9 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
-import { endpointOptions } from '@lomray/microservice-helpers/test-helpers';
+import {
+  endpointOptions,
+  updateResult,
+  viewResult,
+} from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import { getRepository } from 'typeorm';
@@ -24,7 +28,7 @@ describe('methods/profile/crud', () => {
 
     const res = await Crud.view?.({ query: { where: { userId: 1 } } }, endpointOptions);
 
-    expect(res).to.deep.equal(entity);
+    expect(res).to.deep.equal(viewResult(entity));
   });
 
   it('should correctly entity update', async () => {
@@ -39,7 +43,7 @@ describe('methods/profile/crud', () => {
 
     const res = await Crud.update?.({ fields, query: { where: { userId: 1 } } }, endpointOptions);
 
-    expect(res).to.deep.equal(fields);
+    expect(res).to.deep.equal(updateResult(fields));
   });
 
   it("should haven't restore method", () => {

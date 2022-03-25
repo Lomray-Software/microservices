@@ -31,14 +31,15 @@
         "isInternal": true
       },
       "convertParams": {
-        "userId": "$task.payload.authentication.userId",
+        "userId": "$task.params.payload.authentication.userId",
         "method": "$task.method",
         "filterInput": "$task.params"
       },
       "convertResult": {
         ".": "$middleware.filteredInput",
-        "payload": "$task.payload",
+        "payload": "$task.params.payload",
         "payload.authorization.isAllow": "$middleware.isAllow",
+        "payload.authorization.roles": "$middleware.roles",
         "payload.authorization.filter": "$middleware.filters"
       }
     }
@@ -59,13 +60,12 @@
       },
       "convertParams": {
         "type": "out",
-        "userId": "$task.payload.authentication.userId",
+        "userId": "$task.params.payload.authentication.userId",
         "method": "$task.method",
         "filterInput": "$result"
       },
       "convertResult": {
-        ".": "$middleware.filtered",
-        "payload": "$task.payload"
+        ".": "$middleware.filtered"
       }
     }
   },
@@ -85,7 +85,7 @@
         "returnType": "cookies"
       },
       "convertResult": {
-        "payload.cookies": "$middleware.payload",
+        "payload.cookies": "$middleware.payload.cookies",
         "tokens.refresh": "$middleware.refresh"
       }
     }
@@ -106,7 +106,7 @@
         "returnType": "cookies"
       },
       "convertResult": {
-        "payload.cookies": "$middleware.payload",
+        "payload.cookies": "$middleware.payload.cookies",
         "tokens.refresh": "$middleware.refresh"
       }
     }
@@ -127,7 +127,7 @@
         "returnType": "cookies"
       },
       "convertResult": {
-        "payload.cookies": "$middleware.payload",
+        "payload.cookies": "$middleware.payload.cookies",
         "tokens.refresh": "$middleware.refresh"
       }
     }
@@ -144,6 +144,10 @@
       "strategy": "transform",
       "convertParams": {
         "query.where.userId": "$task.params.userId"
+      },
+      "convertResult": {
+        "payload.cookies.0.action": "remove",
+        "payload.cookies.0.name": "jwt-access"
       }
     }
   }

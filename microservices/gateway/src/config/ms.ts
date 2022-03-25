@@ -6,7 +6,9 @@ import {
   MS_BATCH_LIMIT,
   MS_CONNECTION,
   MS_CONNECTION_SRV,
+  MS_CORS_CONFIG,
   MS_INFO_ROUTE,
+  MS_LISTENER_PORT,
   MS_NAME,
   MS_REQ_TIMEOUT,
 } from '@constants/index';
@@ -22,6 +24,7 @@ const msOptions: Partial<IGatewayOptions> = {
   batchLimit: MS_BATCH_LIMIT,
   infoRoute: MS_INFO_ROUTE,
   reqTimeout: MS_REQ_TIMEOUT,
+  listener: `0.0.0.0:${MS_LISTENER_PORT}`,
   version,
 };
 
@@ -30,11 +33,7 @@ const msOptions: Partial<IGatewayOptions> = {
  */
 const msParams: Partial<IGatewayParams> = {
   beforeRoute: (express) => {
-    express.use(
-      cors({
-        exposedHeaders: ['Guest-Id', 'Jwt-Access-Token', 'Jwt-Refresh-Token'],
-      }),
-    );
+    express.use(cors(MS_CORS_CONFIG));
   },
   logDriver: ConsoleLogDriver((_, message) => Log.info(message)),
 };

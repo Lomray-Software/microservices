@@ -49,7 +49,11 @@ class SignUp {
    */
   public async register(): Promise<User> {
     const entity = this.repository.create(this.fields);
-    const errors = await validate(entity, { whitelist: true, forbidNonWhitelisted: true });
+    const errors = await validate(entity, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      validationError: { target: false },
+    });
 
     if (errors.length > 0) {
       throw new BaseException({

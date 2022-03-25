@@ -1,16 +1,53 @@
+### Step 1. Send verification code for sign up (new user).
 POST http://127.0.0.1:3000
 Accept: application/json
 Content-Type: application/json
 
 {
   "id": "1",
-  "method": "users.user.view"
+  "method": "users.confirm-code.send",
+  "params": {
+    "type": "email",
+    "login": "test@test.com"
+  }
 }
 
-###
+### Step 2. Sign up (create new user)
 POST http://127.0.0.1:3000
 Accept: application/json
 Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "users.user.sign-up",
+  "params": {
+    "fields": {
+      "firstName": "Mike",
+      "email": "test@test.com",
+      "password": "123456789"
+    },
+    "confirmBy": "email",
+    "confirmCode": 666409
+  }
+}
+
+### Step 3. View created user
+POST http://127.0.0.1:3000
+Accept: application/json
+Content-Type: application/json
+# paste cookies from previous step
+Cookie: jwt-access=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxYmQ2MzAzNS1mMWViLTRjOGEtODc4My00NTNkMzRjOTQyYjEiLCJpYXQiOjE2NDgyMTQ3ODcsImV4cCI6MTY0ODIxNjU4NywianRpIjoiOWNlNTUzMWMtYmU5Ny00NzJhLTg1YTAtZmFlOTBhYzg3NmE1In0.cvSSKHcP-6rLLVy6RSqiSACyRA1fkwmIeKQqdDJE-2c;
+
+{
+  "id": "1",
+  "method": "users.user.view"
+}
+
+### View list of users (this method should be not allowed for user, only admin)
+POST http://127.0.0.1:3000
+Accept: application/json
+Content-Type: application/json
+Cookie: jwt-access=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxYmQ2MzAzNS1mMWViLTRjOGEtODc4My00NTNkMzRjOTQyYjEiLCJpYXQiOjE2NDgyMTQ3ODcsImV4cCI6MTY0ODIxNjU4NywianRpIjoiOWNlNTUzMWMtYmU5Ny00NzJhLTg1YTAtZmFlOTBhYzg3NmE1In0.cvSSKHcP-6rLLVy6RSqiSACyRA1fkwmIeKQqdDJE-2c;
 
 {
   "id": "1",
@@ -18,7 +55,6 @@ Content-Type: application/json
 }
 
 ### Special system request for import authorization entities
-
 #POST http://127.0.0.1:8001/ms/authorization
 #Accept: application/json
 #Content-Type: application/json

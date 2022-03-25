@@ -1,6 +1,6 @@
-import { Endpoint } from '@lomray/microservice-helpers';
+import { Endpoint, IsMeta } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsObject, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { getCustomRepository } from 'typeorm';
 import User from '@entities/user';
 import UserRepository from '@repositories/user';
@@ -17,8 +17,8 @@ class SignInInput {
 }
 
 class SignInOutput {
+  @IsMeta()
   @Type(() => User)
-  @IsObject()
   user: User;
 }
 

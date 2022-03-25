@@ -2,6 +2,7 @@ import { BaseException, Microservice, MicroserviceResponse } from '@lomray/micro
 import { expect } from 'chai';
 import sinon, { SinonStub } from 'sinon';
 import RemoteConfig from '@services/remote-config';
+import { viewResult } from '@test-helpers/mock-args';
 import waitResult from '@test-helpers/wait-result';
 
 describe('services/remote-config', () => {
@@ -39,7 +40,7 @@ describe('services/remote-config', () => {
   it('should correctly get remote config', async () => {
     sandbox.stub(ms, 'sendRequest').resolves(
       new MicroserviceResponse({
-        result: { params: result },
+        result: viewResult({ params: result }),
       }),
     );
 
@@ -51,7 +52,7 @@ describe('services/remote-config', () => {
   it('should correctly get common remote config if personal not exist', async () => {
     const stub = sandbox.stub(ms, 'sendRequest').resolves(
       new MicroserviceResponse({
-        result: { params: result },
+        result: viewResult({ params: result }),
       }),
     );
 
@@ -87,7 +88,7 @@ describe('services/remote-config', () => {
   it('should correctly force get cached config', async () => {
     sandbox.stub(ms, 'sendRequest').resolves(
       new MicroserviceResponse({
-        result: { params: otherParams },
+        result: viewResult({ params: otherParams }),
       }),
     );
 

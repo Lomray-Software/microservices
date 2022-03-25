@@ -6,6 +6,7 @@ import { SelectQueryBuilder } from 'typeorm/query-builder/SelectQueryBuilder';
 import TestEntity from '@__mocks__/entities/test-entity';
 import { TypeormMock } from '@mocks/index';
 import {
+  CreateOutputParams,
   CreateRequestParams,
   Endpoint,
   ListOutputParams,
@@ -248,14 +249,14 @@ describe('services/endpoint', () => {
 
     it('should call custom handler with fields', async () => {
       const customHandler = sandbox
-        .stub<Record<string, any>[], TestEntity>()
-        .callsFake((reqEntityFields) => ({ ...reqEntityFields, id: 1 } as TestEntity));
+        .stub<Record<string, any>[], CreateOutputParams<TestEntity>>()
+        .callsFake((reqEntityFields) => ({ entity: { ...reqEntityFields, id: 1 } as TestEntity }));
       const createWithCustomHandler = Endpoint.create?.(() => ({ repository }), customHandler);
 
       const result = await createWithCustomHandler(reqParams, endpointOptions);
       const [fields, params, options] = customHandler.firstCall.args;
 
-      expect(result).to.deep.equal({ ...entityFields, id: 1 });
+      expect(result?.entity).to.deep.equal({ ...entityFields, id: 1 });
       expect(fields).to.deep.equal(entityFields);
       expect(params).to.deep.equal(reqParams);
       expect(options).to.deep.equal(endpointOptions);
@@ -378,7 +379,10 @@ describe('services/endpoint', () => {
           Endpoint.defaultParams.create.input.name,
           new Endpoint.defaultParams.create.input(repository),
         ],
-        output: [TestEntity.name, undefined],
+        output: [
+          Endpoint.defaultParams.create.output.name,
+          new Endpoint.defaultParams.create.output(repository),
+        ],
         description: 'Create a new TestEntity',
       });
     });
@@ -386,7 +390,7 @@ describe('services/endpoint', () => {
 
   describe('view', () => {
     const viewHandler = Endpoint.view?.(() => ({ repository }), handler);
-    const defaultHandlerStub = sandbox.stub(Endpoint.defaultHandler, 'view').resolves(entity);
+    const defaultHandlerStub = sandbox.stub(Endpoint.defaultHandler, 'view').resolves({ entity });
 
     beforeEach(() => {
       defaultHandlerStub.resetHistory();
@@ -399,7 +403,7 @@ describe('services/endpoint', () => {
       const [queryBuilder] = defaultHandlerStub.firstCall.args;
 
       expect(queryBuilder).to.be.instanceof(SelectQueryBuilder);
-      expect(result).to.deep.equal(entity);
+      expect(result).to.deep.equal({ entity });
     });
 
     it('should run default view handler with query builder: query builder case', async () => {
@@ -411,7 +415,7 @@ describe('services/endpoint', () => {
       const [queryBuilder] = defaultHandlerStub.firstCall.args;
 
       expect(queryBuilder).to.be.instanceof(SelectQueryBuilder);
-      expect(result).to.deep.equal(entity);
+      expect(result).to.deep.equal({ entity });
     });
 
     it('should return custom result: entity', async () => {
@@ -454,7 +458,7 @@ describe('services/endpoint', () => {
         repository.createQueryBuilder().where('id = 1'),
       );
 
-      expect(result).to.deep.equal(entity);
+      expect(result).to.deep.equal({ entity });
     });
 
     it('should run default handler metadata: view', () => {
@@ -462,7 +466,10 @@ describe('services/endpoint', () => {
 
       expect(viewDefaultHandler.getMeta()).to.deep.equal({
         input: [Endpoint.defaultParams.view.input.name, new Endpoint.defaultParams.view.input()],
-        output: [TestEntity.name, undefined],
+        output: [
+          Endpoint.defaultParams.view.output.name,
+          new Endpoint.defaultParams.view.output(repository),
+        ],
         description: 'Returns TestEntity by given condition',
       });
     });
@@ -470,7 +477,7 @@ describe('services/endpoint', () => {
 
   describe('update', () => {
     const updateHandler = Endpoint.update?.(() => ({ repository }), handler);
-    const defaultHandlerStub = sandbox.stub(Endpoint.defaultHandler, 'update').resolves(entity);
+    const defaultHandlerStub = sandbox.stub(Endpoint.defaultHandler, 'update').resolves({ entity });
 
     beforeEach(() => {
       defaultHandlerStub.resetHistory();
@@ -485,7 +492,7 @@ describe('services/endpoint', () => {
       expect(queryBuilder).to.be.instanceof(SelectQueryBuilder);
       expect(passedFields).to.deep.equal({ param: entity.param });
       expect(passedRepo).to.equal(repository);
-      expect(result).to.deep.equal(entity);
+      expect(result).to.deep.equal({ entity });
     });
 
     it('should run default update handler with query builder: query builder case', async () => {
@@ -496,7 +503,7 @@ describe('services/endpoint', () => {
       const [queryBuilder] = defaultHandlerStub.firstCall.args;
 
       expect(queryBuilder).to.be.instanceof(SelectQueryBuilder);
-      expect(result).to.deep.equal(entity);
+      expect(result).to.deep.equal({ entity });
     });
 
     it('should run default update handler with query builder: params typeorm case', async () => {
@@ -508,7 +515,7 @@ describe('services/endpoint', () => {
 
       expect(queryBuilder).to.be.instanceof(SelectQueryBuilder);
       expect(passedFields).to.deep.equal({ param: entity.param });
-      expect(result).to.deep.equal(entity);
+      expect(result).to.deep.equal({ entity });
     });
 
     it('should run default update handler with query builder: params query builder case', async () => {
@@ -522,7 +529,7 @@ describe('services/endpoint', () => {
 
       expect(queryBuilder).to.be.instanceof(SelectQueryBuilder);
       expect(passedFields).to.deep.equal(customFields);
-      expect(result).to.deep.equal(entity);
+      expect(result).to.deep.equal({ entity });
     });
 
     it('should throw error if handler return empty', async () => {

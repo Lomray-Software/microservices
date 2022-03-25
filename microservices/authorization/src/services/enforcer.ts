@@ -7,7 +7,7 @@ import RolesTree from '@entities/roles-tree';
 import UserRole from '@entities/user-role';
 
 export interface IEnforcerParams {
-  userId?: string;
+  userId?: string | null;
   defaultRole: string;
   userRoleRepository: Repository<UserRole>;
   rolesTreeRepository: Repository<RolesTree>;
@@ -117,9 +117,9 @@ class Enforcer {
     const { userId, roleAlias } = (await this.userRoleRepository.findOne({
       userId: this.userId,
     })) ?? { userId: this.userId, roleAlias: this.defaultRole };
-    const { parents } = (await this.rolesTreeRepository.findOne({ alias: roleAlias })) ?? {};
+    const { path } = (await this.rolesTreeRepository.findOne({ alias: roleAlias })) ?? {};
 
-    this.userInfo = { userId, roles: parents ?? [roleAlias] };
+    this.userInfo = { userId, roles: path ?? [roleAlias] };
 
     return this.userInfo;
   }

@@ -1,4 +1,4 @@
-import { Endpoint, IsType } from '@lomray/microservice-helpers';
+import { Endpoint, IsMeta, IsType } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsObject } from 'class-validator';
 import { getCustomRepository, getRepository } from 'typeorm';
@@ -22,7 +22,7 @@ class SignUpInput {
 }
 
 class SignUpOutput {
-  @IsObject()
+  @IsMeta()
   @Type(() => User)
   user: User;
 }
@@ -32,7 +32,7 @@ class SignUpOutput {
  * NOTE: before call this method, you need send confirmation code, see 'confirm-code.send'
  */
 const signUp = Endpoint.custom(
-  () => ({ input: SignUpInput, output: SignUpOutput }),
+  () => ({ input: SignUpInput, output: SignUpOutput, description: 'Sign up user' }),
   async ({ fields, confirmBy, confirmCode }) => {
     const confirmService = Factory.create(confirmBy, getRepository(ConfirmCode));
     const service = SignUp.init({

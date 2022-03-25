@@ -1,5 +1,5 @@
 import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, Length, IsEmail, IsMobilePhone } from 'class-validator';
+import { Allow, Length, IsEmail, IsMobilePhone, IsString } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -60,6 +60,7 @@ class User {
   @Column({ type: 'varchar', select: false, default: null })
   @IsUndefinable()
   @IsNullable()
+  @IsString()
   password: null | string;
 
   @CreateDateColumn()

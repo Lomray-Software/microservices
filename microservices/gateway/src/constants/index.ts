@@ -14,6 +14,10 @@ const MS_BATCH_LIMIT = Number(process.env.MS_BATCH_LIMIT) || undefined;
 const MS_INFO_ROUTE = process.env.MS_INFO_ROUTE || undefined;
 const MS_REQ_TIMEOUT = Number(process.env.MS_REQ_TIMEOUT) || undefined;
 const MS_ENABLE_REMOTE_MIDDLEWARE = Number(process.env.MS_ENABLE_REMOTE_MIDDLEWARE ?? 1);
+const MS_LISTENER_PORT = process.env.MS_LISTENER_PORT || 3000;
+const MS_CORS_CONFIG = JSON.parse(
+  process.env.MS_CORS_CONFIG || '{"origin":["http://localhost:3000"],"credentials":true}',
+);
 
 export {
   MS_NAME,
@@ -24,6 +28,8 @@ export {
   MS_INFO_ROUTE,
   MS_REQ_TIMEOUT,
   MS_ENABLE_REMOTE_MIDDLEWARE,
+  MS_LISTENER_PORT,
+  MS_CORS_CONFIG,
   ENV,
   IS_PROD,
   IS_DEV,

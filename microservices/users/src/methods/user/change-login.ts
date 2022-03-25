@@ -32,7 +32,7 @@ class ChangeLoginOutput {
  * Change user login, e.g.: email, phone
  */
 const changeLogin = Endpoint.custom(
-  () => ({ input: ChangeLoginInput, output: ChangeLoginOutput }),
+  () => ({ input: ChangeLoginInput, output: ChangeLoginOutput, description: 'Change user login' }),
   async ({ userId, login, confirmBy, confirmCode }) => {
     const confirmService = Factory.create(confirmBy, getRepository(ConfirmCode));
     const service = ChangeLogin.init({

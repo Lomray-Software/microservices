@@ -11,7 +11,7 @@ class ConfirmCode {
   @Length(1, 10)
   code: string | number;
 
-  @Column('timestamp')
+  @Column({ type: 'int', width: 10 })
   @IsRFC3339() // timestamp validator
   expirationAt: number;
 

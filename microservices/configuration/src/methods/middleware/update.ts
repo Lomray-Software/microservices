@@ -15,7 +15,7 @@ const update = Endpoint.update(
     description: 'Update middleware and update it on target microservice workers',
   }),
   async (typeQuery, fields: Partial<Middleware>) => {
-    const entity = await Endpoint.defaultHandler.update<Middleware>(
+    const { entity } = await Endpoint.defaultHandler.update<Middleware>(
       typeQuery.toQuery(),
       fields,
       getRepository(Middleware),
@@ -32,7 +32,7 @@ const update = Endpoint.update(
       params,
     });
 
-    return { result: entity };
+    return { result: { entity } };
   },
 );
 

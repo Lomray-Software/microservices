@@ -135,7 +135,7 @@ class RemoteConfig {
       throw config.getError();
     }
 
-    const result = config.getResult()?.params;
+    const result = config.getResult()?.entity?.params;
 
     if (!result && isThrowNotExist) {
       throw new Error(`Configuration for param "${paramName}" doesn't exist.`);

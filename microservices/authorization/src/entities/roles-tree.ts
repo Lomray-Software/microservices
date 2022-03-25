@@ -24,7 +24,7 @@ class RolesTree {
    * E.g.: users => guest (not guest => users)
    */
   @ViewColumn()
-  parents: string[];
+  path: string[];
 
   @ViewColumn()
   depth: number;

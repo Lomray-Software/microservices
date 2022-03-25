@@ -1,5 +1,9 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
-import { endpointOptions, waitResult } from '@lomray/microservice-helpers/test-helpers';
+import {
+  createResult,
+  endpointOptions,
+  waitResult,
+} from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import OriginalUserRoleAssign from '@methods/user-role/assign';
@@ -18,7 +22,7 @@ describe('methods/config/create', () => {
   it('should correctly assign role', async () => {
     const res = await Assign({ fields: { userId: 'test', roleAlias: 'users' } }, endpointOptions);
 
-    expect(res).to.deep.equal({});
+    expect(res).to.deep.equal(createResult({}));
   });
 
   it('should throw error when we pass empty fields', async () => {

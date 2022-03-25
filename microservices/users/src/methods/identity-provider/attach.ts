@@ -1,4 +1,4 @@
-import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
+import { Endpoint, IsMeta, IsUndefinable } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsObject, IsString } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
@@ -28,7 +28,7 @@ class IdentityProviderAttachInput {
 }
 
 class IdentityProviderAttachOutput {
-  @IsObject()
+  @IsMeta()
   @Type(() => User)
   user: User;
 }

@@ -15,12 +15,12 @@ const create = Endpoint.create(
     description: 'Create middleware and register it on target microservice workers',
   }),
   async (fields) => {
-    const entity = (await Endpoint.defaultHandler.create<Middleware, Middleware>({
+    const result = await Endpoint.defaultHandler.create<Middleware>({
       fields,
       repository: getRepository(Middleware),
-    })) as Middleware;
+    });
 
-    const { target, targetMethod, sender, senderMethod, params } = entity;
+    const { target, targetMethod, sender, senderMethod, params } = result.entity as Middleware;
 
     await RemoteMiddlewareServer.getInstance().remoteRegister({
       action: RemoteMiddlewareActionType.ADD,
@@ -31,7 +31,7 @@ const create = Endpoint.create(
       params,
     });
 
-    return entity;
+    return result;
   },
 );
 

@@ -17,7 +17,7 @@ class SignOutOutput {
  * This method only for add remote middlewares (e.g.: remove auth tokens from authentication microservice)
  */
 const signOut = Endpoint.custom(
-  () => ({ input: SignOutInput, output: SignOutOutput }),
+  () => ({ input: SignOutInput, output: SignOutOutput, description: 'Sign out user' }),
   () => ({
     loggedOut: true,
   }),

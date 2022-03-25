@@ -9,6 +9,7 @@ import CrudModel from '@methods/model/crud';
 import CrudRole from '@methods/role/crud';
 import ServiceSyncMetadata from '@methods/service/sync-metadata';
 import UserRoleAssign from '@methods/user-role/assign';
+import UserRoleMy from '@methods/user-role/my';
 import UserRoleRemove from '@methods/user-role/remove';
 
 /**
@@ -37,6 +38,7 @@ export default (ms: Microservice): void => {
    */
   ms.addEndpoint('user-role.assign', UserRoleAssign, { isPrivate: true });
   ms.addEndpoint('user-role.remove', UserRoleRemove, { isPrivate: true });
+  ms.addEndpoint('user-role.my', UserRoleMy);
 
   /**
    * Extra methods for endpoint

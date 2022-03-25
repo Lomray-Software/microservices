@@ -137,6 +137,16 @@ class ViewRequestParams<TEntity> {
   query: IJsonQuery<TEntity>;
 }
 
+class ViewOutputParams<TEntity> {
+  constructor(repository: Repository<TEntity>) {
+    // it will need for make documentation
+    Object.assign(this, { entity: repository.metadata.name });
+  }
+
+  @IsObject()
+  entity: TEntity;
+}
+
 class CreateRequestParams<TEntity> {
   constructor(repository: Repository<TEntity>) {
     // it will need for make documentation
@@ -151,6 +161,16 @@ class CreateRequestParams<TEntity> {
   fields: Partial<TEntity | TEntity[]>;
 }
 
+class CreateOutputParams<TEntity> {
+  constructor(repository: Repository<TEntity>) {
+    // it will need for make documentation
+    Object.assign(this, { entity: repository.metadata.name });
+  }
+
+  @IsObject()
+  entity: TEntity;
+}
+
 class UpdateRequestParams<TEntity> {
   constructor(repository: Repository<TEntity>) {
     // it will need for make documentation
@@ -163,6 +183,16 @@ class UpdateRequestParams<TEntity> {
   @IsObject()
   @Type(() => IJsonQueryFilter)
   query: IJsonQuery<TEntity>;
+}
+
+class UpdateOutputParams<TEntity> {
+  constructor(repository: Repository<TEntity>) {
+    // it will need for make documentation
+    Object.assign(this, { entity: repository.metadata.name });
+  }
+
+  @IsObject()
+  entity: TEntity;
 }
 
 class RemoveRequestParams<TEntity> {
@@ -221,13 +251,15 @@ type IListLazyResult<TEntity, TResult> =
       query?: TypeormJsonQuery<TEntity> | SelectQueryBuilder<TEntity>;
     } & TResult);
 
-type IViewLazyResult<TEntity, TResult> =
+type IViewLazyResult<TEntity, TResult = never> =
   | TypeormJsonQuery<TEntity>
   | SelectQueryBuilder<TEntity>
-  | TEntity
+  | ViewOutputParams<TEntity>
   | TResult;
 
-type ICreateLazyResult<TEntity, TResult> = TEntity | TEntity[] | TResult;
+type ICreateLazyResult<TEntity, TResult = never> =
+  | CreateOutputParams<TEntity | TEntity[]>
+  | TResult;
 
 type IUpdateLazyResult<TEntity, TResult> =
   | TypeormJsonQuery<TEntity>
@@ -235,7 +267,7 @@ type IUpdateLazyResult<TEntity, TResult> =
   | {
       query?: TypeormJsonQuery<TEntity> | SelectQueryBuilder<TEntity>;
       fields?: Partial<TEntity>;
-      result?: TEntity | TResult;
+      result?: UpdateOutputParams<TEntity> | TResult;
     };
 
 type IRemoveLazyResult<TEntity> =
@@ -318,9 +350,15 @@ interface IControllerMethodsParams<TEntity> {
   list: TControllerMethodParam<
     IListParams<TEntity, ListRequestParams<TEntity>, ListOutputParams<TEntity>>
   >;
-  view: TControllerMethodParam<IViewParams<TEntity, ViewRequestParams<TEntity>, TEntity>>;
-  create: TControllerMethodParam<ICreateParams<TEntity, CreateRequestParams<TEntity>, TEntity>>;
-  update: TControllerMethodParam<IUpdateParams<TEntity, UpdateRequestParams<TEntity>, TEntity>>;
+  view: TControllerMethodParam<
+    IViewParams<TEntity, ViewRequestParams<TEntity>, ViewOutputParams<TEntity>>
+  >;
+  create: TControllerMethodParam<
+    ICreateParams<TEntity, CreateRequestParams<TEntity>, CreateOutputParams<TEntity>>
+  >;
+  update: TControllerMethodParam<
+    IUpdateParams<TEntity, UpdateRequestParams<TEntity>, UpdateOutputParams<TEntity>>
+  >;
   remove: TControllerMethodParam<
     IRemoveParams<TEntity, RemoveRequestParams<TEntity>, RemoveOutputParams<TEntity>>
   >;
@@ -342,14 +380,24 @@ interface IControllerReturn<TEntity> {
     Record<string, any>,
     ListOutputParams<TEntity>
   >;
-  view: IReturnWithMeta<TEntity, ViewRequestParams<TEntity>, Record<string, any>, TEntity>;
+  view: IReturnWithMeta<
+    TEntity,
+    ViewRequestParams<TEntity>,
+    Record<string, any>,
+    ViewOutputParams<TEntity>
+  >;
   create: IReturnWithMeta<
     TEntity,
     CreateRequestParams<TEntity>,
     Record<string, any>,
-    ICreateLazyResult<TEntity, never>
+    ICreateLazyResult<TEntity>
   >;
-  update: IReturnWithMeta<TEntity, UpdateRequestParams<TEntity>, Record<string, any>, TEntity>;
+  update: IReturnWithMeta<
+    TEntity,
+    UpdateRequestParams<TEntity>,
+    Record<string, any>,
+    UpdateOutputParams<TEntity>
+  >;
   remove: IReturnWithMeta<
     TEntity,
     RemoveRequestParams<TEntity>,
@@ -464,7 +512,7 @@ const getQueryList = async <TEntity>(
 /**
  * Default handler for create entity(ies)
  */
-const createDefaultHandler = async <TEntity, TResult>({
+const createDefaultHandler = async <TEntity, TResult = never>({
   fields,
   repository,
   isAllowMultiple = false,
@@ -487,12 +535,14 @@ const createDefaultHandler = async <TEntity, TResult>({
   const entities: (TEntity & Partial<TEntity>)[] = entitiesAttributes.map((attributes) =>
     Object.assign(repository.create(), attributes),
   );
-  const errors = (
-    await Promise.all(
-      entities.map((entity) => validate(entity, { whitelist: true, forbidNonWhitelisted: true })),
-    )
-  ).map((entityErrors) =>
-    entityErrors.map(({ value, property, constraints }) => ({ value, property, constraints })),
+  const errors = await Promise.all(
+    entities.map((entity) =>
+      validate(entity, {
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        validationError: { target: false },
+      }),
+    ),
   );
 
   if (errors.some((entityErrors) => entityErrors.length > 0)) {
@@ -507,7 +557,7 @@ const createDefaultHandler = async <TEntity, TResult>({
   try {
     const result = await repository.save(entities, { chunk: 20 });
 
-    return isArray ? result : result[0];
+    return { entity: isArray ? result : result[0] };
   } catch (e) {
     const { detail } = e;
     let { message } = e;
@@ -532,7 +582,7 @@ const createDefaultHandler = async <TEntity, TResult>({
  */
 const viewDefaultHandler = async <TEntity>(
   query: SelectQueryBuilder<TEntity>,
-): Promise<TEntity> => {
+): Promise<ViewOutputParams<TEntity>> => {
   if (hasEmptyCondition(query)) {
     throw new BaseException({
       code: CRUD_EXCEPTION_CODE.VALIDATION_FAILED,
@@ -561,7 +611,7 @@ const viewDefaultHandler = async <TEntity>(
     });
   }
 
-  return targets[0];
+  return { entity: targets[0] };
 };
 
 /**
@@ -573,7 +623,7 @@ const updateDefaultHandler = async <TEntity>(
   query: SelectQueryBuilder<TEntity>,
   fields: Partial<TEntity>,
   repository: ICrudParams<TEntity>['repository'],
-): Promise<TEntity> => {
+): Promise<UpdateOutputParams<TEntity>> => {
   // catch attempting pass empty fields for update
   if (Object.keys(fields).length === 0) {
     throw new BaseException({
@@ -583,11 +633,13 @@ const updateDefaultHandler = async <TEntity>(
     });
   }
 
-  const target = await viewDefaultHandler(query);
-  const result = Object.assign(target, fields);
-  const errors = (await validate(result, { whitelist: true, forbidNonWhitelisted: true })).map(
-    ({ value, property, constraints }) => ({ value, property, constraints }),
-  );
+  const { entity } = await viewDefaultHandler(query);
+  const result = Object.assign(entity, fields);
+  const errors = await validate(result, {
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    validationError: { target: false },
+  });
 
   if (errors.length > 0) {
     throw new BaseException({
@@ -599,7 +651,7 @@ const updateDefaultHandler = async <TEntity>(
   }
 
   try {
-    return await repository.save(result);
+    return { entity: await repository.save(result) };
   } catch (e) {
     throw new BaseException({
       code: CRUD_EXCEPTION_CODE.FAILED_UPDATE,
@@ -816,12 +868,12 @@ class Endpoint {
     },
     view: {
       input: ViewRequestParams,
-      output: null,
+      output: ViewOutputParams,
       description: (name = 'entity'): string => `Returns ${name} by given condition`,
     },
     create: {
       input: CreateRequestParams,
-      output: null,
+      output: CreateOutputParams,
       description: (name = 'entity'): string => `Create a new ${name}`,
     },
     update: {
@@ -982,7 +1034,7 @@ class Endpoint {
    */
   static view<
     TParams extends ViewRequestParams<TEntity>,
-    TResult extends TEntity,
+    TResult extends ViewOutputParams<TEntity>,
     TEntity = ObjectLiteral,
     TPayload = Record<string, any>,
   >(
@@ -994,29 +1046,27 @@ class Endpoint {
       TEntity,
       IViewLazyResult<TEntity, TResult>
     > = defaultHandler,
-  ): IReturnWithMeta<TEntity, TParams, TPayload, TEntity | TResult> {
-    const viewHandler: IReturn<TEntity, TParams, TPayload, TEntity | TResult> = async function (
-      params,
-      options,
-    ) {
-      const { repository, queryOptions } = viewOptions();
-      const typeQuery = createTypeQuery(repository.createQueryBuilder(), params, {
-        ...queryOptions,
-        isDisableOrderBy: true,
-        isDisablePagination: true,
-      });
-      const result = await handler(typeQuery, params, options);
+  ): IReturnWithMeta<TEntity, TParams, TPayload, ViewOutputParams<TEntity> | TResult> {
+    const viewHandler: IReturn<TEntity, TParams, TPayload, ViewOutputParams<TEntity> | TResult> =
+      async function (params, options) {
+        const { repository, queryOptions } = viewOptions();
+        const typeQuery = createTypeQuery(repository.createQueryBuilder(), params, {
+          ...queryOptions,
+          isDisableOrderBy: true,
+          isDisablePagination: true,
+        });
+        const result = await handler(typeQuery, params, options);
 
-      if (result instanceof TypeormJsonQuery) {
-        return Endpoint.defaultHandler.view(result.toQuery());
-      }
+        if (result instanceof TypeormJsonQuery) {
+          return Endpoint.defaultHandler.view(result.toQuery());
+        }
 
-      if (result instanceof SelectQueryBuilder) {
-        return Endpoint.defaultHandler.view(result);
-      }
+        if (result instanceof SelectQueryBuilder) {
+          return Endpoint.defaultHandler.view(result);
+        }
 
-      return result;
-    };
+        return result;
+      };
 
     return withMeta(viewHandler, viewOptions, Endpoint.defaultParams.view);
   }
@@ -1026,7 +1076,7 @@ class Endpoint {
    */
   static create<
     TParams extends CreateRequestParams<TEntity>,
-    TResult extends TEntity,
+    TResult extends CreateOutputParams<TEntity>,
     TEntity = ObjectLiteral,
     TPayload = Record<string, any>,
   >(
@@ -1063,17 +1113,19 @@ class Endpoint {
    */
   static update<
     TParams extends UpdateRequestParams<TEntity>,
-    TResult extends TEntity,
+    TResult extends UpdateOutputParams<TEntity>,
     TEntity = ObjectLiteral,
     TPayload = Record<string, any>,
   >(
     updateOptions: TOptions<IUpdateParams<TEntity, TParams, TResult>>,
     handler: ICrudUpdateHandler<TParams, TPayload, TResult, TEntity> = defaultHandler,
-  ): IReturnWithMeta<TEntity, TParams, TPayload, TEntity | TResult> {
-    const updateHandler: IReturn<TEntity, TParams, TPayload, TEntity | TResult> = async function (
-      params,
-      options,
-    ) {
+  ): IReturnWithMeta<TEntity, TParams, TPayload, UpdateOutputParams<TEntity> | TResult> {
+    const updateHandler: IReturn<
+      TEntity,
+      TParams,
+      TPayload,
+      UpdateOutputParams<TEntity> | TResult
+    > = async function (params, options) {
       const { repository, queryOptions } = updateOptions();
       const typeQuery = createTypeQuery(repository.createQueryBuilder(), params, {
         ...queryOptions,
@@ -1262,6 +1314,7 @@ class Endpoint {
       if (typeof input === 'function') {
         const errors = await validate(Object.assign(new input(), params), {
           whitelist: true,
+          validationError: { target: false },
         });
 
         if (errors.length > 0) {
@@ -1296,6 +1349,7 @@ class Endpoint {
       if (typeof input === 'function') {
         const errors = await validate(Object.assign(new input(), params), {
           whitelist: true,
+          validationError: { target: false },
         });
 
         if (errors.length > 0) {
@@ -1322,8 +1376,11 @@ export {
   ListRequestParams,
   ListOutputParams,
   ViewRequestParams,
+  ViewOutputParams,
   CreateRequestParams,
+  CreateOutputParams,
   UpdateRequestParams,
+  UpdateOutputParams,
   RemoveRequestParams,
   RemoveOutputParams,
   RestoreRequestParams,

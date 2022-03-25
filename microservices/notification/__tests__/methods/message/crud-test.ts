@@ -3,6 +3,7 @@ import {
   countResult,
   endpointOptions,
   listResult,
+  viewResult,
 } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
@@ -38,7 +39,7 @@ describe('methods/message/crud', () => {
 
     const res = await Crud.view?.({ query: { where: { id: 1 } } }, endpointOptions);
 
-    expect(res).to.deep.equal(entity);
+    expect(res).to.deep.equal(viewResult(entity));
   });
 
   it("should haven't restore method", () => {

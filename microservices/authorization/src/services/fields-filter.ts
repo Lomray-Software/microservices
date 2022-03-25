@@ -5,7 +5,7 @@ import { FilterType } from '@constants/filter';
 import Model, { IModelSchema, IRolePermissions } from '@entities/model';
 
 export interface IFieldsFilter {
-  userId?: string;
+  userId?: string | null;
   userRoles: string[];
   modelRepository: Repository<Model>;
 }

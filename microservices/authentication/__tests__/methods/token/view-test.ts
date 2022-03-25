@@ -1,5 +1,5 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
-import { endpointOptions } from '@lomray/microservice-helpers/test-helpers';
+import { endpointOptions, viewResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import OriginalTokenView from '@methods/token/view';
@@ -22,6 +22,6 @@ describe('methods/token/view', () => {
 
     const res = await View({ query: { where: { id: 1 } } }, endpointOptions);
 
-    expect(res).to.deep.equal(entity);
+    expect(res).to.deep.equal(viewResult(entity));
   });
 });

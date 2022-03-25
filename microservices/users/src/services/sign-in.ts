@@ -1,3 +1,6 @@
+import { EntityColumns } from '@lomray/microservice-helpers';
+import { BaseException } from '@lomray/microservice-nodejs-lib';
+import ExceptionCode from '@constants/exception-code';
 import User from '@entities/user';
 import UserRepository from '@repositories/user';
 
@@ -50,11 +53,15 @@ class SignIn {
       {
         ...(this.isEmail() ? { email: this.login } : { phone: this.login }),
       },
-      { relations: ['profile'] },
+      { relations: ['profile'], select: EntityColumns(this.repository) },
     );
 
     if (!user || !this.repository.isValidPassword(user, this.password)) {
-      throw new Error('Login or password incorrect.');
+      throw new BaseException({
+        code: ExceptionCode.LOGIN_PASSWORD_INCORRECT,
+        message: 'Login or password incorrect.',
+        status: 422,
+      });
     }
 
     return user;

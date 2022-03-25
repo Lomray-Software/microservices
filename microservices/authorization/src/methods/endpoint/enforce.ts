@@ -1,15 +1,21 @@
-import { Endpoint, IJsonQueryWhereFilter, IsUndefinable } from '@lomray/microservice-helpers';
+import {
+  Endpoint,
+  IJsonQueryWhereFilter,
+  IsNullable,
+  IsUndefinable,
+} from '@lomray/microservice-helpers';
 import type { IJsonQueryWhere } from '@lomray/typeorm-json-query';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsObject, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsObject, IsString } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { FilterType } from '@constants/filter';
 import EndpointHandler from '@services/endpoint-handler';
 
 class EndpointEnforceInput {
   @IsUndefinable()
+  @IsNullable()
   @IsString()
-  userId?: string;
+  userId?: string | null;
 
   @IsString()
   method: string;
@@ -36,6 +42,9 @@ class EndpointEnforceInput {
 class EndpointEnforceOutput {
   @IsBoolean()
   isAllow: boolean;
+
+  @IsArray()
+  roles: string[];
 
   @IsObject()
   @IsUndefinable()
@@ -70,9 +79,11 @@ const enforce = Endpoint.custom(
     });
 
     const isAllow = await endpointService.isMethodAllowed(shouldThrowError);
+    const { roles } = await endpointService.getEnforcer().findUserRoles();
 
     return {
       isAllow,
+      roles,
       filters:
         isAllow && hasFilters ? await endpointService.getMethodFilters(filterInput) : undefined,
       filteredInput:
