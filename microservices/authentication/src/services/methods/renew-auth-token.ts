@@ -7,11 +7,13 @@ import { Repository } from 'typeorm';
 import type { IJwtConfig } from '@config/jwt';
 import Token from '@entities/token';
 import { TokenCreateReturnType } from '@services/methods/create-auth-token';
+import { IdentifyAuthToken } from '@services/methods/identity-auth-token';
 import Jwt from '@services/tokens/jwt';
 
 class TokenRenewInput {
+  @IsUndefinable() // can be obtained from headers
   @Length(1, 300)
-  access: string;
+  access?: string;
 
   @Length(1, 300)
   refresh: string;
@@ -121,10 +123,13 @@ class RenewAuthToken {
   /**
    * Renew auth token
    */
-  async renew(options: TokenRenewInput): Promise<TokenRenewOutput> {
-    const { returnType } = options;
+  async renew(options: TokenRenewInput, headers?: Record<string, any>): Promise<TokenRenewOutput> {
+    const { returnType, access } = options;
 
-    const result = await this.renewJwtTokens(options);
+    const result = await this.renewJwtTokens({
+      ...options,
+      access: access ?? IdentifyAuthToken.getCookieAuth(headers),
+    });
 
     return returnType === TokenCreateReturnType.cookies
       ? {

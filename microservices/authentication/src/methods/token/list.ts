@@ -3,7 +3,7 @@ import { getRepository } from 'typeorm';
 import Token from '@entities/token';
 
 /**
- * View auth token
+ * List auth tokens
  */
 const list = Endpoint.list(() => ({
   repository: getRepository(Token),

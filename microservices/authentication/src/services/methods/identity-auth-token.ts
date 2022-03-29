@@ -74,7 +74,7 @@ class IdentifyAuthToken {
    * Get auth token from cookies
    * @private
    */
-  private static getCookieAuth(headers?: Record<string, any>): string | undefined {
+  public static getCookieAuth(headers?: Record<string, any>): string | undefined {
     const cookies = headers?.cookie;
 
     if (!cookies) {
@@ -87,7 +87,7 @@ class IdentifyAuthToken {
   }
 
   /**
-   * Find auth toke in db
+   * Find auth token in db
    * @private
    */
   private async findToken(token: string): Promise<Required<Omit<TokenIdentifyOutput, 'payload'>>> {

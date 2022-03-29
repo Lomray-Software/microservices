@@ -20,14 +20,17 @@ describe('services/methods/renew-auth-token', () => {
   const jwtConfig = { secretKey: 'secret' };
   const service = new RenewAuthToken(repository, jwtConfig);
   const jwtService = new Jwt(jwtConfig.secretKey);
+  const tokenId = 'token-id';
 
   afterEach(() => {
     TypeormMock.sandbox.reset();
   });
 
-  it('should correctly renew token: all return types', async () => {
-    const tokenId = 'token-id';
+  beforeEach(() => {
+    TypeormMock.sandbox.reset();
+  });
 
+  it('should correctly renew token: all return types', async () => {
     TypeormMock.entityManager.findOne.resolves(repository.create({ id: tokenId, userId }));
 
     const { access, refresh } = jwtService.create(tokenId);
@@ -70,6 +73,28 @@ describe('services/methods/renew-auth-token', () => {
       expect(String(token.expirationAt)).to.length(10);
       expect(result).to.deep.equal(expectedResult(token));
     }
+  });
+
+  it('should correctly renew with headers', async () => {
+    TypeormMock.entityManager.findOne.resolves(repository.create({ id: tokenId, userId }));
+
+    const { access, refresh } = jwtService.create(tokenId);
+    const result = await service.renew(
+      {
+        refresh,
+        returnType: TokenCreateReturnType.directly,
+      },
+      {
+        cookie: `_octo=GH1.1.410839147.1623154775; _device_id=bd16babbc28b1bd75915ce011104d00c; jwt-access=${access};`,
+      },
+    );
+
+    const [, token] = TypeormMock.entityManager.save.firstCall.args;
+
+    expect(token.userId).to.equal(userId);
+    expect(token.access).to.not.empty.and.not.equal(access);
+    expect(token.refresh).to.not.empty.and.not.equal(refresh);
+    expect(result).to.deep.equal({ access: token.access, refresh: token.refresh });
   });
 
   it('should throw error: jwt not valid', async () => {

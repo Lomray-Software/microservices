@@ -1,4 +1,5 @@
 import type { Microservice } from '@lomray/microservice-nodejs-lib';
+import CookiesRemove from '@methods/cookies/remove';
 import MetaEndpoint from '@methods/meta';
 import TokenCreate from '@methods/token/create';
 import TokenIdentify from '@methods/token/identify';
@@ -20,6 +21,11 @@ export default (ms: Microservice): void => {
   ms.addEndpoint('token.list', TokenList, { isDisableMiddlewares: true, isPrivate: true });
   ms.addEndpoint('token.view', TokenView, { isDisableMiddlewares: true, isPrivate: true });
   ms.addEndpoint('token.remove', TokenRemove, { isDisableMiddlewares: true, isPrivate: true });
+
+  /**
+   * Cookies methods
+   */
+  ms.addEndpoint('cookies.remove', CookiesRemove, { isDisableMiddlewares: true });
 
   /**
    * Microservice metadata endpoint

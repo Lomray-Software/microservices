@@ -85,9 +85,9 @@ class Jwt {
   /**
    * Validate JWT token
    */
-  public validate(token: string, options: VerifyOptions = {}): JwtPayload {
+  public validate(token?: string, options: VerifyOptions = {}): JwtPayload {
     try {
-      return jsonwebtoken.verify(token, this.secretKey, { ...this.getOptions(), ...options });
+      return jsonwebtoken.verify(token ?? '', this.secretKey, { ...this.getOptions(), ...options });
     } catch (e) {
       throw new BaseException({
         message: 'Unauthorized',
