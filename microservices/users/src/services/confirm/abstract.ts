@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { InsertResult, Repository } from 'typeorm';
 import ConfirmCode from '@entities/confirm-code';
 
@@ -27,7 +28,7 @@ abstract class Abstract {
    * @protected
    */
   protected generateCode(min = 100000, max = 999999): string {
-    return String(Math.floor(Math.random() * (max - min + 1) + min));
+    return String(crypto.randomInt(min, max));
   }
 
   /**
