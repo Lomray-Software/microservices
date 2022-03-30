@@ -17,7 +17,7 @@ services:
       POSTGRES_PASSWORD: example
 
   configuration:
-    image: ghcr.io/lomray-software/microservices/configuration:latest-staging
+    image: ghcr.io/kety-inc/kety-api/configuration:latest-staging
     container_name: configuration
     environment:
       # from ./config.json
@@ -28,7 +28,7 @@ services:
       - db
 
   gateway:
-    image: ghcr.io/lomray-software/microservices/gateway:latest-staging
+    image: ghcr.io/kety-inc/kety-api/gateway:latest-staging
     container_name: gateway
     ports:
       - "3000:3000"
@@ -36,13 +36,13 @@ services:
       - configuration
 
   authentication:
-    image: ghcr.io/lomray-software/microservices/authentication:latest-staging
+    image: ghcr.io/kety-inc/kety-api/authentication:latest-staging
     container_name: authentication
     depends_on:
       - configuration
 
   authorization:
-    image: ghcr.io/lomray-software/microservices/authorization:latest-staging
+    image: ghcr.io/kety-inc/kety-api/authorization:latest-staging
     container_name: authorization
     environment:
       MS_DEFAULT_PERMISSION_MIGRATION: 1
@@ -50,13 +50,13 @@ services:
       - configuration
 
   notification:
-    image: ghcr.io/lomray-software/microservices/notification:latest-staging
+    image: ghcr.io/kety-inc/kety-api/notification:latest-staging
     container_name: notification
     depends_on:
       - configuration
 
   users:
-    image: ghcr.io/lomray-software/microservices/users:latest-staging
+    image: ghcr.io/kety-inc/kety-api/users:latest-staging
     container_name: users
     depends_on:
       - configuration

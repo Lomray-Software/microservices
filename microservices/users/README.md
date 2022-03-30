@@ -4,17 +4,6 @@ users
 RPC 2.0 Microservice.  
 This microservice provides mechanism for store/manage user data.
 
-![Version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fraw.githubusercontent.com%2FLomray-Software%2Fmicroservices%2Fstaging%2Fmicroservices%2Fusers%2Fpackage.json&label=Staging%20version&query=$.version&colorB=blue)  
-![GitHub](https://img.shields.io/github/license/Lomray-Software/microservices)
-![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
-
-[![Quality Gate Status](https://sonarqube-proxy.lomray.com/status/microservices-users?token=3735196b93e535aeb8e06f388e7ed408)](https://sonarqube.lomray.com/dashboard?id=microservices-users)
-[![Reliability Rating](https://sonarqube-proxy.lomray.com/reliability/microservices-users?token=3735196b93e535aeb8e06f388e7ed408)](https://sonarqube.lomray.com/dashboard?id=microservices-users)
-[![Security Rating](https://sonarqube-proxy.lomray.com/security/microservices-users?token=3735196b93e535aeb8e06f388e7ed408)](https://sonarqube.lomray.com/dashboard?id=microservices-users)
-[![Vulnerabilities](https://sonarqube-proxy.lomray.com/vulnerabilities/microservices-users?token=3735196b93e535aeb8e06f388e7ed408)](https://sonarqube.lomray.com/dashboard?id=microservices-users)
-[![Lines of code](https://sonarqube-proxy.lomray.com/lines/microservices-users?token=3735196b93e535aeb8e06f388e7ed408)](https://sonarqube.lomray.com/dashboard?id=microservices-users)
-[![Coverage](https://sonarqube-proxy.lomray.com/coverage/microservices-users?token=3735196b93e535aeb8e06f388e7ed408)](https://sonarqube.lomray.com/dashboard?id=microservices-users)
-
 ## Navigation
 - [ENVIRONMENTS](#environments)
 - [HOW TO RUN](#how-to-run)

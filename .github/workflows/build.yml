@@ -75,12 +75,11 @@ jobs:
         run: npm run build
 
       # note: this also update package.json version
-      - name: Publish npm packages / create github release
+      - name: Create github release
         run: npm run semantic-release
         env:
           GIT_BRANCH: ${{ needs.changed-microservices.outputs.branch }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Archive microservices artifacts
         uses: actions/upload-artifact@v2
@@ -134,7 +133,7 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
         with:
-          name: "Lomray-Software/microservices/${{ env.MICROSERVICE_NAME }}"
+          name: "kety-inc/kety-api/${{ env.MICROSERVICE_NAME }}"
           tags: "latest${{ needs.changed-microservices.outputs.docker-tag }},${{ steps.package-version.outputs.version}}"
           dockerfile: Dockerfile-nodejs
           context: ${{ env.WORK_DIR }}
@@ -174,10 +173,10 @@ jobs:
         with:
           path: ${{ env.WORK_DIR }}
 
-      - uses: sonarsource/sonarqube-scan-action@master
+      - uses: SonarSource/sonarcloud-github-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           projectBaseDir: ${{ env.WORK_DIR }}
           args: >

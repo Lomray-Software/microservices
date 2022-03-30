@@ -1,5 +1,5 @@
 {
-	"name": "@lomray/microservice-notification",
+	"name": "@kety-inc/microservice-notification",
 	"version": "1.0.0",
 	"description": "Microservice based on NodeJS & inverted json.",
 	"main": "lib/index.js",
@@ -19,12 +19,12 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Lomray-Software/microservices.git"
+		"url": "https://github.com/kety-inc/kety-api.git"
 	},
 	"bugs": {
-		"url": "https://github.com/Lomray-Software/microservices/issues"
+		"url": "https://github.com/kety-inc/kety-api/issues"
 	},
-	"homepage": "https://github.com/Lomray-Software/microservices/notification",
+	"homepage": "https://github.com/kety-inc/kety-api/notification",
 	"author": "Mikhail Yarmaliuk",
 	"license": "Apache-2.0",
 	"scripts": {

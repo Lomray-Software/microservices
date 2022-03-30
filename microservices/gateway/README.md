@@ -3,17 +3,6 @@ Gateway
 
 RPC 2.0 Microservice. This is a single entry point for all clients.
 
-![Version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fraw.githubusercontent.com%2FLomray-Software%2Fmicroservices%2Fstaging%2Fmicroservices%2Fgateway%2Fpackage.json&label=Staging%20version&query=$.version&colorB=blue)  
-![GitHub](https://img.shields.io/github/license/Lomray-Software/microservices)
-![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
-
-[![Quality Gate Status](https://sonarqube-proxy.lomray.com/status/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-[![Reliability Rating](https://sonarqube-proxy.lomray.com/reliability/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-[![Security Rating](https://sonarqube-proxy.lomray.com/security/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-[![Vulnerabilities](https://sonarqube-proxy.lomray.com/vulnerabilities/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-[![Lines of code](https://sonarqube-proxy.lomray.com/lines/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-[![Coverage](https://sonarqube-proxy.lomray.com/coverage/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-
 ## Navigation
 - [ENVIRONMENTS](#environments)
 - [HOW TO RUN](#how-to-run)

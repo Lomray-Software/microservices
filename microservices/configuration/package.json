@@ -1,5 +1,5 @@
 {
-	"name": "@lomray/microservice-configuration",
+	"name": "@kety-inc/microservice-configuration",
 	"version": "1.0.0",
 	"description": "Microservice based on NodeJS & inverted json.",
 	"main": "lib/index.js",
@@ -19,12 +19,12 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Lomray-Software/microservices.git"
+		"url": "https://github.com/Kety-Inc/kety-api.git"
 	},
 	"bugs": {
-		"url": "https://github.com/Lomray-Software/microservices/issues"
+		"url": "https://github.com/Kety-Inc/kety-api/issues"
 	},
-	"homepage": "https://github.com/Lomray-Software/microservices/configuration",
+	"homepage": "https://github.com/Kety-Inc/kety-api/configuration",
 	"author": "Mikhail Yarmaliuk",
 	"license": "Apache-2.0",
 	"scripts": {

@@ -4,17 +4,6 @@ authentication
 RPC 2.0 Microservice.  
 This microservice provides authentication mechanism for microservices.
 
-![Version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fraw.githubusercontent.com%2FLomray-Software%2Fmicroservices%2Fstaging%2Fmicroservices%2Fauthentication%2Fpackage.json&label=Staging%20version&query=$.version&colorB=blue)  
-![GitHub](https://img.shields.io/github/license/Lomray-Software/microservices)
-![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
-
-[![Quality Gate Status](https://sonarqube-proxy.lomray.com/status/microservices-authentication?token=b6ab7058149225b55075f5564fe532c9)](https://sonarqube.lomray.com/dashboard?id=microservices-authentication)
-[![Reliability Rating](https://sonarqube-proxy.lomray.com/reliability/microservices-authentication?token=b6ab7058149225b55075f5564fe532c9)](https://sonarqube.lomray.com/dashboard?id=microservices-authentication)
-[![Security Rating](https://sonarqube-proxy.lomray.com/security/microservices-authentication?token=b6ab7058149225b55075f5564fe532c9)](https://sonarqube.lomray.com/dashboard?id=microservices-authentication)
-[![Vulnerabilities](https://sonarqube-proxy.lomray.com/vulnerabilities/microservices-authentication?token=b6ab7058149225b55075f5564fe532c9)](https://sonarqube.lomray.com/dashboard?id=microservices-authentication)
-[![Lines of code](https://sonarqube-proxy.lomray.com/lines/microservices-authentication?token=b6ab7058149225b55075f5564fe532c9)](https://sonarqube.lomray.com/dashboard?id=microservices-authentication)
-[![Coverage](https://sonarqube-proxy.lomray.com/coverage/microservices-authentication?token=b6ab7058149225b55075f5564fe532c9)](https://sonarqube.lomray.com/dashboard?id=microservices-authentication)
-
 ## Navigation
 - [ENVIRONMENTS](#environments)
 - [HOW TO RUN](#how-to-run)
