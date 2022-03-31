@@ -1,4 +1,4 @@
-import { FirebaseSdk } from '@lomray/microservice-helpers';
+import FirebaseSdk from '@lomray/microservice-helpers/services/firebase-sdk';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import Firebase from '@services/external/firebase-sdk';

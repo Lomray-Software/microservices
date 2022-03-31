@@ -36,15 +36,15 @@
     "class-validator": "^0.13.2",
     "class-validator-jsonschema": "^3.1.0",
     "typeorm": "0.2.41",
-    "typeorm-extension": "1.2.1"
+    "typeorm-extension": "1.2.1",
+    "pg": "^8.7.3"
   },
 	"devDependencies": {
 		"@types/lodash": "^4.14.176"
 	},
 	"peerDependencies": {
     "firebase-admin": "^10.0.2",
-		"lodash": "^4.17.21",
-    "pg": "^8.7.3"
+		"lodash": "^4.17.21"
 	},
 	"bundledDependencies": [
 		"tslib"

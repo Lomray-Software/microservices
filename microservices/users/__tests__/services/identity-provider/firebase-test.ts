@@ -1,5 +1,5 @@
-import { FirebaseSdk } from '@lomray/microservice-helpers';
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
+import FirebaseSdk from '@lomray/microservice-helpers/services/firebase-sdk';
 import type { TFirebaseAdmin } from '@lomray/microservice-helpers/services/firebase-sdk';
 import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';

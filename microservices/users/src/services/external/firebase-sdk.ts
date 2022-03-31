@@ -1,4 +1,4 @@
-import { FirebaseSdk } from '@lomray/microservice-helpers';
+import FirebaseSdk from '@lomray/microservice-helpers/services/firebase-sdk';
 import { FIREBASE_CREDENTIAL, FIREBASE_FROM_CONFIG_MS } from '@constants/index';
 
 export default (): ReturnType<typeof FirebaseSdk.get> => {
