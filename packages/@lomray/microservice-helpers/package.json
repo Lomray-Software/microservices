@@ -28,22 +28,22 @@
 		"test": "NODE_ENV=tests TS_NODE_COMPILER_OPTIONS='{\"target\":\"es6\"}' mocha --harmony --no-warnings  __tests__ --require ts-node/register --recursive --unhandled-rejections=strict --exit"
 	},
 	"dependencies": {
-		"winston": "^3.3.3"
-	},
+		"winston": "^3.3.3",
+    "@lomray/microservice-nodejs-lib": "^2.5.2",
+    "@lomray/typeorm-json-query": "^1.0.1",
+    "@lomray/microservice-remote-middleware": "^1.3.1",
+    "class-transformer": "0.4.1",
+    "class-validator": "^0.13.2",
+    "class-validator-jsonschema": "^3.1.0",
+    "typeorm": "0.2.41",
+    "typeorm-extension": "1.2.1"
+  },
 	"devDependencies": {
 		"@types/lodash": "^4.14.176"
 	},
 	"peerDependencies": {
-		"@lomray/microservice-nodejs-lib": "^2.5.2",
-		"@lomray/typeorm-json-query": "^1.0.1",
-    "@lomray/microservice-remote-middleware": "^1.3.1",
-		"class-transformer": "0.4.1",
-		"class-validator": "^0.13.2",
-		"class-validator-jsonschema": "^3.1.0",
     "firebase-admin": "^10.0.2",
 		"lodash": "^4.17.21",
-		"typeorm": "0.2.41",
-		"typeorm-extension": "1.2.1",
     "pg": "^8.7.3"
 	},
 	"bundledDependencies": [
