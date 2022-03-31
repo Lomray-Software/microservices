@@ -20,6 +20,8 @@ describe('services/firebase-sdk', () => {
     const RemoteConfigMock = sandbox.stub(RemoteConfig, 'get');
     const FirebaseStub = sandbox.stub(FirebaseAdmin, 'initializeApp');
 
+    sandbox.stub(FirebaseAdmin.credential, 'cert').returns(credential as any);
+
     const sdk = await FirebaseSdk.get();
 
     expect(sdk).to.equal(await FirebaseSdk.get());
@@ -34,6 +36,8 @@ describe('services/firebase-sdk', () => {
 
     const RemoteConfigMock = sandbox.stub(RemoteConfig, 'get').resolves(remoteConf);
     const FirebaseStub = sandbox.stub(FirebaseAdmin, 'initializeApp');
+
+    sandbox.stub(FirebaseAdmin.credential, 'cert').returns(remoteConf.credential as any);
 
     const sdk = await FirebaseSdk.get();
 

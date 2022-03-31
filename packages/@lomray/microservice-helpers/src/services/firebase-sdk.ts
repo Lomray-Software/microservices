@@ -25,7 +25,7 @@ class FirebaseSdk {
   /**
    * @private
    */
-  private static credential?: Record<string, any>;
+  private static credential?: IFirebaseSdkParams['credential'];
 
   /**
    * Init service
@@ -48,11 +48,11 @@ class FirebaseSdk {
   public static async get(): Promise<TFirebaseAdmin> {
     if (!this.hasInit) {
       const config = this.hasConfigMs
-        ? await RemoteConfig.get('firebase', { isThrowNotExist: true })
+        ? await RemoteConfig.get('firebase', { isThrowNotExist: true, isCommon: true })
         : {};
 
       FirebaseAdmin.initializeApp({
-        credential: config?.credential ?? this.credential,
+        credential: FirebaseAdmin.credential.cert(config?.credential ?? this.credential),
       });
 
       this.hasInit = true;
