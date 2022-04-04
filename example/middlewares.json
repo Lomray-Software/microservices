@@ -8,7 +8,7 @@
     "params": {
       "type": "request",
       "isRequired": true,
-      "exclude": ["users.user.sign-in", "identity-provider.sign-in"],
+      "exclude": ["users.user.sign-in", "users.identity-provider.sign-in"],
       "strategy": "transform",
       "convertResult": {
         "payload.authentication.userId": "$middleware.userId",
