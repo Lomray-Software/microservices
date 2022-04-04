@@ -5,6 +5,7 @@
     "sender": "authentication",
     "senderMethod": "token.identify",
     "type": "request",
+    "order": 1,
     "params": {
       "type": "request",
       "isRequired": true,
@@ -23,6 +24,7 @@
     "sender": "authorization",
     "senderMethod": "endpoint.enforce",
     "type": "request",
+    "order": 2,
     "params": {
       "type": "request",
       "isRequired": true,

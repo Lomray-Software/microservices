@@ -11,7 +11,7 @@ export default class init1645793882509 implements MigrationInterface {
       `CREATE TYPE "public"."middleware_type_enum" AS ENUM('request', 'response')`,
     );
     await queryRunner.query(
-      `CREATE TABLE "middleware" ("id" SERIAL NOT NULL, "target" character varying(30) NOT NULL, "targetMethod" character varying(30) NOT NULL, "sender" character varying(30) NOT NULL, "senderMethod" character varying(30) NOT NULL, "type" "public"."middleware_type_enum" NOT NULL DEFAULT 'request', "params" json NOT NULL DEFAULT '{}', CONSTRAINT "UQ_28fc6aa1217c1f02f1ec4274718" UNIQUE ("sender", "senderMethod", "target", "targetMethod", "type"), CONSTRAINT "PK_aced9b1bc194d77dd07ddd4d092" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "middleware" ("id" SERIAL NOT NULL, "target" character varying(30) NOT NULL, "targetMethod" character varying(30) NOT NULL, "sender" character varying(30) NOT NULL, "senderMethod" character varying(30) NOT NULL, "order" integer NOT NULL DEFAULT '9', "type" "public"."middleware_type_enum" NOT NULL DEFAULT 'request', "params" json NOT NULL DEFAULT '{}', CONSTRAINT "UQ_28fc6aa1217c1f02f1ec4274718" UNIQUE ("sender", "senderMethod", "target", "targetMethod", "type"), CONSTRAINT "PK_aced9b1bc194d77dd07ddd4d092" PRIMARY KEY ("id"))`,
     );
   }
 

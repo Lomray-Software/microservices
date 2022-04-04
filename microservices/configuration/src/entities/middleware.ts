@@ -4,7 +4,7 @@ import type {
   MiddlewareEntity,
   IRemoteMiddlewareReqParams,
 } from '@lomray/microservice-remote-middleware';
-import { Allow, IsEnum, IsObject, Length } from 'class-validator';
+import { Allow, IsEnum, IsNumber, IsObject, Length } from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
 
 @Entity()
@@ -37,6 +37,11 @@ class Middleware implements MiddlewareEntity {
   })
   @IsEnum(MiddlewareType)
   type: MiddlewareType;
+
+  @Column({ type: 'integer', default: 9 })
+  @IsNumber()
+  @IsUndefinable()
+  order: number;
 
   @Column({ type: 'json', default: {} })
   @IsObject()
