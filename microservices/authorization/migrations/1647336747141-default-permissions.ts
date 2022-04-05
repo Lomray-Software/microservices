@@ -100,8 +100,8 @@ export default class defaultPermissions1647336747141 implements MigrationInterfa
     // Create filters
     await queryRunner.query(
       `
-        INSERT INTO public.filter (id, title, condition, "createdAt", "updatedAt") VALUES (1, 'By user id', '{"id": "{{ userId }}"}', '2022-03-15 09:15:14.739189', '2022-03-15 09:15:14.739189');
-        INSERT INTO public.filter (id, title, condition, "createdAt", "updatedAt") VALUES (2, 'By userId', '{"userId": "{{ userId }}"}', '2022-03-15 09:15:40.656123', '2022-03-15 09:15:40.656123');
+        INSERT INTO public.filter (id, title, condition, "createdAt", "updatedAt") VALUES (1, 'By user id', '{"where":{"id":"{{ userId }}"}}', '2022-03-15 09:15:14.739189', '2022-03-15 09:15:14.739189');
+        INSERT INTO public.filter (id, title, condition, "createdAt", "updatedAt") VALUES (2, 'By userId', '{"where":{"userId":"{{ userId }}"}}', '2022-03-15 09:15:40.656123', '2022-03-15 09:15:40.656123');
       `,
     );
 
