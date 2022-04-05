@@ -116,6 +116,9 @@ abstract class Abstract {
         entityProfile ? profileRepository.save(profile) : Promise.resolve(null),
       ]);
 
+      // add profile to response
+      user.profile = profile;
+
       return user;
     });
   }

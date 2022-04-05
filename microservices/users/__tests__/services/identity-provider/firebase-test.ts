@@ -155,6 +155,7 @@ describe('services/sign-up', () => {
         }),
       ),
     );
+    mockUser.profile = mockProfile();
     TypeormMock.entityManager.findOne.resolves(mockUser);
     TypeormMock.entityManager.save.resolves(mockUser);
 

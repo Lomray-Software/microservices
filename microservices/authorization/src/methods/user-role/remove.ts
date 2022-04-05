@@ -6,6 +6,7 @@ import UserRole from '@entities/user-role';
  * Remove user role
  */
 const remove = Endpoint.remove(() => ({
+  description: 'Remove user role',
   repository: getRepository(UserRole),
   isAllowMultiple: false,
 }));

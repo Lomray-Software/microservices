@@ -79,7 +79,9 @@ class SignUp {
 
     this.repository.encryptPassword(entity);
 
-    return this.repository.save(entity);
+    const user = await this.repository.save(entity);
+
+    return this.repository.attachProfile(user);
   }
 }
 
