@@ -1,4 +1,4 @@
-import { IJsonQueryWhere } from '@lomray/typeorm-json-query';
+import type { IJsonQuery } from '@lomray/typeorm-json-query';
 import { getRepository } from 'typeorm';
 import { FilterType } from '@constants/filter';
 import { MS_DEFAULT_ROLE_ALIAS } from '@constants/index';
@@ -72,13 +72,15 @@ class EndpointHandler {
   /**
    * Return typeorm query filters for method
    */
-  public async getMethodFilters(reqParams: Record<string, any> = {}): Promise<IJsonQueryWhere> {
+  public async getMethodFilters(reqParams: Record<string, any> = {}): Promise<IJsonQuery> {
     const { roles } = await this.getEnforcer().findUserRoles();
 
-    return MethodFilters.init({
+    const filters = MethodFilters.init({
       userRoles: roles,
       templateOptions: { userId: this.params.userId, fields: reqParams },
     }).getFilters((await this.getMethod())?.methodFilters ?? []);
+
+    return { where: filters };
   }
 
   /**

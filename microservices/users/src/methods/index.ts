@@ -8,6 +8,7 @@ import CrudProfile from '@methods/profile/crud';
 import UserChangeLogin from '@methods/user/change-login';
 import UserChangePassword from '@methods/user/change-password';
 import CrudUser from '@methods/user/crud';
+import UserMe from '@methods/user/me';
 import UserSignIn from '@methods/user/sign-in';
 import UserSignOut from '@methods/user/sign-out';
 import UserSignUp from '@methods/user/sign-up';
@@ -39,6 +40,7 @@ export default (ms: Microservice): void => {
   ms.addEndpoint('user.sign-out', UserSignOut);
   ms.addEndpoint('user.change-password', UserChangePassword);
   ms.addEndpoint('user.change-login', UserChangeLogin);
+  ms.addEndpoint('user.me', UserMe);
 
   /**
    * Confirm code methods

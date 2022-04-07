@@ -43,7 +43,7 @@ class MethodFilters {
    * Collect filters
    */
   getFilters(filters: MethodFiltersEntity[]): IJsonQueryWhere {
-    const filter = {};
+    const filter: IJsonQueryWhere = {};
 
     if (filters.length === 0) {
       return filter;

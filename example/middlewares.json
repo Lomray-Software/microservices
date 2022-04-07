@@ -9,7 +9,12 @@
     "params": {
       "type": "request",
       "isRequired": true,
-      "exclude": ["users.user.sign-in", "users.identity-provider.sign-in", "authentication.cookies.remove"],
+      "exclude": [
+        "users.user.sign-in",
+        "users.identity-provider.sign-in",
+        "authentication.cookies.remove",
+        "authentication.token.renew"
+      ],
       "strategy": "transform",
       "convertResult": {
         "payload.authentication.userId": "$middleware.userId",

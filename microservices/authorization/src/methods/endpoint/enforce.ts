@@ -1,10 +1,10 @@
 import {
   Endpoint,
-  IJsonQueryWhereFilter,
+  IJsonQueryFilter,
   IsNullable,
   IsUndefinable,
 } from '@lomray/microservice-helpers';
-import type { IJsonQueryWhere } from '@lomray/typeorm-json-query';
+import type { IJsonQuery } from '@lomray/typeorm-json-query';
 import { Type } from 'class-transformer';
 import { IsArray, IsBoolean, IsObject, IsString } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
@@ -48,8 +48,8 @@ class EndpointEnforceOutput {
 
   @IsObject()
   @IsUndefinable()
-  @Type(() => IJsonQueryWhereFilter)
-  filters?: IJsonQueryWhere;
+  @Type(() => IJsonQueryFilter)
+  filters?: IJsonQuery;
 
   @IsObject()
   @IsUndefinable()
