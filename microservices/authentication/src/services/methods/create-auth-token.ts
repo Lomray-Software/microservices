@@ -4,6 +4,7 @@ import { IsEnum, IsObject, IsRFC3339, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Repository } from 'typeorm';
 import type { IJwtConfig } from '@config/jwt';
+import { IS_PROD } from '@constants/index';
 import TokenType from '@constants/token-type';
 import Token from '@entities/token';
 import Jwt from '@services/tokens/jwt';
@@ -165,7 +166,7 @@ class CreateAuthToken {
                 action: 'add',
                 name: 'jwt-access',
                 value: result['access'],
-                options: { httpOnly: true },
+                options: { httpOnly: true, secure: IS_PROD },
               },
             ],
           },

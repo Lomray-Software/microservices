@@ -5,6 +5,7 @@ import { IsEnum, IsObject, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Repository } from 'typeorm';
 import type { IJwtConfig } from '@config/jwt';
+import { IS_PROD } from '@constants/index';
 import Token from '@entities/token';
 import { TokenCreateReturnType } from '@services/methods/create-auth-token';
 import { IdentifyAuthToken } from '@services/methods/identity-auth-token';
@@ -140,7 +141,7 @@ class RenewAuthToken {
                 action: 'add',
                 name: 'jwt-access',
                 value: result['access'],
-                options: { httpOnly: true },
+                options: { httpOnly: true, secure: IS_PROD },
               },
             ],
           },
