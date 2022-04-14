@@ -17,7 +17,7 @@ export default class init1645794505492 implements MigrationInterface {
       `CREATE TYPE "public"."identity_provider_provider_enum" AS ENUM('firebase')`,
     );
     await queryRunner.query(
-      `CREATE TABLE "identity_provider" ("userId" uuid NOT NULL, "provider" "public"."identity_provider_provider_enum" NOT NULL, "identifier" character varying(70) NOT NULL, "type" character varying(20), "params" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, CONSTRAINT "PK_9d4ac53db35d502894a9a5e8492" PRIMARY KEY ("userId"))`,
+      `CREATE TABLE "identity_provider" ("userId" uuid NOT NULL, "provider" "public"."identity_provider_provider_enum" NOT NULL, "identifier" character varying(70) NOT NULL, "type" character varying(20), "params" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, CONSTRAINT "PK_9d4ac53db35d502894a9a5e8492" PRIMARY KEY ("userId"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "confirm_code" ("login" character varying NOT NULL, "code" character varying NOT NULL, "expirationAt" integer NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_2d7c755dc719b76c97d353b85ee" PRIMARY KEY ("login"))`,
