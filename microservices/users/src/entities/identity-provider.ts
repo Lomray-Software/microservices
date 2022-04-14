@@ -57,7 +57,7 @@ class IdentityProvider {
 
   @IsTypeormDate()
   @UpdateDateColumn()
-  updateAt: Date;
+  updatedAt: Date;
 
   @IsTypeormDate()
   @DeleteDateColumn()
