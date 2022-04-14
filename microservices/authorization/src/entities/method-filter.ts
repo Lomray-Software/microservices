@@ -1,4 +1,6 @@
+import { IsTypeormDate } from '@lomray/microservice-helpers';
 import { Length, IsEnum, IsNumber } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
   CreateDateColumn,
@@ -13,6 +15,13 @@ import type Filter from '@entities/filter';
 import type Method from '@entities/method';
 import type Role from '@entities/role';
 
+@JSONSchema({
+  properties: {
+    filter: { $ref: '#/definitions/Filter' },
+    method: { $ref: '#/definitions/Method' },
+    role: { $ref: '#/definitions/Role' },
+  },
+})
 @Entity()
 @Unique(['methodId', 'filterId', 'roleAlias'])
 class MethodFilter {
@@ -37,9 +46,11 @@ class MethodFilter {
   @Length(3, 30)
   roleAlias: string;
 
+  @IsTypeormDate()
   @CreateDateColumn()
   createdAt: Date;
 
+  @IsTypeormDate()
   @UpdateDateColumn()
   updatedAt: Date;
 

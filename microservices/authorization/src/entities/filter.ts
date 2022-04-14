@@ -1,4 +1,4 @@
-import { IsUndefinable } from '@lomray/microservice-helpers';
+import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { IJsonQueryWhere } from '@lomray/typeorm-json-query';
 import { Allow, Length, IsObject } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
@@ -12,6 +12,11 @@ import {
 } from 'typeorm';
 import MethodFilter from '@entities/method-filter';
 
+@JSONSchema({
+  properties: {
+    filterMethods: { $ref: '#/definitions/MethodFilter', type: 'array' },
+  },
+})
 @Entity()
 class Filter {
   @PrimaryGeneratedColumn()
@@ -31,9 +36,11 @@ class Filter {
   @IsUndefinable()
   condition: IJsonQueryWhere;
 
+  @IsTypeormDate()
   @CreateDateColumn()
   createdAt: Date;
 
+  @IsTypeormDate()
   @UpdateDateColumn()
   updatedAt: Date;
 

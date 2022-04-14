@@ -1,5 +1,6 @@
-import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsEnum, IsISO8601, IsObject, Length } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Entity,
   Column,
@@ -17,6 +18,9 @@ export interface IProfileParams {
   isPhoneVerified?: boolean;
 }
 
+@JSONSchema({
+  properties: { user: { $ref: '#/definitions/User' } },
+})
 @Entity()
 class Profile {
   @PrimaryColumn()
@@ -49,9 +53,11 @@ class Profile {
   @IsUndefinable()
   params: IProfileParams;
 
+  @IsTypeormDate()
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @IsTypeormDate()
   @DeleteDateColumn()
   deletedAt: Date;
 

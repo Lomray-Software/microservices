@@ -1,4 +1,4 @@
-import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsEnum, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
@@ -9,6 +9,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  UpdateDateColumn,
 } from 'typeorm';
 import IdProvider from '@constants/id-provider';
 import type User from '@entities/user';
@@ -16,6 +17,9 @@ import type User from '@entities/user';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IProviderParams {}
 
+@JSONSchema({
+  properties: { user: { $ref: '#/definitions/User' } },
+})
 @Entity()
 class IdentityProvider {
   @PrimaryColumn()
@@ -47,9 +51,15 @@ class IdentityProvider {
   @IsUndefinable()
   params: IProviderParams;
 
+  @IsTypeormDate()
   @CreateDateColumn()
   createdAt: Date;
 
+  @IsTypeormDate()
+  @UpdateDateColumn()
+  updateAt: Date;
+
+  @IsTypeormDate()
   @DeleteDateColumn()
   deletedAt: Date;
 

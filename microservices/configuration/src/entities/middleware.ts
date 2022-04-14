@@ -1,11 +1,18 @@
-import { IsUndefinable } from '@lomray/microservice-helpers';
+import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { MiddlewareType } from '@lomray/microservice-nodejs-lib';
 import type {
   MiddlewareEntity,
   IRemoteMiddlewareReqParams,
 } from '@lomray/microservice-remote-middleware';
 import { Allow, IsEnum, IsNumber, IsObject, Length } from 'class-validator';
-import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  Unique,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 @Unique(['sender', 'senderMethod', 'target', 'targetMethod', 'type'])
@@ -47,6 +54,14 @@ class Middleware implements MiddlewareEntity {
   @IsObject()
   @IsUndefinable()
   params: IRemoteMiddlewareReqParams;
+
+  @IsTypeormDate()
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @IsTypeormDate()
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
 
 export default Middleware;

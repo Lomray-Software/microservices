@@ -277,13 +277,13 @@ describe('services/methods-importer', () => {
     });
     expect(testInputModel).to.deep.equal({
       microservice: 'demo1',
-      alias: 'demo1.TestInput',
+      alias: 'demo1.TestInput.ad47d9d491f31cccc2f5d2a126139599',
       title: 'Test Input',
       schema: { fields: anotherSchemaAlias },
     });
     expect(testOutputModel).to.deep.equal({
       microservice: 'demo1',
-      alias: 'demo1.TestOutput',
+      alias: 'demo1.TestOutput.3fdd48a668f8bed9a600cd6de9e0e3ba',
       title: 'Test Output',
       schema: { list: anotherSchemaAlias },
     });

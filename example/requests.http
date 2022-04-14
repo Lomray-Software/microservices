@@ -27,7 +27,7 @@ Content-Type: application/json
       "password": "123456789"
     },
     "confirmBy": "email",
-    "confirmCode": 666409
+    "confirmCode": 729503
   }
 }
 
@@ -36,52 +36,89 @@ POST http://127.0.0.1:3000
 Accept: application/json
 Content-Type: application/json
 # paste cookies from previous step
-Cookie: jwt-access=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxYmQ2MzAzNS1mMWViLTRjOGEtODc4My00NTNkMzRjOTQyYjEiLCJpYXQiOjE2NDgyMTQ3ODcsImV4cCI6MTY0ODIxNjU4NywianRpIjoiOWNlNTUzMWMtYmU5Ny00NzJhLTg1YTAtZmFlOTBhYzg3NmE1In0.cvSSKHcP-6rLLVy6RSqiSACyRA1fkwmIeKQqdDJE-2c;
+#Cookie: jwt-access=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxYmQ2MzAzNS1mMWViLTRjOGEtODc4My00NTNkMzRjOTQyYjEiLCJpYXQiOjE2NDgyMTQ3ODcsImV4cCI6MTY0ODIxNjU4NywianRpIjoiOWNlNTUzMWMtYmU5Ny00NzJhLTg1YTAtZmFlOTBhYzg3NmE1In0.cvSSKHcP-6rLLVy6RSqiSACyRA1fkwmIeKQqdDJE-2c;
 
 {
   "id": "1",
-  "method": "users.user.view"
+  "method": "users.user.view",
+  "params": {
+    "query": {
+      "relations": ["profile"]
+    }
+  }
+}
+
+### Update user profile
+POST http://127.0.0.1:3000
+Accept: application/json
+Content-Type: application/json
+# paste cookies from previous step
+#Cookie: jwt-access=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxYmQ2MzAzNS1mMWViLTRjOGEtODc4My00NTNkMzRjOTQyYjEiLCJpYXQiOjE2NDgyMTQ3ODcsImV4cCI6MTY0ODIxNjU4NywianRpIjoiOWNlNTUzMWMtYmU5Ny00NzJhLTg1YTAtZmFlOTBhYzg3NmE1In0.cvSSKHcP-6rLLVy6RSqiSACyRA1fkwmIeKQqdDJE-2c;
+
+{
+  "id": "1",
+  "method": "users.profile.update",
+  "params": {
+    "fields": {
+      "birthDay": "1990-01-01"
+    }
+  }
 }
 
 ### View list of users (this method should be not allowed for user, only admin)
 POST http://127.0.0.1:3000
 Accept: application/json
 Content-Type: application/json
-Cookie: jwt-access=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxYmQ2MzAzNS1mMWViLTRjOGEtODc4My00NTNkMzRjOTQyYjEiLCJpYXQiOjE2NDgyMTQ3ODcsImV4cCI6MTY0ODIxNjU4NywianRpIjoiOWNlNTUzMWMtYmU5Ny00NzJhLTg1YTAtZmFlOTBhYzg3NmE1In0.cvSSKHcP-6rLLVy6RSqiSACyRA1fkwmIeKQqdDJE-2c;
+#Cookie: jwt-access=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIxYmQ2MzAzNS1mMWViLTRjOGEtODc4My00NTNkMzRjOTQyYjEiLCJpYXQiOjE2NDgyMTQ3ODcsImV4cCI6MTY0ODIxNjU4NywianRpIjoiOWNlNTUzMWMtYmU5Ny00NzJhLTg1YTAtZmFlOTBhYzg3NmE1In0.cvSSKHcP-6rLLVy6RSqiSACyRA1fkwmIeKQqdDJE-2c;
 
 {
   "id": "1",
   "method": "users.user.list"
 }
 
+### Get microservice metadata
+POST http://127.0.0.1:8001/ms/users
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "meta",
+  "params": {
+    "payload": {
+      "isInternal": true
+    }
+  }
+}
+
 ### Special system request for import authorization entities
-#POST http://127.0.0.1:8001/ms/authorization
-#Accept: application/json
-#Content-Type: application/json
-#
-#{
-#  "id": "1",
-#  "method": "service.sync-metadata",
-#  "params": {
-#    "defaultSchemaRoles": ["admin"],
-#    "defaultAllowGroup": ["admin"],
-#    "commonModelAliases": [
-#      "CountRequestParams",
-#      "CountOutputParams",
-#      "ListRequestParams",
-#      "ViewRequestParams",
-#      "RemoveRequestParams",
-#      "RestoreRequestParams",
-#      "MicroserviceMetaOutput",
-#      "RemoteConfigOutput",
-#      "ClientRegisterMiddlewareInput",
-#      "ClientRegisterMiddlewareOutput",
-#      "RemoteConfigOutput"
-#    ],
-#    "payload": {
-#      "isInternal": true
-#    }
-#  }
-#}
+POST http://127.0.0.1:8001/ms/authorization
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "service.sync-metadata",
+  "params": {
+    "defaultSchemaRoles": ["admin"],
+    "defaultAllowGroup": ["admin"],
+    "commonModelAliases": [
+      "CountRequestParams",
+      "CountOutputParams",
+      "ListRequestParams",
+      "ViewRequestParams",
+      "RemoveRequestParams",
+      "RestoreRequestParams",
+      "MicroserviceMetaOutput",
+      "RemoteConfigOutput",
+      "ClientRegisterMiddlewareInput",
+      "ClientRegisterMiddlewareOutput",
+      "RemoteConfigOutput"
+    ],
+    "payload": {
+      "isInternal": true
+    }
+  }
+}
 
 ###

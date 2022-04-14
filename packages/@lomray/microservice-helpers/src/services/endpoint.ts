@@ -617,7 +617,7 @@ const viewDefaultHandler = async <TEntity>(
 /**
  * Default handler for update entity
  *
- * fields - should be without primary keys (e.g. this is do it in CRUD.update)
+ * fields - should be without primary keys (e.g. this is done in CRUD.update)
  */
 const updateDefaultHandler = async <TEntity>(
   query: SelectQueryBuilder<TEntity>,
@@ -878,7 +878,7 @@ class Endpoint {
     },
     update: {
       input: UpdateRequestParams,
-      output: null,
+      output: UpdateOutputParams,
       description: (name = 'entity'): string => `Update ${name} by given condition`,
     },
     remove: {

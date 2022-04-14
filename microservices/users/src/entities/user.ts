@@ -1,4 +1,4 @@
-import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, Length, IsEmail, IsMobilePhone, IsString } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
@@ -14,6 +14,12 @@ import {
 import IdentityProvider from '@entities/identity-provider';
 import Profile from '@entities/profile';
 
+@JSONSchema({
+  properties: {
+    profile: { $ref: '#/definitions/Profile' },
+    identityProviders: { $ref: '#/definitions/IdentityProvider', type: 'array' },
+  },
+})
 @Entity()
 class User {
   @PrimaryGeneratedColumn('uuid')
@@ -63,12 +69,15 @@ class User {
   @IsString()
   password: null | string;
 
+  @IsTypeormDate()
   @CreateDateColumn()
   createdAt: Date;
 
+  @IsTypeormDate()
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @IsTypeormDate()
   @DeleteDateColumn()
   deletedAt: Date | null;
 

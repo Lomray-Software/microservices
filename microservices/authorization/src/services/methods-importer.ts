@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import { IMicroserviceMeta, Log } from '@lomray/microservice-helpers';
 import { AbstractMicroservice } from '@lomray/microservice-nodejs-lib';
 import _ from 'lodash';
@@ -108,7 +109,7 @@ class MethodsImporter {
         result[msName] = { isSuccess: true };
       } catch (e) {
         result[msName] = { error: "Microservice meta endpoint doesn't exist." };
-        Log.error(result[msName].error);
+        Log.error(result[msName].error, e);
       }
     }
 
@@ -141,17 +142,17 @@ class MethodsImporter {
       const modelRepository = transactionManager.getRepository(Model);
 
       for (const [methodName, { input, output, description }] of Object.entries(endpoints)) {
-        const [modelIn, modelOut] = await Promise.all([
-          // create or update input model if exist
-          (input[0] &&
+        // create or update input model
+        const modelIn =
+          (await (input[0] &&
             this.updateOrCreateModel(modelRepository, {
               microservice,
               schemaEntities: entities,
               schemaName: input[0],
               schemaParams: input[1],
-            })) ||
-            undefined,
-          // create or update output model if exist
+            }))) || undefined;
+        // create or update output model
+        const modelOut =
           (output[0] &&
             (await this.updateOrCreateModel(modelRepository, {
               microservice,
@@ -159,8 +160,7 @@ class MethodsImporter {
               schemaName: output[0],
               schemaParams: output[1],
             }))) ||
-            undefined,
-        ]);
+          undefined;
 
         await MethodsImporter.updateOrCreateMethod(methodRepository, {
           microservice,
@@ -211,7 +211,7 @@ class MethodsImporter {
     },
   ): Promise<Model | undefined> {
     const { microservice, schemaEntities, schemaName, schemaParams } = params;
-    const alias = this.getSchemaAlias(schemaName, microservice);
+    const alias = this.getSchemaAlias(schemaName, microservice, schemaParams);
 
     const { commonModelAliases = [] } = this.params;
     const isCommonModel = Boolean(commonModelAliases.includes(schemaName));
@@ -220,7 +220,7 @@ class MethodsImporter {
       alias,
     });
 
-    // no need update model
+    // no need create/update model
     if (this.handledModels.has(alias)) {
       return model;
     }
@@ -242,10 +242,16 @@ class MethodsImporter {
 
     model.schema = schema;
 
+    this.handledModels.add(model.alias);
+
     // need also add related schemas
     if (related.length > 0) {
-      // save memory (don't use Promise.all)
       for (const relatedSchemaName of related) {
+        // skip self referencing
+        if (this.getSchemaAlias(relatedSchemaName, microservice) === alias) {
+          continue;
+        }
+
         await this.updateOrCreateModel(repository, {
           microservice,
           schemaEntities,
@@ -253,8 +259,6 @@ class MethodsImporter {
         });
       }
     }
-
-    this.handledModels.add(model.alias);
 
     return repository.save(model);
   }
@@ -282,10 +286,7 @@ class MethodsImporter {
     const related = new Set<string>();
     const schema = Object.entries(entitySchema.properties ?? {}).reduce(
       (res, [fieldName, fieldSchema]) => {
-        // just keep previous field definition
-        if (baseSchema?.[fieldName]) {
-          res[fieldName] = baseSchema[fieldName];
-        } else if (schemaParams?.[fieldName]) {
+        if (schemaParams?.[fieldName]) {
           const alias = Array.isArray(schemaParams[fieldName])
             ? schemaParams[fieldName][0]
             : schemaParams[fieldName];
@@ -294,7 +295,13 @@ class MethodsImporter {
           res[fieldName] = this.getSchemaAlias(alias, microservice);
 
           related.add(alias);
-        } else if (fieldSchema.$ref && !fieldSchema.$ref.endsWith('/Object')) {
+        } else if (
+          fieldSchema.$ref &&
+          !fieldSchema.$ref.endsWith('/Object') &&
+          !fieldSchema.$ref.endsWith('/Array') &&
+          !fieldSchema.$ref.endsWith('/Date') &&
+          !fieldSchema.$ref.endsWith('/Function')
+        ) {
           // this field should be related to another schema (nested model)
           const [alias, uniqueAlias] = this.getRefSchemaAlias(fieldSchema.$ref, microservice);
 
@@ -311,21 +318,36 @@ class MethodsImporter {
           res[fieldName] = { object: nestedSchema };
           childrenSchemas.forEach((childrenSchema) => related.add(childrenSchema));
         } else {
-          // new schema field - set default permission
-          res[fieldName] = { in: {}, out: {} };
+          // new schema field - set default permission, or copy prev permissions
+          res[fieldName] = baseSchema?.[fieldName] ?? { in: {}, out: {} };
 
-          defaultSchemaRoles.forEach((role) => {
-            res[fieldName].in[role] = FieldPolicy.allow;
-            res[fieldName].out[role] = FieldPolicy.allow;
-          });
+          if (!baseSchema?.[fieldName]) {
+            defaultSchemaRoles.forEach((role) => {
+              _.set(res, `${fieldName}.in.${role}`, FieldPolicy.allow);
+              _.set(res, `${fieldName}.out.${role}`, FieldPolicy.allow);
+            });
+          }
         }
 
         return res;
       },
+      // keep '*' from existing schema
       _.pick(baseSchema ?? ({} as IModelSchema), ['*']),
     );
+    // keep custom fields
+    const customFields = Object.entries(baseSchema ?? {}).reduce(
+      (res, [field, permissions]) => ({
+        ...res,
+        ...(permissions?.['isCustom'] === true
+          ? {
+              [field]: permissions,
+            }
+          : {}),
+      }),
+      {} as IModelSchema,
+    );
 
-    return { schema, related: [...related] };
+    return { schema: { ...schema, ...customFields }, related: [...related] };
   }
 
   /**
@@ -343,14 +365,22 @@ class MethodsImporter {
    * Get schema alias name
    * @private
    */
-  private getSchemaAlias(name: string, microservice: string): string {
+  private getSchemaAlias(
+    name: string,
+    microservice: string,
+    schemaParams?: Record<string, any>,
+  ): string {
     const isCommonModel = Boolean(this.params.commonModelAliases?.includes(name));
 
     if (isCommonModel) {
       return name;
     }
 
-    return [microservice, name].join('.');
+    const hash = _.isEmpty(schemaParams)
+      ? null
+      : crypto.createHash('md5').update(JSON.stringify(schemaParams)).digest('hex');
+
+    return [microservice, name, hash].filter(Boolean).join('.');
   }
 }
 

@@ -1,4 +1,4 @@
-import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsEnum, IsObject, IsRFC3339, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Unique } from 'typeorm';
@@ -55,6 +55,7 @@ class Token {
   @IsUndefinable()
   params: Record<string, any>;
 
+  @IsTypeormDate()
   @CreateDateColumn()
   createdAt: Date;
 }

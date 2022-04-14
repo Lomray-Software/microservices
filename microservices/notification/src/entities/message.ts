@@ -1,4 +1,4 @@
-import { IsUndefinable } from '@lomray/microservice-helpers';
+import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsEnum, IsObject, Length } from 'class-validator';
 import { Entity, Column, CreateDateColumn, PrimaryGeneratedColumn } from 'typeorm';
 import NotifyType from '@constants/notify-type';
@@ -38,6 +38,7 @@ class Message {
   @IsUndefinable()
   params: Record<string, any>;
 
+  @IsTypeormDate()
   @CreateDateColumn()
   createdAt: Date;
 }

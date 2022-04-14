@@ -1,3 +1,4 @@
+import { IsTypeormDate } from '@lomray/microservice-helpers';
 import { IsRFC3339, Length } from 'class-validator';
 import { Entity, Column, PrimaryColumn, CreateDateColumn } from 'typeorm';
 
@@ -15,6 +16,7 @@ class ConfirmCode {
   @IsRFC3339() // timestamp validator
   expirationAt: number;
 
+  @IsTypeormDate()
   @CreateDateColumn()
   createdAt: Date;
 }

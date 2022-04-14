@@ -1,4 +1,4 @@
-import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, Length, IsNumber, IsArray, IsString } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
@@ -14,6 +14,13 @@ import {
 import MethodFilter from '@entities/method-filter';
 import Model from '@entities/model';
 
+@JSONSchema({
+  properties: {
+    modelIn: { $ref: '#/definitions/Model' },
+    modelOut: { $ref: '#/definitions/Model' },
+    methodFilters: { $ref: '#/definitions/MethodFilter', type: 'array' },
+  },
+})
 @Entity()
 @Unique(['microservice', 'method'])
 class Method {
@@ -59,26 +66,28 @@ class Method {
   @IsUndefinable()
   modelInId: number | null;
 
-  @ManyToOne(() => Model, { onDelete: 'SET NULL' })
-  modelIn: Model;
-
   @Column({ type: 'integer', nullable: true, default: null })
   @IsNumber()
   @IsNullable()
   @IsUndefinable()
   modelOutId: number | null;
 
+  @IsTypeormDate()
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @IsTypeormDate()
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @ManyToOne(() => Model, { onDelete: 'SET NULL' })
+  modelIn: Model;
+
   @ManyToOne(() => Model, { onDelete: 'SET NULL' })
   modelOut: Model;
 
   @OneToMany(() => MethodFilter, (methodFilter) => methodFilter.method)
   methodFilters: MethodFilter[];
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 }
 
 export default Method;

@@ -1,6 +1,13 @@
-import { IsUndefinable } from '@lomray/microservice-helpers';
+import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsObject, Length } from 'class-validator';
-import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  Unique,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 @Unique(['microservice', 'type'])
@@ -17,7 +24,7 @@ class Config<TParams = Record<string, any>> {
   microservice: string;
 
   /**
-   * db, aws, mail, microservice (personal configs) and etc.
+   * db, aws, mail, microservice (personal configs) etc.
    */
   @Column({ type: 'varchar', length: 30 })
   @Length(1, 30)
@@ -27,6 +34,14 @@ class Config<TParams = Record<string, any>> {
   @IsObject()
   @IsUndefinable()
   params: TParams;
+
+  @IsTypeormDate()
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @IsTypeormDate()
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
 
 export default Config;

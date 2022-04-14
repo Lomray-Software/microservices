@@ -1,4 +1,4 @@
-import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, Length, IsObject } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
@@ -23,10 +23,11 @@ export interface IModelSchema {
   '*': FieldPolicy;
   [fieldName: string]:
     | string // related model alias
-    | { object: IModelSchema }
+    | { object: IModelSchema; isCustom?: boolean }
     | {
         in?: IRolePermissions;
         out?: IRolePermissions;
+        isCustom?: boolean;
       };
 }
 
@@ -43,7 +44,7 @@ class Model {
 
   @Column({ type: 'varchar', length: 50 })
   @Unique(['alias'])
-  @Length(1, 50)
+  @Length(1, 150)
   alias: string;
 
   @Column({ type: 'varchar', length: 50 })
@@ -78,9 +79,11 @@ class Model {
   @IsUndefinable()
   schema: IModelSchema;
 
+  @IsTypeormDate()
   @CreateDateColumn()
   createdAt: Date;
 
+  @IsTypeormDate()
   @UpdateDateColumn()
   updatedAt: Date;
 }

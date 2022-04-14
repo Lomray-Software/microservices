@@ -18,6 +18,7 @@ const config = {
     preserveModulesRoot: 'src',
     exports: 'auto',
   },
+  external: ['crypto'],
   plugins: [
     replace({
       preventAssignment: true,

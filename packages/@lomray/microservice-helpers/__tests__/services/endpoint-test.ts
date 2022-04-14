@@ -649,7 +649,10 @@ describe('services/endpoint', () => {
           Endpoint.defaultParams.update.input.name,
           new Endpoint.defaultParams.update.input(repository),
         ],
-        output: [TestEntity.name, undefined],
+        output: [
+          Endpoint.defaultParams.update.output.name,
+          new Endpoint.defaultParams.update.output(repository),
+        ],
         description: 'Update TestEntity by given condition',
       });
     });

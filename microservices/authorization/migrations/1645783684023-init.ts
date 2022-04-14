@@ -5,7 +5,7 @@ export default class init1645783684023 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "model" ("id" SERIAL NOT NULL, "microservice" character varying(50), "alias" character varying(50) NOT NULL, "title" character varying(50) NOT NULL, "schema" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_c1d9be113aa490dd35f2daaa553" UNIQUE ("alias"), CONSTRAINT "PK_d6df271bba301d5cc79462912a4" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "model" ("id" SERIAL NOT NULL, "microservice" character varying(50), "alias" character varying(150) NOT NULL, "title" character varying(50) NOT NULL, "schema" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_c1d9be113aa490dd35f2daaa553" UNIQUE ("alias"), CONSTRAINT "PK_d6df271bba301d5cc79462912a4" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "method" ("id" SERIAL NOT NULL, "microservice" character varying(50), "method" character varying(100) NOT NULL, "description" character varying(255) NOT NULL DEFAULT '', "allowGroup" text array NOT NULL DEFAULT '{}', "denyGroup" text array NOT NULL DEFAULT '{}', "modelInId" integer, "modelOutId" integer, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_9c1f21eeb5fd48835d9945a3ff1" UNIQUE ("microservice", "method"), CONSTRAINT "PK_def6b33cb9809fb4b8ac44c69ae" PRIMARY KEY ("id"))`,
