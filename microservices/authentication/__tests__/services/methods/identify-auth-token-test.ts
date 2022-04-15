@@ -62,6 +62,7 @@ describe('services/methods/identify-auth-token', () => {
       {
         token: personalToken,
         expectedResult: {
+          tokenId,
           userId,
           isAuth: true,
           provider: AuthProviders.personal,
@@ -70,6 +71,7 @@ describe('services/methods/identify-auth-token', () => {
       {
         headers: { Authorization: `Bearer ${personalToken}` },
         expectedResult: {
+          tokenId,
           userId,
           isAuth: true,
           provider: AuthProviders.personal,
@@ -93,6 +95,7 @@ describe('services/methods/identify-auth-token', () => {
       {
         token: access,
         expectedResult: {
+          tokenId,
           userId,
           isAuth: true,
           provider: AuthProviders.jwt,
@@ -101,6 +104,7 @@ describe('services/methods/identify-auth-token', () => {
       {
         headers: { Authorization: `Bearer ${access}` },
         expectedResult: {
+          tokenId,
           userId,
           isAuth: true,
           provider: AuthProviders.jwt,
@@ -111,6 +115,7 @@ describe('services/methods/identify-auth-token', () => {
           cookie: `_octo=GH1.1.410839147.1623154775; _device_id=bd16babbc28b1bd75915ce011104d00c; jwt-access=${access};`,
         },
         expectedResult: {
+          tokenId,
           userId,
           isAuth: true,
           provider: AuthProviders.jwt,
@@ -129,6 +134,7 @@ describe('services/methods/identify-auth-token', () => {
     const result = await service.identify({ token: undefined });
 
     expect(result).to.deep.equal({
+      tokenId: null,
       userId: null,
       isAuth: false,
       provider: null,

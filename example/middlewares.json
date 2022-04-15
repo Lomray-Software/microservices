@@ -17,6 +17,7 @@
       ],
       "strategy": "transform",
       "convertResult": {
+        "payload.authentication.tokenId": "$middleware.tokenId",
         "payload.authentication.userId": "$middleware.userId",
         "payload.authentication.isAuth": "$middleware.isAuth",
         "payload.authentication.provider": "$middleware.provider"
@@ -90,6 +91,7 @@
       "convertParams": {
         "type": "jwt",
         "userId": "$result.user.id",
+        "params": "$task.params.payload.headers.user-info",
         "returnType": "cookies"
       },
       "convertResult": {
@@ -111,6 +113,7 @@
       "convertParams": {
         "type": "jwt",
         "userId": "$result.user.id",
+        "params": "$task.params.payload.headers.user-info",
         "returnType": "cookies"
       },
       "convertResult": {
@@ -132,6 +135,7 @@
       "convertParams": {
         "type": "jwt",
         "userId": "$result.user.id",
+        "params": "$task.params.payload.headers.user-info",
         "returnType": "cookies"
       },
       "convertResult": {
@@ -151,7 +155,7 @@
       "isRequired": true,
       "strategy": "transform",
       "convertParams": {
-        "query.where.userId": "$task.params.userId"
+        "query.where.id": "$task.params.payload.authentication.tokenId"
       },
       "convertResult": {
         "payload.cookies.0.action": "remove",

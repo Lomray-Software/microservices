@@ -2,6 +2,8 @@ import { Log } from '@lomray/microservice-helpers';
 import type { IGatewayOptions, IGatewayParams } from '@lomray/microservice-nodejs-lib';
 import { ConsoleLogDriver } from '@lomray/microservice-nodejs-lib';
 import cors from 'cors';
+import _ from 'lodash';
+import RequestIp from 'request-ip';
 import {
   MS_BATCH_LIMIT,
   MS_CONNECTION,
@@ -34,8 +36,29 @@ const msOptions: Partial<IGatewayOptions> = {
 const msParams: Partial<IGatewayParams> = {
   beforeRoute: (express) => {
     express.use(cors(MS_CORS_CONFIG));
+    express.use((req, res, next) => {
+      const clientIp = RequestIp.getClientIp(req);
+
+      // parse user info
+      try {
+        const userInfo = req.header('user-info');
+
+        if (userInfo) {
+          _.set(req.headers, 'user-info', JSON.parse(userInfo));
+        }
+      } catch (e) {
+        Log.error('Failed parse user info', e);
+      }
+
+      // set user ip
+      if (clientIp) {
+        _.set(req.headers, 'user-info.ipAddress', clientIp);
+      }
+
+      next();
+    });
   },
-  logDriver: ConsoleLogDriver((_, message) => Log.info(message)),
+  logDriver: ConsoleLogDriver((__, message) => Log.info(message)),
 };
 
 export { msOptions, msParams };

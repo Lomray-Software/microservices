@@ -23,6 +23,11 @@ class TokenIdentifyOutput {
   @Length(1, 36)
   @IsNullable()
   @IsUndefinable()
+  tokenId?: string | null;
+
+  @Length(1, 36)
+  @IsNullable()
+  @IsUndefinable()
   userId?: string | number | null;
 
   @IsBoolean()
@@ -129,6 +134,7 @@ class IdentifyAuthToken {
     }
 
     return {
+      tokenId: dbToken.id,
       userId: dbToken.userId,
       isAuth: true,
       provider: isPersonal ? AuthProviders.personal : AuthProviders.jwt,
@@ -148,6 +154,7 @@ class IdentifyAuthToken {
 
     if (!authToken) {
       return Promise.resolve({
+        tokenId: null,
         userId: null,
         isAuth: false,
         provider: null,
