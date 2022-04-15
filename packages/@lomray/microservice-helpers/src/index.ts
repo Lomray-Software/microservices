@@ -8,6 +8,8 @@ export { default as IsMeta } from '@validators/is-meta';
 
 export { default as IsTypeormDate } from '@validators/is-typeorm-date';
 
+export { default as IsTimestamp } from '@validators/is-timestamp';
+
 export { default as CreateDbConnection } from '@helpers/create-db-connection';
 
 export { default as EntityColumns } from '@helpers/entity-columns';

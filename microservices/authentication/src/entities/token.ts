@@ -1,5 +1,10 @@
-import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, IsEnum, IsObject, IsRFC3339, Length } from 'class-validator';
+import {
+  IsNullable,
+  IsTimestamp,
+  IsTypeormDate,
+  IsUndefinable,
+} from '@lomray/microservice-helpers';
+import { Allow, IsEnum, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import TokenType from '@constants/token-type';
@@ -40,7 +45,8 @@ class Token {
 
   @Column({ type: 'int', width: 10, default: null })
   @IsNullable()
-  @IsRFC3339() // timestamp validator
+  @IsUndefinable()
+  @IsTimestamp()
   expirationAt: number | null;
 
   @JSONSchema({
@@ -54,6 +60,17 @@ class Token {
   @IsObject()
   @IsUndefinable()
   params: Record<string, any>;
+
+  @JSONSchema({
+    description: 'Some user payload data.',
+    example: {
+      pushNotificationToken: '....',
+    },
+  })
+  @Column({ type: 'json', default: {} })
+  @IsObject()
+  @IsUndefinable()
+  userParams: Record<string, any>;
 
   @IsTypeormDate()
   @CreateDateColumn()

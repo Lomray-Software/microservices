@@ -6,6 +6,7 @@ import TokenIdentify from '@methods/token/identify';
 import TokenList from '@methods/token/list';
 import TokenRemove from '@methods/token/remove';
 import TokenRenew from '@methods/token/renew';
+import TokenUpdate from '@methods/token/update';
 import TokenView from '@methods/token/view';
 
 /**
@@ -21,11 +22,12 @@ export default (ms: Microservice): void => {
   ms.addEndpoint('token.list', TokenList, { isDisableMiddlewares: true, isPrivate: true });
   ms.addEndpoint('token.view', TokenView, { isDisableMiddlewares: true, isPrivate: true });
   ms.addEndpoint('token.remove', TokenRemove, { isDisableMiddlewares: true, isPrivate: true });
+  ms.addEndpoint('token.update', TokenUpdate);
 
   /**
    * Cookies methods
    */
-  ms.addEndpoint('cookies.remove', CookiesRemove, { isDisableMiddlewares: true });
+  ms.addEndpoint('cookies.remove', CookiesRemove);
 
   /**
    * Microservice metadata endpoint

@@ -101,7 +101,7 @@ export default class defaultPermissions1647336747141 implements MigrationInterfa
         INSERT INTO public.model (id, microservice, alias, title, schema, "createdAt", "updatedAt") VALUES (89, 'authentication', 'authentication.TokenRenewOutput', 'Token Renew Output', '{"access":{"in":{"admin":"allow"},"out":{"guest":"allow","user":"allow","admin":"allow"}},"refresh":{"in":{"admin":"allow"},"out":{"guest":"allow","user":"allow","admin":"allow"}},"payload":{"in":{"admin":"allow"},"out":{"guest":"allow","user":"allow","admin":"allow"}}}', '2022-04-14 08:34:31.238165', '2022-04-14 08:34:31.238165');
         INSERT INTO public.model (id, microservice, alias, title, schema, "createdAt", "updatedAt") VALUES (90, 'authentication', 'authentication.TokenIdentifyInput', 'Token Identify Input', '{"token":{"in":{"admin":"allow"},"out":{"admin":"allow"}}}', '2022-04-14 08:34:31.238165', '2022-04-14 08:34:31.238165');
         INSERT INTO public.model (id, microservice, alias, title, schema, "createdAt", "updatedAt") VALUES (91, 'authentication', 'authentication.TokenIdentifyOutput', 'Token Identify Output', '{"userId":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"isAuth":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"provider":{"in":{"admin":"allow"},"out":{"admin":"allow"}}}', '2022-04-14 08:34:31.238165', '2022-04-14 08:34:31.238165');
-        INSERT INTO public.model (id, microservice, alias, title, schema, "createdAt", "updatedAt") VALUES (92, 'authentication', 'authentication.Token', 'Token', '{"id":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"type":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"userId":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"personal":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"access":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"refresh":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"expirationAt":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"params":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"createdAt":{"in":{"admin":"allow"},"out":{"admin":"allow"}}}', '2022-04-14 08:34:31.238165', '2022-04-14 12:42:53.894457');
+        INSERT INTO public.model (id, microservice, alias, title, schema, "createdAt", "updatedAt") VALUES (92, 'authentication', 'authentication.Token', 'Token', '{"id":{"in":{"user":"allow","admin":"allow"},"out":{"user":"allow","admin":"allow"}},"type":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"userId":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"personal":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"access":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"refresh":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"expirationAt":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"params":{"in":{"admin":"allow"},"out":{"admin":"allow"}},"userParams":{"in":{"user":"allow","admin":"allow"},"out":{"user":"allow","admin":"allow"}},"createdAt":{"in":{"admin":"allow"},"out":{"admin":"allow"}}}', '2022-04-14 08:34:31.238165', '2022-04-14 12:42:53.894457');
         INSERT INTO public.model (id, microservice, alias, title, schema, "createdAt", "updatedAt") VALUES (93, 'authentication', 'authentication.ListOutputParams.82d98355b4b039c79c1f31793cd42d85', 'List Output Params', '{"list":"authentication.Token","count":{"in":{"admin":"allow"},"out":{"admin":"allow"}}}', '2022-04-14 08:34:31.238165', '2022-04-14 08:34:31.238165');
         INSERT INTO public.model (id, microservice, alias, title, schema, "createdAt", "updatedAt") VALUES (94, 'authentication', 'authentication.ViewOutputParams.39be1ca76dce78187a814db381b988ea', 'View Output Params', '{"entity":"authentication.Token"}', '2022-04-14 08:34:31.238165', '2022-04-14 08:34:31.238165');
         INSERT INTO public.model (id, microservice, alias, title, schema, "createdAt", "updatedAt") VALUES (95, 'authentication', 'authentication.RemoveOutputParams.54ae1099e15b675aef25ea992c441972', 'Remove Output Params', '{"deleted":"authentication.Token","entities":{"in":{"admin":"allow"},"out":{"admin":"allow"}}}', '2022-04-14 08:34:31.238165', '2022-04-14 08:34:31.238165');
@@ -143,14 +143,8 @@ export default class defaultPermissions1647336747141 implements MigrationInterfa
         INSERT INTO public.model (id, microservice, alias, title, schema, "createdAt", "updatedAt") VALUES (131, 'users', 'users.IdentityProviderSignInOutput', 'Identity Provider Sign In Output', '{"user":"users.User","tokens":{"out":{"guest":"allow","user":"allow","admin":"allow"},"isCustom":true},"payload":{"out":{"guest":"allow","user":"allow","admin":"allow"},"isCustom":true}}', '2022-04-14 08:34:31.363563', '2022-04-14 08:34:31.363563');
         INSERT INTO public.model (id, microservice, alias, title, schema, "createdAt", "updatedAt") VALUES (132, 'users', 'users.IdentityProviderAttachInput', 'Identity Provider Attach Input', '{"userId":{"in":{"user":"allow","admin":"allow"},"out":{"admin":"allow"}},"provider":{"in":{"user":"allow","admin":"allow"},"out":{"admin":"allow"}},"token":{"in":{"user":"allow","admin":"allow"},"out":{"admin":"allow"}},"params":{"in":{"user":"allow","admin":"allow"},"out":{"admin":"allow"}}}', '2022-04-14 08:34:31.363563', '2022-04-14 08:34:31.363563');
         INSERT INTO public.model (id, microservice, alias, title, schema, "createdAt", "updatedAt") VALUES (133, 'users', 'users.IdentityProviderAttachOutput', 'Identity Provider Attach Output', '{"user":"users.User"}', '2022-04-14 08:34:31.363563', '2022-04-14 08:34:31.363563');
-      `,
-    );
-
-    // Create filters
-    await queryRunner.query(
-      `
-        INSERT INTO public.filter (id, title, condition, "createdAt", "updatedAt") VALUES (1, 'By user id', '{"id":"{{ userId }}"}', '2022-03-15 09:15:14.739189', '2022-03-15 09:15:14.739189');
-        INSERT INTO public.filter (id, title, condition, "createdAt", "updatedAt") VALUES (2, 'By userId', '{"userId":"{{ userId }}"}', '2022-03-15 09:15:40.656123', '2022-03-15 09:15:40.656123');
+        INSERT INTO public.model (id, microservice, alias, title, schema, "createdAt", "updatedAt") VALUES (134, 'authentication', 'authentication.UpdateRequestParams.b182b20fc8406f55af308dd86a0b84a2', 'Update Request Params', '{"fields":"authentication.Token","query":{"in":{"admin":"allow"},"out":{"admin":"allow"}}}', '2022-04-15 10:54:50.996469', '2022-04-15 10:54:50.996469');
+        INSERT INTO public.model (id, microservice, alias, title, schema, "createdAt", "updatedAt") VALUES (135, 'authentication', 'authentication.UpdateOutputParams.39be1ca76dce78187a814db381b988ea', 'Update Output Params', '{"entity":"authentication.Token"}', '2022-04-15 10:54:50.996469', '2022-04-15 10:54:50.996469');
       `,
     );
 
@@ -256,6 +250,15 @@ export default class defaultPermissions1647336747141 implements MigrationInterfa
         INSERT INTO public.method (id, microservice, method, description, "allowGroup", "denyGroup", "modelInId", "modelOutId", "createdAt", "updatedAt") VALUES (97, 'users', 'identity-provider.attach', 'Attach new identity provider to existing user', '{user}', '{}', 132, 133, '2022-04-14 08:34:31.363563', '2022-04-14 08:34:31.363563');
         INSERT INTO public.method (id, microservice, method, description, "allowGroup", "denyGroup", "modelInId", "modelOutId", "createdAt", "updatedAt") VALUES (98, 'users', 'meta', 'Get microservice metadata', '{admin}', '{}', null, 20, '2022-04-14 08:34:31.363563', '2022-04-14 08:34:31.363563');
         INSERT INTO public.method (id, microservice, method, description, "allowGroup", "denyGroup", "modelInId", "modelOutId", "createdAt", "updatedAt") VALUES (99, 'users', 'middleware-register', 'Register remote middleware on this microservice', '{admin}', '{}', 77, 78, '2022-04-14 08:34:31.363563', '2022-04-14 08:34:31.363563');
+        INSERT INTO public.method (id, microservice, method, description, "allowGroup", "denyGroup", "modelInId", "modelOutId", "createdAt", "updatedAt") VALUES (100, 'authentication', 'token.update', 'Update Token by given condition', '{user}', '{}', 134, 135, '2022-04-15 10:54:50.996469', '2022-04-15 10:54:50.996469');
+      `,
+    );
+
+    // Create filters
+    await queryRunner.query(
+      `
+        INSERT INTO public.filter (id, title, condition, "createdAt", "updatedAt") VALUES (1, 'By user id', '{"id":"{{ userId }}"}', '2022-03-15 09:15:14.739189', '2022-03-15 09:15:14.739189');
+        INSERT INTO public.filter (id, title, condition, "createdAt", "updatedAt") VALUES (2, 'By userId', '{"userId":"{{ userId }}"}', '2022-03-15 09:15:40.656123', '2022-03-15 09:15:40.656123');
       `,
     );
 
@@ -267,8 +270,16 @@ export default class defaultPermissions1647336747141 implements MigrationInterfa
         INSERT INTO public.method_filter ("methodId", "filterId", operator, "roleAlias", "createdAt", "updatedAt") VALUES (94, 1, 'and', 'user', '2022-03-15 09:18:07.204300', '2022-03-15 09:18:07.204300');
         INSERT INTO public.method_filter ("methodId", "filterId", operator, "roleAlias", "createdAt", "updatedAt") VALUES (81, 2, 'only', 'user', '2022-03-15 09:17:23.698669', '2022-03-15 09:17:23.698669');
         INSERT INTO public.method_filter ("methodId", "filterId", operator, "roleAlias", "createdAt", "updatedAt") VALUES (82, 2, 'only', 'user', '2022-03-15 09:18:07.204300', '2022-03-15 09:18:07.204300');
+        INSERT INTO public.method_filter ("methodId", "filterId", operator, "roleAlias", "createdAt", "updatedAt") VALUES (100, 2, 'only', 'user', '2022-03-15 09:18:07.204300', '2022-03-15 09:18:07.204300');
       `,
     );
+
+    // update sequence next_val
+    await queryRunner.query(`
+      SELECT SETVAL('model_id_seq',  (SELECT MAX(id) FROM public.model));
+      SELECT SETVAL('filter_id_seq',  (SELECT MAX(id) FROM public.filter));
+      SELECT SETVAL('method_id_seq',  (SELECT MAX(id) FROM public.method));
+    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
