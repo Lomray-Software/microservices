@@ -6,7 +6,7 @@ const sandbox = sinon.createSandbox();
 
 /**
  * Replace entity manager methods with stub methods
- * (prevent trying create connection and original requests to database)
+ * (prevent trying to create connection and original requests to database)
  */
 class EntityManagerMock extends EntityManager {
   queryBuilders: SelectQueryBuilder<any>[] = [];
@@ -19,6 +19,7 @@ class EntityManagerMock extends EntityManager {
 
       return {};
     });
+    this.update = sandbox.stub().resolves({ affected: 0, generatedMaps: [] });
     this.count = sandbox.stub().resolves(0);
     this.find = sandbox.stub().resolves({});
     this.findOne = sandbox.stub().resolves({});
