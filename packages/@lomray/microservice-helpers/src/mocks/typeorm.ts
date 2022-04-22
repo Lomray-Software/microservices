@@ -19,6 +19,8 @@ class EntityManagerMock extends EntityManager {
 
       return {};
     });
+    this.increment = sandbox.stub().resolves({ affected: 0, generatedMaps: [] });
+    this.decrement = sandbox.stub().resolves({ affected: 0, generatedMaps: [] });
     this.update = sandbox.stub().resolves({ affected: 0, generatedMaps: [] });
     this.count = sandbox.stub().resolves(0);
     this.find = sandbox.stub().resolves({});

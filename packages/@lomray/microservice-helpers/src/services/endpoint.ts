@@ -204,7 +204,10 @@ class RemoveRequestParams<TEntity> {
 class RemoveOutputParams<TEntity> {
   constructor(repository: Repository<TEntity>) {
     // it will need for make documentation
-    Object.assign(this, { deleted: [repository.metadata.name] });
+    Object.assign(this, {
+      deleted: [repository.metadata.name],
+      entities: [repository.metadata.name],
+    });
   }
 
   @JSONSchema({
