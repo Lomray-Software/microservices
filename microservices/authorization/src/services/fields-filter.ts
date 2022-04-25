@@ -7,6 +7,7 @@ import Model, { IModelSchema, IRolePermissions } from '@entities/model';
 export interface IFieldsFilter {
   userId?: string | null;
   userRoles: string[];
+  templateOptions?: Record<string, any>;
   modelRepository: Repository<Model>;
 }
 
@@ -40,16 +41,18 @@ class FieldsFilter {
   /**
    * @private
    */
-  private templateOptions = {};
+  private templateOptions = { fields: {} };
 
   /**
    * @protected
    * @constructor
    */
-  protected constructor({ userId, userRoles, modelRepository }: IFieldsFilter) {
+  protected constructor({ userId, userRoles, templateOptions, modelRepository }: IFieldsFilter) {
     this.userId = userId;
     this.userRoles = userRoles;
     this.modelRepository = modelRepository;
+
+    Object.assign(this.templateOptions, templateOptions);
   }
 
   /**
@@ -71,13 +74,13 @@ class FieldsFilter {
 
     this.cacheSchema(alias, schema);
 
-    if (fields) {
-      this.templateOptions = fields;
-    }
-
     // filter only object or array of objects
     if (typeof fields !== 'object' || fields === null) {
       return fields;
+    }
+
+    if (fields) {
+      this.templateOptions.fields = fields;
     }
 
     return (await this.filterBySchema(schema, type, fields)) || {};
@@ -165,7 +168,7 @@ class FieldsFilter {
       if (permission.template) {
         const newValue = _.template(permission.template)({
           value,
-          fields: this.templateOptions,
+          params: this.templateOptions,
           current: {
             userId: this.userId,
             roles: this.userRoles,

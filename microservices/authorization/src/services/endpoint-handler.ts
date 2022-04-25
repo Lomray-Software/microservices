@@ -89,6 +89,7 @@ class EndpointHandler {
   public async filterFields(
     type: FilterType,
     fields?: Record<string, any>,
+    templateOptions?: Record<string, any>,
   ): Promise<Record<string, any> | undefined> {
     const [{ roles }, method] = await Promise.all([
       this.getEnforcer().findUserRoles(),
@@ -98,6 +99,7 @@ class EndpointHandler {
     return FieldsFilter.init({
       userId: this.params.userId,
       userRoles: roles,
+      templateOptions,
       modelRepository: getRepository(Model),
     }).filter(type, type === FilterType.IN ? method?.modelIn : method?.modelOut, fields);
   }

@@ -65,7 +65,7 @@ class Model {
           in: {
             guests: FieldPolicy.deny,
             users: {
-              // allow only if userId equal userId from authentication microservice
+              // allow only if userId equal userId from authentication microservice (available: current - (userId, userRoles), params - payload, value)
               template: '<%= value === current.userId ? value : undefined %>',
             },
           },

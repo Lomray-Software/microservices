@@ -69,7 +69,7 @@ const enforce = Endpoint.custom(
     description:
       'Check access user to microservice method, filter req params, get entities filters',
   }),
-  async ({ userId, method, filterInput, shouldThrowError = true, hasFilters = true }) => {
+  async ({ userId, method, filterInput, payload, shouldThrowError = true, hasFilters = true }) => {
     const hasFilterInput = Boolean(filterInput);
     const endpointService = EndpointHandler.init(method, {
       userId,
@@ -88,7 +88,7 @@ const enforce = Endpoint.custom(
         isAllow && hasFilters ? await endpointService.getMethodFilters(filterInput) : undefined,
       filteredInput:
         isAllow && hasFilterInput
-          ? await endpointService.filterFields(FilterType.IN, filterInput)
+          ? await endpointService.filterFields(FilterType.IN, filterInput, { payload })
           : undefined,
     };
   },

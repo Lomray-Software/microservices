@@ -222,7 +222,9 @@ describe('services/fields-filter', () => {
   it('should correctly filter field: field empty template', async () => {
     const input = {
       userId: 'user-100',
+      someField: '',
     };
+    const templateOptions = { payload: { it: 'payload' } };
     const model = modelRepository.create({
       alias: 'inputTest',
       schema: {
@@ -236,12 +238,23 @@ describe('services/fields-filter', () => {
           },
           out: { guests: FieldPolicy.allow },
         },
+        someField: {
+          in: { users: { template: "<%= _.get(params, 'payload.it', 'undefined') %>" } },
+        },
       },
     });
-    const srv = FieldsFilter.init({ userId: input.userId, userRoles, modelRepository });
+    const srv = FieldsFilter.init({
+      userId: input.userId,
+      userRoles,
+      modelRepository,
+      templateOptions,
+    });
 
     expect(await service.filter(FilterType.IN, model, input)).to.deep.equal({});
-    expect(await srv.filter(FilterType.IN, model, input)).to.deep.equal({ userId: input.userId });
+    expect(await srv.filter(FilterType.IN, model, input)).to.deep.equal({
+      userId: input.userId,
+      someField: templateOptions.payload.it,
+    });
     expect(await service.filter(FilterType.OUT, model, input)).to.deep.equal({
       userId: input.userId,
     });

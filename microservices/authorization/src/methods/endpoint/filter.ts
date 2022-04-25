@@ -35,7 +35,7 @@ const filter = Endpoint.custom(
     output: EndpointFilterOutput,
     description: 'Filter input/output endpoint params',
   }),
-  async ({ userId, method, type, filterInput }) => {
+  async ({ userId, method, type, filterInput, payload }) => {
     const hasFilterInput = type === FilterType.IN;
     const endpointService = EndpointHandler.init(method, {
       userId,
@@ -45,7 +45,7 @@ const filter = Endpoint.custom(
     });
 
     return {
-      filtered: await endpointService.filterFields(type, filterInput),
+      filtered: await endpointService.filterFields(type, filterInput, { payload }),
     };
   },
 );

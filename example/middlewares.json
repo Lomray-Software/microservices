@@ -5,7 +5,7 @@
     "sender": "authentication",
     "senderMethod": "token.identify",
     "type": "request",
-    "order": 1,
+    "order": 10,
     "params": {
       "type": "request",
       "isRequired": true,
@@ -30,7 +30,7 @@
     "sender": "authorization",
     "senderMethod": "endpoint.enforce",
     "type": "request",
-    "order": 2,
+    "order": 20,
     "params": {
       "type": "request",
       "isRequired": true,
@@ -59,6 +59,7 @@
     "sender": "authorization",
     "senderMethod": "endpoint.filter",
     "type": "response",
+    "order": 20,
     "params": {
       "type": "response",
       "isRequired": true,
@@ -84,6 +85,7 @@
     "sender": "authentication",
     "senderMethod": "token.create",
     "type": "response",
+    "order": 10,
     "params": {
       "type": "response",
       "isRequired": true,
@@ -106,6 +108,7 @@
     "sender": "authentication",
     "senderMethod": "token.create",
     "type": "response",
+    "order": 10,
     "params": {
       "type": "response",
       "isRequired": true,
@@ -128,6 +131,7 @@
     "sender": "authentication",
     "senderMethod": "token.create",
     "type": "response",
+    "order": 10,
     "params": {
       "type": "response",
       "isRequired": true,
@@ -150,6 +154,7 @@
     "sender": "authentication",
     "senderMethod": "token.remove",
     "type": "response",
+    "order": 10,
     "params": {
       "type": "response",
       "isRequired": true,
