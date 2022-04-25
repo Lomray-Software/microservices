@@ -50,6 +50,11 @@ class Middleware implements MiddlewareEntity {
   @IsUndefinable()
   order: number;
 
+  @Column({ type: 'varchar', length: 500, default: '' })
+  @Length(0, 500)
+  @IsUndefinable()
+  description: string;
+
   @Column({ type: 'json', default: {} })
   @IsObject()
   @IsUndefinable()

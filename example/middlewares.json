@@ -6,6 +6,7 @@
     "senderMethod": "token.identify",
     "type": "request",
     "order": 10,
+    "description": "Validate JWT token and add payload with token info.",
     "params": {
       "type": "request",
       "isRequired": true,
@@ -31,6 +32,7 @@
     "senderMethod": "endpoint.enforce",
     "type": "request",
     "order": 20,
+    "description": "Whether the user is allowed to call the method. Filter method input params.",
     "params": {
       "type": "request",
       "isRequired": true,
@@ -60,6 +62,7 @@
     "senderMethod": "endpoint.filter",
     "type": "response",
     "order": 20,
+    "description": "Filter microservice response fields.",
     "params": {
       "type": "response",
       "isRequired": true,
@@ -86,6 +89,7 @@
     "senderMethod": "token.create",
     "type": "response",
     "order": 10,
+    "description": "Create JWT auth tokens and attach to response after successful sign in.",
     "params": {
       "type": "response",
       "isRequired": true,
@@ -109,6 +113,7 @@
     "senderMethod": "token.create",
     "type": "response",
     "order": 10,
+    "description": "Create JWT auth tokens and attach to response after successful sign in.",
     "params": {
       "type": "response",
       "isRequired": true,
@@ -132,6 +137,7 @@
     "senderMethod": "token.create",
     "type": "response",
     "order": 10,
+    "description": "Create JWT auth tokens and attach to response after successful sign up.",
     "params": {
       "type": "response",
       "isRequired": true,
@@ -155,6 +161,7 @@
     "senderMethod": "token.remove",
     "type": "response",
     "order": 10,
+    "description": "Remove JWT auth tokens after successful sign out.",
     "params": {
       "type": "response",
       "isRequired": true,
