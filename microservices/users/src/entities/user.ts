@@ -31,12 +31,12 @@ class User {
   firstName: string;
 
   @Column({ type: 'varchar', length: 25, default: '' })
-  @Length(1, 25)
+  @Length(0, 25)
   @IsUndefinable()
   lastName: string;
 
   @Column({ type: 'varchar', length: 25, default: '' })
-  @Length(1, 25)
+  @Length(0, 25)
   @IsUndefinable()
   middleName: string;
 
