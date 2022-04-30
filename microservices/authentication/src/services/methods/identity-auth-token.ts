@@ -66,7 +66,7 @@ class IdentifyAuthToken {
    * @private
    */
   private static getHeaderAuth(headers?: Record<string, any>): string | undefined {
-    const token = headers?.Authorization;
+    const token = headers?.Authorization ?? headers?.authorization;
 
     if (token) {
       return token.split('Bearer ')?.[1];

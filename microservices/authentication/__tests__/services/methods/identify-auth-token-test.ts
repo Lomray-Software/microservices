@@ -111,6 +111,15 @@ describe('services/methods/identify-auth-token', () => {
         },
       },
       {
+        headers: { authorization: `Bearer ${access}` },
+        expectedResult: {
+          tokenId,
+          userId,
+          isAuth: true,
+          provider: AuthProviders.jwt,
+        },
+      },
+      {
         headers: {
           cookie: `_octo=GH1.1.410839147.1623154775; _device_id=bd16babbc28b1bd75915ce011104d00c; jwt-access=${access};`,
         },
