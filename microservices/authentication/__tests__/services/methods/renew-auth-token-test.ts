@@ -75,26 +75,44 @@ describe('services/methods/renew-auth-token', () => {
     }
   });
 
-  it('should correctly renew with headers', async () => {
+  it('should correctly renew with headers & cookies', async () => {
     TypeormMock.entityManager.findOne.resolves(repository.create({ id: tokenId, userId }));
 
     const { access, refresh } = jwtService.create(tokenId);
-    const result = await service.renew(
+
+    const cases = [
       {
-        refresh,
         returnType: TokenCreateReturnType.directly,
+        headers: {
+          cookie: `_octo=GH1.1.410839147.1623154775; _device_id=bd16babbc28b1bd75915ce011104d00c; jwt-access=${access};`,
+        },
+        expectedResult: (token: Token) => ({ access: token.access, refresh: token.refresh }),
       },
       {
-        cookie: `_octo=GH1.1.410839147.1623154775; _device_id=bd16babbc28b1bd75915ce011104d00c; jwt-access=${access};`,
+        returnType: TokenCreateReturnType.directly,
+        headers: {
+          authorization: `Bearer ${access}`,
+        },
+        expectedResult: (token: Token) => ({ access: token.access, refresh: token.refresh }),
       },
-    );
+    ];
 
-    const [, token] = TypeormMock.entityManager.save.firstCall.args;
+    for (const { returnType, headers, expectedResult } of cases) {
+      const result = await service.renew(
+        {
+          refresh,
+          returnType,
+        },
+        headers,
+      );
 
-    expect(token.userId).to.equal(userId);
-    expect(token.access).to.not.empty.and.not.equal(access);
-    expect(token.refresh).to.not.empty.and.not.equal(refresh);
-    expect(result).to.deep.equal({ access: token.access, refresh: token.refresh });
+      const [, token] = TypeormMock.entityManager.save.firstCall.args;
+
+      expect(token.userId).to.equal(userId);
+      expect(token.access).to.not.empty.and.not.equal(access);
+      expect(token.refresh).to.not.empty.and.not.equal(refresh);
+      expect(result).to.deep.equal(expectedResult(token));
+    }
   });
 
   it('should throw error: jwt not valid', async () => {

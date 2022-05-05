@@ -129,7 +129,10 @@ class RenewAuthToken {
 
     const result = await this.renewJwtTokens({
       ...options,
-      access: access ?? IdentifyAuthToken.getCookieAuth(headers),
+      access:
+        access ??
+        IdentifyAuthToken.getHeaderAuth(headers) ??
+        IdentifyAuthToken.getCookieAuth(headers),
     });
 
     return returnType === TokenCreateReturnType.cookies

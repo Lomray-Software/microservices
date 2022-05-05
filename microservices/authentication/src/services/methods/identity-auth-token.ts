@@ -65,7 +65,7 @@ class IdentifyAuthToken {
    * Get authorization token from headers
    * @private
    */
-  private static getHeaderAuth(headers?: Record<string, any>): string | undefined {
+  public static getHeaderAuth(headers?: Record<string, any>): string | undefined {
     const token = headers?.Authorization ?? headers?.authorization;
 
     if (token) {
