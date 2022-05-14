@@ -1,0 +1,210 @@
+[
+  {
+    "microservice": "configuration",
+    "method": "config.update",
+    "description": "Update Config by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelIn": "configuration.UpdateRequestParams.938d2de5afb758d221b99aee5425ad5b",
+    "modelOut": "configuration.UpdateOutputParams.17e91bbfa6f16a187d80a1f2ce14f9b1",
+    "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "config.remove",
+    "description": "Remove Config by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "configuration.RemoveOutputParams.da897e86bedb73f87a28872b8fdbba25",
+    "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "config.create",
+    "description": "Create a new Config",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelIn": "configuration.CreateRequestParams.938d2de5afb758d221b99aee5425ad5b",
+    "modelOut": "configuration.CreateOutputParams.17e91bbfa6f16a187d80a1f2ce14f9b1",
+    "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "middleware.list",
+    "description": "Returns list of Middleware by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "configuration.ListOutputParams.ddb13fa7e98644b92dc9747089e32c5a",
+    "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "middleware-obtain",
+    "description": "Get remote middlewares for microservice",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelOut": "configuration.ServerObtainMiddlewareOutput.bd6c3a3a5540be563f4edf9012631fdb",
+    "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "meta",
+    "description": "Get microservice metadata",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelOut": "MicroserviceMetaOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "middleware.update",
+    "description": "Create a new Middleware",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelIn": "configuration.CreateRequestParams.feed7528232e4069088c29908e6addfc",
+    "modelOut": "configuration.CreateOutputParams.9da16b07f4df7998b36997fabebc911b",
+    "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "config.list",
+    "description": "Returns list of Config by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "configuration.ListOutputParams.b09e48814202712475e863dccceab136",
+    "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "middleware.remove",
+    "description": "Remove Middleware by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "configuration.RemoveOutputParams.d18390f16ed2ed4d3d0473688b03809d",
+    "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "middleware.create",
+    "description": "Create a new Middleware",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelIn": "configuration.CreateRequestParams.feed7528232e4069088c29908e6addfc",
+    "modelOut": "configuration.CreateOutputParams.9da16b07f4df7998b36997fabebc911b",
+    "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "middleware.count",
+    "description": "Returns count of Middleware by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "middleware.view",
+    "description": "Returns Middleware by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "configuration.ViewOutputParams.9da16b07f4df7998b36997fabebc911b",
+    "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "middleware-register",
+    "description": "Add remote middleware for any microservice",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelIn": "configuration.ServerRegisterMiddlewareInput",
+    "modelOut": "configuration.ServerRegisterMiddlewareOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "config.view",
+    "description": "Returns Config by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "configuration.ViewOutputParams.17e91bbfa6f16a187d80a1f2ce14f9b1",
+    "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "config.count",
+    "description": "Returns count of Config by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  }
+]

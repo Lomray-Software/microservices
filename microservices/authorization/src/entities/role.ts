@@ -24,7 +24,7 @@ class Role {
   @Allow()
   alias: string;
 
-  @Column({ type: 'varchar', length: 30, nullable: true })
+  @Column({ type: 'varchar', length: 30, nullable: true, default: null })
   @Length(3, 30)
   @IsUndefinable()
   @IsNullable()

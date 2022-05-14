@@ -1,0 +1,18 @@
+[
+  {
+    "title": "By user id",
+    "condition": {
+      "id": "{{ userId }}"
+    },
+    "createdAt": "2022-03-15T06:15:14.739Z",
+    "updatedAt": "2022-03-15T06:15:14.739Z"
+  },
+  {
+    "title": "By userId",
+    "condition": {
+      "userId": "{{ userId }}"
+    },
+    "createdAt": "2022-03-15T06:15:40.656Z",
+    "updatedAt": "2022-03-15T06:15:40.656Z"
+  }
+]

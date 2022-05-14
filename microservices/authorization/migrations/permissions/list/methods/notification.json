@@ -1,0 +1,112 @@
+[
+  {
+    "microservice": "notification",
+    "method": "message.list",
+    "description": "Returns list of Message by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T05:34:31.136Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "notification.ListOutputParams.bdcd7fe53eb338303f700274acbe827c",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "message.count",
+    "description": "Returns count of Message by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T05:34:31.136Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "config-reset",
+    "description": "Reset RemoteConfig cache",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T05:34:31.136Z",
+    "modelOut": "RemoteConfigOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "middleware-register",
+    "description": "Register remote middleware on this microservice",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T05:34:31.136Z",
+    "modelIn": "ClientRegisterMiddlewareInput",
+    "modelOut": "ClientRegisterMiddlewareOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "email.send",
+    "description": "Send message to email",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T05:34:31.136Z",
+    "modelIn": "notification.EmailSendInput",
+    "modelOut": "notification.EmailSendOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "message.view",
+    "description": "Returns Message by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T05:34:31.136Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "notification.ViewOutputParams.db2684fa43e6535cad55abe2a93cd2b5",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "phone.send",
+    "description": "Send message to phone number",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T05:34:31.136Z",
+    "modelIn": "notification.PhoneSendInput",
+    "modelOut": "notification.PhoneSendOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "meta",
+    "description": "Get microservice metadata",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T05:34:31.136Z",
+    "modelOut": "MicroserviceMetaOutput",
+    "methodFilters": []
+  }
+]

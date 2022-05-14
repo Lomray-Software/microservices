@@ -1,0 +1,467 @@
+[
+  {
+    "microservice": "configuration",
+    "alias": "configuration.Middleware",
+    "title": "Middleware",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "target": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "targetMethod": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "sender": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "senderMethod": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "order": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "description": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-25T10:25:03.709Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.ListOutputParams.ddb13fa7e98644b92dc9747089e32c5a",
+    "title": "List Output Params",
+    "schema": {
+      "list": "configuration.Middleware",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.ViewOutputParams.9da16b07f4df7998b36997fabebc911b",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "configuration.Middleware"
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.CreateRequestParams.feed7528232e4069088c29908e6addfc",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "configuration.Middleware"
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.CreateOutputParams.9da16b07f4df7998b36997fabebc911b",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "configuration.Middleware"
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.RemoveOutputParams.d18390f16ed2ed4d3d0473688b03809d",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "configuration.Middleware",
+      "entities": "configuration.Middleware"
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.Config",
+    "title": "Config",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "microservice": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T09:27:10.213Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.ListOutputParams.b09e48814202712475e863dccceab136",
+    "title": "List Output Params",
+    "schema": {
+      "list": "configuration.Config",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.ViewOutputParams.17e91bbfa6f16a187d80a1f2ce14f9b1",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "configuration.Config"
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.CreateRequestParams.938d2de5afb758d221b99aee5425ad5b",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "configuration.Config"
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.CreateOutputParams.17e91bbfa6f16a187d80a1f2ce14f9b1",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "configuration.Config"
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.UpdateRequestParams.938d2de5afb758d221b99aee5425ad5b",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "configuration.Config",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.UpdateOutputParams.17e91bbfa6f16a187d80a1f2ce14f9b1",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "configuration.Config"
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.RemoveOutputParams.da897e86bedb73f87a28872b8fdbba25",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "configuration.Config",
+      "entities": "configuration.Config"
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.ServerRegisterMiddlewareInput",
+    "title": "Server Register Middleware Input",
+    "schema": {
+      "action": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "target": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "targetMethod": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "sender": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "senderMethod": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "order": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.ServerRegisterMiddlewareOutput",
+    "title": "Server Register Middleware Output",
+    "schema": {
+      "ok": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.MiddlewareEntity",
+    "title": "Middleware Entity",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "target": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "targetMethod": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "sender": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "senderMethod": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "order": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.ServerObtainMiddlewareOutput.bd6c3a3a5540be563f4edf9012631fdb",
+    "title": "Server Obtain Middleware Output",
+    "schema": {
+      "list": "configuration.MiddlewareEntity"
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  }
+]

@@ -1,0 +1,440 @@
+[
+  {
+    "microservice": "authentication",
+    "alias": "authentication.TokenIdentifyInput",
+    "title": "Token Identify Input",
+    "schema": {
+      "token": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z"
+  },
+  {
+    "microservice": "authentication",
+    "alias": "authentication.TokenCreateInput",
+    "title": "Token Create Input",
+    "schema": {
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "expirationAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "jwtPayload": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "returnType": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z"
+  },
+  {
+    "microservice": "authentication",
+    "alias": "authentication.TokenCreateOutput",
+    "title": "Token Create Output",
+    "schema": {
+      "access": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "refresh": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "token": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "payload": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z"
+  },
+  {
+    "microservice": "authentication",
+    "alias": "authentication.TokenRenewInput",
+    "title": "Token Renew Input",
+    "schema": {
+      "access": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "refresh": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "jwtPayload": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "returnType": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z"
+  },
+  {
+    "microservice": "authentication",
+    "alias": "authentication.TokenRenewOutput",
+    "title": "Token Renew Output",
+    "schema": {
+      "access": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "refresh": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "payload": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z"
+  },
+  {
+    "microservice": "authentication",
+    "alias": "authentication.TokenIdentifyOutput",
+    "title": "Token Identify Output",
+    "schema": {
+      "tokenId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "isAuth": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "provider": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-15T12:53:59.288Z"
+  },
+  {
+    "microservice": "authentication",
+    "alias": "authentication.Token",
+    "title": "Token",
+    "schema": {
+      "id": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "personal": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "access": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "refresh": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "expirationAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userParams": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T09:42:53.894Z"
+  },
+  {
+    "microservice": "authentication",
+    "alias": "authentication.ListOutputParams.82d98355b4b039c79c1f31793cd42d85",
+    "title": "List Output Params",
+    "schema": {
+      "list": "authentication.Token",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z"
+  },
+  {
+    "microservice": "authentication",
+    "alias": "authentication.ViewOutputParams.39be1ca76dce78187a814db381b988ea",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "authentication.Token"
+    },
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z"
+  },
+  {
+    "microservice": "authentication",
+    "alias": "authentication.RemoveOutputParams.20237fc46aa748afcd36badbe6e29dcf",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "authentication.Token",
+      "entities": "authentication.Token"
+    },
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z"
+  },
+  {
+    "microservice": "authentication",
+    "alias": "authentication.CookiesRemoveOutput",
+    "title": "Cookies Remove Output",
+    "schema": {
+      "isRemoved": {
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "in": {
+          "admin": "allow"
+        }
+      },
+      "payload": {
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "isCustom": true
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T10:02:50.201Z"
+  },
+  {
+    "microservice": "authentication",
+    "alias": "authentication.UpdateRequestParams.b182b20fc8406f55af308dd86a0b84a2",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "authentication.Token",
+      "query": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-15T07:54:50.996Z",
+    "updatedAt": "2022-04-15T07:54:50.996Z"
+  },
+  {
+    "microservice": "authentication",
+    "alias": "authentication.UpdateOutputParams.39be1ca76dce78187a814db381b988ea",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "authentication.Token"
+    },
+    "createdAt": "2022-04-15T07:54:50.996Z",
+    "updatedAt": "2022-04-15T07:54:50.996Z"
+  }
+]

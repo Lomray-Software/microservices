@@ -1,0 +1,211 @@
+[
+  {
+    "microservice": "notification",
+    "alias": "notification.Message",
+    "title": "Message",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "from": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "to": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "subject": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "text": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T09:27:11.033Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.ListOutputParams.bdcd7fe53eb338303f700274acbe827c",
+    "title": "List Output Params",
+    "schema": {
+      "list": "notification.Message",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T05:34:31.136Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.ViewOutputParams.db2684fa43e6535cad55abe2a93cd2b5",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "notification.Message"
+    },
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T05:34:31.136Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.EmailSendInput",
+    "title": "Email Send Input",
+    "schema": {
+      "from": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "to": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "subject": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "text": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "html": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T05:34:31.136Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.EmailSendOutput",
+    "title": "Email Send Output",
+    "schema": {
+      "isSent": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T05:34:31.136Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.PhoneSendInput",
+    "title": "Phone Send Input",
+    "schema": {
+      "to": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "message": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T05:34:31.136Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.PhoneSendOutput",
+    "title": "Phone Send Output",
+    "schema": {
+      "isSent": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.136Z",
+    "updatedAt": "2022-04-14T05:34:31.136Z"
+  }
+]

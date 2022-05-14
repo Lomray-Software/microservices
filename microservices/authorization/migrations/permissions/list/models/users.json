@@ -1,0 +1,984 @@
+[
+  {
+    "microservice": "users",
+    "alias": "users.Profile",
+    "title": "Profile",
+    "schema": {
+      "userId": {
+        "in": {
+          "user": {
+            "template": "<%= value === current.userId ? value : undefined %>"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "gender": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "birthDay": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "photo": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "object": {
+          "isEmailVerified": {
+            "in": {
+              "admin": "allow"
+            },
+            "out": {
+              "guest": "allow",
+              "user": "allow",
+              "admin": "allow"
+            }
+          },
+          "isPhoneVerified": {
+            "in": {
+              "admin": "allow"
+            },
+            "out": {
+              "guest": "allow",
+              "user": "allow",
+              "admin": "allow"
+            }
+          }
+        },
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "deletedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "user": "users.User"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T10:02:50.329Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.IdentityProvider",
+    "title": "Identity Provider",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "provider": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "identifier": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "deletedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "user": "users.User"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-15T12:53:59.447Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.User",
+    "title": "User",
+    "schema": {
+      "id": {
+        "in": {
+          "user": {
+            "template": "<%= value === current.userId ? value : undefined %>"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "firstName": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "lastName": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "middleName": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "email": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "phone": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "password": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "deletedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "profile": "users.Profile",
+      "identityProviders": "users.IdentityProvider"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.ListOutputParams.b2550b7a4ea7d332a31180f22cc0912b",
+    "title": "List Output Params",
+    "schema": {
+      "list": "users.User",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow",
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.ViewOutputParams.7c0210cc643ff04cde41d75273968a95",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "users.User"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.CreateRequestParams.b66dcf339120e89ab7794f53d6bc2e26",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "users.User"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.CreateOutputParams.7c0210cc643ff04cde41d75273968a95",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "users.User"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.UpdateRequestParams.b66dcf339120e89ab7794f53d6bc2e26",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "users.User",
+      "query": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.UpdateOutputParams.7c0210cc643ff04cde41d75273968a95",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "users.User"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.RemoveOutputParams.42e0a89b6cfe7ecc53acfed3adca0ed1",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "users.User",
+      "entities": "users.User"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.RestoreOutputParams.0affa0885c45ae77e6f8e2bc65a94ec7",
+    "title": "Restore Output Params",
+    "schema": {
+      "restored": "users.User"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.ViewOutputParams.a2f2a5d70288c017f302f33f61069b9b",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "users.Profile"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.UpdateRequestParams.bafad6bad4f0262c789073da58d4bf02",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "users.Profile",
+      "query": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.UpdateOutputParams.a2f2a5d70288c017f302f33f61069b9b",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "users.Profile"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.ListOutputParams.4f7306f05cd5aed97238a6c1863e9699",
+    "title": "List Output Params",
+    "schema": {
+      "list": "users.IdentityProvider",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow",
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.ViewOutputParams.da327cca56c4e309862b9c654bc59f88",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "users.IdentityProvider"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.UpdateRequestParams.8786756dd1e166aa6d20e32423de8317",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "users.IdentityProvider",
+      "query": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.UpdateOutputParams.da327cca56c4e309862b9c654bc59f88",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "users.IdentityProvider"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.RemoveOutputParams.158e7c87adce36140aee3d6fa1e900c6",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "users.IdentityProvider",
+      "entities": "users.IdentityProvider"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.RestoreOutputParams.1398bbf6eb0a1781b464f0a9352da056",
+    "title": "Restore Output Params",
+    "schema": {
+      "restored": "users.IdentityProvider"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.SignUpInput",
+    "title": "Sign Up Input",
+    "schema": {
+      "fields": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "confirmBy": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "confirmCode": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.SignUpOutput",
+    "title": "Sign Up Output",
+    "schema": {
+      "user": "users.User",
+      "tokens": {
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "isCustom": true
+      },
+      "payload": {
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "isCustom": true
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T10:02:50.329Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.SignInInput",
+    "title": "Sign In Input",
+    "schema": {
+      "login": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "password": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.SignInOutput",
+    "title": "Sign In Output",
+    "schema": {
+      "user": "users.User",
+      "tokens": {
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "isCustom": true
+      },
+      "payload": {
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "isCustom": true
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.SignOutInput",
+    "title": "Sign Out Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "user": {
+            "template": "<%= value === current.userId ? value : undefined %>"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.SignOutOutput",
+    "title": "Sign Out Output",
+    "schema": {
+      "loggedOut": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "payload": {
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "isCustom": true
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.ChangePasswordInput",
+    "title": "Change Password Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "user": {
+            "template": "<%= value === current.userId ? value : undefined %>"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "newPassword": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "oldPassword": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "confirmBy": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "confirmCode": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.ChangePasswordOutput",
+    "title": "Change Password Output",
+    "schema": {
+      "isChanged": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow",
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.ChangeLoginInput",
+    "title": "Change Login Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "user": {
+            "template": "<%= value === current.userId ? value : undefined %>"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "login": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "confirmBy": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "confirmCode": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.ChangeLoginOutput",
+    "title": "Change Login Output",
+    "schema": {
+      "isChanged": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow",
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.ConfirmSendInput",
+    "title": "Confirm Send Input",
+    "schema": {
+      "type": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "login": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.ConfirmSendOutput",
+    "title": "Confirm Send Output",
+    "schema": {
+      "isSent": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.IdentityProviderSignInInput",
+    "title": "Identity Provider Sign In Input",
+    "schema": {
+      "provider": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "token": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.IdentityProviderSignInOutput",
+    "title": "Identity Provider Sign In Output",
+    "schema": {
+      "user": "users.User",
+      "tokens": {
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "isCustom": true
+      },
+      "payload": {
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "isCustom": true
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.IdentityProviderAttachInput",
+    "title": "Identity Provider Attach Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "user": {
+            "template": "<%= value === current.userId ? value : undefined %>"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "provider": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "token": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.IdentityProviderAttachOutput",
+    "title": "Identity Provider Attach Output",
+    "schema": {
+      "user": "users.User"
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  }
+]

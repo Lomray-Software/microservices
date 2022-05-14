@@ -1,0 +1,422 @@
+[
+  {
+    "microservice": "users",
+    "method": "user.view",
+    "description": "Returns User by given condition",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "users.ViewOutputParams.7c0210cc643ff04cde41d75273968a95",
+    "methodFilters": [
+      {
+        "filterTitle": "By user id",
+        "operator": "only",
+        "roleAlias": "user",
+        "createdAt": "2022-03-15T06:16:55.264Z",
+        "updatedAt": "2022-03-15T06:16:55.264Z"
+      }
+    ]
+  },
+  {
+    "microservice": "users",
+    "method": "user.update",
+    "description": "Update User by given condition",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "users.UpdateRequestParams.b66dcf339120e89ab7794f53d6bc2e26",
+    "modelOut": "users.UpdateOutputParams.7c0210cc643ff04cde41d75273968a95",
+    "methodFilters": [
+      {
+        "filterTitle": "By user id",
+        "operator": "only",
+        "roleAlias": "user",
+        "createdAt": "2022-03-15T06:17:44.538Z",
+        "updatedAt": "2022-03-15T06:17:44.538Z"
+      }
+    ]
+  },
+  {
+    "microservice": "users",
+    "method": "user.me",
+    "description": "Returns User by given condition",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "users.ViewOutputParams.7c0210cc643ff04cde41d75273968a95",
+    "methodFilters": [
+      {
+        "filterTitle": "By user id",
+        "operator": "and",
+        "roleAlias": "user",
+        "createdAt": "2022-03-15T06:18:07.204Z",
+        "updatedAt": "2022-03-15T06:18:07.204Z"
+      }
+    ]
+  },
+  {
+    "microservice": "users",
+    "method": "profile.view",
+    "description": "Returns Profile by given condition",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "users.ViewOutputParams.a2f2a5d70288c017f302f33f61069b9b",
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "only",
+        "roleAlias": "user",
+        "createdAt": "2022-03-15T06:17:23.698Z",
+        "updatedAt": "2022-03-15T06:17:23.698Z"
+      }
+    ]
+  },
+  {
+    "microservice": "users",
+    "method": "profile.update",
+    "description": "Update Profile by given condition",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "users.UpdateRequestParams.bafad6bad4f0262c789073da58d4bf02",
+    "modelOut": "users.UpdateOutputParams.a2f2a5d70288c017f302f33f61069b9b",
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "only",
+        "roleAlias": "user",
+        "createdAt": "2022-03-15T06:18:07.204Z",
+        "updatedAt": "2022-03-15T06:18:07.204Z"
+      }
+    ]
+  },
+  {
+    "microservice": "users",
+    "method": "user.change-login",
+    "description": "Change user login",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "users.ChangeLoginInput",
+    "modelOut": "users.ChangeLoginOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "user.sign-up",
+    "description": "Sign up user",
+    "allowGroup": [
+      "guest"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "users.SignUpInput",
+    "modelOut": "users.SignUpOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "meta",
+    "description": "Get microservice metadata",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelOut": "MicroserviceMetaOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "identity-provider.count",
+    "description": "Returns count of IdentityProvider by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "user.create",
+    "description": "Create a new User",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "users.CreateRequestParams.b66dcf339120e89ab7794f53d6bc2e26",
+    "modelOut": "users.CreateOutputParams.7c0210cc643ff04cde41d75273968a95",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "config-reset",
+    "description": "Reset RemoteConfig cache",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelOut": "RemoteConfigOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "user.sign-out",
+    "description": "Sign out user",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "users.SignOutInput",
+    "modelOut": "users.SignOutOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "identity-provider.sign-in",
+    "description": "Sign in user through identity provider",
+    "allowGroup": [
+      "guest"
+    ],
+    "denyGroup": [
+      "user"
+    ],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "users.IdentityProviderSignInInput",
+    "modelOut": "users.IdentityProviderSignInOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "identity-provider.view",
+    "description": "Returns IdentityProvider by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "users.ViewOutputParams.da327cca56c4e309862b9c654bc59f88",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "user.restore",
+    "description": "Restore User by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "RestoreRequestParams",
+    "modelOut": "users.RestoreOutputParams.0affa0885c45ae77e6f8e2bc65a94ec7",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "middleware-register",
+    "description": "Register remote middleware on this microservice",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "ClientRegisterMiddlewareInput",
+    "modelOut": "ClientRegisterMiddlewareOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "confirm-code.send",
+    "description": "Send confirm code",
+    "allowGroup": [
+      "guest"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "users.ConfirmSendInput",
+    "modelOut": "users.ConfirmSendOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "identity-provider.attach",
+    "description": "Attach new identity provider to existing user",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "users.IdentityProviderAttachInput",
+    "modelOut": "users.IdentityProviderAttachOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "user.remove",
+    "description": "Remove User by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "users.RemoveOutputParams.42e0a89b6cfe7ecc53acfed3adca0ed1",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "user.sign-in",
+    "description": "Sign in user",
+    "allowGroup": [
+      "guest"
+    ],
+    "denyGroup": [
+      "user"
+    ],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "users.SignInInput",
+    "modelOut": "users.SignInOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "identity-provider.list",
+    "description": "Returns list of IdentityProvider by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "users.ListOutputParams.4f7306f05cd5aed97238a6c1863e9699",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "user.count",
+    "description": "Returns count of User by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "user.change-password",
+    "description": "Change user password",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "users.ChangePasswordInput",
+    "modelOut": "users.ChangePasswordOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "identity-provider.update",
+    "description": "Update IdentityProvider by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "users.UpdateRequestParams.8786756dd1e166aa6d20e32423de8317",
+    "modelOut": "users.UpdateOutputParams.da327cca56c4e309862b9c654bc59f88",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "user.list",
+    "description": "Returns list of User by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "users.ListOutputParams.b2550b7a4ea7d332a31180f22cc0912b",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "identity-provider.remove",
+    "description": "Remove IdentityProvider by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "users.RemoveOutputParams.158e7c87adce36140aee3d6fa1e900c6",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "identity-provider.restore",
+    "description": "Restore IdentityProvider by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z",
+    "modelIn": "RestoreRequestParams",
+    "modelOut": "users.RestoreOutputParams.1398bbf6eb0a1781b464f0a9352da056",
+    "methodFilters": []
+  }
+]

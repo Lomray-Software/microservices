@@ -1,3 +1,20 @@
+import copy from 'rollup-plugin-copy';
 import rootConfig from '../../rollup.config';
 
-export default rootConfig;
+const config = {
+  ...rootConfig,
+  external: [
+    ...rootConfig.external,
+    'fs',
+  ],
+  plugins: [
+    ...rootConfig.plugins,
+    copy({
+      targets: [
+        { src: 'migrations/permissions/list/**/*', dest: 'lib/migrations/permissions/list' },
+      ]
+    })
+  ],
+}
+
+export default config;

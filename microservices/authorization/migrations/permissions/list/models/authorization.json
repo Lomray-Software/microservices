@@ -1,0 +1,1043 @@
+[
+  {
+    "microservice": "authorization",
+    "alias": "authorization.Role",
+    "title": "Role",
+    "schema": {
+      "alias": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "parentAlias": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "name": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "parent": "authorization.Role",
+      "children": "authorization.Role"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T09:27:10.493Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.ListOutputParams.221f92aac51d54ab06b6eb48e3a378e5",
+    "title": "List Output Params",
+    "schema": {
+      "list": "authorization.Role",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.ViewOutputParams.99e3f9e2275885dc1b3f797dbee8611c",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "authorization.Role"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.CreateRequestParams.a9291794d1b2b24e6a5a6a651eb3b574",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "authorization.Role"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.CreateOutputParams.99e3f9e2275885dc1b3f797dbee8611c",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "authorization.Role"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.UpdateRequestParams.a9291794d1b2b24e6a5a6a651eb3b574",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "authorization.Role",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.UpdateOutputParams.99e3f9e2275885dc1b3f797dbee8611c",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "authorization.Role"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.RemoveOutputParams.495eb94498381173c7ead0b1cd4c7052",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "authorization.Role",
+      "entities": "authorization.Role"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.Model",
+    "title": "Model",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "microservice": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "alias": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "title": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "schema": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T09:27:10.493Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.ListOutputParams.0f4c58a545987958ebc368870e07e92f",
+    "title": "List Output Params",
+    "schema": {
+      "list": "authorization.Model",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.ViewOutputParams.4c90aafb8eac6497496f4eaa1acaedeb",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "authorization.Model"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.CreateRequestParams.751da20dd166d3b96cdc346f02bd2600",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "authorization.Model"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.CreateOutputParams.4c90aafb8eac6497496f4eaa1acaedeb",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "authorization.Model"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.UpdateRequestParams.751da20dd166d3b96cdc346f02bd2600",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "authorization.Model",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.UpdateOutputParams.4c90aafb8eac6497496f4eaa1acaedeb",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "authorization.Model"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.RemoveOutputParams.6abe43b62d4fcf6635bb3781737b92d7",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "authorization.Model",
+      "entities": "authorization.Model"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.Method",
+    "title": "Method",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "microservice": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "method": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "description": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "allowGroup": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "denyGroup": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "modelInId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "modelOutId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "modelIn": "authorization.Model",
+      "modelOut": "authorization.Model",
+      "methodFilters": "authorization.MethodFilter"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T09:27:10.493Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.MethodFilter",
+    "title": "Method Filter",
+    "schema": {
+      "methodId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "filterId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "operator": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "roleAlias": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "filter": "authorization.Filter",
+      "method": "authorization.Method",
+      "role": "authorization.Role"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T09:27:10.493Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.Filter",
+    "title": "Filter",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "title": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "condition": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "filterMethods": "authorization.MethodFilter"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T09:27:10.493Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.ListOutputParams.ea84a9e6263f16d84304c8e45178ba88",
+    "title": "List Output Params",
+    "schema": {
+      "list": "authorization.Filter",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.ViewOutputParams.133a88c0f119356ec406846cb0ff0304",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "authorization.Filter"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.CreateRequestParams.c7e9a6fb17d83a14a138233c2cd42aa8",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "authorization.Filter"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.CreateOutputParams.133a88c0f119356ec406846cb0ff0304",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "authorization.Filter"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.UpdateRequestParams.c7e9a6fb17d83a14a138233c2cd42aa8",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "authorization.Filter",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.UpdateOutputParams.133a88c0f119356ec406846cb0ff0304",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "authorization.Filter"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.RemoveOutputParams.8c32d59bf148e47301daab5a7e03cc10",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "authorization.Filter",
+      "entities": "authorization.Filter"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.ListOutputParams.6ea6e9c2850a57a92ca1d26481a80991",
+    "title": "List Output Params",
+    "schema": {
+      "list": "authorization.Method",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.ViewOutputParams.26c4cac3dc0bf70b09c1d4d15b3c823d",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "authorization.Method"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.CreateRequestParams.9b986fedb2f30f964dd5a82cf55865cc",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "authorization.Method"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.CreateOutputParams.26c4cac3dc0bf70b09c1d4d15b3c823d",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "authorization.Method"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.UpdateRequestParams.9b986fedb2f30f964dd5a82cf55865cc",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "authorization.Method",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.UpdateOutputParams.26c4cac3dc0bf70b09c1d4d15b3c823d",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "authorization.Method"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.RemoveOutputParams.e11ad58ada2e5ade6d6cde8b8c418d70",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "authorization.Method",
+      "entities": "authorization.Method"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.ListOutputParams.af0ed6002c2836201582d712828785a5",
+    "title": "List Output Params",
+    "schema": {
+      "list": "authorization.MethodFilter",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.ViewOutputParams.4dd7f64baa954edcd368ba98ac93cd20",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "authorization.MethodFilter"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.CreateRequestParams.2f2103c4e91caa301618ee63d650187b",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "authorization.MethodFilter"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.CreateOutputParams.4dd7f64baa954edcd368ba98ac93cd20",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "authorization.MethodFilter"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.UpdateRequestParams.2f2103c4e91caa301618ee63d650187b",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "authorization.MethodFilter",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.UpdateOutputParams.4dd7f64baa954edcd368ba98ac93cd20",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "authorization.MethodFilter"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.RemoveOutputParams.ec2339219bd90c116a5241d184aed930",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "authorization.MethodFilter",
+      "entities": "authorization.MethodFilter"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.UserRole",
+    "title": "User Role",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "roleAlias": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "role": "authorization.Role"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T09:27:10.493Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.CreateRequestParams.9b26d9bde22a6308c7f0315211e96c8a",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "authorization.UserRole"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.CreateOutputParams.e7351e98083b2dd2b03fb481fccf3bb7",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "authorization.UserRole"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.RemoveOutputParams.5d51ac5edbc9f23e5d229f6cdf344f64",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "authorization.UserRole",
+      "entities": "authorization.UserRole"
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.UserRoleMyOutput",
+    "title": "User Role My Output",
+    "schema": {
+      "roles": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.EndpointEnforceInput",
+    "title": "Endpoint Enforce Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "method": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "filterInput": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "shouldThrowError": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "hasFilters": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.EndpointEnforceOutput",
+    "title": "Endpoint Enforce Output",
+    "schema": {
+      "isAllow": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "roles": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "filters": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "filteredInput": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.EndpointFilterInput",
+    "title": "Endpoint Filter Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "method": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "filterInput": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.EndpointFilterOutput",
+    "title": "Endpoint Filter Output",
+    "schema": {
+      "filtered": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.SyncMetadataInput",
+    "title": "Sync Metadata Input",
+    "schema": {
+      "defaultSchemaRoles": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "defaultAllowGroup": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "commonModelAliases": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.SyncMetadataOutput",
+    "title": "Sync Metadata Output",
+    "schema": {
+      "microservices": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  }
+]

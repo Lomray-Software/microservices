@@ -19,6 +19,7 @@ This microservice provides authorization mechanism for all other microservices.
 - [ENVIRONMENTS](#environments)
 - [HOW TO RUN](#how-to-run)
 - [HOW TO DEVELOP](#how-to-develop)
+- [DEFAULT PERMISSIONS](#how-to-work-with-default-permissions)
 - [MEMORY USAGE](#memory-usage)
 
 ### <a id="environments"></a>ENVIRONMENTS:
@@ -78,8 +79,11 @@ nyc npm run test
 That is all. **Don't forget install npm dependencies**
 (in root folder & local folder run:  `npm ci`)
 
-### <a id="memory-usage"></a>MEMORY USAGE:
+### <a id="how-to-work-with-default-permissions"></a>DEFAULT PERMISSIONS:
+Make needed changes in `permissions/list`.
+For sync dumped permissions with db, run: `npm run sync:permissions`
 
+### <a id="memory-usage"></a>MEMORY USAGE:
 __Run on typescript__: ~205 MB PEAK / ~181 MB  
 __Run on JS__: ~33 MB PEAK / ~26 MB
 __AWS Memory__: ~70 MB

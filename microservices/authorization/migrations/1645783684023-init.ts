@@ -11,7 +11,7 @@ export default class init1645783684023 implements MigrationInterface {
       `CREATE TABLE "method" ("id" SERIAL NOT NULL, "microservice" character varying(50), "method" character varying(100) NOT NULL, "description" character varying(255) NOT NULL DEFAULT '', "allowGroup" text array NOT NULL DEFAULT '{}', "denyGroup" text array NOT NULL DEFAULT '{}', "modelInId" integer, "modelOutId" integer, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "method(uq):microservice_method" UNIQUE ("microservice", "method"), CONSTRAINT "method(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "role" ("alias" character varying(30) NOT NULL, "parentAlias" character varying(30), "name" character varying(30) NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "role(pk):alias" PRIMARY KEY ("alias"))`,
+      `CREATE TABLE "role" ("alias" character varying(30) NOT NULL, "parentAlias" character varying(30) DEFAULT NULL, "name" character varying(30) NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "role(pk):alias" PRIMARY KEY ("alias"))`,
     );
     await queryRunner.query(
       `CREATE TYPE "public"."method_filter_operator_enum" AS ENUM('only', 'and')`,
@@ -66,15 +66,6 @@ export default class init1645783684023 implements MigrationInterface {
         'roles_tree',
         'WITH RECURSIVE roles_graph (alias, path, cycle) AS (\n      SELECT r.alias, ARRAY[alias]::varchar[] as path, false\n      FROM role as r\n      UNION ALL\n      SELECT g.alias, g.alias || rg.path, g.alias = ANY(rg.path)\n      FROM role as g, roles_graph as rg\n      WHERE rg.alias = g."parentAlias" AND NOT cycle\n    )\n    SELECT DISTINCT ON (alias) alias, path, array_length(path, 1) AS depth FROM roles_graph\n    ORDER BY alias, depth DESC;',
       ],
-    );
-
-    // Create default roles
-    await queryRunner.query(
-      `
-      INSERT INTO public.role (alias, "parentAlias", name, "createdAt", "updatedAt") VALUES ('guest', null, 'Guest', '2022-02-25 10:11:22.570142', '2022-02-25 10:11:22.570142');
-      INSERT INTO public.role (alias, "parentAlias", name, "createdAt", "updatedAt") VALUES ('user', 'guest', 'User', '2022-02-25 10:11:34.858224', '2022-02-25 10:11:34.858224');
-      INSERT INTO public.role (alias, "parentAlias", name, "createdAt", "updatedAt") VALUES ('admin', 'user', 'Admin', '2022-02-25 10:11:47.364353', '2022-02-25 10:11:47.364353');
-      `,
     );
   }
 

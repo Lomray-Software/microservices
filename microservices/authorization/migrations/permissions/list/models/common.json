@@ -1,0 +1,240 @@
+[
+  {
+    "microservice": null,
+    "alias": "CountRequestParams",
+    "title": "Count Request Params",
+    "schema": {
+      "query": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "hasRemoved": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": null,
+    "alias": "CountOutputParams",
+    "title": "Count Output Params",
+    "schema": {
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": null,
+    "alias": "ListRequestParams",
+    "title": "List Request Params",
+    "schema": {
+      "query": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "hasRemoved": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": null,
+    "alias": "ViewRequestParams",
+    "title": "View Request Params",
+    "schema": {
+      "query": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": null,
+    "alias": "RemoveRequestParams",
+    "title": "Remove Request Params",
+    "schema": {
+      "query": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": null,
+    "alias": "MicroserviceMetaOutput",
+    "title": "Microservice Meta Output",
+    "schema": {
+      "endpoints": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "entities": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.394Z",
+    "updatedAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": null,
+    "alias": "RemoteConfigOutput",
+    "title": "Remote Config Output",
+    "schema": {
+      "isReset": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": null,
+    "alias": "ClientRegisterMiddlewareInput",
+    "title": "Client Register Middleware Input",
+    "schema": {
+      "action": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "targetMethod": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "sender": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "senderMethod": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": null,
+    "alias": "ClientRegisterMiddlewareOutput",
+    "title": "Client Register Middleware Output",
+    "schema": {
+      "ok": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:30.652Z",
+    "updatedAt": "2022-04-14T05:34:30.652Z"
+  },
+  {
+    "microservice": null,
+    "alias": "RestoreRequestParams",
+    "title": "Restore Request Params",
+    "schema": {
+      "query": {
+        "in": {
+          "guest": "allow",
+          "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-04-14T05:34:31.363Z",
+    "updatedAt": "2022-04-14T05:34:31.363Z"
+  }
+]

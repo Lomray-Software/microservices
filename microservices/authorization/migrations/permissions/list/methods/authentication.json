@@ -1,0 +1,161 @@
+[
+  {
+    "microservice": "authentication",
+    "method": "token.update",
+    "description": "Update Token by given condition",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-15T07:54:50.996Z",
+    "updatedAt": "2022-04-15T07:54:50.996Z",
+    "modelIn": "authentication.UpdateRequestParams.b182b20fc8406f55af308dd86a0b84a2",
+    "modelOut": "authentication.UpdateOutputParams.39be1ca76dce78187a814db381b988ea",
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "only",
+        "roleAlias": "user",
+        "createdAt": "2022-03-15T06:18:07.204Z",
+        "updatedAt": "2022-03-15T06:18:07.204Z"
+      }
+    ]
+  },
+  {
+    "microservice": "authentication",
+    "method": "token.identify",
+    "description": "Identify authentication token",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z",
+    "modelIn": "authentication.TokenIdentifyInput",
+    "modelOut": "authentication.TokenIdentifyOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "authentication",
+    "method": "token.create",
+    "description": "Create authentication token",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z",
+    "modelIn": "authentication.TokenCreateInput",
+    "modelOut": "authentication.TokenCreateOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "authentication",
+    "method": "meta",
+    "description": "Get microservice metadata",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z",
+    "modelOut": "MicroserviceMetaOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "authentication",
+    "method": "middleware-register",
+    "description": "Register remote middleware on this microservice",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z",
+    "modelIn": "ClientRegisterMiddlewareInput",
+    "modelOut": "ClientRegisterMiddlewareOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "authentication",
+    "method": "token.renew",
+    "description": "Renew authentication token",
+    "allowGroup": [
+      "guest"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z",
+    "modelIn": "authentication.TokenRenewInput",
+    "modelOut": "authentication.TokenRenewOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "authentication",
+    "method": "token.view",
+    "description": "Returns Token by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "authentication.ViewOutputParams.39be1ca76dce78187a814db381b988ea",
+    "methodFilters": []
+  },
+  {
+    "microservice": "authentication",
+    "method": "token.list",
+    "description": "Returns list of Token by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "authentication.ListOutputParams.82d98355b4b039c79c1f31793cd42d85",
+    "methodFilters": []
+  },
+  {
+    "microservice": "authentication",
+    "method": "token.remove",
+    "description": "Remove Token by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "authentication.RemoveOutputParams.20237fc46aa748afcd36badbe6e29dcf",
+    "methodFilters": []
+  },
+  {
+    "microservice": "authentication",
+    "method": "cookies.remove",
+    "description": "Remove auth token from cookies",
+    "allowGroup": [
+      "guest"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z",
+    "modelOut": "authentication.CookiesRemoveOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "authentication",
+    "method": "config-reset",
+    "description": "Reset RemoteConfig cache",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-04-14T05:34:31.238Z",
+    "updatedAt": "2022-04-14T05:34:31.238Z",
+    "modelOut": "RemoteConfigOutput",
+    "methodFilters": []
+  }
+]

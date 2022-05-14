@@ -36,9 +36,10 @@
 		"ts:check": "tsc --project ./tsconfig.json --skipLibCheck --noemit",
 		"build": "rollup -c",
 		"start:dev": "node --require ts-node/register src/index.ts",
-    "start:prod": "NODE_ENV=production node lib/index.js",
-    "typeorm": "node node_modules/typeorm/cli.js",
-    "typeorm:ts": "node --require ts-node/register node_modules/typeorm/cli.js"
+		"start:prod": "NODE_ENV=production node lib/index.js",
+		"typeorm": "node node_modules/typeorm/cli.js",
+		"typeorm:ts": "node --require ts-node/register node_modules/typeorm/cli.js",
+		"sync:permissions": "node --require ts-node/register migrations/permissions/sync.ts"
 	},
 	"dependencies": {
 		"@lomray/microservice-helpers": "file:../../packages/@lomray/microservice-helpers/lomray-microservice-helpers-1.0.0.tgz",
@@ -51,9 +52,10 @@
 		"lodash": "^4.17.21",
 		"pg": "^8.7.3",
 		"typeorm": "0.2.41",
-    "typeorm-extension": "1.2.1"
+		"typeorm-extension": "1.2.1"
 	},
 	"devDependencies": {
-		"@types/lodash": "^4.14.178"
+		"@types/lodash": "^4.14.178",
+		"rollup-plugin-copy": "^3.4.0"
 	}
 }
