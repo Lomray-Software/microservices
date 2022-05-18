@@ -30,6 +30,7 @@ class EntityManagerMock extends EntityManager {
     this.restore = sandbox.stub().resolves({ affected: 0, generatedMaps: [] });
     this.recover = sandbox.stub().resolves([]);
     this.remove = sandbox.stub().resolves({});
+    this.delete = sandbox.stub().resolves({ raw: '', affected: 0 });
     this.softRemove = sandbox.stub().resolves({});
     this.softDelete = sandbox.stub().resolves({ affected: 0, generatedMaps: [] });
     this.upsert = sandbox.stub().resolves({ identifiers: [], generatedMaps: [] });
