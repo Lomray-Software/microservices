@@ -1,5 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { MS_DEFAULT_PERMISSION_MIGRATION } from '@constants/index';
+import Condition from '@entities/condition';
 import Filter from '@entities/filter';
 import Method from '@entities/method';
 import MethodFilter from '@entities/method-filter';
@@ -23,6 +24,7 @@ export default class defaultPermissions1647336747141 implements MigrationInterfa
     const { manager } = queryRunner;
     const methodRepo = manager.getRepository(Method);
     const modelRepo = manager.getRepository(Model);
+    const conditionRepo = manager.getRepository(Condition);
     const filtersRepo = manager.getRepository(Filter);
     const methodFilterRepo = manager.getRepository(MethodFilter);
     const rolesRepo = manager.getRepository(Role);
@@ -43,13 +45,18 @@ export default class defaultPermissions1647336747141 implements MigrationInterfa
       await filtersRepo.save(filtersRepo.create(filter));
     }
 
+    // load default conditions
+    for (const condition of getDumpEntities('conditions', DUMP_PATH_ROOT)) {
+      await conditionRepo.save(conditionRepo.create(condition));
+    }
+
     // load default models
     for (const model of getDumpEntitiesInFiles(DUMP_PATH_MODELS)) {
       await modelRepo.save(modelRepo.create(model));
     }
 
     // load default methods
-    for (const { modelIn, modelOut, methodFilters, ...method } of getDumpEntitiesInFiles(
+    for (const { modelIn, modelOut, methodFilters, condition, ...method } of getDumpEntitiesInFiles(
       DUMP_PATH_METHODS,
     )) {
       const methodEntity = methodRepo.create(method as Partial<Method>);
@@ -62,6 +69,11 @@ export default class defaultPermissions1647336747141 implements MigrationInterfa
       // attach model out if exist
       if (modelOut) {
         methodEntity.modelOutId = (await modelRepo.findOne({ alias: modelOut }))?.id ?? null;
+      }
+
+      // attach condition if exist
+      if (condition) {
+        methodEntity.conditionId = (await conditionRepo.findOne({ title: condition }))?.id ?? null;
       }
 
       const methodModel = await methodRepo.save(methodRepo.create(methodEntity));

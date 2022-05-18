@@ -97,7 +97,7 @@ const enforce = Endpoint.custom(
       hasFilterOutput: false,
       enforcerParams: {
         ms: app,
-        templateParams: { payload, filterInput },
+        templateParams: { payload, reqParams: filterInput },
       },
     });
 

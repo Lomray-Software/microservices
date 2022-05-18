@@ -96,6 +96,8 @@ class Enforcer {
       return isAllow;
     }
 
+    this.conditionChecker?.addTemplateParams({ roles });
+
     return Enforcer.enforceResponse(
       (await this.conditionChecker?.execConditions(condition.conditions)) ?? false,
       shouldThrowError,

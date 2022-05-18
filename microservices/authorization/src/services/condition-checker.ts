@@ -45,7 +45,7 @@ class ConditionChecker {
   /**
    * @private
    */
-  private readonly templateParams: Record<string, any>;
+  private templateParams: Record<string, any>;
 
   /**
    * @private
@@ -164,6 +164,16 @@ class ConditionChecker {
     }
 
     return isAllow;
+  }
+
+  /**
+   * Add template params
+   */
+  public addTemplateParams(params: Record<string, any>): void {
+    this.templateParams = {
+      ...this.templateParams,
+      ...params,
+    };
   }
 }
 

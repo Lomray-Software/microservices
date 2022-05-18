@@ -29,6 +29,20 @@ describe('services/condition-checker', () => {
     expect(await getService().execConditions(condition)).to.true;
   });
 
+  it('should correctly dynamically add template params', () => {
+    const service = getService();
+    const params = { extra: 'param' };
+
+    service.addTemplateParams(params);
+
+    expect(service)
+      .to.have.property('templateParams')
+      .deep.equal({
+        ...templateParams,
+        ...params,
+      });
+  });
+
   it('should correctly exec direct condition with requests (parallel and not parallel)', async () => {
     const condition: ICondition = {
       requests: {

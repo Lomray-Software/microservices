@@ -88,11 +88,12 @@ const createOrUpdateMethods = (methods: Method[]): void => {
     const keepActual = _.intersectionBy(dumpMethods, msMethods, uniqueKey);
     const merged = _.merge(_.keyBy(keepActual, uniqueKey), _.keyBy(msMethods, uniqueKey));
     const values = _.values(merged)
-      .map((f) => _.omit(f, ['id', 'modelInId', 'modelOutId']))
-      .map(({ modelIn, modelOut, methodFilters, ...method }) => ({
+      .map((f) => _.omit(f, ['id', 'modelInId', 'modelOutId', 'conditionId']))
+      .map(({ modelIn, modelOut, methodFilters, condition, ...method }) => ({
         ...method,
         modelIn: modelIn?.alias,
         modelOut: modelOut?.alias,
+        condition: condition?.title,
         methodFilters: methodFilters
           ?.map((f: MethodFilter) => _.omit(f, ['methodId', 'filterId']))
           // @ts-ignore
@@ -124,7 +125,7 @@ const sync = async () => {
   const userRoles = await userRolesRepo.find();
   const models = await modelRepo.find();
   const methods = await methodRepo.find({
-    relations: ['modelOut', 'modelIn', 'methodFilters', 'methodFilters.filter'],
+    relations: ['modelOut', 'modelIn', 'methodFilters', 'methodFilters.filter', 'condition'],
   });
 
   createOrUpdateRoles(roles);
