@@ -32,11 +32,18 @@ class EndpointEnforceInput {
   shouldThrowError?: boolean;
 
   @JSONSchema({
-    description: 'Run enforce and collect method filters. Default: true',
+    description: 'Run enforce and return method filters. Default: true',
   })
   @IsBoolean()
   @IsUndefinable()
   hasFilters?: boolean;
+
+  @JSONSchema({
+    description: 'Run enforce and check access by condition if exist. Default: true',
+  })
+  @IsBoolean()
+  @IsUndefinable()
+  hasCondition?: boolean;
 }
 
 class EndpointEnforceOutput {
@@ -69,13 +76,29 @@ const enforce = Endpoint.custom(
     description:
       'Check access user to microservice method, filter req params, get entities filters',
   }),
-  async ({ userId, method, filterInput, payload, shouldThrowError = true, hasFilters = true }) => {
+  async (
+    {
+      userId,
+      method,
+      filterInput,
+      payload,
+      shouldThrowError = true,
+      hasFilters = true,
+      hasCondition = true,
+    },
+    { app },
+  ) => {
     const hasFilterInput = Boolean(filterInput);
     const endpointService = EndpointHandler.init(method, {
       userId,
       hasFilters,
       hasFilterInput,
+      hasCondition,
       hasFilterOutput: false,
+      enforcerParams: {
+        ms: app,
+        templateParams: { payload, filterInput },
+      },
     });
 
     const isAllow = await endpointService.isMethodAllowed(shouldThrowError);

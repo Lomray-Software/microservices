@@ -1,10 +1,13 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { waitResult } from '@lomray/microservice-helpers/test-helpers';
+import { Microservice } from '@lomray/microservice-nodejs-lib';
 import { expect } from 'chai';
 import sinon from 'sinon';
+import Condition from '@entities/condition';
 import Method from '@entities/method';
 import RolesTree from '@entities/roles-tree';
 import UserRole from '@entities/user-role';
+import ConditionChecker from '@services/condition-checker';
 import Enforcer from '@services/enforcer';
 
 describe('services/enforcer', () => {
@@ -13,6 +16,7 @@ describe('services/enforcer', () => {
   const methodRepository = TypeormMock.entityManager.getRepository(Method);
   const userRoleRepository = TypeormMock.entityManager.getRepository(UserRole);
   const rolesTreeRepository = TypeormMock.entityManager.getRepository(RolesTree);
+  const conditionRepository = TypeormMock.entityManager.getRepository(Condition);
   const service = Enforcer.init({
     userId,
     defaultRole: 'users',
@@ -121,5 +125,29 @@ describe('services/enforcer', () => {
       roles: ['user'],
       userId: '123',
     });
+  });
+
+  it('should use conditional checker for check access to method', async () => {
+    sandbox.stub(userRoleRepository, 'findOne').resolves(undefined);
+
+    const conditionChecker = new ConditionChecker(Microservice.getInstance());
+    const method = methodRepository.create({
+      method: 'demo.test',
+      allowGroup: ['user'],
+      condition: conditionRepository.create(),
+    });
+    const stubExecConditions = sandbox.stub(conditionChecker, 'execConditions');
+
+    const localService = Enforcer.init({
+      userRoleRepository,
+      rolesTreeRepository,
+      defaultRole: 'user',
+      userId,
+      conditionChecker,
+    });
+
+    await localService.enforce(method, false);
+
+    expect(stubExecConditions).to.calledOnce;
   });
 });

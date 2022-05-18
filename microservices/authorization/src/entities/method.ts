@@ -11,6 +11,7 @@ import {
   OneToMany,
   Unique,
 } from 'typeorm';
+import Condition from '@entities/condition';
 import MethodFilter from '@entities/method-filter';
 import Model from '@entities/model';
 
@@ -72,6 +73,12 @@ class Method {
   @IsUndefinable()
   modelOutId: number | null;
 
+  @Column({ type: 'integer', nullable: true, default: null })
+  @IsNumber()
+  @IsNullable()
+  @IsUndefinable()
+  conditionId: number | null;
+
   @IsTypeormDate()
   @CreateDateColumn()
   createdAt: Date;
@@ -88,6 +95,9 @@ class Method {
 
   @OneToMany(() => MethodFilter, (methodFilter) => methodFilter.method)
   methodFilters: MethodFilter[];
+
+  @ManyToOne(() => Condition, { onDelete: 'SET NULL' })
+  condition: Condition;
 }
 
 export default Method;

@@ -1,4 +1,5 @@
 import type { Microservice } from '@lomray/microservice-nodejs-lib';
+import CrudCondition from '@methods/condition/crud';
 import CrudEndpointFilter from '@methods/endpoint-filter/crud';
 import CrudEndpoint from '@methods/endpoint/crud';
 import EndpointEnforce from '@methods/endpoint/enforce';
@@ -21,6 +22,7 @@ export default (ms: Microservice): void => {
     model: CrudModel,
     filter: CrudFilter,
     endpoint: CrudEndpoint,
+    condition: CrudCondition,
     'endpoint-filter': CrudEndpointFilter,
   };
 

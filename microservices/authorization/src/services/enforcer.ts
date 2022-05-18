@@ -5,12 +5,14 @@ import ExceptionCode from '@constants/exception-code';
 import Method from '@entities/method';
 import RolesTree from '@entities/roles-tree';
 import UserRole from '@entities/user-role';
+import type ConditionChecker from '@services/condition-checker';
 
 export interface IEnforcerParams {
   userId?: string | null;
   defaultRole: string;
   userRoleRepository: Repository<UserRole>;
   rolesTreeRepository: Repository<RolesTree>;
+  conditionChecker?: ConditionChecker;
 }
 
 /**
@@ -35,7 +37,12 @@ class Enforcer {
   /**
    * @private
    */
-  private rolesTreeRepository: IEnforcerParams['rolesTreeRepository'];
+  private readonly rolesTreeRepository: IEnforcerParams['rolesTreeRepository'];
+
+  /**
+   * @private
+   */
+  private readonly conditionChecker: IEnforcerParams['conditionChecker'];
 
   /**
    * @private
@@ -51,11 +58,13 @@ class Enforcer {
     defaultRole,
     userRoleRepository,
     rolesTreeRepository,
+    conditionChecker,
   }: IEnforcerParams) {
     this.userId = userId;
     this.defaultRole = defaultRole;
     this.userRoleRepository = userRoleRepository;
     this.rolesTreeRepository = rolesTreeRepository;
+    this.conditionChecker = conditionChecker;
   }
 
   /**
@@ -73,13 +82,22 @@ class Enforcer {
       return Enforcer.enforceResponse(false, shouldThrowError);
     }
 
-    const { denyGroup, allowGroup } = method;
+    const { denyGroup, allowGroup, condition } = method;
     const { userId, roles } = await this.findUserRoles();
     const userGroups = [userId, ...roles];
 
-    return Enforcer.enforceResponse(
+    const isAllow = Enforcer.enforceResponse(
       _.intersection(denyGroup, userGroups).length === 0 &&
         _.intersection(allowGroup, userGroups).length > 0,
+      shouldThrowError,
+    );
+
+    if (!condition) {
+      return isAllow;
+    }
+
+    return Enforcer.enforceResponse(
+      (await this.conditionChecker?.execConditions(condition.conditions)) ?? false,
       shouldThrowError,
     );
   }

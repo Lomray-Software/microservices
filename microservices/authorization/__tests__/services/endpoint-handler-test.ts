@@ -1,13 +1,16 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
+import { Microservice } from '@lomray/microservice-nodejs-lib';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon, { SinonSpy } from 'sinon';
 import { Repository } from 'typeorm';
 import { FilterType } from '@constants/filter';
 import { MS_DEFAULT_ROLE_ALIAS } from '@constants/index';
+import Condition from '@entities/condition';
 import Method from '@entities/method';
 import MethodFilter from '@entities/method-filter';
 import Model from '@entities/model';
+import ConditionChecker from '@services/condition-checker';
 import OriginalEndpointHandler from '@services/endpoint-handler';
 import Enforcer, { IEnforcerParams } from '@services/enforcer';
 import FieldsFilter, { IFieldsFilter } from '@services/fields-filter';
@@ -30,6 +33,11 @@ describe('services/endpoint-handler', () => {
     hasFilters: true,
     hasFilterInput: true,
     hasFilterOutput: true,
+    hasCondition: true,
+    enforcerParams: {
+      ms: Microservice.getInstance(),
+      templateParams: { hello: 'world' },
+    },
   });
 
   const methodRepository = TypeormMock.entityManager.getRepository(Method);
@@ -43,12 +51,16 @@ describe('services/endpoint-handler', () => {
   const modelOut = TypeormMock.entityManager
     .getRepository(Model)
     .create({ alias: 'testModel', schema: {} });
+  const conditionModel = TypeormMock.entityManager
+    .getRepository(Condition)
+    .create({ conditions: {} });
   const method = methodRepository.create({
     microservice,
     method: methodPath,
     methodFilters,
     modelIn,
     modelOut,
+    condition: conditionModel,
   });
 
   let enforcer: Enforcer | undefined;
@@ -88,6 +100,7 @@ describe('services/endpoint-handler', () => {
     expect(enforcerInitParams?.defaultRole).to.equal(MS_DEFAULT_ROLE_ALIAS);
     expect(enforcerInitParams?.userRoleRepository).to.instanceof(Repository);
     expect(enforcerInitParams?.rolesTreeRepository).to.instanceof(Repository);
+    expect(enforcerInitParams?.conditionChecker).to.instanceof(ConditionChecker);
     expect(enforceSpy?.firstCall.firstArg).to.equal(method);
     expect(enforceSpy?.firstCall.lastArg).to.equal(false);
     // cache enforcer
@@ -100,6 +113,7 @@ describe('services/endpoint-handler', () => {
       'methodFilters.filter',
       'modelIn',
       'modelOut',
+      'condition',
     ]);
     // cache method
     expect(service).to.have.property('method').to.equal(method);
@@ -179,6 +193,7 @@ describe('services/endpoint-handler', () => {
       hasFilters: false,
       hasFilterInput: false,
       hasFilterOutput: false,
+      hasCondition: false,
     });
 
     await localService.isMethodAllowed(false);

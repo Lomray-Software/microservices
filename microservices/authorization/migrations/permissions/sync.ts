@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { createConnection } from 'typeorm';
+import Condition from '@entities/condition';
 import Filter from '@entities/filter';
 import Method from '@entities/method';
 import MethodFilter from '@entities/method-filter';
@@ -46,6 +47,17 @@ const createOrUpdateFilters = (filters: Filter[]): void => {
   const values = _.values(merged).map((f) => _.omit(f, ['id']));
 
   saveDump(values, 'filters', DUMP_PATH_ROOT);
+};
+
+/**
+ * Create or update conditions
+ */
+const createOrUpdateConditions = (conditions: Condition[]): void => {
+  const dumpFilters = getDumpEntities('conditions', DUMP_PATH_ROOT);
+  const keepActual = _.intersectionBy(dumpFilters, conditions, 'title');
+  const merged = _.merge(_.keyBy(keepActual, 'title'), _.keyBy(conditions, 'title'));
+
+  saveDump(_.values(merged), 'conditions', DUMP_PATH_ROOT);
 };
 
 /**
@@ -104,9 +116,11 @@ const sync = async () => {
   const filtersRepo = connection.getRepository(Filter);
   const rolesRepo = connection.getRepository(Role);
   const userRolesRepo = connection.getRepository(UserRole);
+  const conditionRepo = connection.getRepository(Condition);
 
   const filters = await filtersRepo.find();
   const roles = await rolesRepo.find();
+  const condition = await conditionRepo.find();
   const userRoles = await userRolesRepo.find();
   const models = await modelRepo.find();
   const methods = await methodRepo.find({
@@ -116,6 +130,7 @@ const sync = async () => {
   createOrUpdateRoles(roles);
   createOrUpdateUserRoles(userRoles);
   createOrUpdateFilters(filters);
+  createOrUpdateConditions(condition);
   createOrUpdateModels(models);
   createOrUpdateMethods(methods);
 

@@ -8,7 +8,7 @@ export default class init1645783684023 implements MigrationInterface {
       `CREATE TABLE "model" ("id" SERIAL NOT NULL, "microservice" character varying(50), "alias" character varying(150) NOT NULL, "title" character varying(50) NOT NULL, "schema" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "model(uq):alias" UNIQUE ("alias"), CONSTRAINT "model(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "method" ("id" SERIAL NOT NULL, "microservice" character varying(50), "method" character varying(100) NOT NULL, "description" character varying(255) NOT NULL DEFAULT '', "allowGroup" text array NOT NULL DEFAULT '{}', "denyGroup" text array NOT NULL DEFAULT '{}', "modelInId" integer, "modelOutId" integer, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "method(uq):microservice_method" UNIQUE ("microservice", "method"), CONSTRAINT "method(pk):id" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "method" ("id" SERIAL NOT NULL, "microservice" character varying(50), "method" character varying(100) NOT NULL, "description" character varying(255) NOT NULL DEFAULT '', "allowGroup" text array NOT NULL DEFAULT '{}', "denyGroup" text array NOT NULL DEFAULT '{}', "modelInId" integer, "modelOutId" integer, "conditionId" integer, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "method(uq):microservice_method" UNIQUE ("microservice", "method"), CONSTRAINT "method(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "role" ("alias" character varying(30) NOT NULL, "parentAlias" character varying(30) DEFAULT NULL, "name" character varying(30) NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "role(pk):alias" PRIMARY KEY ("alias"))`,
@@ -23,6 +23,9 @@ export default class init1645783684023 implements MigrationInterface {
       `CREATE TABLE "filter" ("id" SERIAL NOT NULL, "title" character varying(50) NOT NULL, "condition" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "filter(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
+      `CREATE TABLE "condition" ("id" SERIAL NOT NULL, "title" character varying(50) NOT NULL, "conditions" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "condition(pk):id" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
       `CREATE TABLE "user_role" ("userId" character varying(36) NOT NULL, "roleAlias" character varying(30) NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "user_role(pk):userId_roleAlias" PRIMARY KEY ("userId", "roleAlias"))`,
     );
     await queryRunner.query(
@@ -30,6 +33,9 @@ export default class init1645783684023 implements MigrationInterface {
     );
     await queryRunner.query(
       `ALTER TABLE "method" ADD CONSTRAINT "method(fk):modelOutId_id" FOREIGN KEY ("modelOutId") REFERENCES "model"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "method" ADD CONSTRAINT "method(fk):conditionId_id" FOREIGN KEY ("conditionId") REFERENCES "condition"("id") ON DELETE SET NULL ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE "role" ADD CONSTRAINT "role(fk):parentAlias_alias" FOREIGN KEY ("parentAlias") REFERENCES "role"("alias") ON DELETE SET NULL ON UPDATE NO ACTION`,
@@ -90,8 +96,10 @@ export default class init1645783684023 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "role" DROP CONSTRAINT "role(fk):parentAlias_alias"`);
     await queryRunner.query(`ALTER TABLE "method" DROP CONSTRAINT "method(fk):modelOutId_id"`);
     await queryRunner.query(`ALTER TABLE "method" DROP CONSTRAINT "method(fk):modelInId_id"`);
+    await queryRunner.query(`ALTER TABLE "method" DROP CONSTRAINT "method(fk):conditionId_id"`);
     await queryRunner.query(`DROP TABLE "user_role"`);
     await queryRunner.query(`DROP TABLE "filter"`);
+    await queryRunner.query(`DROP TABLE "condition"`);
     await queryRunner.query(`DROP TABLE "method_filter"`);
     await queryRunner.query(`DROP TYPE "public"."method_filter_operator_enum"`);
     await queryRunner.query(`DROP TABLE "role"`);

@@ -1,3 +1,4 @@
+import type { AbstractMicroservice } from '@lomray/microservice-nodejs-lib';
 import type { IJsonQuery } from '@lomray/typeorm-json-query';
 import { getRepository } from 'typeorm';
 import { FilterType } from '@constants/filter';
@@ -6,6 +7,7 @@ import Method from '@entities/method';
 import Model from '@entities/model';
 import RolesTree from '@entities/roles-tree';
 import UserRole from '@entities/user-role';
+import ConditionChecker from '@services/condition-checker';
 import Enforcer from '@services/enforcer';
 import FieldsFilter from '@services/fields-filter';
 import MethodFilters from '@services/method-filters';
@@ -14,6 +16,11 @@ export interface IEndpointHandlerParams {
   hasFilters: boolean;
   hasFilterInput: boolean;
   hasFilterOutput: boolean;
+  hasCondition: boolean;
+  enforcerParams?: {
+    ms: AbstractMicroservice;
+    templateParams?: Record<string, any>;
+  };
   userId?: string | null;
 }
 
@@ -113,11 +120,18 @@ class EndpointHandler {
       return this.enforcer;
     }
 
+    const { userId, hasCondition, enforcerParams: { ms, templateParams } = {} } = this.params;
+
     this.enforcer = Enforcer.init({
-      userId: this.params.userId,
+      userId,
       defaultRole: MS_DEFAULT_ROLE_ALIAS,
       userRoleRepository: getRepository(UserRole),
       rolesTreeRepository: getRepository(RolesTree),
+      ...(hasCondition && ms
+        ? {
+            conditionChecker: new ConditionChecker(ms, templateParams),
+          }
+        : {}),
     });
 
     return this.enforcer;
@@ -132,7 +146,7 @@ class EndpointHandler {
       return this.method;
     }
 
-    const { hasFilters, hasFilterInput, hasFilterOutput } = this.params;
+    const { hasFilters, hasFilterInput, hasFilterOutput, hasCondition } = this.params;
 
     this.method = await getRepository(Method).findOne(
       {
@@ -144,6 +158,7 @@ class EndpointHandler {
           ...(hasFilters ? ['methodFilters', 'methodFilters.filter'] : []),
           ...(hasFilterInput ? ['modelIn'] : []),
           ...(hasFilterOutput ? ['modelOut'] : []),
+          ...(hasCondition ? ['condition'] : []),
         ],
       },
     );

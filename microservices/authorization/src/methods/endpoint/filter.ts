@@ -40,6 +40,7 @@ const filter = Endpoint.custom(
     const endpointService = EndpointHandler.init(method, {
       userId,
       hasFilters: false,
+      hasCondition: false,
       hasFilterInput,
       hasFilterOutput: !hasFilterInput,
     });
