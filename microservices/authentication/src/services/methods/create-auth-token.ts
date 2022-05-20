@@ -1,6 +1,6 @@
-import { IsUndefinable } from '@lomray/microservice-helpers';
+import { IsTimestamp, IsUndefinable } from '@lomray/microservice-helpers';
 import type { IMicroserviceResponseCookie } from '@lomray/microservice-nodejs-lib';
-import { IsEnum, IsObject, IsRFC3339, IsString, Length } from 'class-validator';
+import { IsEnum, IsObject, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Repository } from 'typeorm';
 import type { IJwtConfig } from '@config/jwt';
@@ -22,8 +22,8 @@ class TokenCreateInput {
   @Length(1, 36)
   userId: string;
 
+  @IsTimestamp()
   @IsUndefinable()
-  @IsRFC3339() // timestamp validator
   expirationAt?: number;
 
   @IsUndefinable()
