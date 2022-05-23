@@ -12,10 +12,6 @@ COPY ./lib $WEB_PATH/lib
 COPY ./package.json $WEB_PATH/package.json
 COPY ./package-lock.json $WEB_PATH/package-lock.json
 
-# @TODO remove it after publish package
-# Extra step, copy microservices helpers package
-COPY ./lib/lomray-microservice-helpers-1.0.0.tgz /packages/@lomray/microservice-helpers/lomray-microservice-helpers-1.0.0.tgz
-
 RUN npm ci --production
 
 CMD npm run start:prod
