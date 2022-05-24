@@ -38,7 +38,7 @@ const getDumpEntitiesInFiles = (pathname: string): any[] => {
  * Save entities dump
  */
 const saveDump = (entities: any[], filename: string, pathname: string): void => {
-  fs.writeFileSync(`${pathname}/${filename}.json`, JSON.stringify(entities, null, 2));
+  fs.writeFileSync(`${pathname}/${filename}.json`, `${JSON.stringify(entities, null, 2)}\n`);
 };
 
 export {

@@ -52,9 +52,11 @@ describe('services/condition-checker', () => {
             cases: {
               case1: {
                 method: "<%= _.join(['microservice', hello], '.') %>",
-                query: {
-                  where: {
-                    hello: '<%= hello %>',
+                params: {
+                  query: {
+                    where: {
+                      hello: '<%= hello %>',
+                    },
                   },
                 },
               },
@@ -101,7 +103,10 @@ describe('services/condition-checker', () => {
     const call1 = stubRequests.getCall(0).args;
 
     expect(isAllow).to.true;
-    expect(call1).to.deep.equal(['microservice.world', { where: { hello: templateParams.hello } }]);
+    expect(call1).to.deep.equal([
+      'microservice.world',
+      { query: { where: { hello: templateParams.hello } } },
+    ]);
   });
 
   it('should correctly exec junction "or" conditions', async () => {

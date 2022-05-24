@@ -9,7 +9,10 @@ interface IConditionRequest {
   // lodash template
   method: string;
   // can include lodash template
-  query?: IJsonQuery;
+
+  params?: {
+    query?: IJsonQuery;
+  };
 }
 
 interface IConditionalSwitchRequest {
@@ -64,18 +67,22 @@ class ConditionChecker {
    * Exec microservice request
    * @private
    */
-  private async execRequest(key: string, { query, method }: IConditionRequest): Promise<void> {
+  private async execRequest(key: string, { params, method }: IConditionRequest): Promise<void> {
     const msMethod = _.template(method)({ ...this.templateParams });
-    const data = query ? JSON.parse(_.template(JSON.stringify(query))(this.templateParams)) : {};
-    const response = await this.ms.sendRequest(msMethod, data);
+    const data = params ? JSON.parse(_.template(JSON.stringify(params))(this.templateParams)) : {};
+    let response;
 
-    if (!response.getError()) {
-      this.templateParams[key] = response.getResult();
-    } else {
-      this.templateParams[key] = null;
+    try {
+      response = await this.ms.sendRequest(msMethod, data);
+    } catch (e) {
+      Log.error('Condition request failed (#1): ', e);
+    } finally {
+      if (response?.getError()) {
+        Log.error('Condition request failed (#2): ', response.getError());
+      }
+
+      this.templateParams[key] = response?.getResult() ?? null;
     }
-
-    Log.error('Condition request failed: ', response.getError());
   }
 
   /**
