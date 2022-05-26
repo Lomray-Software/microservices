@@ -475,16 +475,16 @@
   },
   {
     "microservice": "authorization",
-    "method": "user-role.my",
-    "description": "Get roles for current user",
+    "method": "user-role.view",
+    "description": "Get roles for user or current user.",
     "allowGroup": [
-      "admin",
       "user"
     ],
     "denyGroup": [],
-    "createdAt": "2022-04-14T05:34:30.652Z",
-    "updatedAt": "2022-05-18T10:19:06.263Z",
-    "modelOut": "authorization.UserRoleMyOutput",
+    "createdAt": "2022-05-26T10:48:58.320Z",
+    "updatedAt": "2022-05-26T10:49:20.483Z",
+    "modelIn": "authorization.UserRoleViewInput",
+    "modelOut": "authorization.UserRoleViewOutput",
     "methodFilters": []
   },
   {

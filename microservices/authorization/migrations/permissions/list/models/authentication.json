@@ -320,6 +320,14 @@
           "admin": "allow"
         }
       },
+      "jwtPayload": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "userParams": {
         "in": {
           "user": "allow",

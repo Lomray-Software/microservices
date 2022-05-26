@@ -1,0 +1,43 @@
+{
+	"name": "@lomray/microservices-integration-tests",
+	"version": "1.0.0",
+	"description": "Microservices integration tests.",
+	"keywords": [
+		"node",
+		"js",
+		"microservice",
+		"inverted",
+		"json",
+		"tests",
+		"typescript",
+    "integration"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+    "url": "https://github.com/Lomray-Software/microservices.git"
+	},
+	"bugs": {
+    "url": "https://github.com/Lomray-Software/microservices/issues"
+	},
+  "homepage": "https://github.com/Lomray-Software/microservices",
+	"author": "Mikhail Yarmaliuk",
+	"license": "Apache-2.0",
+	"scripts": {
+		"test": "NODE_ENV=tests TS_NODE_COMPILER_OPTIONS='{\"target\":\"es6\"}' mocha --harmony --no-warnings  integration --require ts-node/register --recursive --unhandled-rejections=strict --exit",
+		"prettier:format": "prettier --write 'src/**/*.{ts,tsx,*.ts,*tsx}'",
+		"prettier:check": "prettier --check --debug-check 'src/**/*.{ts,tsx,*.ts,*tsx}'",
+		"lint:check": "eslint --ext '.ts,.tsx' 'src/**/*.{ts,tsx,*.ts,*tsx}'",
+		"lint:format": "eslint --fix --ext '.ts,.tsx' 'src/**/*.{ts,tsx,*.ts,*tsx}'",
+		"ts:check": "tsc --project ./tsconfig.json --skipLibCheck --noemit"
+	},
+	"dependencies": {
+		"axios": "^0.27.2",
+		"lodash": "^4.17.21"
+	},
+	"devDependencies": {
+		"@types/lodash": "^4.14.182"
+	}
+}

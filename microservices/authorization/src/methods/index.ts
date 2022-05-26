@@ -10,8 +10,8 @@ import CrudModel from '@methods/model/crud';
 import CrudRole from '@methods/role/crud';
 import ServiceSyncMetadata from '@methods/service/sync-metadata';
 import UserRoleAssign from '@methods/user-role/assign';
-import UserRoleMy from '@methods/user-role/my';
 import UserRoleRemove from '@methods/user-role/remove';
+import UserRoleView from '@methods/user-role/view';
 
 /**
  * Register methods
@@ -31,27 +31,27 @@ export default (ms: Microservice): void => {
    */
   Object.entries(crud).forEach(([endpoint, crudMethods]) => {
     Object.entries(crudMethods).forEach(([method, handler]) => {
-      ms.addEndpoint(`${endpoint}.${method}`, handler, { isPrivate: true });
+      ms.addEndpoint(`${endpoint}.${method}`, handler);
     });
   });
 
   /**
    * User role methods
    */
-  ms.addEndpoint('user-role.assign', UserRoleAssign, { isPrivate: true });
-  ms.addEndpoint('user-role.remove', UserRoleRemove, { isPrivate: true });
-  ms.addEndpoint('user-role.my', UserRoleMy);
+  ms.addEndpoint('user-role.assign', UserRoleAssign);
+  ms.addEndpoint('user-role.remove', UserRoleRemove);
+  ms.addEndpoint('user-role.view', UserRoleView);
 
   /**
    * Extra methods for endpoint
    */
-  ms.addEndpoint('endpoint.enforce', EndpointEnforce, { isPrivate: true });
-  ms.addEndpoint('endpoint.filter', EndpointFilter, { isPrivate: true });
+  ms.addEndpoint('endpoint.enforce', EndpointEnforce);
+  ms.addEndpoint('endpoint.filter', EndpointFilter);
 
   /**
    * Service methods
    */
-  ms.addEndpoint('service.sync-metadata', ServiceSyncMetadata, { isPrivate: true });
+  ms.addEndpoint('service.sync-metadata', ServiceSyncMetadata);
 
   /**
    * Microservice metadata endpoint

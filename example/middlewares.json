@@ -94,11 +94,21 @@
       "type": "response",
       "isRequired": true,
       "strategy": "transform",
+      "extraRequests": [
+        {
+          "key": "rolesResp",
+          "method": "authorization.user-role.view",
+          "params": {
+            "userId": "<%= result.user.id %>"
+          }
+        }
+      ],
       "convertParams": {
         "type": "jwt",
         "userId": "$result.user.id",
         "params": "$task.params.payload.headers.user-info",
-        "returnType": "cookies"
+        "jwtPayload.roles": "$rolesResp.roles",
+        "returnType": "<%= _.get(task, 'params.payload.headers.user-info.authType', 'cookies') %>"
       },
       "convertResult": {
         "payload.cookies": "$middleware.payload.cookies",
@@ -118,11 +128,21 @@
       "type": "response",
       "isRequired": true,
       "strategy": "transform",
+      "extraRequests": [
+        {
+          "key": "rolesResp",
+          "method": "authorization.user-role.view",
+          "params": {
+            "userId": "<%= result.user.id %>"
+          }
+        }
+      ],
       "convertParams": {
         "type": "jwt",
         "userId": "$result.user.id",
         "params": "$task.params.payload.headers.user-info",
-        "returnType": "cookies"
+        "jwtPayload.roles": "$rolesResp.roles",
+        "returnType": "<%= _.get(task, 'params.payload.headers.user-info.authType', 'cookies') %>"
       },
       "convertResult": {
         "payload.cookies": "$middleware.payload.cookies",
@@ -142,11 +162,21 @@
       "type": "response",
       "isRequired": true,
       "strategy": "transform",
+      "extraRequests": [
+        {
+          "key": "rolesResp",
+          "method": "authorization.user-role.view",
+          "params": {
+            "userId": "<%= result.user.id %>"
+          }
+        }
+      ],
       "convertParams": {
         "type": "jwt",
         "userId": "$result.user.id",
         "params": "$task.params.payload.headers.user-info",
-        "returnType": "cookies"
+        "jwtPayload.roles": "$rolesResp.roles",
+        "returnType": "<%= _.get(task, 'params.payload.headers.user-info.authType', 'cookies') %>"
       },
       "convertResult": {
         "payload.cookies": "$middleware.payload.cookies",

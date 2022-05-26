@@ -13,10 +13,10 @@ import FieldsFilter from '@services/fields-filter';
 import MethodFilters from '@services/method-filters';
 
 export interface IEndpointHandlerParams {
-  hasFilters: boolean;
-  hasFilterInput: boolean;
-  hasFilterOutput: boolean;
-  hasCondition: boolean;
+  hasFilters?: boolean;
+  hasFilterInput?: boolean;
+  hasFilterOutput?: boolean;
+  hasCondition?: boolean;
   enforcerParams?: {
     ms: AbstractMicroservice;
     templateParams?: Record<string, any>;
@@ -146,7 +146,12 @@ class EndpointHandler {
       return this.method;
     }
 
-    const { hasFilters, hasFilterInput, hasFilterOutput, hasCondition } = this.params;
+    const {
+      hasFilters = false,
+      hasFilterInput = false,
+      hasFilterOutput = false,
+      hasCondition = false,
+    } = this.params;
 
     this.method = await getRepository(Method).findOne(
       {

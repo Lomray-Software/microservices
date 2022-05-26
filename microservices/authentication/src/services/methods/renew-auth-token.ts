@@ -107,6 +107,7 @@ class RenewAuthToken {
 
     const result = jwtService.create(dbToken.id, {
       ...(jwtPayload ?? {}),
+      ...(dbToken.jwtPayload ?? {}),
       userId: dbToken.userId,
     });
     const { exp } = jwtService.decode(result.access);
@@ -114,6 +115,7 @@ class RenewAuthToken {
     dbToken.access = result.access;
     dbToken.refresh = result.refresh;
     dbToken.params = { ...dbToken.params, ...(params ?? {}) };
+    dbToken.jwtPayload = { ...dbToken.jwtPayload, ...(jwtPayload ?? {}) };
     dbToken.expirationAt = exp ?? null;
 
     await this.repository.save(dbToken);

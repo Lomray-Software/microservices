@@ -1,0 +1,8 @@
+const API_GATEWAY = process.env.API_GATEWAY || 'http://127.0.0.1:3000';
+const IJSON_CONNECTION = process.env.IJSON_CONNECTION || 'http://127.0.0.1:8001';
+
+enum STATUS_CODE {
+  METHOD_NOT_ALLOWED = 405,
+}
+
+export { API_GATEWAY, IJSON_CONNECTION, STATUS_CODE };

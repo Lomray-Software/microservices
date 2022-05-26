@@ -1192,5 +1192,39 @@
     },
     "createdAt": "2022-05-18T09:51:18.471Z",
     "updatedAt": "2022-05-18T09:51:18.471Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.UserRoleViewInput",
+    "title": "User Role View Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-05-26T10:48:58.320Z",
+    "updatedAt": "2022-05-26T10:48:58.320Z"
+  },
+  {
+    "microservice": "authorization",
+    "alias": "authorization.UserRoleViewOutput",
+    "title": "User Role View Output",
+    "schema": {
+      "roles": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-05-26T10:48:58.320Z",
+    "updatedAt": "2022-05-26T10:48:58.320Z"
   }
 ]

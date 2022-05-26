@@ -127,6 +127,7 @@ class CreateAuthToken {
         refresh: 'temp-refresh',
         expirationAt,
         params,
+        jwtPayload,
       }),
     );
     const jwtService = new Jwt(secretKey, jwtOptions);

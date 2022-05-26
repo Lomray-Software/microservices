@@ -33,14 +33,14 @@ class Token {
   @Length(1, 32)
   personal: string | null;
 
-  @Column({ type: 'varchar', length: 300, default: null })
+  @Column({ type: 'varchar', length: 1000, default: null })
   @IsNullable()
-  @Length(1, 300)
+  @Length(1, 1000)
   access: string | null;
 
-  @Column({ type: 'varchar', length: 300, default: null })
+  @Column({ type: 'varchar', length: 1000, default: null })
   @IsNullable()
-  @Length(1, 300)
+  @Length(1, 1000)
   refresh: string | null;
 
   @Column({ type: 'int', width: 10, default: null })
@@ -62,7 +62,18 @@ class Token {
   params: Record<string, any>;
 
   @JSONSchema({
-    description: 'Some user payload data.',
+    description: 'Some payload data for token.',
+    example: {
+      roles: ['user'],
+    },
+  })
+  @Column({ type: 'json', default: {} })
+  @IsObject()
+  @IsUndefinable()
+  jwtPayload: Record<string, any>;
+
+  @JSONSchema({
+    description: 'Some user payload data included in tokens.',
     example: {
       pushNotificationToken: '....',
     },

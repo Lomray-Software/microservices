@@ -57,6 +57,14 @@ docker-compose up
 
 see example requests in file `requests.http`
 
+## Integration tests
+1. Run all microservices
+2. Run commands:
+```bash
+cd tests
+npm run test
+```
+
 ## TODO
 - [ ] Add api service generator (backend) (generate api service for microservices based on metadata endpoint)
 - [ ] Add api service generator (frontend)
