@@ -49,7 +49,7 @@ describe('services/methods/renew-auth-token', () => {
                 action: 'add',
                 name: 'jwt-access',
                 value: token.access,
-                options: { httpOnly: true, secure: true },
+                options: { httpOnly: true, secure: true, sameSite: undefined },
               },
             ],
           },

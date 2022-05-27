@@ -4,7 +4,7 @@ import { IsEnum, IsObject, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import type { Repository } from 'typeorm';
 import type { IJwtConfig } from '@config/jwt';
-import { IS_SECURE_COOKIE } from '@constants/index';
+import { COOKIE_SAME_SITE, IS_HTTPONLY_COOKIE, IS_SECURE_COOKIE } from '@constants/index';
 import TokenType from '@constants/token-type';
 import type Token from '@entities/token';
 import Jwt from '@services/tokens/jwt';
@@ -167,7 +167,11 @@ class CreateAuthToken {
                 action: 'add',
                 name: 'jwt-access',
                 value: result['access'],
-                options: { httpOnly: true, secure: IS_SECURE_COOKIE },
+                options: {
+                  httpOnly: IS_HTTPONLY_COOKIE,
+                  secure: IS_SECURE_COOKIE,
+                  sameSite: COOKIE_SAME_SITE,
+                },
               },
             ],
           },

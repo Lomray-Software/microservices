@@ -39,6 +39,8 @@ This microservice provides authentication mechanism for microservices.
 - `DB_PASSWORD` - Database password. Default: `example`
 - `DB_DATABASE` - Database db name. Default: `ms-authentication`
 - `IS_SECURE_COOKIE` - Set secure cookie for `returnType: cookies`. Default: `1`
+- `IS_HTTPONLY_COOKIE` - Set httpOnly cookie for `returnType: cookies`. Default: `1`
+- `COOKIE_SAME_SITE` - Set sameSite cookie for `returnType: cookies`. Default: `undefined`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.
