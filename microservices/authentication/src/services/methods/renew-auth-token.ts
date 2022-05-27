@@ -3,10 +3,10 @@ import type { IMicroserviceResponseCookie } from '@lomray/microservice-nodejs-li
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { IsEnum, IsObject, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import type { IJwtConfig } from '@config/jwt';
-import { IS_PROD } from '@constants/index';
-import Token from '@entities/token';
+import { IS_SECURE_COOKIE } from '@constants/index';
+import type Token from '@entities/token';
 import { TokenCreateReturnType } from '@services/methods/create-auth-token';
 import { IdentifyAuthToken } from '@services/methods/identity-auth-token';
 import Jwt from '@services/tokens/jwt';
@@ -146,7 +146,7 @@ class RenewAuthToken {
                 action: 'add',
                 name: 'jwt-access',
                 value: result['access'],
-                options: { httpOnly: true, secure: IS_PROD },
+                options: { httpOnly: true, secure: IS_SECURE_COOKIE },
               },
             ],
           },

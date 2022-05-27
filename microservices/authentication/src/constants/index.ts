@@ -15,6 +15,7 @@ const MS_ENABLE_REMOTE_MIDDLEWARE = Number(process.env.MS_ENABLE_REMOTE_MIDDLEWA
 const MS_JWT_PARAMS = JSON.parse(process.env.MS_JWT_PARAMS || '{}');
 const MS_JWT_SECRET_KEY = process.env.MS_JWT_SECRET_KEY || undefined;
 const MS_REMOTE_CONFIG = Number(process.env.MS_REMOTE_CONFIG || 1);
+const IS_SECURE_COOKIE = Boolean(Number(process.env.IS_SECURE_COOKIE || 1));
 
 const DB_FROM_CONFIG_MS = Number(process.env.DB_FROM_CONFIG_MS ?? 1);
 const DB_ENV = {
@@ -44,4 +45,5 @@ export {
   IS_TEST,
   IS_BUILD,
   SRC_FOLDER,
+  IS_SECURE_COOKIE,
 };

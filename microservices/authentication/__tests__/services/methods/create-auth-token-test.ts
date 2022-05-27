@@ -5,10 +5,8 @@ import jsonwebtoken from 'jsonwebtoken';
 import rewiremock from 'rewiremock';
 import TokenType from '@constants/token-type';
 import Token from '@entities/token';
-import {
-  CreateAuthToken as OriginalCreateAuthToken,
-  TokenCreateReturnType,
-} from '@services/methods/create-auth-token';
+import type { CreateAuthToken as OriginalCreateAuthToken } from '@services/methods/create-auth-token';
+import { TokenCreateReturnType } from '@services/methods/create-auth-token';
 
 const { CreateAuthToken } = rewiremock.proxy<{ CreateAuthToken: typeof OriginalCreateAuthToken }>(
   () => require('@services/methods/create-auth-token'),
@@ -106,7 +104,7 @@ describe('services/methods/create-auth-token', () => {
             action: 'add',
             name: 'jwt-access',
             value: token.access,
-            options: { httpOnly: true, secure: false },
+            options: { httpOnly: true, secure: true },
           },
         ],
       },

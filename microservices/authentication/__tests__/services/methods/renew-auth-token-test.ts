@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import Token from '@entities/token';
 import { TokenCreateReturnType } from '@services/methods/create-auth-token';
-import { RenewAuthToken as OriginalRenewAuthToken } from '@services/methods/renew-auth-token';
+import type { RenewAuthToken as OriginalRenewAuthToken } from '@services/methods/renew-auth-token';
 import Jwt from '@services/tokens/jwt';
 
 const { RenewAuthToken } = rewiremock.proxy<{ RenewAuthToken: typeof OriginalRenewAuthToken }>(
@@ -49,7 +49,7 @@ describe('services/methods/renew-auth-token', () => {
                 action: 'add',
                 name: 'jwt-access',
                 value: token.access,
-                options: { httpOnly: true, secure: false },
+                options: { httpOnly: true, secure: true },
               },
             ],
           },

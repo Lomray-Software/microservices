@@ -42,7 +42,7 @@
 		"@commitlint/cli": "^13.1.0",
 		"@commitlint/config-conventional": "^13.1.0",
 		"@istanbuljs/nyc-config-typescript": "^1.0.1",
-		"@lomray/eslint-config": "^1.1.0",
+		"@lomray/eslint-config": "^1.2.1",
 		"@lomray/prettier-config": "^1.0.1",
 		"@rollup/plugin-json": "^4.1.0",
 		"@rollup/plugin-replace": "^4.0.0",

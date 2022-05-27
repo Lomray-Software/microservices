@@ -29,6 +29,7 @@ module.exports = {
   settings: {},
   rules: {
     '@typescript-eslint/no-unsafe-return': 'off',
+    '@typescript-eslint/consistent-type-imports': 'off',
     'no-await-in-loop': 'off',
     'prettier/prettier': [
       'error',

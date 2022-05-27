@@ -38,6 +38,7 @@ This microservice provides authentication mechanism for microservices.
 - `DB_USERNAME` - Database user name. Default: `postgres`
 - `DB_PASSWORD` - Database password. Default: `example`
 - `DB_DATABASE` - Database db name. Default: `ms-authentication`
+- `IS_SECURE_COOKIE` - Set secure cookie for `returnType: cookies`. Default: `1`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.
