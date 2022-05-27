@@ -14,8 +14,8 @@ const MS_WORKERS = Number(process.env.MS_WORKERS) || 5;
 const MS_ENABLE_REMOTE_MIDDLEWARE = Number(process.env.MS_ENABLE_REMOTE_MIDDLEWARE ?? 1);
 const MS_JWT_PARAMS = JSON.parse(process.env.MS_JWT_PARAMS || '{}');
 const MS_JWT_SECRET_KEY = process.env.MS_JWT_SECRET_KEY || undefined;
-const MS_REMOTE_CONFIG = Number(process.env.MS_REMOTE_CONFIG || 1);
 const IS_SECURE_COOKIE = Boolean(Number(process.env.IS_SECURE_COOKIE || 1));
+const MS_REMOTE_CONFIG = Number(process.env.MS_REMOTE_CONFIG || 1);
 
 const DB_FROM_CONFIG_MS = Number(process.env.DB_FROM_CONFIG_MS ?? 1);
 const DB_ENV = {
