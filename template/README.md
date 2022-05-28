@@ -17,6 +17,8 @@ RPC 2.0 Microservice.
 - `MS_CONFIG_NAME` - Configuration microservice name. Default: `configuration` 
 - `MS_WORKERS` - Microservice queue workers count. Default: `1`
 - `MS_ENABLE_REMOTE_MIDDLEWARE` - Enable remote middleware feature. Set `0` to disable. Default: `1` (enabled)
+- `MS_GRAFANA_LOKI_CONFIG` - Grafana loki config. Default: `null`
+- `MS_ENABLE_GRAFANA_LOG` - Enable grafana loki log (config from configuration ms). Default: `0`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.

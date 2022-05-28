@@ -1,6 +1,6 @@
 import { Log } from '@lomray/microservice-helpers';
 import type { IMicroserviceOptions, IMicroserviceParams } from '@lomray/microservice-nodejs-lib';
-import { ConsoleLogDriver } from '@lomray/microservice-nodejs-lib';
+import { ConsoleLogDriver, LogType } from '@lomray/microservice-nodejs-lib';
 import { MS_CONNECTION, MS_CONNECTION_SRV, MS_NAME, MS_WORKERS } from '@constants/index';
 import { version } from '../../package.json';
 
@@ -19,7 +19,9 @@ const msOptions: Partial<IMicroserviceOptions> = {
  * Microservice params
  */
 const msParams: Partial<IMicroserviceParams> = {
-  logDriver: ConsoleLogDriver((_, message) => Log.info(message)),
+  logDriver: ConsoleLogDriver((message, { type }) =>
+    Log.log(type === LogType.ERROR ? 'error' : 'info', message),
+  ),
 };
 
 export { msOptions, msParams };

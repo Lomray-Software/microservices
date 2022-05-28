@@ -41,6 +41,8 @@ This microservice provides authentication mechanism for microservices.
 - `IS_SECURE_COOKIE` - Set secure cookie for `returnType: cookies`. Default: `1`
 - `IS_HTTPONLY_COOKIE` - Set httpOnly cookie for `returnType: cookies`. Default: `1`
 - `COOKIE_SAME_SITE` - Set sameSite cookie for `returnType: cookies`. Default: `undefined`
+- `MS_GRAFANA_LOKI_CONFIG` - Grafana loki config. Default: `null`
+- `MS_ENABLE_GRAFANA_LOG` - Enable grafana loki log (config from configuration ms). Default: `0`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.

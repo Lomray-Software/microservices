@@ -39,6 +39,8 @@ This microservice provides mechanism for store/manage user data.
 - `DB_DATABASE` - Database db name. Default: `ms-users`
 - `FIREBASE_FROM_CONFIG_MS` - Get firebase credential from configuration microservice. Set `0` to disable. Default: `1`
 - `FIREBASE_CREDENTIAL` - Firebase credential JSON string. Default: `{}`
+- `MS_GRAFANA_LOKI_CONFIG` - Grafana loki config. Default: `null`
+- `MS_ENABLE_GRAFANA_LOG` - Enable grafana loki log (config from configuration ms). Default: `0`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.

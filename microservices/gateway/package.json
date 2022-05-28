@@ -39,8 +39,8 @@
 		"start:prod": "node lib/index.js"
 	},
 	"dependencies": {
-		"@lomray/microservice-helpers": "^1.0.0",
-		"@lomray/microservice-nodejs-lib": "^2.7.0",
+    "@lomray/microservice-helpers": "^1.1.0",
+    "@lomray/microservice-nodejs-lib": "^2.8.0",
     "@lomray/microservice-remote-middleware": "^1.6.0",
 		"cors": "^2.8.5",
 		"lodash": "^4.17.21",

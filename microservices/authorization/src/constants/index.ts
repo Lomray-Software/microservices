@@ -15,6 +15,8 @@ const MS_ENABLE_REMOTE_MIDDLEWARE = Number(process.env.MS_ENABLE_REMOTE_MIDDLEWA
 const MS_REMOTE_CONFIG = Number(process.env.MS_REMOTE_CONFIG || 1);
 const MS_DEFAULT_ROLE_ALIAS = process.env.MS_DEFAULT_ROLE_ALIAS || 'user';
 const MS_DEFAULT_PERMISSION_MIGRATION = Number(process.env.MS_DEFAULT_PERMISSION_MIGRATION || 0);
+const MS_GRAFANA_LOKI_CONFIG = JSON.parse(process.env.MS_GRAFANA_LOKI_CONFIG || 'null');
+const MS_ENABLE_GRAFANA_LOG = Number(process.env.MS_ENABLE_GRAFANA_LOG || 0);
 
 const DB_FROM_CONFIG_MS = Number(process.env.DB_FROM_CONFIG_MS ?? 1);
 const DB_ENV = {
@@ -44,4 +46,6 @@ export {
   IS_TEST,
   IS_BUILD,
   SRC_FOLDER,
+  MS_GRAFANA_LOKI_CONFIG,
+  MS_ENABLE_GRAFANA_LOG,
 };

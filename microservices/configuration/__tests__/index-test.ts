@@ -73,7 +73,7 @@ describe('microservice: start', () => {
 
   it('should have microservice custom logger', () => {
     const { logDriver } = msParams;
-    const LogInfoSpy = sandbox.spy(Log, 'info');
+    const LogInfoSpy = sandbox.spy(Log, 'log');
 
     if (typeof logDriver !== 'boolean') {
       logDriver?.(() => 'test');

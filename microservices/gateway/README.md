@@ -32,6 +32,8 @@ RPC 2.0 Microservice. This is a single entry point for all clients.
 - `MS_REQ_TIMEOUT` - Gateway request timeout in sec. Default: `15`
 - `MS_LISTENER_PORT` - Express listener port. Default: `3000`
 - `MS_CORS_CONFIG` - Express CORS config. See [CORS](https://www.npmjs.com/package/cors) lib. Default: `{"origin":["http://localhost:3000"],"credentials":true}`
+- `MS_GRAFANA_LOKI_CONFIG` - Grafana loki config. Default: `null`
+- `MS_ENABLE_GRAFANA_LOG` - Enable grafana loki log (config from configuration ms). Default: `0`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.

@@ -40,6 +40,8 @@ This microservice provides authorization mechanism for all other microservices.
 - `DB_DATABASE` - Database db name. Default: `ms-authorization`
 - `MS_DEFAULT_ROLE_ALIAS` - Default role alias for authenticated users. Default: `user`
 - `MS_DEFAULT_PERMISSION_MIGRATION` - Apply migration with default permissions. Default: `0`
+- `MS_GRAFANA_LOKI_CONFIG` - Grafana loki config. Default: `null`
+- `MS_ENABLE_GRAFANA_LOG` - Enable grafana loki log (config from configuration ms). Default: `0`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.

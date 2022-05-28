@@ -24,6 +24,9 @@ const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || '';
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY || '';
 const AWS_REGION = process.env.AWS_REGION || '';
 
+const MS_GRAFANA_LOKI_CONFIG = JSON.parse(process.env.MS_GRAFANA_LOKI_CONFIG || 'null');
+const MS_ENABLE_GRAFANA_LOG = Number(process.env.MS_ENABLE_GRAFANA_LOG || 0);
+
 const DB_FROM_CONFIG_MS = Number(process.env.DB_FROM_CONFIG_MS ?? 1);
 const DB_ENV = {
   URL: process.env.DB_URL || undefined,
@@ -56,4 +59,6 @@ export {
   IS_TEST,
   IS_BUILD,
   SRC_FOLDER,
+  MS_GRAFANA_LOKI_CONFIG,
+  MS_ENABLE_GRAFANA_LOG,
 };

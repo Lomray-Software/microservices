@@ -36,6 +36,7 @@ This microservice provides configuration for all other microservices. Single poi
 - `DB_DATABASE` - Database db name. Default: `ms-configuration`
 - `MS_INIT_CONFIGS` - JSON string for configure initial `Config` values. Default: `[]`
 - `MS_INIT_MIDDLEWARES` - JSON string for configure initial `Middleware` values. Default: `[]`
+- `MS_ENABLE_GRAFANA_LOKI_LOG` - Enable grafana loki logs. Default: `0`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.

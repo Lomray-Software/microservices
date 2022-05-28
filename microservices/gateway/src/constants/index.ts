@@ -18,6 +18,8 @@ const MS_LISTENER_PORT = process.env.MS_LISTENER_PORT || 3000;
 const MS_CORS_CONFIG = JSON.parse(
   process.env.MS_CORS_CONFIG || '{"origin":["http://localhost:3000"],"credentials":true}',
 );
+const MS_GRAFANA_LOKI_CONFIG = JSON.parse(process.env.MS_GRAFANA_LOKI_CONFIG || 'null');
+const MS_ENABLE_GRAFANA_LOG = Number(process.env.MS_ENABLE_GRAFANA_LOG || 0);
 
 export {
   MS_NAME,
@@ -36,4 +38,6 @@ export {
   IS_TEST,
   IS_BUILD,
   SRC_FOLDER,
+  MS_GRAFANA_LOKI_CONFIG,
+  MS_ENABLE_GRAFANA_LOG,
 };

@@ -43,6 +43,8 @@ This microservice provides notifications mechanism.
 - `AWS_ACCESS_KEY_ID` - AWS access key, if you will use SES for sending email (if not configured from remote config.). Default: `empty`
 - `AWS_SECRET_ACCESS_KEY` - AWS secret access key, if you will use SES for sending email (if not configured from remote config.). Default: `empty`
 - `AWS_REGION` - AWS region, if you will use SES for sending email (if not configured from remote config.). Default: `empty`
+- `MS_GRAFANA_LOKI_CONFIG` - Grafana loki config. Default: `null`
+- `MS_ENABLE_GRAFANA_LOG` - Enable grafana loki log (config from configuration ms). Default: `0`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.

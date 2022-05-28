@@ -1,6 +1,6 @@
 import { Log } from '@lomray/microservice-helpers';
 import type { IGatewayOptions, IGatewayParams } from '@lomray/microservice-nodejs-lib';
-import { ConsoleLogDriver } from '@lomray/microservice-nodejs-lib';
+import { ConsoleLogDriver, LogType } from '@lomray/microservice-nodejs-lib';
 import cors from 'cors';
 import _ from 'lodash';
 import RequestIp from 'request-ip';
@@ -58,7 +58,9 @@ const msParams: Partial<IGatewayParams> = {
       next();
     });
   },
-  logDriver: ConsoleLogDriver((__, message) => Log.info(message)),
+  logDriver: ConsoleLogDriver((message, { type }) =>
+    Log.log(type === LogType.ERROR ? 'error' : 'info', message),
+  ),
 };
 
 export { msOptions, msParams };

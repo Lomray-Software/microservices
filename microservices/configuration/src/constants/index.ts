@@ -13,6 +13,7 @@ const MS_WORKERS = Number(process.env.MS_WORKERS) || 5;
 const MS_ENABLE_REMOTE_MIDDLEWARE = Number(process.env.MS_ENABLE_REMOTE_MIDDLEWARE ?? 1);
 const MS_INIT_CONFIGS = process.env.MS_INIT_CONFIGS || '[]';
 const MS_INIT_MIDDLEWARES = process.env.MS_INIT_MIDDLEWARES || '[]';
+const MS_ENABLE_GRAFANA_LOKI_LOG = Number(process.env.MS_ENABLE_GRAFANA_LOKI_LOG || 0);
 
 const DB_ENV = {
   URL: process.env.DB_URL || undefined,
@@ -38,4 +39,5 @@ export {
   IS_TEST,
   IS_BUILD,
   SRC_FOLDER,
+  MS_ENABLE_GRAFANA_LOKI_LOG,
 };
