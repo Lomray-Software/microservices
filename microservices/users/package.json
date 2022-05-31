@@ -41,7 +41,7 @@
     "typeorm:ts": "node --require ts-node/register node_modules/typeorm/cli.js"
 	},
 	"dependencies": {
-    "@lomray/microservice-helpers": "^1.2.1",
+    "@lomray/microservice-helpers": "^1.2.2",
     "@lomray/microservice-nodejs-lib": "^2.8.0",
     "@lomray/microservice-remote-middleware": "^1.6.1",
 		"bcrypt": "^5.0.1",
