@@ -735,6 +735,14 @@
         "out": {
           "admin": "allow"
         }
+      },
+      "allowByAdmin": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
       }
     },
     "createdAt": "2022-04-14T05:34:31.363Z",

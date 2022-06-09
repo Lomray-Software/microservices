@@ -32,6 +32,10 @@ class ChangePasswordInput {
   @IsUndefinable()
   @ValidateIf(({ confirmCode, oldPassword }) => !oldPassword || confirmCode)
   confirmCode?: string | number;
+
+  @IsBoolean()
+  @IsUndefinable()
+  allowByAdmin?: boolean;
 }
 
 class ChangePasswordOutput {
@@ -48,7 +52,7 @@ const changePassword = Endpoint.custom(
     output: ChangePasswordOutput,
     description: 'Change user password',
   }),
-  async ({ userId, newPassword, oldPassword, confirmBy, confirmCode }) => {
+  async ({ userId, newPassword, oldPassword, confirmBy, confirmCode, allowByAdmin = false }) => {
     const service = ChangePassword.init({
       userId,
       newPassword,
@@ -59,7 +63,7 @@ const changePassword = Endpoint.custom(
             user[confirmBy],
             confirmCode,
           )) ||
-        false,
+        allowByAdmin,
       repository: getCustomRepository(UserRepository),
     });
 
