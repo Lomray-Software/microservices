@@ -35,7 +35,17 @@ const msOptions: Partial<IGatewayOptions> = {
  */
 const msParams: Partial<IGatewayParams> = {
   beforeRoute: (express) => {
-    express.use(cors(MS_CORS_CONFIG));
+    const corsConfig = MS_CORS_CONFIG;
+
+    // Check origin's and find regex
+    if (Array.isArray(corsConfig.origin)) {
+      corsConfig.origin = corsConfig.origin.map((origin: string) =>
+        // if string is regex, convert to regex instance
+        origin.startsWith('/') ? new RegExp(origin.replace(/^\/|\/$/g, '')) : origin,
+      );
+    }
+
+    express.use(cors(corsConfig));
     express.use((req, res, next) => {
       const clientIp = RequestIp.getClientIp(req);
 
