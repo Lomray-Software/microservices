@@ -207,7 +207,7 @@ class MethodsImporter {
       microservice: string;
       schemaEntities: IMicroserviceMeta['entities'];
       schemaName: string;
-      schemaParams?: Record<string, any>;
+      schemaParams?: Record<string, any> | null;
     },
   ): Promise<Model | undefined> {
     const { microservice, schemaEntities, schemaName, schemaParams } = params;
@@ -276,7 +276,7 @@ class MethodsImporter {
     microservice: string;
     baseSchema?: IModelSchema;
     entitySchema?: IMicroserviceMeta['entities'][string];
-    schemaParams?: Record<string, any>;
+    schemaParams?: Record<string, any> | null;
   }): { schema: IModelSchema; related: string[] } {
     if (!entitySchema) {
       return { schema: {} as IModelSchema, related: [] };
@@ -368,7 +368,7 @@ class MethodsImporter {
   private getSchemaAlias(
     name: string,
     microservice: string,
-    schemaParams?: Record<string, any>,
+    schemaParams?: Record<string, any> | null,
   ): string {
     const isCommonModel = Boolean(this.params.commonModelAliases?.includes(name));
 
