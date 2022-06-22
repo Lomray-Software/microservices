@@ -42,7 +42,7 @@
 	},
 	"dependencies": {
 		"@aws-sdk/client-ses": "^3.112.0",
-    "@lomray/microservice-helpers": "^1.4.1",
+    "@lomray/microservice-helpers": "^1.4.2",
     "@lomray/microservice-nodejs-lib": "^2.8.1",
     "@lomray/microservice-remote-middleware": "^1.6.1",
 		"class-transformer": "0.4.1",
