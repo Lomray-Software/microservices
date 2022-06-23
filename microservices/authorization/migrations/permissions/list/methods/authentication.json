@@ -8,7 +8,6 @@
     ],
     "denyGroup": [],
     "createdAt": "2022-04-15T07:54:50.996Z",
-    "updatedAt": "2022-04-15T07:54:50.996Z",
     "modelIn": "authentication.UpdateRequestParams.b182b20fc8406f55af308dd86a0b84a2",
     "modelOut": "authentication.UpdateOutputParams.39be1ca76dce78187a814db381b988ea",
     "methodFilters": [
@@ -30,7 +29,6 @@
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.238Z",
-    "updatedAt": "2022-04-14T05:34:31.238Z",
     "modelIn": "authentication.TokenIdentifyInput",
     "modelOut": "authentication.TokenIdentifyOutput",
     "methodFilters": []
@@ -44,7 +42,6 @@
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.238Z",
-    "updatedAt": "2022-04-14T05:34:31.238Z",
     "modelIn": "authentication.TokenCreateInput",
     "modelOut": "authentication.TokenCreateOutput",
     "methodFilters": []
@@ -58,7 +55,6 @@
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.238Z",
-    "updatedAt": "2022-04-14T05:34:31.238Z",
     "modelOut": "MicroserviceMetaOutput",
     "methodFilters": []
   },
@@ -71,7 +67,6 @@
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.238Z",
-    "updatedAt": "2022-04-14T05:34:31.238Z",
     "modelIn": "ClientRegisterMiddlewareInput",
     "modelOut": "ClientRegisterMiddlewareOutput",
     "methodFilters": []
@@ -85,7 +80,6 @@
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.238Z",
-    "updatedAt": "2022-04-14T05:34:31.238Z",
     "modelIn": "authentication.TokenRenewInput",
     "modelOut": "authentication.TokenRenewOutput",
     "methodFilters": []
@@ -99,7 +93,6 @@
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.238Z",
-    "updatedAt": "2022-04-14T05:34:31.238Z",
     "modelIn": "ViewRequestParams",
     "modelOut": "authentication.ViewOutputParams.39be1ca76dce78187a814db381b988ea",
     "methodFilters": []
@@ -113,7 +106,6 @@
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.238Z",
-    "updatedAt": "2022-04-14T05:34:31.238Z",
     "modelIn": "ListRequestParams",
     "modelOut": "authentication.ListOutputParams.82d98355b4b039c79c1f31793cd42d85",
     "methodFilters": []
@@ -127,7 +119,6 @@
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.238Z",
-    "updatedAt": "2022-04-14T05:34:31.238Z",
     "modelIn": "RemoveRequestParams",
     "modelOut": "authentication.RemoveOutputParams.20237fc46aa748afcd36badbe6e29dcf",
     "methodFilters": []
@@ -141,7 +132,6 @@
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.238Z",
-    "updatedAt": "2022-04-14T05:34:31.238Z",
     "modelOut": "authentication.CookiesRemoveOutput",
     "methodFilters": []
   },
@@ -154,7 +144,6 @@
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.238Z",
-    "updatedAt": "2022-04-14T05:34:31.238Z",
     "modelOut": "RemoteConfigOutput",
     "methodFilters": []
   }
