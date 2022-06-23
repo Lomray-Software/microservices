@@ -98,7 +98,7 @@ const createOrUpdateMethods = (methods: Method[]): void => {
         modelOut: modelOut?.alias,
         condition: condition?.title,
         methodFilters: methodFilters
-          ?.map((f: MethodFilter) => _.omit(f, ['methodId', 'filterId']))
+          ?.map((f: MethodFilter) => _.omit(f, ['methodId', 'filterId', 'updatedAt']))
           // @ts-ignore
           .map(({ filter, ...fields }) => ({
             filterTitle: filter.title,

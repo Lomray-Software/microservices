@@ -16,8 +16,7 @@
         "filterTitle": "By user id",
         "operator": "only",
         "roleAlias": "user",
-        "createdAt": "2022-03-15T06:16:55.264Z",
-        "updatedAt": "2022-03-15T06:16:55.264Z"
+        "createdAt": "2022-03-15T06:16:55.264Z"
       }
     ]
   },
@@ -38,8 +37,7 @@
         "filterTitle": "By user id",
         "operator": "only",
         "roleAlias": "user",
-        "createdAt": "2022-03-15T06:17:44.538Z",
-        "updatedAt": "2022-03-15T06:17:44.538Z"
+        "createdAt": "2022-03-15T06:17:44.538Z"
       }
     ]
   },
@@ -60,8 +58,7 @@
         "filterTitle": "By user id",
         "operator": "and",
         "roleAlias": "user",
-        "createdAt": "2022-03-15T06:18:07.204Z",
-        "updatedAt": "2022-03-15T06:18:07.204Z"
+        "createdAt": "2022-03-15T06:18:07.204Z"
       }
     ]
   },
@@ -82,8 +79,7 @@
         "filterTitle": "By userId",
         "operator": "only",
         "roleAlias": "user",
-        "createdAt": "2022-03-15T06:17:23.698Z",
-        "updatedAt": "2022-03-15T06:17:23.698Z"
+        "createdAt": "2022-03-15T06:17:23.698Z"
       }
     ]
   },
@@ -104,8 +100,7 @@
         "filterTitle": "By userId",
         "operator": "only",
         "roleAlias": "user",
-        "createdAt": "2022-03-15T06:18:07.204Z",
-        "updatedAt": "2022-03-15T06:18:07.204Z"
+        "createdAt": "2022-03-15T06:18:07.204Z"
       }
     ]
   },
