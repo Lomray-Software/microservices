@@ -106,8 +106,7 @@
       },
       "user": "users.User"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T10:02:50.329Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -184,8 +183,7 @@
       },
       "user": "users.User"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-15T12:53:59.447Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -297,8 +295,7 @@
       "profile": "users.Profile",
       "identityProviders": "users.IdentityProvider"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -316,8 +313,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -326,8 +322,7 @@
     "schema": {
       "entity": "users.User"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -336,8 +331,7 @@
     "schema": {
       "fields": "users.User"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -346,8 +340,7 @@
     "schema": {
       "entity": "users.User"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -365,8 +358,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -375,8 +367,7 @@
     "schema": {
       "entity": "users.User"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -386,8 +377,7 @@
       "deleted": "users.User",
       "entities": "users.User"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -396,8 +386,7 @@
     "schema": {
       "restored": "users.User"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -406,8 +395,7 @@
     "schema": {
       "entity": "users.Profile"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -425,8 +413,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -435,8 +422,7 @@
     "schema": {
       "entity": "users.Profile"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -454,8 +440,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -464,8 +449,7 @@
     "schema": {
       "entity": "users.IdentityProvider"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -483,8 +467,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -493,8 +476,7 @@
     "schema": {
       "entity": "users.IdentityProvider"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -504,8 +486,7 @@
       "deleted": "users.IdentityProvider",
       "entities": "users.IdentityProvider"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -514,8 +495,7 @@
     "schema": {
       "restored": "users.IdentityProvider"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -553,8 +533,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -579,8 +558,7 @@
         "isCustom": true
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T10:02:50.329Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -608,8 +586,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -634,8 +611,7 @@
         "isCustom": true
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -654,8 +630,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -681,8 +656,7 @@
         "isCustom": true
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -745,8 +719,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -763,8 +736,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -810,8 +782,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -828,8 +799,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -857,8 +827,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -876,8 +845,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -915,8 +883,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -941,8 +908,7 @@
         "isCustom": true
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -988,8 +954,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   },
   {
     "microservice": "users",
@@ -998,7 +963,6 @@
     "schema": {
       "user": "users.User"
     },
-    "createdAt": "2022-04-14T05:34:31.363Z",
-    "updatedAt": "2022-04-14T05:34:31.363Z"
+    "createdAt": "2022-04-14T05:34:31.363Z"
   }
 ]

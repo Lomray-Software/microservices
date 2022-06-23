@@ -69,8 +69,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.136Z",
-    "updatedAt": "2022-04-14T09:27:11.033Z"
+    "createdAt": "2022-04-14T05:34:31.136Z"
   },
   {
     "microservice": "notification",
@@ -87,8 +86,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.136Z",
-    "updatedAt": "2022-04-14T05:34:31.136Z"
+    "createdAt": "2022-04-14T05:34:31.136Z"
   },
   {
     "microservice": "notification",
@@ -97,8 +95,7 @@
     "schema": {
       "entity": "notification.Message"
     },
-    "createdAt": "2022-04-14T05:34:31.136Z",
-    "updatedAt": "2022-04-14T05:34:31.136Z"
+    "createdAt": "2022-04-14T05:34:31.136Z"
   },
   {
     "microservice": "notification",
@@ -146,8 +143,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.136Z",
-    "updatedAt": "2022-04-14T05:34:31.136Z"
+    "createdAt": "2022-04-14T05:34:31.136Z"
   },
   {
     "microservice": "notification",
@@ -163,8 +159,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.136Z",
-    "updatedAt": "2022-04-14T05:34:31.136Z"
+    "createdAt": "2022-04-14T05:34:31.136Z"
   },
   {
     "microservice": "notification",
@@ -188,8 +183,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.136Z",
-    "updatedAt": "2022-04-14T05:34:31.136Z"
+    "createdAt": "2022-04-14T05:34:31.136Z"
   },
   {
     "microservice": "notification",
@@ -205,7 +199,6 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.136Z",
-    "updatedAt": "2022-04-14T05:34:31.136Z"
+    "createdAt": "2022-04-14T05:34:31.136Z"
   }
 ]

@@ -22,8 +22,9 @@ const createOrUpdateRoles = (roles: Role[]): void => {
   const dumpFilters = getDumpEntities('roles', DUMP_PATH_ROOT);
   const keepActual = _.intersectionBy(dumpFilters, roles, 'alias');
   const merged = _.merge(_.keyBy(keepActual, 'alias'), _.keyBy(roles, 'alias'));
+  const values = _.values(merged).map((f) => _.omit(f, ['updatedAt']));
 
-  saveDump(_.values(merged), 'roles', DUMP_PATH_ROOT);
+  saveDump(values, 'roles', DUMP_PATH_ROOT);
 };
 
 /**
@@ -33,8 +34,9 @@ const createOrUpdateUserRoles = (userRoles: UserRole[]): void => {
   const dumpFilters = getDumpEntities('user-roles', DUMP_PATH_ROOT);
   const keepActual = _.intersectionBy(dumpFilters, userRoles, 'userId');
   const merged = _.merge(_.keyBy(keepActual, 'userId'), _.keyBy(userRoles, 'userId'));
+  const values = _.values(merged).map((f) => _.omit(f, ['updatedAt']));
 
-  saveDump(_.values(merged), 'user-roles', DUMP_PATH_ROOT);
+  saveDump(values, 'user-roles', DUMP_PATH_ROOT);
 };
 
 /**
@@ -44,7 +46,7 @@ const createOrUpdateFilters = (filters: Filter[]): void => {
   const dumpFilters = getDumpEntities('filters', DUMP_PATH_ROOT);
   const keepActual = _.intersectionBy(dumpFilters, filters, 'title');
   const merged = _.merge(_.keyBy(keepActual, 'title'), _.keyBy(filters, 'title'));
-  const values = _.values(merged).map((f) => _.omit(f, ['id']));
+  const values = _.values(merged).map((f) => _.omit(f, ['id', 'updatedAt']));
 
   saveDump(values, 'filters', DUMP_PATH_ROOT);
 };
@@ -56,8 +58,9 @@ const createOrUpdateConditions = (conditions: Condition[]): void => {
   const dumpFilters = getDumpEntities('conditions', DUMP_PATH_ROOT);
   const keepActual = _.intersectionBy(dumpFilters, conditions, 'title');
   const merged = _.merge(_.keyBy(keepActual, 'title'), _.keyBy(conditions, 'title'));
+  const values = _.values(merged).map((f) => _.omit(f, ['updatedAt']));
 
-  saveDump(_.values(merged), 'conditions', DUMP_PATH_ROOT);
+  saveDump(values, 'conditions', DUMP_PATH_ROOT);
 };
 
 /**
@@ -70,7 +73,7 @@ const createOrUpdateModels = (models: Model[]): void => {
     const dumpModels = getDumpEntities(microservice, DUMP_PATH_MODELS);
     const keepActual = _.intersectionBy(dumpModels, msModels, 'alias');
     const merged = _.merge(_.keyBy(keepActual, 'alias'), _.keyBy(msModels, 'alias'));
-    const values = _.values(merged).map((f) => _.omit(f, ['id']));
+    const values = _.values(merged).map((f) => _.omit(f, ['id', 'updatedAt']));
 
     saveDump(values, microservice, DUMP_PATH_MODELS);
   });
@@ -88,14 +91,14 @@ const createOrUpdateMethods = (methods: Method[]): void => {
     const keepActual = _.intersectionBy(dumpMethods, msMethods, uniqueKey);
     const merged = _.merge(_.keyBy(keepActual, uniqueKey), _.keyBy(msMethods, uniqueKey));
     const values = _.values(merged)
-      .map((f) => _.omit(f, ['id', 'modelInId', 'modelOutId', 'conditionId']))
+      .map((f) => _.omit(f, ['id', 'modelInId', 'modelOutId', 'conditionId', 'updatedAt']))
       .map(({ modelIn, modelOut, methodFilters, condition, ...method }) => ({
         ...method,
         modelIn: modelIn?.alias,
         modelOut: modelOut?.alias,
         condition: condition?.title,
         methodFilters: methodFilters
-          ?.map((f: MethodFilter) => _.omit(f, ['methodId', 'filterId']))
+          ?.map((f: MethodFilter) => _.omit(f, ['methodId', 'filterId', 'updatedAt']))
           // @ts-ignore
           .map(({ filter, ...fields }) => ({
             filterTitle: filter.title,

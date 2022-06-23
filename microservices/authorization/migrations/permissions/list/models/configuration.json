@@ -93,8 +93,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-25T10:25:03.709Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -111,8 +110,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -121,8 +119,7 @@
     "schema": {
       "entity": "configuration.Middleware"
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -131,8 +128,7 @@
     "schema": {
       "fields": "configuration.Middleware"
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -141,8 +137,7 @@
     "schema": {
       "entity": "configuration.Middleware"
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -152,8 +147,7 @@
       "deleted": "configuration.Middleware",
       "entities": "configuration.Middleware"
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -209,8 +203,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T09:27:10.213Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -227,8 +220,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -237,8 +229,7 @@
     "schema": {
       "entity": "configuration.Config"
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -247,8 +238,7 @@
     "schema": {
       "fields": "configuration.Config"
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -257,8 +247,7 @@
     "schema": {
       "entity": "configuration.Config"
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -275,8 +264,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -285,8 +273,7 @@
     "schema": {
       "entity": "configuration.Config"
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -296,8 +283,7 @@
       "deleted": "configuration.Config",
       "entities": "configuration.Config"
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -361,8 +347,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -378,8 +363,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -451,8 +435,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   },
   {
     "microservice": "configuration",
@@ -461,7 +444,6 @@
     "schema": {
       "list": "configuration.MiddlewareEntity"
     },
-    "createdAt": "2022-04-14T05:34:30.394Z",
-    "updatedAt": "2022-04-14T05:34:30.394Z"
+    "createdAt": "2022-04-14T05:34:30.394Z"
   }
 ]

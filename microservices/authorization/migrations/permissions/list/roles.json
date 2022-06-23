@@ -3,21 +3,18 @@
     "alias": "guest",
     "parentAlias": null,
     "name": "Guest",
-    "createdAt": "2022-02-25T07:11:22.570Z",
-    "updatedAt": "2022-02-25T07:11:22.570Z"
+    "createdAt": "2022-02-25T07:11:22.570Z"
   },
   {
     "alias": "user",
     "parentAlias": "guest",
     "name": "User",
-    "createdAt": "2022-02-25T07:11:34.858Z",
-    "updatedAt": "2022-02-25T07:11:34.858Z"
+    "createdAt": "2022-02-25T07:11:34.858Z"
   },
   {
     "alias": "admin",
     "parentAlias": "user",
     "name": "Admin",
-    "createdAt": "2022-02-25T07:11:47.364Z",
-    "updatedAt": "2022-02-25T07:11:47.364Z"
+    "createdAt": "2022-02-25T07:11:47.364Z"
   }
 ]
