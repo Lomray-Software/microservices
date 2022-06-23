@@ -88,7 +88,7 @@ const createOrUpdateMethods = (methods: Method[]): void => {
     const keepActual = _.intersectionBy(dumpMethods, msMethods, uniqueKey);
     const merged = _.merge(_.keyBy(keepActual, uniqueKey), _.keyBy(msMethods, uniqueKey));
     const values = _.values(merged)
-      .map((f) => _.omit(f, ['id', 'modelInId', 'modelOutId', 'conditionId']))
+      .map((f) => _.omit(f, ['id', 'modelInId', 'modelOutId', 'conditionId', 'updatedAt']))
       .map(({ modelIn, modelOut, methodFilters, condition, ...method }) => ({
         ...method,
         modelIn: modelIn?.alias,
