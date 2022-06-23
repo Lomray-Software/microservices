@@ -4,29 +4,20 @@
     "method": "user.view",
     "description": "Returns User by given condition",
     "allowGroup": [
-      "user",
-      "admin"
+      "user"
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.363Z",
     "modelIn": "ViewRequestParams",
     "modelOut": "users.ViewOutputParams.7c0210cc643ff04cde41d75273968a95",
-    "methodFilters": [
-      {
-        "filterTitle": "By user id",
-        "operator": "only",
-        "roleAlias": "user",
-        "createdAt": "2022-03-15T06:16:55.264Z"
-      }
-    ]
+    "methodFilters": []
   },
   {
     "microservice": "users",
     "method": "user.update",
     "description": "Update User by given condition",
     "allowGroup": [
-      "user",
-      "admin"
+      "user"
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.363Z",
@@ -46,8 +37,7 @@
     "method": "user.me",
     "description": "Returns User by given condition",
     "allowGroup": [
-      "user",
-      "admin"
+      "user"
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.363Z",
@@ -67,29 +57,20 @@
     "method": "profile.view",
     "description": "Returns Profile by given condition",
     "allowGroup": [
-      "user",
-      "admin"
+      "user"
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.363Z",
     "modelIn": "ViewRequestParams",
     "modelOut": "users.ViewOutputParams.a2f2a5d70288c017f302f33f61069b9b",
-    "methodFilters": [
-      {
-        "filterTitle": "By userId",
-        "operator": "only",
-        "roleAlias": "user",
-        "createdAt": "2022-03-15T06:17:23.698Z"
-      }
-    ]
+    "methodFilters": []
   },
   {
     "microservice": "users",
     "method": "profile.update",
     "description": "Update Profile by given condition",
     "allowGroup": [
-      "user",
-      "admin"
+      "user"
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.363Z",
@@ -109,7 +90,6 @@
     "method": "user.change-login",
     "description": "Change user login",
     "allowGroup": [
-      "user",
       "admin"
     ],
     "denyGroup": [],
@@ -123,7 +103,6 @@
     "method": "user.sign-up",
     "description": "Sign up user",
     "allowGroup": [
-      "guest",
       "admin"
     ],
     "denyGroup": [],
@@ -187,8 +166,7 @@
     "method": "user.sign-out",
     "description": "Sign out user",
     "allowGroup": [
-      "user",
-      "admin"
+      "user"
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.363Z",
@@ -201,8 +179,7 @@
     "method": "identity-provider.sign-in",
     "description": "Sign in user through identity provider",
     "allowGroup": [
-      "guest",
-      "admin"
+      "guest"
     ],
     "denyGroup": [
       "user"
@@ -256,7 +233,6 @@
     "method": "confirm-code.send",
     "description": "Send confirm code",
     "allowGroup": [
-      "guest",
       "admin"
     ],
     "denyGroup": [],
@@ -270,8 +246,7 @@
     "method": "identity-provider.attach",
     "description": "Attach new identity provider to existing user",
     "allowGroup": [
-      "user",
-      "admin"
+      "user"
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.363Z",
@@ -297,8 +272,7 @@
     "method": "user.sign-in",
     "description": "Sign in user",
     "allowGroup": [
-      "guest",
-      "admin"
+      "guest"
     ],
     "denyGroup": [
       "user"
@@ -339,7 +313,6 @@
     "method": "user.change-password",
     "description": "Change user password",
     "allowGroup": [
-      "user",
       "admin"
     ],
     "denyGroup": [],
@@ -366,12 +339,14 @@
     "method": "user.list",
     "description": "Returns list of User by given condition",
     "allowGroup": [
+      "user",
       "admin"
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.363Z",
     "modelIn": "ListRequestParams",
     "modelOut": "users.ListOutputParams.b2550b7a4ea7d332a31180f22cc0912b",
+    "condition": "Get list with query condition",
     "methodFilters": []
   },
   {

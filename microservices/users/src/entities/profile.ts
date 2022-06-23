@@ -61,6 +61,12 @@ class Profile {
   @DeleteDateColumn()
   deletedAt: Date;
 
+  @Column({ type: 'varchar', length: 255, default: null })
+  @Length(1, 255)
+  @IsNullable()
+  @IsUndefinable()
+  location: null | string;
+
   @OneToOne('User', 'profile')
   @JoinColumn()
   user: User;

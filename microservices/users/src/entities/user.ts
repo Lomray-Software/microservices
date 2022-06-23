@@ -1,5 +1,5 @@
 import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, Length, IsEmail, IsMobilePhone, IsString } from 'class-validator';
+import { Allow, Length, IsEmail, IsMobilePhone, IsString, Matches } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -80,6 +80,14 @@ class User {
   @IsTypeormDate()
   @DeleteDateColumn()
   deletedAt: Date | null;
+
+  @Column({ type: 'varchar', length: 50, default: null, unique: true })
+  @Length(1, 70)
+  @Matches(/^[a-z0-9_.]+$/, {
+    message: 'Username must be lower case and contains only: letters numbers _ .',
+  })
+  @IsUndefinable()
+  username: string;
 
   @OneToOne(() => Profile, (profile) => profile.user)
   profile: Profile;
