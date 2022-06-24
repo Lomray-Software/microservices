@@ -10,7 +10,14 @@
     "createdAt": "2022-04-14T05:34:31.363Z",
     "modelIn": "ViewRequestParams",
     "modelOut": "users.ViewOutputParams.7c0210cc643ff04cde41d75273968a95",
-    "methodFilters": []
+    "methodFilters": [
+      {
+        "filterTitle": "By user id",
+        "operator": "only",
+        "roleAlias": "user",
+        "createdAt": "2022-03-15T06:16:55.264Z"
+      }
+    ]
   },
   {
     "microservice": "users",
@@ -63,7 +70,14 @@
     "createdAt": "2022-04-14T05:34:31.363Z",
     "modelIn": "ViewRequestParams",
     "modelOut": "users.ViewOutputParams.a2f2a5d70288c017f302f33f61069b9b",
-    "methodFilters": []
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "only",
+        "roleAlias": "user",
+        "createdAt": "2022-03-15T06:17:23.698Z"
+      }
+    ]
   },
   {
     "microservice": "users",

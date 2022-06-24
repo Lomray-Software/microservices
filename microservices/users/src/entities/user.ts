@@ -26,6 +26,14 @@ class User {
   @Allow()
   id: string;
 
+  @Column({ type: 'varchar', length: 50, default: null, unique: true })
+  @Length(1, 70)
+  @Matches(/^[a-z0-9_.]+$/, {
+    message: 'Username must be lower case and contains only: letters numbers _ .',
+  })
+  @IsUndefinable()
+  username: string;
+
   @Column({ type: 'varchar', length: 25 })
   @Length(1, 25)
   firstName: string;
@@ -80,14 +88,6 @@ class User {
   @IsTypeormDate()
   @DeleteDateColumn()
   deletedAt: Date | null;
-
-  @Column({ type: 'varchar', length: 50, default: null, unique: true })
-  @Length(1, 70)
-  @Matches(/^[a-z0-9_.]+$/, {
-    message: 'Username must be lower case and contains only: letters numbers _ .',
-  })
-  @IsUndefinable()
-  username: string;
 
   @OneToOne(() => Profile, (profile) => profile.user)
   profile: Profile;

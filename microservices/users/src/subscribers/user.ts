@@ -15,7 +15,7 @@ class User implements EntitySubscriberInterface<UserEntity> {
 
   /**
    * 1. Also create profile when we create new user
-   * 2. Add username
+   * 2. Generate username
    */
   afterInsert(event: InsertEvent<UserEntity>): Promise<[UpdateResult, Profile]> {
     const profileRepository = event.manager.getRepository(Profile);

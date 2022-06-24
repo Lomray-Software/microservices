@@ -48,6 +48,12 @@ class Profile {
   @IsUndefinable()
   photo: null | string;
 
+  @Column({ type: 'varchar', length: 255, default: null })
+  @Length(1, 255)
+  @IsNullable()
+  @IsUndefinable()
+  location: null | string;
+
   @Column({ type: 'json', default: {} })
   @IsObject()
   @IsUndefinable()
@@ -60,12 +66,6 @@ class Profile {
   @IsTypeormDate()
   @DeleteDateColumn()
   deletedAt: Date;
-
-  @Column({ type: 'varchar', length: 255, default: null })
-  @Length(1, 255)
-  @IsNullable()
-  @IsUndefinable()
-  location: null | string;
 
   @OneToOne('User', 'profile')
   @JoinColumn()
