@@ -14,12 +14,19 @@ class User implements EntitySubscriberInterface<UserEntity> {
   }
 
   /**
-   * Also create profile when we create new user
+   * 1. Also create profile when we create new user
+   * 2. Generate username
    */
-  afterInsert(event: InsertEvent<UserEntity>): Promise<Profile> {
+  afterInsert(event: InsertEvent<UserEntity>): Promise<[UpdateResult, Profile]> {
     const profileRepository = event.manager.getRepository(Profile);
+    const userRepository = event.manager.getRepository(UserEntity);
 
-    return profileRepository.save(profileRepository.create({ userId: event.entity.id }));
+    const { id } = event.entity;
+
+    return Promise.all([
+      userRepository.update({ id }, { username: id.replace(/-/g, '') }),
+      profileRepository.save(profileRepository.create({ userId: id })),
+    ]);
   }
 
   /**

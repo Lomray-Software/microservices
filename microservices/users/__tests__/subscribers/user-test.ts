@@ -23,15 +23,18 @@ describe('subscribers/user', () => {
     expect(target).to.equal(User);
   });
 
-  it('should create profile after create new user', async () => {
+  it('should create profile & username after create new user', async () => {
     await subscriber.afterInsert({
       ...subscriptionEventInsert(),
       entity: mockUser,
     });
 
     const [, profile] = TypeormMock.entityManager.save.firstCall.args;
+    const [, userCriteria, userFields] = TypeormMock.entityManager.update.firstCall.args;
 
     expect(profile).to.deep.equal({ userId: mockUser.id });
+    expect(userFields.username).to.equal(mockUser.id.replace('-', ''));
+    expect(userCriteria.id).to.equal(mockUser.id);
   });
 
   it('should remove relations with user', async () => {

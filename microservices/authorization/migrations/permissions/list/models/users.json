@@ -104,6 +104,17 @@
           "admin": "allow"
         }
       },
+      "location": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow",
+          "guest": "allow"
+        }
+      },
       "user": "users.User"
     },
     "createdAt": "2022-04-14T05:34:31.363Z"
@@ -290,6 +301,17 @@
         },
         "out": {
           "admin": "allow"
+        }
+      },
+      "username": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow",
+          "guest": "allow"
         }
       },
       "profile": "users.Profile",
