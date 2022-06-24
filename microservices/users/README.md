@@ -41,6 +41,7 @@ This microservice provides mechanism for store/manage user data.
 - `FIREBASE_CREDENTIAL` - Firebase credential JSON string. Default: `{}`
 - `MS_GRAFANA_LOKI_CONFIG` - Grafana loki config. Default: `null`
 - `MS_ENABLE_GRAFANA_LOG` - Enable grafana loki log (config from configuration ms). Default: `0`
+- `ENABLE_EVENTS` - Enable events and watch for attachments microservice (update user photo by default). Default: `0`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.

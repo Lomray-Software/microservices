@@ -21,7 +21,7 @@ describe('services/confirm/phone', () => {
   });
 
   it('should successful send confirm code', async () => {
-    sandbox.stub(Api.notification, 'phoneSend').resolves(new MicroserviceResponse());
+    sandbox.stub(Api.notification.phone, 'send').resolves(new MicroserviceResponse());
 
     const isSuccess = await service.send(login);
 
@@ -35,7 +35,7 @@ describe('services/confirm/phone', () => {
   });
 
   it('should return false if send phone confirmation failed', async () => {
-    sandbox.stub(Api.notification, 'phoneSend').resolves(
+    sandbox.stub(Api.notification.phone, 'send').resolves(
       new MicroserviceResponse({
         error: new BaseException({ message: 'Failed send phone message' }),
       }),

@@ -23,7 +23,7 @@ describe('services/confirm/email', () => {
   });
 
   it('should successful send confirm code', async () => {
-    sandbox.stub(Api.notification, 'emailSend').resolves(new MicroserviceResponse());
+    sandbox.stub(Api.notification.email, 'send').resolves(new MicroserviceResponse());
 
     const isSuccess = await service.send(login);
 
@@ -37,7 +37,7 @@ describe('services/confirm/email', () => {
   });
 
   it('should return false if send email confirmation failed', async () => {
-    sandbox.stub(Api.notification, 'emailSend').resolves(
+    sandbox.stub(Api.notification.email, 'send').resolves(
       new MicroserviceResponse({
         error: new BaseException({ message: 'Failed send email message' }),
       }),

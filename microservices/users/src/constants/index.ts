@@ -29,6 +29,8 @@ const DB_ENV = {
 const FIREBASE_FROM_CONFIG_MS = Number(process.env.FIREBASE_FROM_CONFIG_MS ?? 1);
 const FIREBASE_CREDENTIAL = JSON.parse(process.env.FIREBASE_FROM_CONFIG_MS || '{}');
 
+const ENABLE_EVENTS = Number(process.env.ENABLE_EVENTS ?? 0);
+
 export {
   MS_NAME,
   MS_CONFIG_NAME,
@@ -49,4 +51,5 @@ export {
   SRC_FOLDER,
   MS_GRAFANA_LOKI_CONFIG,
   MS_ENABLE_GRAFANA_LOG,
+  ENABLE_EVENTS,
 };

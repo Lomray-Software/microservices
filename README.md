@@ -4,8 +4,8 @@
 ![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
-[![Build staging](https://github.com/Lomray-Software/microservices/actions/workflows/build.yml/badge.svg?branch=staging)](https://github.com/Lomray-Software/microservices/actions/workflows/build.yml)   
-[![Build prod](https://github.com/Lomray-Software/microservices/actions/workflows/build.yml/badge.svg?branch=prod)](https://github.com/Lomray-Software/microservices/actions/workflows/build.yml)
+Staging: [![Build staging](https://github.com/Lomray-Software/microservices/actions/workflows/build.yml/badge.svg?branch=staging)](https://github.com/Lomray-Software/microservices/actions/workflows/build.yml)   
+Prod: [![Build prod](https://github.com/Lomray-Software/microservices/actions/workflows/build.yml/badge.svg?branch=prod)](https://github.com/Lomray-Software/microservices/actions/workflows/build.yml)
 
 ## Microservices list:
  - [Gateway](microservices/gateway)
