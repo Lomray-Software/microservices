@@ -13,7 +13,7 @@ import Api from '@services/external/api';
  *
  * Update user photo if user attachment changed
  */
-const changed: IEventHandler<{ entity: IAttachmentEntity }> = async ({
+const attachmentEntityChanged: IEventHandler<{ entity: IAttachmentEntity }> = async ({
   entity,
   payload: { eventName } = {},
 }) => {
@@ -52,4 +52,4 @@ const changed: IEventHandler<{ entity: IAttachmentEntity }> = async ({
   return true;
 };
 
-export default changed;
+export default attachmentEntityChanged;

@@ -5,17 +5,17 @@ import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
 import Event from '@constants/event';
-import OriginalEventChangeAttachmentEntity from '@events/attachments/attachment-entity/changed';
+import OriginalEventChangeAttachmentEntity from '@events/user/attachment-entity-changed';
 import IAttachmentEntity from '@interfaces/microservices/attachments/entities/attachment-entity';
 import Api from '@services/external/api';
 
 const { default: ChangeAttachmentEntity } = rewiremock.proxy<{
   default: typeof OriginalEventChangeAttachmentEntity;
-}>(() => require('@events/attachments/attachment-entity/changed'), {
+}>(() => require('@events/user/attachment-entity-changed'), {
   typeorm: TypeormMock.mock,
 });
 
-describe('events/attachments/attachment-entity/changed', () => {
+describe('events/user/attachment-entity-changed', () => {
   const sandbox = sinon.createSandbox();
 
   beforeEach(() => {
