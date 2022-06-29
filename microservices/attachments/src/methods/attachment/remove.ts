@@ -27,7 +27,8 @@ const remove = Endpoint.custom(
   }),
   async ({ id }) => {
     const manager = getManager();
-    const attachment = await manager.getRepository(Attachment).findOne(id, { select: ['type'] });
+    // find the attachment to pass its type to the factory
+    const attachment = await manager.getRepository(Attachment).findOne(id);
 
     if (!attachment) {
       throw new BaseException({
@@ -39,7 +40,7 @@ const remove = Endpoint.custom(
     const service = await Factory.create(attachment.type, manager);
 
     return {
-      isRemoved: await service.remove(id),
+      isRemoved: await service.remove(attachment),
     };
   },
 );

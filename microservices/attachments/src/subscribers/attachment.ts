@@ -43,7 +43,9 @@ class Attachment implements EntitySubscriberInterface<AttachmentModel> {
    * 1. Trigger remove event
    */
   afterRemove(event: RemoveEvent<AttachmentModel>): void {
-    void Microservice.eventPublish(Event.AttachmentRemove, { entity: event.databaseEntity });
+    void Microservice.eventPublish(Event.AttachmentRemove, {
+      entity: { ...event.databaseEntity, ...event.entity },
+    });
   }
 
   /**

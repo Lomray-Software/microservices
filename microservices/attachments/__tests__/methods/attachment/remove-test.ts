@@ -73,6 +73,6 @@ describe('methods/attachment/remove', () => {
     expect(res).to.deep.equal({ isRemoved: true });
     expect(serviceParams?.[0]).to.be.equal(AttachmentType.image);
     expect(serviceParams?.[1]).to.deep.equal(TypeormMock.entityManager);
-    expect(sendStub).to.calledOnceWith(methodParams.id);
+    expect(sendStub).to.calledOnceWith(attachment);
   });
 });

@@ -33,20 +33,21 @@ class Image extends Abstract {
    * Update attachment
    * @inheritDoc
    */
-  public async update(
-    id: string,
-    file: string,
-    attachment: Attachment,
-    alt?: string,
-  ): Promise<Attachment> {
-    const { attachmentData, images } = await this.composeData(file, id);
+  public async update(attachment: Attachment, file?: string, alt?: string): Promise<Attachment> {
+    const { id } = attachment;
+    let attachmentData;
+    let images;
 
-    await this.storage.delete(this.getFilePath(id));
-    await this.uploadImages(images);
+    if (file) {
+      ({ attachmentData, images } = await this.composeData(file, id));
+
+      await this.storage.delete(this.getFilePath(id));
+      await this.uploadImages(images);
+    }
 
     return this.attachmentRepository.save({
       ...attachment,
-      ...attachmentData,
+      ...(attachmentData && { ...attachmentData }),
       ...(alt && { alt }),
     });
   }
@@ -55,9 +56,9 @@ class Image extends Abstract {
    * Delete attachment
    * @inheritDoc
    */
-  public async remove(id: string): Promise<boolean> {
-    await this.attachmentRepository.delete(id);
-    await this.storage.delete(this.getFilePath(id));
+  public async remove(attachment: Attachment): Promise<boolean> {
+    await this.attachmentRepository.remove(attachment);
+    await this.storage.delete(this.getFilePath(attachment.id));
 
     return true;
   }

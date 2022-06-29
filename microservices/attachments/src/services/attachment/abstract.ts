@@ -59,17 +59,12 @@ abstract class Abstract {
   /**
    * Update attachment
    */
-  public abstract update(
-    id: string,
-    file: string,
-    attachment: Attachment,
-    alt?: string,
-  ): Promise<Attachment>;
+  public abstract update(attachment: Attachment, file?: string, alt?: string): Promise<Attachment>;
 
   /**
    * Remove attachment
    */
-  public abstract remove(id: string): Promise<boolean>;
+  public abstract remove(attachment: Attachment): Promise<boolean>;
 
   /**
    * Get correct storage path

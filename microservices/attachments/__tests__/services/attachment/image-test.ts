@@ -2,6 +2,7 @@ import { RemoteConfig } from '@lomray/microservice-helpers';
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { expect } from 'chai';
 import sinon from 'sinon';
+import { getRepository } from 'typeorm';
 import AttachmentType from '@constants/attachment-type';
 import { IMAGE_CONFIG_FROM_CONFIG_MS, IMAGE_PROCESSING_CONFIG } from '@constants/index';
 import StorageType from '@constants/storage-type';
@@ -12,9 +13,9 @@ import StorageFactory from '@services/storage/factory';
 
 describe('services/attachment/image', () => {
   const BUCKET_NAME = 'bucket-name';
-  const attachmentData = {
+  const attachmentData = getRepository(Attachment).create({
     id: 'attachment_id',
-  };
+  });
 
   const sandbox = sinon.createSandbox();
 
@@ -66,19 +67,15 @@ describe('services/attachment/image', () => {
 
     sandbox.stub(storage, 'delete');
 
-    const isRemoved = await service.remove(attachmentData.id);
+    const isRemoved = await service.remove(attachmentData);
 
-    const [, attachmentId] = TypeormMock.entityManager.delete.firstCall.args;
+    const [, attachment] = TypeormMock.entityManager.remove.firstCall.args;
 
     expect(isRemoved).to.ok;
-    expect(attachmentId).to.deep.equal(attachmentData.id);
+    expect(attachment).to.deep.equal(attachmentData);
   });
 
   it('should successfully update image', async () => {
-    const attachment = {
-      id: attachmentData.id,
-    } as Attachment;
-
     TypeormMock.entityManager.save.resolves(attachmentData);
     sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: BUCKET_NAME } });
 
@@ -99,7 +96,7 @@ describe('services/attachment/image', () => {
 
     sandbox.stub(storage, 'delete');
 
-    const entity = await service.update(attachmentData.id, 'file', attachment);
+    const entity = await service.update(attachmentData, 'file');
 
     const [, attachmentEntity] = TypeormMock.entityManager.save.firstCall.args;
 

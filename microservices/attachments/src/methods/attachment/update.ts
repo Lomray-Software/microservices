@@ -14,10 +14,11 @@ class AttachmentUpdateInput {
 
   @Length(0, 50)
   @IsUndefinable()
-  alt: string;
+  alt?: string;
 
   @IsString()
-  file: string;
+  @IsUndefinable()
+  file?: string;
 }
 
 class AttachmentUpdateOutput {
@@ -37,6 +38,7 @@ const update = Endpoint.custom(
   }),
   async ({ id, file, alt }) => {
     const manager = getManager();
+    // find the attachment to pass its type to the factory
     const attachment = await manager.getRepository(Attachment).findOne(id);
 
     if (!attachment) {
@@ -49,7 +51,7 @@ const update = Endpoint.custom(
     const service = await Factory.create(attachment.type, manager);
 
     return {
-      entity: await AttachmentDomain.addDomain(await service.update(id, file, attachment, alt)),
+      entity: await AttachmentDomain.addDomain(await service.update(attachment, file, alt)),
     };
   },
 );
