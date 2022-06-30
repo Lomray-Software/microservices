@@ -57,8 +57,14 @@ class Image extends Abstract {
    * @inheritDoc
    */
   public async remove(attachment: Attachment): Promise<boolean> {
+    const { id } = attachment;
+
+    if (!id) {
+      return false;
+    }
+
     await this.attachmentRepository.remove(attachment);
-    await this.storage.delete(this.getFilePath(attachment.id));
+    await this.storage.delete(this.getFilePath(id));
 
     return true;
   }
