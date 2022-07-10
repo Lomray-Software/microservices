@@ -39,7 +39,7 @@ describe('events/user/attachment-removed', () => {
     userId: null,
     type: 'image',
     alt: '',
-    formats: {},
+    formats: {} as IAttachment['formats'],
     meta: {
       mime: '',
       hasWebp: false,

@@ -1,7 +1,7 @@
 import { Log } from '@lomray/microservice-helpers';
 import type { IGatewayOptions, IGatewayParams } from '@lomray/microservice-nodejs-lib';
 import { ConsoleLogDriver, LogType } from '@lomray/microservice-nodejs-lib';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import _ from 'lodash';
 import RequestIp from 'request-ip';
 import {
@@ -35,7 +35,7 @@ const msOptions: Partial<IGatewayOptions> = {
  */
 const msParams: Partial<IGatewayParams> = {
   beforeRoute: (express) => {
-    const corsConfig = MS_CORS_CONFIG;
+    const corsConfig = MS_CORS_CONFIG as CorsOptions;
 
     // Check origin's and find regex
     if (Array.isArray(corsConfig.origin)) {

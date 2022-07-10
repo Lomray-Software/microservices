@@ -1,5 +1,5 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { IJsonQueryWhere } from '@lomray/typeorm-json-query';
+import { IJsonQueryWhere } from '@lomray/microservices-types';
 import { Allow, Length, IsObject } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {

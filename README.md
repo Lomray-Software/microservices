@@ -65,7 +65,3 @@ see example requests in file `requests.http`
 cd tests
 npm run test
 ```
-
-## TODO
-- [ ] Add api service generator (backend) (generate api service for microservices based on metadata endpoint)
-- [ ] Add api service generator (frontend)

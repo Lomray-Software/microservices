@@ -1,4 +1,4 @@
-import { IJsonQueryWhere } from '@lomray/typeorm-json-query';
+import { IJsonQueryWhere } from '@lomray/microservices-types';
 import _ from 'lodash';
 import { FilterOperator } from '@constants/filter';
 import Filter from '@entities/filter';
@@ -130,7 +130,7 @@ class MethodFilters {
     const simpleTypeNames: string[] = [];
     const resultVariables = {};
 
-    for (const [name, value] of Object.entries(variables)) {
+    for (const [name, value] of Object.entries<Record<string, any>>(variables)) {
       const variableType = typeof value;
 
       if (['number', 'boolean', 'bigint'].includes(variableType) || value === null) {

@@ -1,4 +1,5 @@
 import type { Microservice } from '@lomray/microservice-nodejs-lib';
+import { IEndpointHandler } from '@lomray/microservice-nodejs-lib';
 import CrudCondition from '@methods/condition/crud';
 import CrudEndpointFilter from '@methods/endpoint-filter/crud';
 import CrudEndpoint from '@methods/endpoint/crud';
@@ -30,7 +31,7 @@ export default (ms: Microservice): void => {
    * CRUD methods
    */
   Object.entries(crud).forEach(([endpoint, crudMethods]) => {
-    Object.entries(crudMethods).forEach(([method, handler]) => {
+    Object.entries<IEndpointHandler>(crudMethods).forEach(([method, handler]) => {
       ms.addEndpoint(`${endpoint}.${method}`, handler);
     });
   });

@@ -1,6 +1,6 @@
-import type { IRelation } from '@lomray/typeorm-json-query';
+import type { IEntity } from '@lomray/microservices-types';
 
-interface IAttachmentEntity extends IRelation {
+interface IAttachmentEntity extends IEntity {
   id: string;
   entityId: string;
   attachmentId: string;

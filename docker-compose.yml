@@ -2,6 +2,7 @@ version: '3.7'
 
 services:
   ijson:
+    # ~ 70 MB memory
     image: lega911/ijson
     container_name: ijson
     ports:

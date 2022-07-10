@@ -4,7 +4,7 @@ import {
   IsNullable,
   IsUndefinable,
 } from '@lomray/microservice-helpers';
-import type { IJsonQuery } from '@lomray/typeorm-json-query';
+import type { IJsonQuery } from '@lomray/microservices-types';
 import { Type } from 'class-transformer';
 import { IsArray, IsBoolean, IsObject, IsString } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';

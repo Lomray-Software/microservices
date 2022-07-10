@@ -78,7 +78,7 @@ class MethodsImporter {
    */
   public async import(): Promise<IMethodsImporterResult> {
     const availableMs = await this.ms.lookup(true);
-    const result = {};
+    const result: IMethodsImporterResult = {};
 
     for (const msName of availableMs) {
       try {
@@ -92,7 +92,7 @@ class MethodsImporter {
               msMetaResponse.getError()?.message ?? ''
             }`,
           };
-          Log.error(result[msName].error, msMetaResponse.getError());
+          Log.error(result[msName].error as string, msMetaResponse.getError());
           continue;
         }
 
@@ -109,7 +109,7 @@ class MethodsImporter {
         result[msName] = { isSuccess: true };
       } catch (e) {
         result[msName] = { error: "Microservice meta endpoint doesn't exist." };
-        Log.error(result[msName].error, e);
+        Log.error(result[msName].error as string, e);
       }
     }
 
@@ -287,7 +287,7 @@ class MethodsImporter {
     const schema = Object.entries(entitySchema.properties ?? {}).reduce(
       (res, [fieldName, fieldSchema]) => {
         if (schemaParams?.[fieldName]) {
-          const alias = Array.isArray(schemaParams[fieldName])
+          const alias: string = Array.isArray(schemaParams[fieldName])
             ? schemaParams[fieldName][0]
             : schemaParams[fieldName];
 
@@ -303,7 +303,10 @@ class MethodsImporter {
           !fieldSchema.$ref.endsWith('/Function')
         ) {
           // this field should be related to another schema (nested model)
-          const [alias, uniqueAlias] = this.getRefSchemaAlias(fieldSchema.$ref, microservice);
+          const [alias, uniqueAlias] = this.getRefSchemaAlias(
+            fieldSchema.$ref as string,
+            microservice,
+          );
 
           res[fieldName] = uniqueAlias;
 

@@ -1,7 +1,7 @@
 import { Log } from '@lomray/microservice-helpers';
 import type { AbstractMicroservice } from '@lomray/microservice-nodejs-lib';
-import type { IJsonQuery } from '@lomray/typeorm-json-query';
-import { IJsonQueryJunction } from '@lomray/typeorm-json-query';
+import type { IJsonQuery } from '@lomray/microservices-types';
+import { JQJunction } from '@lomray/microservices-types';
 import _ from 'lodash';
 
 interface IConditionRequest {
@@ -34,10 +34,10 @@ export interface ICondition {
 
 export type IConditions =
   | {
-      [IJsonQueryJunction.and]?: IConditions[];
+      [JQJunction.and]?: IConditions[];
     }
   | {
-      [IJsonQueryJunction.or]?: IConditions[];
+      [JQJunction.or]?: IConditions[];
     }
   | ICondition;
 
@@ -134,17 +134,14 @@ class ConditionChecker {
    * Map junction conditions
    * @private
    */
-  private async mapConditions(
-    operator: IJsonQueryJunction,
-    conditions: IConditions[],
-  ): Promise<boolean> {
+  private async mapConditions(operator: JQJunction, conditions: IConditions[]): Promise<boolean> {
     let isAllow = false;
 
     for (const condition of conditions) {
       isAllow = await this.execConditions(condition);
 
       // return result immediately, skip other conditions in this part
-      if (isAllow && operator === IJsonQueryJunction.or) {
+      if (isAllow && operator === JQJunction.or) {
         return isAllow;
       }
     }
@@ -160,9 +157,9 @@ class ConditionChecker {
 
     for (const [operator, condition] of Object.entries(conditions)) {
       switch (operator) {
-        case IJsonQueryJunction.and:
-        case IJsonQueryJunction.or:
-          isAllow = await this.mapConditions(operator, condition);
+        case JQJunction.and:
+        case JQJunction.or:
+          isAllow = await this.mapConditions(operator, condition as IConditions[]);
           break;
 
         default:

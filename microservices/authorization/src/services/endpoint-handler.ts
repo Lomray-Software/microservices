@@ -1,5 +1,5 @@
 import type { AbstractMicroservice } from '@lomray/microservice-nodejs-lib';
-import type { IJsonQuery } from '@lomray/typeorm-json-query';
+import type { IJsonQuery } from '@lomray/microservices-types';
 import { getRepository } from 'typeorm';
 import { FilterType } from '@constants/filter';
 import { MS_DEFAULT_ROLE_ALIAS } from '@constants/index';

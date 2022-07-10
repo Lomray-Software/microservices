@@ -80,7 +80,7 @@ class IdentifyAuthToken {
    * @private
    */
   public static getCookieAuth(headers?: Record<string, any>): string | undefined {
-    const cookies = headers?.cookie;
+    const cookies: string | undefined = headers?.cookie;
 
     if (!cookies) {
       return undefined;

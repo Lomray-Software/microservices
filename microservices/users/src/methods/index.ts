@@ -1,4 +1,4 @@
-import type { Microservice } from '@lomray/microservice-nodejs-lib';
+import type { IEndpointHandler, Microservice } from '@lomray/microservice-nodejs-lib';
 import ConfirmCodeSend from '@methods/confirm-code/send';
 import IdentityProviderAttach from '@methods/identity-provider/attach';
 import CrudIdentityProvider from '@methods/identity-provider/crud';
@@ -27,7 +27,7 @@ export default (ms: Microservice): void => {
    * CRUD methods
    */
   Object.entries(crud).forEach(([endpoint, crudMethods]) => {
-    Object.entries(crudMethods).forEach(([method, handler]) => {
+    Object.entries<IEndpointHandler>(crudMethods).forEach(([method, handler]) => {
       ms.addEndpoint(`${endpoint}.${method}`, handler);
     });
   });

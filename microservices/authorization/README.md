@@ -88,4 +88,4 @@ For sync dumped permissions with db, run: `npm run sync:permissions`
 ### <a id="memory-usage"></a>MEMORY USAGE:
 __Run on typescript__: ~205 MB PEAK / ~181 MB  
 __Run on JS__: ~33 MB PEAK / ~26 MB
-__AWS Memory__: ~70 MB
+__AWS Memory__: ~100 MB

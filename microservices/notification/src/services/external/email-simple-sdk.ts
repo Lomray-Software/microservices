@@ -1,5 +1,6 @@
 import { RemoteConfig } from '@lomray/microservice-helpers';
 import nodemailer from 'nodemailer';
+import type SMTPConnection from 'nodemailer/lib/smtp-connection';
 
 class EmailSimpleSdk {
   /**
@@ -33,7 +34,7 @@ class EmailSimpleSdk {
     if (!this.hasInit) {
       const { defaultFrom, isFromConfigMs, options = '{}' } = params;
 
-      let transportOptions;
+      let transportOptions: SMTPConnection.Options;
       let defaultEmailFrom;
 
       if (isFromConfigMs) {

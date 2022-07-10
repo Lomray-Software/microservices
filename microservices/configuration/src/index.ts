@@ -9,6 +9,8 @@ import {
   MS_INIT_MIDDLEWARES,
   MS_ENABLE_GRAFANA_LOKI_LOG,
 } from '@constants/index';
+import Config from '@entities/config';
+import Middleware from '@entities/middleware';
 import registerMethods from '@methods/index';
 import ConfigRepository from '@repositories/config-repository';
 import MiddlewareRepository from '@repositories/middleware-repository';
@@ -40,11 +42,13 @@ export default startWithDb({
       ]);
 
       if (!configExist) {
-        await configRepository.bulkSave(JSON.parse(MS_INIT_CONFIGS));
+        await configRepository.bulkSave(JSON.parse(MS_INIT_CONFIGS) as Partial<Config>[]);
       }
 
       if (!middlewareExist) {
-        await middlewareRepository.bulkSave(JSON.parse(MS_INIT_MIDDLEWARES));
+        await middlewareRepository.bulkSave(
+          JSON.parse(MS_INIT_MIDDLEWARES) as Partial<Middleware>[],
+        );
       }
 
       if (MS_ENABLE_GRAFANA_LOKI_LOG) {
