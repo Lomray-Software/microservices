@@ -42,7 +42,7 @@
 		"sync:permissions": "node --require ts-node/register migrations/permissions/sync.ts"
 	},
 	"dependencies": {
-    "@lomray/microservice-helpers": "^1.5.0",
+    "@lomray/microservice-helpers": "^1.8.0",
     "@lomray/microservice-nodejs-lib": "^2.9.0",
     "@lomray/microservice-remote-middleware": "^1.6.1",
 		"@lomray/typeorm-json-query": "^1.2.0",

@@ -103,6 +103,7 @@ describe('services/method-filters', () => {
       }),
     ]);
 
+    // @ts-ignore
     const datetimeFilled = filters?.and?.[1].datetime;
 
     expect(datetimeFilled.split('T')[0]).to.equal(new Date().toISOString().split('T')[0]);
