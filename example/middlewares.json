@@ -10,7 +10,7 @@
     "params": {
       "type": "request",
       "isRequired": true,
-      "maxValueSize": "100",
+      "maxValueSize": 100,
       "exclude": [
         "users.user.sign-in",
         "users.identity-provider.sign-in",
