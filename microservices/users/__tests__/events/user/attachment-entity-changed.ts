@@ -6,7 +6,7 @@ import rewiremock from 'rewiremock';
 import sinon from 'sinon';
 import Event from '@constants/event';
 import OriginalEventChangeAttachmentEntity from '@events/user/attachment-entity-changed';
-import IAttachmentEntity from '@interfaces/microservices/attachments/entities/attachment-entity';
+import type IAttachmentEntity from '@interfaces/microservices/attachments/entities/attachment-entity';
 import Api from '@services/external/api';
 
 const { default: ChangeAttachmentEntity } = rewiremock.proxy<{

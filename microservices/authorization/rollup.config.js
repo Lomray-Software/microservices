@@ -6,6 +6,7 @@ const config = {
   external: [
     ...rootConfig.external,
     'fs',
+    '@lomray/microservices-types',
   ],
   plugins: [
     ...rootConfig.plugins,

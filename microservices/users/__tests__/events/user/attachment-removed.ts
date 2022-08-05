@@ -5,7 +5,7 @@ import rewiremock from 'rewiremock';
 import sinon from 'sinon';
 import OriginalEventChangeAttachment from '@events/user/attachment-removed';
 import { IAttachment } from '@interfaces/microservices/attachments/entities/attachment';
-import IAttachmentEntity from '@interfaces/microservices/attachments/entities/attachment-entity';
+import type IAttachmentEntity from '@interfaces/microservices/attachments/entities/attachment-entity';
 
 const { default: RemoveAttachment } = rewiremock.proxy<{
   default: typeof OriginalEventChangeAttachment;

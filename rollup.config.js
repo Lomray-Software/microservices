@@ -13,7 +13,6 @@ const config = {
   output: {
     dir: 'lib',
     format: 'cjs',
-    sourcemap: true,
     preserveModules: true,
     preserveModulesRoot: 'src',
     exports: 'auto',
@@ -36,6 +35,8 @@ const config = {
         ...resolvedConfig,
         declaration: true,
         importHelpers: true,
+        sourceMap: true,
+        inlineSources: true,
         plugins: [
           {
             "transform": "@zerollup/ts-transform-paths",
