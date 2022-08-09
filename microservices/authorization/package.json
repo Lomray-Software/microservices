@@ -42,9 +42,9 @@
 		"sync:permissions": "node --require ts-node/register migrations/permissions/sync.ts"
 	},
 	"dependencies": {
-    "@lomray/microservice-helpers": "^1.9.0",
+    "@lomray/microservice-helpers": "^1.10.0",
     "@lomray/microservice-nodejs-lib": "^2.9.0",
-    "@lomray/microservice-remote-middleware": "^1.7.0",
+    "@lomray/microservice-remote-middleware": "^1.7.1",
 		"@lomray/typeorm-json-query": "^1.2.0",
 		"class-transformer": "0.4.1",
 		"class-validator": "^0.13.2",
