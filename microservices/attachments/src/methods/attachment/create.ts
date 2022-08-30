@@ -20,7 +20,7 @@ class AttachmentCreateInput {
   alt: string;
 
   @IsString()
-  file: string;
+  file: string; // base64 string
 }
 
 class AttachmentCreateOutput {

@@ -1,12 +1,12 @@
+import { FirebaseSdk } from '@lomray/microservice-helpers';
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
-import FirebaseSdk from '@lomray/microservice-helpers/services/firebase-sdk';
-import type { TFirebaseAdmin } from '@lomray/microservice-helpers/services/firebase-sdk';
 import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import IdProvider from '@constants/id-provider';
 import Profile from '@entities/profile';
 import User from '@entities/user';
+import type { TFirebaseAdmin } from '@services/external/firebase-sdk';
 import Firebase from '@services/identity-provider/firebase';
 
 describe('services/sign-up', () => {

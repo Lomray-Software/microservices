@@ -42,17 +42,13 @@
 	},
 	"dependencies": {
 		"@aws-sdk/client-ses": "^3.112.0",
-    "@lomray/microservice-helpers": "^1.10.0",
-    "@lomray/microservice-nodejs-lib": "^2.9.0",
-    "@lomray/microservice-remote-middleware": "^1.7.1",
+    "@lomray/microservice-helpers": "^1.11.0",
 		"class-transformer": "0.4.1",
 		"class-validator": "^0.13.2",
 		"class-validator-jsonschema": "^3.1.1",
 		"nodemailer": "^6.7.5",
-		"pg": "^8.7.3",
-		"typeorm": "0.2.41",
-		"typeorm-extension": "1.2.1"
-	},
+    "typeorm": "0.2.41"
+  },
 	"devDependencies": {
 		"@types/nodemailer": "^6.4.4"
 	}
