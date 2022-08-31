@@ -3,10 +3,10 @@ import rootConfig from '../../rollup.config';
 
 const config = {
   ...rootConfig,
+  input: [...rootConfig.input, 'migrations/permissions/*.ts'],
   external: [
     ...rootConfig.external,
     'fs',
-    '@lomray/microservices-types',
   ],
   plugins: [
     ...rootConfig.plugins,

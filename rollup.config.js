@@ -17,7 +17,7 @@ const config = {
     preserveModulesRoot: 'src',
     exports: 'auto',
   },
-  external: ['crypto'],
+  external: ['crypto', '@lomray/microservice-nodejs-lib', '@lomray/microservices-types'],
   plugins: [
     replace({
       preventAssignment: true,
