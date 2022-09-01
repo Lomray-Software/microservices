@@ -10,6 +10,7 @@ import {
   MS_CONNECTION_SRV,
   MS_CORS_CONFIG,
   MS_INFO_ROUTE,
+  MS_JSON_LIMIT,
   MS_LISTENER_PORT,
   MS_NAME,
   MS_REQ_TIMEOUT,
@@ -28,6 +29,9 @@ const msOptions: Partial<IGatewayOptions> = {
   reqTimeout: MS_REQ_TIMEOUT,
   listener: `0.0.0.0:${MS_LISTENER_PORT}`,
   version,
+  jsonParams: {
+    limit: `${MS_JSON_LIMIT}mb`,
+  },
 };
 
 /**
