@@ -109,7 +109,7 @@
         "userId": "$result.user.id",
         "params": "$task.params.payload.headers.user-info",
         "jwtPayload.roles": "$rolesResp.roles",
-        "returnType": "<%= _.get(task, 'params.payload.headers.user-info.authType', 'cookies') %>"
+        "returnType": "<%= _.get(task, \"params.payload.headers.user-info.authType\", \"cookies\") %>"
       },
       "convertResult": {
         "payload.cookies": "$middleware.payload.cookies",
@@ -144,7 +144,7 @@
         "userId": "$result.user.id",
         "params": "$task.params.payload.headers.user-info",
         "jwtPayload.roles": "$rolesResp.roles",
-        "returnType": "<%= _.get(task, 'params.payload.headers.user-info.authType', 'cookies') %>"
+        "returnType": "<%= _.get(task, \"params.payload.headers.user-info.authType\", \"cookies\") %>"
       },
       "convertResult": {
         "payload.cookies": "$middleware.payload.cookies",
@@ -179,7 +179,7 @@
         "userId": "$result.user.id",
         "params": "$task.params.payload.headers.user-info",
         "jwtPayload.roles": "$rolesResp.roles",
-        "returnType": "<%= _.get(task, 'params.payload.headers.user-info.authType', 'cookies') %>"
+        "returnType": "<%= _.get(task, \"params.payload.headers.user-info.authType\", \"cookies\") %>"
       },
       "convertResult": {
         "payload.cookies": "$middleware.payload.cookies",
