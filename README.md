@@ -16,26 +16,42 @@ Prod: [![Build prod](https://github.com/Lomray-Software/microservices/actions/wo
  - [Users](microservices/users)
  - [Attachments](microservices/attachments)
  
-Use `npm run create-microservice name` for create new microservice from template.
+Use `npm run create-microservice your-ms-name` for create new microservice from template.
 
 ## How to start
-Use [docker-compose](docker-compose.yml) to run all in one command (`docker-compose up`) or:
 
-1. Run `Inverted Json` job server.
+### Method 1:
+Use docker to run all in one command:
 ```bash
-docker run -it -p 8001:8001 lega911/ijson --log 47
+docker-compose -f docker-compose.yml -f docker-compose.ms.yml up
 ```
-2. Run `gateway` microservice.
+
+### Method 2
+1. Run `Inverted Json` job server and `postgres` database.
 ```bash
-docker run -it -p 8001:8001 ghcr.io/lomray-software/microservices/gateway:latest-staging
+docker-compose up
 ```
-3. Run other needed microservices (the same actions as in step 2, just replace docker image).
-4. That is all. Check it:
+2. Run `configuration` microservice.
+ - Through docker:
+```bash
+docker-compose -f docker-compose.ms.yml up configuration
+```
+ - Through node:
+```bash
+cd microservices/configuration
+npm i
+npm run start:dev
+```
+3. Run other needed microservices (the same actions as in step 2).
+
+#### **That is all. Check it:**
 ```bash
 curl -X POST http://127.0.0.1:3000
    -H 'Content-Type: application/json'
    -d '{"id":"unique-id-1","method":"microservice-name.method","params":{}}'
 ```
+
+see example requests in `http-requests` folder
 
 [Chek all available microservices](https://github.com/orgs/Lomray-Software/packages?repo_name=microservices)   
 
@@ -46,17 +62,6 @@ npm i --save @lomray/microservice-NAME
 # for e.g.
 npm i --save @lomray/microservice-configuration
 ```
-
-## Complete example
-
-Just run:
-```bash
-git clone git@github.com:Lomray-Software/microservices.git
-cd example
-docker-compose up
-```
-
-see example requests in file `requests.http`
 
 ## Integration tests
 1. Run all microservices
