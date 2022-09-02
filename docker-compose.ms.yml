@@ -17,18 +17,23 @@ services:
       - "3000:3000"
     depends_on:
       - configuration
+    environment:
+      MS_CONNECTION: http://ijson:8001
 
   authentication:
     image: ghcr.io/lomray-software/microservices/authentication:latest-staging
     container_name: authentication
     depends_on:
       - configuration
+    environment:
+      MS_CONNECTION: http://ijson:8001
 
   authorization:
     image: ghcr.io/lomray-software/microservices/authorization:latest-staging
     container_name: authorization
     environment:
       MS_DEFAULT_PERMISSION_MIGRATION: 1
+      MS_CONNECTION: http://ijson:8001
     depends_on:
       - configuration
 
@@ -37,9 +42,13 @@ services:
     container_name: notification
     depends_on:
       - configuration
+    environment:
+      MS_CONNECTION: http://ijson:8001
 
   users:
     image: ghcr.io/lomray-software/microservices/users:latest-staging
     container_name: users
     depends_on:
       - configuration
+    environment:
+      MS_CONNECTION: http://ijson:8001
