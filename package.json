@@ -36,6 +36,7 @@
 		"global-update-package": "./operations.sh global-update-package",
 		"lint-staged": "./operations.sh lint-staged",
 		"semantic-release": "./operations.sh semantic-release",
+    "dotenv-update": "node operations.js update-dotenv",
 		"prepare": "husky install"
 	},
 	"devDependencies": {
