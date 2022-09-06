@@ -191,7 +191,7 @@ class MethodsImporter {
       methodEntity.description = description || methodEntity.description;
       methodEntity.modelInId = modelInId ?? null;
       methodEntity.modelOutId = modelOutId ?? null;
-      methodEntity.allowGroup = [...new Set([...methodEntity.allowGroup, ...(allowGroup ?? [])])];
+      methodEntity.allowGroup = [...new Set(methodEntity.allowGroup ?? allowGroup ?? [])];
     }
 
     await repository.save(methodEntity);

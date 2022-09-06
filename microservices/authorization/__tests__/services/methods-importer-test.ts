@@ -106,7 +106,7 @@ describe('services/methods-importer', () => {
       microservice: 'demo1',
       method: 'test.method',
       description: 'Should be updated',
-      allowGroup: ['user', 'admin'],
+      allowGroup: ['user'],
       modelInId: null,
       modelOutId: null,
     });
