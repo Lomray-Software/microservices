@@ -4,6 +4,7 @@ services:
   configuration:
     image: ghcr.io/lomray-software/microservices/configuration:latest-staging
     container_name: configuration
+    restart: always
     environment:
       DB_HOST: db
       MS_CONNECTION: $MS_CONNECTION
@@ -13,6 +14,7 @@ services:
   gateway:
     image: ghcr.io/lomray-software/microservices/gateway:latest-staging
     container_name: gateway
+    restart: always
     ports:
       - ${GATEWAY_PORT}:3000
     depends_on:
@@ -23,6 +25,7 @@ services:
   authentication:
     image: ghcr.io/lomray-software/microservices/authentication:latest-staging
     container_name: authentication
+    restart: always
     depends_on:
       - configuration
     environment:
@@ -31,6 +34,7 @@ services:
   authorization:
     image: ghcr.io/lomray-software/microservices/authorization:latest-staging
     container_name: authorization
+    restart: always
     environment:
       MS_DEFAULT_PERMISSION_MIGRATION: $MS_DEFAULT_PERMISSION_MIGRATION
       MS_CONNECTION: $MS_CONNECTION
@@ -40,6 +44,7 @@ services:
   notification:
     image: ghcr.io/lomray-software/microservices/notification:latest-staging
     container_name: notification
+    restart: always
     depends_on:
       - configuration
     environment:
@@ -48,6 +53,7 @@ services:
   users:
     image: ghcr.io/lomray-software/microservices/users:latest-staging
     container_name: users
+    restart: always
     depends_on:
       - configuration
     environment:
