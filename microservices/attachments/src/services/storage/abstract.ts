@@ -7,12 +7,12 @@ abstract class Abstract {
   /**
    * Upload file
    */
-  public abstract upload(key: string, buffer: Buffer, mime: string): Promise<void>;
+  public abstract upload(key: string, buffer: Buffer, mime: string): Promise<void> | void;
 
   /**
    * Delete files
    */
-  public abstract delete(key: string): Promise<void>;
+  public abstract delete(key: string): Promise<void> | void;
 
   /**
    * Get storage domain

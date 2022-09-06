@@ -7,6 +7,7 @@ import {
 } from '@constants/index';
 import StorageType from '@constants/storage-type';
 import S3AwsSdk from '@services/external/s3-aws-sdk';
+import LocalStorage from '@services/storage/local';
 import S3Storage from '@services/storage/s3';
 import Abstract from './abstract';
 
@@ -31,6 +32,9 @@ class Factory {
         });
 
         return new S3Storage({ s3, bucketName });
+
+      case StorageType.local:
+        return new LocalStorage();
     }
 
     throw new Error('Not implemented');
