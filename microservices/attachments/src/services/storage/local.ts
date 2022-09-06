@@ -3,7 +3,7 @@ import { LOCAL_STORAGE_PATH } from '@constants/index';
 import Abstract from './abstract';
 
 /**
- * S3 Storage service
+ * Local storage service
  */
 class LocalStorage extends Abstract {
   /**
@@ -14,7 +14,7 @@ class LocalStorage extends Abstract {
   }
 
   /**
-   * Upload file to S3
+   * Save file locally
    * @inheritDoc
    */
   public upload(key: string, buffer: Buffer): void {
