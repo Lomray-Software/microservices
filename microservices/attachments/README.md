@@ -48,6 +48,7 @@ A microservice provides work with attachments for entities from other microservi
 - `STORAGE_PATH_PREFIX` - Path (url) prefix for attachments. Default: `empty`
 - `IMAGE_CONFIG_FROM_CONFIG_MS` - Get image processing configuration from configuration microservice. Set `0` to disable. Default: `1`
 - `IMAGE_PROCESSING_CONFIG` - Image processing configuration JSON string. Default: `{}`
+- `LOCAL_STORAGE_PATH` - Directory where files are saved for local storage provider. Default: `data/files`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.
