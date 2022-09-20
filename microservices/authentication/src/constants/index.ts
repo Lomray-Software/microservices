@@ -17,6 +17,7 @@ const MS_JWT_SECRET_KEY = process.env.MS_JWT_SECRET_KEY || undefined;
 const IS_SECURE_COOKIE = Boolean(Number(process.env.IS_SECURE_COOKIE || 1));
 const IS_HTTPONLY_COOKIE = Boolean(Number(process.env.IS_HTTPONLY_COOKIE || 1));
 const COOKIE_SAME_SITE = (process.env.COOKIE_SAME_SITE || undefined) as undefined;
+const COOKIE_DOMAIN = (process.env.COOKIE_DOMAIN || undefined) as undefined;
 const MS_REMOTE_CONFIG = Number(process.env.MS_REMOTE_CONFIG || 1);
 const MS_GRAFANA_LOKI_CONFIG = JSON.parse(process.env.MS_GRAFANA_LOKI_CONFIG || 'null');
 const MS_ENABLE_GRAFANA_LOG = Number(process.env.MS_ENABLE_GRAFANA_LOG || 0);
@@ -51,6 +52,7 @@ export {
   SRC_FOLDER,
   IS_SECURE_COOKIE,
   COOKIE_SAME_SITE,
+  COOKIE_DOMAIN,
   IS_HTTPONLY_COOKIE,
   MS_GRAFANA_LOKI_CONFIG,
   MS_ENABLE_GRAFANA_LOG,

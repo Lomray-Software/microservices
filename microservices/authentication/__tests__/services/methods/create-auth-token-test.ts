@@ -104,7 +104,7 @@ describe('services/methods/create-auth-token', () => {
             action: 'add',
             name: 'jwt-access',
             value: token.access,
-            options: { httpOnly: true, secure: true, sameSite: undefined },
+            options: { httpOnly: true, secure: true, sameSite: undefined, domain: undefined },
           },
         ],
       },
