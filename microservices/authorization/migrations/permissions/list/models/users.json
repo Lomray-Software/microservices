@@ -913,6 +913,14 @@
     "title": "Identity Provider Sign In Output",
     "schema": {
       "user": "users.User",
+      "isNew": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
       "tokens": {
         "out": {
           "guest": "allow",

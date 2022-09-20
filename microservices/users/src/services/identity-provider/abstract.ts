@@ -7,6 +7,11 @@ import Profile from '@entities/profile';
 import User from '@entities/user';
 import UserRepository from '@repositories/user';
 
+export interface ISingInReturn {
+  user: User;
+  isNew: boolean;
+}
+
 /**
  * Abstract class for identity providers
  */
@@ -56,7 +61,7 @@ abstract class Abstract {
   /**
    * Sign in user
    */
-  public abstract signIn(params?: Record<string, any>): Promise<User>;
+  public abstract signIn(params?: Record<string, any>): Promise<ISingInReturn>;
 
   /**
    * Attach new identity provider to existing user

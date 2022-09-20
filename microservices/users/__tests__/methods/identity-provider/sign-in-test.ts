@@ -34,13 +34,14 @@ describe('methods/identity-provider/sign-in', () => {
     let signInStub;
 
     const mockUser = TypeormMock.entityManager.getRepository(User).create({ id: 'test-id' });
+    const mockResult = { user: mockUser, isNew: false };
     const factoryStub = sandbox.stub(Factory, 'create').callsFake((...args) => {
       factoryStub.restore();
 
       const identityProviderService = Factory.create(...args);
 
       factoryParams = args;
-      signInStub = sandbox.stub(identityProviderService, 'signIn').resolves(mockUser);
+      signInStub = sandbox.stub(identityProviderService, 'signIn').resolves(mockResult);
 
       return identityProviderService;
     });
@@ -53,7 +54,7 @@ describe('methods/identity-provider/sign-in', () => {
 
     const res = await SignIn(methodParams, endpointOptions);
 
-    expect(res).to.deep.equal({ user: mockUser });
+    expect(res).to.deep.equal(mockResult);
     expect(methodParams.provider).to.equal(factoryParams?.[0]);
     expect(methodParams.token).to.equal(factoryParams?.[1]);
     expect(factoryParams?.[2]).to.instanceof(EntityManager);

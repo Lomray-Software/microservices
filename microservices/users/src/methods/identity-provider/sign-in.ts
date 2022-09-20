@@ -1,6 +1,6 @@
 import { Endpoint, IsMeta, IsUndefinable } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNotEmpty, IsObject, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsObject, IsString } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { getManager } from 'typeorm';
 import IdProvider from '@constants/id-provider';
@@ -27,6 +27,9 @@ class IdentityProviderSignInOutput {
   @IsMeta()
   @Type(() => User)
   user: User;
+
+  @IsBoolean()
+  isNew: boolean;
 }
 
 /**
@@ -38,12 +41,10 @@ const signIn = Endpoint.custom(
     output: IdentityProviderSignInOutput,
     description: 'Sign in user through identity provider',
   }),
-  async ({ provider, token, params }) => {
+  ({ provider, token, params }) => {
     const service = Factory.create(provider, token, getManager());
 
-    return {
-      user: await service.signIn(params),
-    };
+    return service.signIn(params);
   },
 );
 

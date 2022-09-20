@@ -5,7 +5,7 @@ import IdentityProvider from '@entities/identity-provider';
 import Profile from '@entities/profile';
 import User from '@entities/user';
 import FirebaseSdk from '@services/external/firebase-sdk';
-import Abstract from '@services/identity-provider/abstract';
+import Abstract, { ISingInReturn } from '@services/identity-provider/abstract';
 
 type UserRecord = auth.UserRecord;
 
@@ -16,15 +16,17 @@ class Firebase extends Abstract {
   /**
    * @inheritDoc
    */
-  public async signIn(): Promise<User> {
+  public async signIn(): Promise<ISingInReturn> {
     const [firebaseUser, providerType] = await this.getFirebaseUser();
-    const user = await this.userRepository.findUserByIdentifier(this.provider, firebaseUser.uid);
+    let user = await this.userRepository.findUserByIdentifier(this.provider, firebaseUser.uid);
+    let isNew = false;
 
     if (!user) {
-      return this.register(firebaseUser, providerType);
+      user = await this.register(firebaseUser, providerType);
+      isNew = true;
     }
 
-    return user;
+    return { user, isNew };
   }
 
   /**

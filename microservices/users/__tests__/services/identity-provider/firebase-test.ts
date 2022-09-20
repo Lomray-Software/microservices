@@ -77,9 +77,9 @@ describe('services/sign-up', () => {
     sandbox.stub(FirebaseSdk, 'get').resolves(getFirebaseMock(firebaseMock()));
     TypeormMock.queryBuilder.getOne.resolves(mockUser);
 
-    const user = await service.signIn();
+    const resp = await service.signIn();
 
-    expect(user).to.equal(mockUser);
+    expect(resp).to.deep.equal({ user: mockUser, isNew: false });
   });
 
   it('should registration throw error: validation failed', async () => {
@@ -112,7 +112,7 @@ describe('services/sign-up', () => {
     // save profile
     const [, profile] = TypeormMock.entityManager.save.thirdCall.args;
 
-    expect(res).to.equal(mockUser);
+    expect(res).to.deep.equal({ user: mockUser, isNew: true });
     expect(entityUser).to.deep.equal({
       firstName: 'First', // see firebase mock
       lastName: 'Last',
