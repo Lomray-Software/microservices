@@ -1,4 +1,3 @@
-import './tracer';
 import { start } from '@lomray/microservice-helpers';
 import { msOptions, msParams } from '@config/ms';
 import {

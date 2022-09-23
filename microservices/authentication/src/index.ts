@@ -1,4 +1,3 @@
-import './tracer';
 import { startWithDb } from '@lomray/microservice-helpers';
 import dbOptions from '@config/db';
 import { msOptions, msParams } from '@config/ms';

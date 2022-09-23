@@ -16,3 +16,12 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: example
+
+# for testing tracing
+#  agent:
+#    image: matthewpatell/grafana-agent
+#    environment:
+#      GRAFANA_TEMPO_USERNAME: FILL_THIS_FIELD
+#      GRAFANA_TEMPO_PASSWORD: FILL_THIS_FIELD
+#    ports:
+#      - "4318:4318"

@@ -1,4 +1,3 @@
-import './tracer';
 import { Log, startWithDb } from '@lomray/microservice-helpers';
 import type { ILokiTransportOptions } from '@lomray/microservice-helpers';
 import { getCustomRepository, In } from 'typeorm';

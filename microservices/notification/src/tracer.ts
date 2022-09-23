@@ -1,2 +1,5 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-require('@lomray/microservice-helpers/helpers/tracer')(require('./constants'));
+import tracer from '@lomray/microservice-helpers/helpers/tracer';
+import { version } from '../package.json';
+import * as constants from './constants';
+
+export default tracer({ ...constants, version });

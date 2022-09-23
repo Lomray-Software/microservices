@@ -33,11 +33,11 @@
 		"lint:format": "eslint --fix --ext '.ts,.tsx' 'src/**/*.{ts,tsx,*.ts,*tsx}'",
 		"ts:check": "tsc --project ./tsconfig.json --skipLibCheck --noemit",
 		"build": "rollup -c",
-		"start:dev": "node --require ts-node/register src/index.ts",
-		"start:prod": "node lib/index.js"
+    "start:dev": "node --require ts-node/register src/index.ts",
+    "start:prod": "node --require ./lib/tracer.js ./lib/index.js"
 	},
 	"dependencies": {
-    "@lomray/microservice-helpers": "^1.19.4",
+    "@lomray/microservice-helpers": "^1.20.0",
 		"cors": "^2.8.5",
 		"lodash": "^4.17.21",
 		"request-ip": "^2.2.0"
