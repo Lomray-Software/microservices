@@ -146,7 +146,7 @@ jobs:
   sonarcube:
     name: Sonarcube
     needs: [changed-microservices, checks-compile]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     # only for staging
     if: ${{ (needs.changed-microservices.outputs.microservices != '') && (needs.changed-microservices.outputs.branch == 'staging') }}
 
@@ -174,10 +174,10 @@ jobs:
         with:
           path: ${{ env.WORK_DIR }}
 
-      - uses: sonarsource/sonarqube-scan-action@master
+      - uses: SonarSource/sonarcloud-github-action@master
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_CLOUD_TOKEN }}
         with:
           projectBaseDir: ${{ env.WORK_DIR }}
           args: >

@@ -8,12 +8,12 @@ This microservice provides authentication mechanism for microservices.
 ![GitHub](https://img.shields.io/github/license/Lomray-Software/microservices)
 ![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
 
-[![Quality Gate Status](https://sonarqube-proxy.lomray.com/status/microservices-authentication?token=b6ab7058149225b55075f5564fe532c9)](https://sonarqube.lomray.com/dashboard?id=microservices-authentication)
-[![Reliability Rating](https://sonarqube-proxy.lomray.com/reliability/microservices-authentication?token=b6ab7058149225b55075f5564fe532c9)](https://sonarqube.lomray.com/dashboard?id=microservices-authentication)
-[![Security Rating](https://sonarqube-proxy.lomray.com/security/microservices-authentication?token=b6ab7058149225b55075f5564fe532c9)](https://sonarqube.lomray.com/dashboard?id=microservices-authentication)
-[![Vulnerabilities](https://sonarqube-proxy.lomray.com/vulnerabilities/microservices-authentication?token=b6ab7058149225b55075f5564fe532c9)](https://sonarqube.lomray.com/dashboard?id=microservices-authentication)
-[![Lines of code](https://sonarqube-proxy.lomray.com/lines/microservices-authentication?token=b6ab7058149225b55075f5564fe532c9)](https://sonarqube.lomray.com/dashboard?id=microservices-authentication)
-[![Coverage](https://sonarqube-proxy.lomray.com/coverage/microservices-authentication?token=b6ab7058149225b55075f5564fe532c9)](https://sonarqube.lomray.com/dashboard?id=microservices-authentication)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=microservice-authentication&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=microservice-authentication)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-authentication&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=microservice-authentication)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-authentication&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=microservice-authentication)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=microservice-authentication&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=microservice-authentication)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=microservice-authentication&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=microservice-authentication)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=microservice-authentication&metric=coverage)](https://sonarcloud.io/summary/new_code?id=microservice-authentication)
 
 ## Navigation
 - [ENVIRONMENTS](#environments)

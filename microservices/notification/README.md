@@ -8,12 +8,12 @@ This microservice provides notifications mechanism.
 ![GitHub](https://img.shields.io/github/license/Lomray-Software/microservices)
 ![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
 
-[![Quality Gate Status](https://sonarqube-proxy.lomray.com/status/microservice-notification?token=142fb5190911f1cc533062a3dc38f92c)](https://sonarqube.lomray.com/dashboard?id=microservice-notification)
-[![Reliability Rating](https://sonarqube-proxy.lomray.com/reliability/microservice-notification?token=142fb5190911f1cc533062a3dc38f92c)](https://sonarqube.lomray.com/dashboard?id=microservice-notification)
-[![Security Rating](https://sonarqube-proxy.lomray.com/security/microservice-notification?token=142fb5190911f1cc533062a3dc38f92c)](https://sonarqube.lomray.com/dashboard?id=microservice-notification)
-[![Vulnerabilities](https://sonarqube-proxy.lomray.com/vulnerabilities/microservice-notification?token=142fb5190911f1cc533062a3dc38f92c)](https://sonarqube.lomray.com/dashboard?id=microservice-notification)
-[![Lines of code](https://sonarqube-proxy.lomray.com/lines/microservice-notification?token=142fb5190911f1cc533062a3dc38f92c)](https://sonarqube.lomray.com/dashboard?id=microservice-notification)
-[![Coverage](https://sonarqube-proxy.lomray.com/coverage/microservice-notification?token=142fb5190911f1cc533062a3dc38f92c)](https://sonarqube.lomray.com/dashboard?id=microservice-notification)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=microservice-notification&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=microservice-notification)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-notification&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=microservice-notification)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-notification&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=microservice-notification)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=microservice-notification&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=microservice-notification)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=microservice-notification&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=microservice-notification)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=microservice-notification&metric=coverage)](https://sonarcloud.io/summary/new_code?id=microservice-notification)
 
 ## Navigation
 - [ENVIRONMENTS](#environments)

@@ -7,12 +7,12 @@ RPC 2.0 Microservice. This is a single entry point for all clients.
 ![GitHub](https://img.shields.io/github/license/Lomray-Software/microservices)
 ![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
 
-[![Quality Gate Status](https://sonarqube-proxy.lomray.com/status/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-[![Reliability Rating](https://sonarqube-proxy.lomray.com/reliability/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-[![Security Rating](https://sonarqube-proxy.lomray.com/security/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-[![Vulnerabilities](https://sonarqube-proxy.lomray.com/vulnerabilities/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-[![Lines of code](https://sonarqube-proxy.lomray.com/lines/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
-[![Coverage](https://sonarqube-proxy.lomray.com/coverage/microservices-gateway?token=cdc3d50e659b50ce3d57cbc000cd8623)](https://sonarqube.lomray.com/dashboard?id=microservices-gateway)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=microservice-gateway&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=microservice-gateway)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-gateway&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=microservice-gateway)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-gateway&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=microservice-gateway)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=microservice-gateway&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=microservice-gateway)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=microservice-gateway&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=microservice-gateway)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=microservice-gateway&metric=coverage)](https://sonarcloud.io/summary/new_code?id=microservice-gateway)
 
 ## Navigation
 - [ENVIRONMENTS](#environments)

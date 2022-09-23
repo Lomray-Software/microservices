@@ -9,12 +9,12 @@ A microservice provides work with attachments for entities from other microservi
 ![GitHub](https://img.shields.io/github/license/Lomray-Software/microservices)
 ![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
 
-[![Quality Gate Status](https://sonarqube-proxy.lomray.com/status/microservice-attachments?token=6aec7092850771ce2bcc1776d66efccc)](https://sonarqube.lomray.com/dashboard?id=microservice-attachments)
-[![Reliability Rating](https://sonarqube-proxy.lomray.com/reliability/microservice-attachments?token=6aec7092850771ce2bcc1776d66efccc)](https://sonarqube.lomray.com/dashboard?id=microservice-attachments)
-[![Security Rating](https://sonarqube-proxy.lomray.com/security/microservice-attachments?token=6aec7092850771ce2bcc1776d66efccc)](https://sonarqube.lomray.com/dashboard?id=microservice-attachments)
-[![Vulnerabilities](https://sonarqube-proxy.lomray.com/vulnerabilities/microservice-attachments?token=6aec7092850771ce2bcc1776d66efccc)](https://sonarqube.lomray.com/dashboard?id=microservice-attachments)
-[![Lines of code](https://sonarqube-proxy.lomray.com/lines/microservice-attachments?token=6aec7092850771ce2bcc1776d66efccc)](https://sonarqube.lomray.com/dashboard?id=microservice-attachments)
-[![Coverage](https://sonarqube-proxy.lomray.com/coverage/microservice-attachments?token=6aec7092850771ce2bcc1776d66efccc)](https://sonarqube.lomray.com/dashboard?id=microservice-attachments)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=microservice-attachments&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=microservice-attachments)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-attachments&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=microservice-attachments)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-attachments&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=microservice-attachments)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=microservice-attachments&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=microservice-attachments)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=microservice-attachments&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=microservice-attachments)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=microservice-attachments&metric=coverage)](https://sonarcloud.io/summary/new_code?id=microservice-attachments)
 
 ## Navigation
 - [ENVIRONMENTS](#environments)

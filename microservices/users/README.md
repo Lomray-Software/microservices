@@ -8,12 +8,12 @@ This microservice provides mechanism for store/manage user data.
 ![GitHub](https://img.shields.io/github/license/Lomray-Software/microservices)
 ![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
 
-[![Quality Gate Status](https://sonarqube-proxy.lomray.com/status/microservices-users?token=3735196b93e535aeb8e06f388e7ed408)](https://sonarqube.lomray.com/dashboard?id=microservices-users)
-[![Reliability Rating](https://sonarqube-proxy.lomray.com/reliability/microservices-users?token=3735196b93e535aeb8e06f388e7ed408)](https://sonarqube.lomray.com/dashboard?id=microservices-users)
-[![Security Rating](https://sonarqube-proxy.lomray.com/security/microservices-users?token=3735196b93e535aeb8e06f388e7ed408)](https://sonarqube.lomray.com/dashboard?id=microservices-users)
-[![Vulnerabilities](https://sonarqube-proxy.lomray.com/vulnerabilities/microservices-users?token=3735196b93e535aeb8e06f388e7ed408)](https://sonarqube.lomray.com/dashboard?id=microservices-users)
-[![Lines of code](https://sonarqube-proxy.lomray.com/lines/microservices-users?token=3735196b93e535aeb8e06f388e7ed408)](https://sonarqube.lomray.com/dashboard?id=microservices-users)
-[![Coverage](https://sonarqube-proxy.lomray.com/coverage/microservices-users?token=3735196b93e535aeb8e06f388e7ed408)](https://sonarqube.lomray.com/dashboard?id=microservices-users)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=microservice-users&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=microservice-users)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-users&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=microservice-users)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-users&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=microservice-users)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=microservice-users&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=microservice-users)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=microservice-users&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=microservice-users)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=microservice-users&metric=coverage)](https://sonarcloud.io/summary/new_code?id=microservice-users)
 
 ## Navigation
 - [ENVIRONMENTS](#environments)

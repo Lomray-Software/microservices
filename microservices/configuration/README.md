@@ -8,12 +8,12 @@ This microservice provides configuration for all other microservices. Single poi
 ![GitHub](https://img.shields.io/github/license/Lomray-Software/microservices)
 ![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
 
-[![Quality Gate Status](https://sonarqube-proxy.lomray.com/status/microservices-configuration?token=bc1f8fe2de3b8e8fb2a9caee93661e22)](https://sonarqube.lomray.com/dashboard?id=microservices-configuration)
-[![Reliability Rating](https://sonarqube-proxy.lomray.com/reliability/microservices-configuration?token=bc1f8fe2de3b8e8fb2a9caee93661e22)](https://sonarqube.lomray.com/dashboard?id=microservices-configuration)
-[![Security Rating](https://sonarqube-proxy.lomray.com/security/microservices-configuration?token=bc1f8fe2de3b8e8fb2a9caee93661e22)](https://sonarqube.lomray.com/dashboard?id=microservices-configuration)
-[![Vulnerabilities](https://sonarqube-proxy.lomray.com/vulnerabilities/microservices-configuration?token=bc1f8fe2de3b8e8fb2a9caee93661e22)](https://sonarqube.lomray.com/dashboard?id=microservices-configuration)
-[![Lines of code](https://sonarqube-proxy.lomray.com/lines/microservices-configuration?token=bc1f8fe2de3b8e8fb2a9caee93661e22)](https://sonarqube.lomray.com/dashboard?id=microservices-configuration)
-[![Coverage](https://sonarqube-proxy.lomray.com/coverage/microservices-configuration?token=bc1f8fe2de3b8e8fb2a9caee93661e22)](https://sonarqube.lomray.com/dashboard?id=microservices-configuration)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=microservice-configuration&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=microservice-configuration)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-configuration&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=microservice-configuration)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-configuration&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=microservice-configuration)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=microservice-configuration&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=microservice-configuration)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=microservice-configuration&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=microservice-configuration)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=microservice-configuration&metric=coverage)](https://sonarcloud.io/summary/new_code?id=microservice-configuration)
 
 ## Navigation
 - [ENVIRONMENTS](#environments)
