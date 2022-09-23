@@ -41,7 +41,7 @@
     "typeorm:ts": "node --require ts-node/register node_modules/typeorm/cli.js"
 	},
 	"dependencies": {
-    "@lomray/microservice-helpers": "^1.16.1",
+    "@lomray/microservice-helpers": "^1.19.2",
     "class-transformer": "0.4.1",
     "class-validator": "^0.13.2",
     "class-validator-jsonschema": "^3.1.1",

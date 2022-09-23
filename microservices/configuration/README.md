@@ -37,6 +37,10 @@ This microservice provides configuration for all other microservices. Single poi
 - `MS_INIT_CONFIGS` - JSON string for configure initial `Config` values. Default: `[]`
 - `MS_INIT_MIDDLEWARES` - JSON string for configure initial `Middleware` values. Default: `[]`
 - `MS_ENABLE_GRAFANA_LOKI_LOG` - Enable grafana loki logs. Default: `0`
+- `MS_OPENTELEMETRY_ENABLE` - Enable opentelemetry tracers. Default: `0`
+- `MS_OPENTELEMETRY_OTLP_URL` - Custom opentelemetry OTLP exporter URL. Default: `undefined`
+- `MS_OPENTELEMETRY_OTLP_URL_SRV` - Custom opentelemetry OTLP URL it is SRV record. Default: `0`
+- `MS_OPENTELEMETRY_DEBUG` - Enable debug log opentelemetry. Default: `0`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.

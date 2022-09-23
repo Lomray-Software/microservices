@@ -40,6 +40,10 @@ A microservice provides work with attachments for entities from other microservi
 - `DB_DATABASE` - Database db name. Default: `ms-users`
 - `MS_GRAFANA_LOKI_CONFIG` - Grafana loki config. Default: `null`
 - `MS_ENABLE_GRAFANA_LOG` - Enable grafana loki log (config from configuration ms). Default: `0`
+- `MS_OPENTELEMETRY_ENABLE` - Enable opentelemetry tracers. Default: `0`
+- `MS_OPENTELEMETRY_OTLP_URL` - Custom opentelemetry OTLP exporter URL. Default: `undefined`
+- `MS_OPENTELEMETRY_OTLP_URL_SRV` - Custom opentelemetry OTLP URL it is SRV record. Default: `0`
+- `MS_OPENTELEMETRY_DEBUG` - Enable debug log opentelemetry. Default: `0`
 - `AWS_ACCESS_KEY_ID` - AWS access key ID, if you will use S3 to store files (if not configured from remote config.). Default: `empty`
 - `AWS_SECRET_ACCESS_KEY` - AWS secret access key, if you will use S3 to store files (if not configured from remote config.) Default: `empty`
 - `AWS_REGION` - AWS region, if you will use S3 to store files (if not configured from remote config.) Default: `empty`

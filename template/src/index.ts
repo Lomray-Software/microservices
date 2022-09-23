@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+require('@lomray/microservice-helpers/helpers/tracer')(require('@constants/index'));
+
 import { start } from '@lomray/microservice-helpers';
-import { microserviceOptions, microserviceParams } from '@config/ms';
+import { msOptions, msParams } from '@config/ms';
 import {
   MS_ENABLE_REMOTE_MIDDLEWARE,
   MS_ENABLE_GRAFANA_LOG,
@@ -12,8 +15,8 @@ import registerMethods from '@methods/index';
  */
 export default start({
   type: 'microservice',
-  msOptions: microserviceOptions,
-  msParams: microserviceParams,
+  msOptions,
+  msParams,
   registerMethods,
   logGrafana: MS_GRAFANA_LOKI_CONFIG || Boolean(MS_ENABLE_GRAFANA_LOG),
   remoteMiddleware: {

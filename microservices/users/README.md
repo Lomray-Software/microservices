@@ -41,6 +41,10 @@ This microservice provides mechanism for store/manage user data.
 - `FIREBASE_CREDENTIAL` - Firebase credential JSON string. Default: `{}`
 - `MS_GRAFANA_LOKI_CONFIG` - Grafana loki config. Default: `null`
 - `MS_ENABLE_GRAFANA_LOG` - Enable grafana loki log (config from configuration ms). Default: `0`
+- `MS_OPENTELEMETRY_ENABLE` - Enable opentelemetry tracers. Default: `0`
+- `MS_OPENTELEMETRY_OTLP_URL` - Custom opentelemetry OTLP exporter URL. Default: `undefined`
+- `MS_OPENTELEMETRY_OTLP_URL_SRV` - Custom opentelemetry OTLP URL it is SRV record. Default: `0`
+- `MS_OPENTELEMETRY_DEBUG` - Enable debug log opentelemetry. Default: `0`
 - `ENABLE_EVENTS` - Enable events and watch for attachments microservice (update user photo by default). Default: `0`
 
 ### <a id="how-to-run"></a>HOW TO RUN:

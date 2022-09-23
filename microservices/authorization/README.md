@@ -42,6 +42,10 @@ This microservice provides authorization mechanism for all other microservices.
 - `MS_DEFAULT_PERMISSION_MIGRATION` - Apply migration with default permissions. Default: `0`
 - `MS_GRAFANA_LOKI_CONFIG` - Grafana loki config. Default: `null`
 - `MS_ENABLE_GRAFANA_LOG` - Enable grafana loki log (config from configuration ms). Default: `0`
+- `MS_OPENTELEMETRY_ENABLE` - Enable opentelemetry tracers. Default: `0`
+- `MS_OPENTELEMETRY_OTLP_URL` - Custom opentelemetry OTLP exporter URL. Default: `undefined`
+- `MS_OPENTELEMETRY_OTLP_URL_SRV` - Custom opentelemetry OTLP URL it is SRV record. Default: `0`
+- `MS_OPENTELEMETRY_DEBUG` - Enable debug log opentelemetry. Default: `0`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.
