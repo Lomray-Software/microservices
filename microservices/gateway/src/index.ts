@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-require('@lomray/microservice-helpers/helpers/tracer')(require('@constants/index'));
-
+import './tracer';
 import { start } from '@lomray/microservice-helpers';
 import { msOptions, msParams } from '@config/ms';
 import {

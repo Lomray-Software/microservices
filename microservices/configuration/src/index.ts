@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-require('@lomray/microservice-helpers/helpers/tracer')(require('@constants/index'));
-
+import './tracer';
 import { Log, startWithDb } from '@lomray/microservice-helpers';
 import type { ILokiTransportOptions } from '@lomray/microservice-helpers';
 import { getCustomRepository, In } from 'typeorm';

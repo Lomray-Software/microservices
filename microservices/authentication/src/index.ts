@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-require('@lomray/microservice-helpers/helpers/tracer')(require('@constants/index'));
-
+import './tracer';
 import { startWithDb } from '@lomray/microservice-helpers';
 import dbOptions from '@config/db';
 import { msOptions, msParams } from '@config/ms';
