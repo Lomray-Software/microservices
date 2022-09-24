@@ -36,7 +36,7 @@ const update = Endpoint.custom(
     output: AttachmentUpdateOutput,
     description: 'Update attachment',
   }),
-  async ({ id, file, alt }) => {
+  async ({ id, file, alt, payload }) => {
     const manager = getManager();
     // find the attachment to pass its type to the factory
     const attachment = await manager.getRepository(Attachment).findOne(id);
@@ -51,7 +51,10 @@ const update = Endpoint.custom(
     const service = await Factory.create(attachment.type, manager);
 
     return {
-      entity: await AttachmentDomain.addDomain(await service.update(attachment, file, alt)),
+      entity: await AttachmentDomain.addDomain(
+        await service.update(attachment, file, alt),
+        payload,
+      ),
     };
   },
 );

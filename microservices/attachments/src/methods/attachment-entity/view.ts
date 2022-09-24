@@ -11,11 +11,13 @@ const view = Endpoint.view(
     repository: getRepository(AttachmentEntity),
     description: 'View attachment entity with domain in its url',
   }),
-  async (typeQuery) => {
+  async (typeQuery, params) => {
     const { entity } = await Endpoint.defaultHandler.view(typeQuery.toQuery());
 
     return {
-      entity: entity.attachment ? await AttachmentDomain.addDomainRelation(entity) : entity,
+      entity: entity.attachment
+        ? await AttachmentDomain.addDomainRelation(entity, params?.payload)
+        : entity,
     };
   },
 );

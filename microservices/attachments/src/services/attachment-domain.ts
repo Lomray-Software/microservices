@@ -3,16 +3,31 @@ import Attachment from '@entities/attachment';
 import AttachmentEntity from '@entities/attachment-entity';
 import StorageFactory from '@services/storage/factory';
 
+interface IAttachmentDomainOptions extends Record<string, any> {
+  // return only specified formats
+  onlyFormats?: string[];
+}
+
 class AttachmentDomain {
   /**
    * Add domain to the url of the attachment and to the url of its formats
    */
-  public static async addDomain(entity: Attachment): Promise<Attachment> {
+  public static async addDomain(
+    entity: Attachment,
+    options: IAttachmentDomainOptions = {},
+  ): Promise<Attachment> {
     const storage = await StorageFactory.create(MS_STORAGE_TYPE);
+    const { onlyFormats } = options;
 
-    entity.url = `${storage.getDomain()}${entity.url}`;
+    if (entity.url) {
+      entity.url = `${storage.getDomain()}${entity.url}`;
+    }
 
     for (const format in entity.formats) {
+      if (Array.isArray(onlyFormats) && !onlyFormats.includes(format)) {
+        continue;
+      }
+
       entity.formats[format].url = `${storage.getDomain()}${entity.formats[format].url}`;
     }
 
@@ -22,9 +37,12 @@ class AttachmentDomain {
   /**
    * Add domain to the url of the attachment entity "attachment" relation
    */
-  public static async addDomainRelation(entity: AttachmentEntity): Promise<AttachmentEntity> {
+  public static async addDomainRelation(
+    entity: AttachmentEntity,
+    options: IAttachmentDomainOptions = {},
+  ): Promise<AttachmentEntity> {
     if (entity.attachment) {
-      entity.attachment = await AttachmentDomain.addDomain(entity.attachment);
+      entity.attachment = await AttachmentDomain.addDomain(entity.attachment, options);
     }
 
     return entity;
@@ -33,11 +51,14 @@ class AttachmentDomain {
   /**
    * Add domains for attachment array
    */
-  public static async addDomains(entities: Attachment[]): Promise<Attachment[]> {
+  public static async addDomains(
+    entities: Attachment[],
+    options: IAttachmentDomainOptions = {},
+  ): Promise<Attachment[]> {
     const result = [];
 
     for (const entity of entities) {
-      result.push(await AttachmentDomain.addDomain(entity));
+      result.push(await AttachmentDomain.addDomain(entity, options));
     }
 
     return result;
@@ -48,11 +69,12 @@ class AttachmentDomain {
    */
   public static async addDomainsRelation(
     entities: AttachmentEntity[],
+    options: IAttachmentDomainOptions = {},
   ): Promise<AttachmentEntity[]> {
     const result = [];
 
     for (const entity of entities) {
-      result.push(await AttachmentDomain.addDomainRelation(entity));
+      result.push(await AttachmentDomain.addDomainRelation(entity, options));
     }
 
     return result;

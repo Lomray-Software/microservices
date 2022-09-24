@@ -38,11 +38,11 @@ const create = Endpoint.custom(
     output: AttachmentCreateOutput,
     description: 'Create attachment',
   }),
-  async ({ type, file, userId, alt }) => {
+  async ({ type, file, userId, alt, payload }) => {
     const service = await Factory.create(type, getManager());
 
     return {
-      entity: await AttachmentDomain.addDomain(await service.save(file, userId, alt)),
+      entity: await AttachmentDomain.addDomain(await service.save(file, userId, alt), payload),
     };
   },
 );
