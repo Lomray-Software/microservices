@@ -33,7 +33,7 @@ class TokenCreateInput {
 
   @IsUndefinable()
   @IsObject()
-  params?: Record<string, any>;
+  params?: Record<string, any> & { maxAge?: number };
 
   @IsUndefinable()
   @IsObject()
@@ -152,7 +152,7 @@ class CreateAuthToken {
    * Create auth token(s)
    */
   async create(options: TokenCreateInput): Promise<TokenCreateOutput> {
-    const { type, returnType } = options;
+    const { type, returnType, params } = options;
 
     if (returnType === TokenCreateReturnType.cookies && type === TokenType.personal) {
       throw new Error('Return type "cookies" available only with type "jwt".');
@@ -177,6 +177,7 @@ class CreateAuthToken {
                   secure: IS_SECURE_COOKIE,
                   sameSite: COOKIE_SAME_SITE,
                   domain: COOKIE_DOMAIN,
+                  maxAge: params?.maxAge,
                 },
               },
             ],

@@ -91,6 +91,7 @@ describe('services/methods/create-auth-token', () => {
       type: TokenType.jwt,
       returnType: TokenCreateReturnType.cookies,
       userId,
+      params: { maxAge: 15 },
     });
 
     const [, token] = TypeormMock.entityManager.save.lastCall.args;
@@ -104,7 +105,13 @@ describe('services/methods/create-auth-token', () => {
             action: 'add',
             name: 'jwt-access',
             value: token.access,
-            options: { httpOnly: true, secure: true, sameSite: undefined, domain: undefined },
+            options: {
+              httpOnly: true,
+              secure: true,
+              sameSite: undefined,
+              domain: undefined,
+              maxAge: 15,
+            },
           },
         ],
       },
