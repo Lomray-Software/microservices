@@ -79,7 +79,7 @@ class Enforcer {
    */
   public async enforce(method?: Method, shouldThrowError = true): Promise<boolean> {
     if (!method) {
-      return Enforcer.enforceResponse(false, shouldThrowError);
+      return Enforcer.enforceResponse(false, shouldThrowError, this.userId);
     }
 
     const { denyGroup, allowGroup, condition } = method;
@@ -90,6 +90,7 @@ class Enforcer {
       _.intersection(denyGroup, userGroups).length === 0 &&
         _.intersection(allowGroup, userGroups).length > 0,
       shouldThrowError,
+      this.userId,
     );
 
     if (!condition) {
@@ -101,6 +102,7 @@ class Enforcer {
     return Enforcer.enforceResponse(
       (await this.conditionChecker?.execConditions(condition.conditions)) ?? false,
       shouldThrowError,
+      this.userId,
     );
   }
 
@@ -108,7 +110,11 @@ class Enforcer {
    * Return enforce response
    * @private
    */
-  private static enforceResponse(isAllow: boolean, shouldThrowError: boolean): boolean {
+  private static enforceResponse(
+    isAllow: boolean,
+    shouldThrowError: boolean,
+    userId?: string | null,
+  ): boolean {
     if (!shouldThrowError || isAllow) {
       return isAllow;
     }
@@ -117,6 +123,7 @@ class Enforcer {
       code: ExceptionCode.METHOD_NOT_ALLOWED,
       status: 405,
       message: 'Method not allowed.',
+      payload: { userId },
     });
   }
 

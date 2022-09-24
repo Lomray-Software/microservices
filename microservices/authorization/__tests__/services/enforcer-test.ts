@@ -3,6 +3,7 @@ import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { Microservice } from '@lomray/microservice-nodejs-lib';
 import { expect } from 'chai';
 import sinon from 'sinon';
+import ExceptionCode from '@constants/exception-code';
 import Condition from '@entities/condition';
 import Method from '@entities/method';
 import RolesTree from '@entities/roles-tree';
@@ -68,7 +69,15 @@ describe('services/enforcer', () => {
 
     const method = methodRepository.create({ method: 'demo.test' });
 
-    expect(await waitResult(service.enforce(method))).to.throw('Method not allowed');
+    expect(await waitResult(service.enforce(method)))
+      .to.throw('Method not allowed')
+      .to.deep.include({
+        code: ExceptionCode.METHOD_NOT_ALLOWED,
+        status: 405,
+        service: 'unknown',
+        message: 'Method not allowed.',
+        payload: { userId },
+      });
   });
 
   it('should correctly return user roles', async () => {
