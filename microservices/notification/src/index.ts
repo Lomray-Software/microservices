@@ -6,6 +6,7 @@ import {
   MS_ENABLE_REMOTE_MIDDLEWARE,
   MS_ENABLE_GRAFANA_LOG,
   MS_GRAFANA_LOKI_CONFIG,
+  MS_CONSOLE_LOG_LEVEL,
 } from '@constants/index';
 import registerMethods from '@methods/index';
 
@@ -21,6 +22,7 @@ export default startWithDb({
   // for local run without configuration ms this should be set to false (or use RunConfiguration IDE)
   shouldUseDbRemoteOptions: Boolean(DB_FROM_CONFIG_MS),
   logGrafana: MS_GRAFANA_LOKI_CONFIG || Boolean(MS_ENABLE_GRAFANA_LOG),
+  logConsoleLevel: MS_CONSOLE_LOG_LEVEL,
   remoteMiddleware: {
     isEnable: Boolean(MS_ENABLE_REMOTE_MIDDLEWARE),
     type: 'client',

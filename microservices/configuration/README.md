@@ -41,6 +41,7 @@ This microservice provides configuration for all other microservices. Single poi
 - `MS_OPENTELEMETRY_OTLP_URL` - Custom opentelemetry OTLP exporter URL. Default: `undefined`
 - `MS_OPENTELEMETRY_OTLP_URL_SRV` - Custom opentelemetry OTLP URL it is SRV record. Default: `0`
 - `MS_OPENTELEMETRY_DEBUG` - Enable debug log opentelemetry. Default: `0`
+- `MS_CONSOLE_LOG_LEVEL` - Change console log level. Default: `info`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.

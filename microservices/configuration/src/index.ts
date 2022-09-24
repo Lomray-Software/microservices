@@ -8,6 +8,7 @@ import {
   MS_ENABLE_REMOTE_MIDDLEWARE,
   MS_INIT_MIDDLEWARES,
   MS_ENABLE_GRAFANA_LOKI_LOG,
+  MS_CONSOLE_LOG_LEVEL,
 } from '@constants/index';
 import Config from '@entities/config';
 import Middleware from '@entities/middleware';
@@ -25,6 +26,7 @@ export default startWithDb({
   dbOptions,
   registerMethods,
   shouldUseDbRemoteOptions: false,
+  logConsoleLevel: MS_CONSOLE_LOG_LEVEL,
   remoteMiddleware: {
     isEnable: Boolean(MS_ENABLE_REMOTE_MIDDLEWARE),
     type: 'server',
