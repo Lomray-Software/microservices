@@ -1,5 +1,5 @@
 import { MS_STORAGE_TYPE } from '@constants/index';
-import Attachment from '@entities/attachment';
+import Attachment, { IAttachmentFormat } from '@entities/attachment';
 import AttachmentEntity from '@entities/attachment-entity';
 import StorageFactory from '@services/storage/factory';
 
@@ -23,13 +23,20 @@ class AttachmentDomain {
       entity.url = `${storage.getDomain()}${entity.url}`;
     }
 
+    const formats: IAttachmentFormat = {};
+
     for (const format in entity.formats) {
       if (Array.isArray(onlyFormats) && !onlyFormats.includes(format)) {
         continue;
       }
 
-      entity.formats[format].url = `${storage.getDomain()}${entity.formats[format].url}`;
+      formats[format] = {
+        ...format[format],
+        url: `${storage.getDomain()}${entity.formats[format].url}`,
+      };
     }
+
+    entity.formats = formats;
 
     return entity;
   }
