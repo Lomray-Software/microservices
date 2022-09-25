@@ -1,6 +1,7 @@
 import { RemoteConfig } from '@lomray/microservice-helpers';
 import { expect } from 'chai';
 import sinon from 'sinon';
+import { bucketNameMock } from '@__mocks__/common';
 import Attachment from '@entities/attachment';
 import AttachmentEntity from '@entities/attachment-entity';
 import AttachmentDomain from '@services/attachment-domain';
@@ -12,7 +13,7 @@ describe('services/attachment-domain', () => {
   const formatMediumUrl = '/medium/url';
   const formatLargeUrl = '/large/url';
   const s3Mock = {
-    bucketName: 'test',
+    bucketName: bucketNameMock,
   };
 
   /**
@@ -42,7 +43,7 @@ describe('services/attachment-domain', () => {
   /**
    * Helpers for add s3 domain to url
    */
-  const withS3Domain = (url: string): string => `https://test.s3.amazonaws.com${url}`;
+  const withS3Domain = (url: string): string => `https://${bucketNameMock}.s3.amazonaws.com${url}`;
 
   /**
    * Expectation

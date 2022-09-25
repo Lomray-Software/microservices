@@ -3,6 +3,7 @@ import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import sinon from 'sinon';
+import { bucketNameMock } from '@__mocks__/common';
 import AttachmentType from '@constants/attachment-type';
 import Factory from '@services/attachment/factory';
 import Image from '@services/attachment/image';
@@ -28,7 +29,7 @@ describe('services/attachment/factory', () => {
   });
 
   it('should throw error: Not implemented', async () => {
-    sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: 'bucket-name' } });
+    sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: bucketNameMock } });
     // @ts-ignore
     const service = Factory.create('unknown', TypeormMock.entityManager);
 

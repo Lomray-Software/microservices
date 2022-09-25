@@ -3,6 +3,7 @@ import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { getRepository } from 'typeorm';
+import { bucketNameMock } from '@__mocks__/common';
 import AttachmentType from '@constants/attachment-type';
 import { IMAGE_CONFIG_FROM_CONFIG_MS, IMAGE_PROCESSING_CONFIG } from '@constants/index';
 import StorageType from '@constants/storage-type';
@@ -12,7 +13,6 @@ import ImageProcessingConfig from '@services/external/image-processing-config';
 import StorageFactory from '@services/storage/factory';
 
 describe('services/attachment/image', () => {
-  const BUCKET_NAME = 'bucket-name';
   const attachmentData = getRepository(Attachment).create({
     id: 'attachment_id',
   });
@@ -25,7 +25,7 @@ describe('services/attachment/image', () => {
 
   it('should successfully save image', async () => {
     TypeormMock.entityManager.save.resolves(attachmentData);
-    sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: BUCKET_NAME } });
+    sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: bucketNameMock } });
 
     const storage = await StorageFactory.create(StorageType.s3);
     const config = await ImageProcessingConfig.get({
@@ -55,7 +55,7 @@ describe('services/attachment/image', () => {
   });
 
   it('should successfully remove image', async () => {
-    sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: BUCKET_NAME } });
+    sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: bucketNameMock } });
 
     const storage = await StorageFactory.create('S3');
     const config = await ImageProcessingConfig.get({
@@ -77,7 +77,7 @@ describe('services/attachment/image', () => {
 
   it('should successfully update image', async () => {
     TypeormMock.entityManager.save.resolves(attachmentData);
-    sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: BUCKET_NAME } });
+    sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: bucketNameMock } });
 
     const storage = await StorageFactory.create('S3');
     const config = await ImageProcessingConfig.get({

@@ -1,6 +1,7 @@
 import { RemoteConfig } from '@lomray/microservice-helpers';
 import { expect } from 'chai';
 import sinon from 'sinon';
+import { bucketNameMock } from '@__mocks__/common';
 import S3AwsSdk from '@services/external/s3-aws-sdk';
 
 describe('services/external/s3-aws-sdk', () => {
@@ -16,7 +17,7 @@ describe('services/external/s3-aws-sdk', () => {
     const options = {
       accessKeyId: 'access_key_id',
       secretAccessKey: 'secret_access_key',
-      bucketName: 'bucket_name',
+      bucketName: bucketNameMock,
     };
 
     const { s3, bucketName } = await S3AwsSdk.get({ isFromConfigMs: 0, options });
@@ -33,7 +34,7 @@ describe('services/external/s3-aws-sdk', () => {
       accessKeyId: 'remote_access_key_id',
       secretAccessKey: 'remote_secret_access_key',
       s3: {
-        bucketName: 'remote_bucket_name',
+        bucketName: bucketNameMock,
       },
     };
 
