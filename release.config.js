@@ -18,7 +18,7 @@ module.exports = {
     ['@semantic-release/exec', {
       publishCmd: "sed -i -e 's/1.0.0/${nextRelease.version}/g' lib/package.json.js"
     }],
-    '@semantic-release/npm',
+    // '@semantic-release/npm',
     '@semantic-release/github',
   ]
 }

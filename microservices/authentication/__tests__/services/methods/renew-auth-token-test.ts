@@ -2,6 +2,7 @@ import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
+import cookies from '@config/cookies';
 import Token from '@entities/token';
 import { TokenCreateReturnType } from '@services/methods/create-auth-token';
 import type { RenewAuthToken as OriginalRenewAuthToken } from '@services/methods/renew-auth-token';
@@ -50,10 +51,7 @@ describe('services/methods/renew-auth-token', () => {
                 name: 'jwt-access',
                 value: token.access,
                 options: {
-                  httpOnly: true,
-                  secure: true,
-                  sameSite: undefined,
-                  domain: undefined,
+                  ...cookies,
                   maxAge: 20,
                 },
               },

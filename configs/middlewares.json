@@ -200,12 +200,18 @@
       "type": "response",
       "isRequired": true,
       "strategy": "transform",
+      "extraRequests": [
+        {
+          "key": "rolesResp",
+          "method": "authentication.cookies.remove",
+          "params": {}
+        }
+      ],
       "convertParams": {
         "query.where.id": "$task.params.payload.authentication.tokenId"
       },
       "convertResult": {
-        "payload.cookies.0.action": "remove",
-        "payload.cookies.0.name": "jwt-access"
+        "payload.cookies": "$middleware.payload.cookies"
       }
     }
   }

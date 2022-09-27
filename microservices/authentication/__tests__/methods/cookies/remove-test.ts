@@ -1,5 +1,6 @@
 import { endpointOptions } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
+import cookies from '@config/cookies';
 import RemoveCookies from '@methods/cookies/remove';
 
 describe('methods/cookies/remove', () => {
@@ -9,7 +10,7 @@ describe('methods/cookies/remove', () => {
     expect(result).to.deep.equal({
       isRemoved: true,
       payload: {
-        cookies: [{ action: 'remove', name: 'jwt-access' }],
+        cookies: [{ action: 'remove', name: 'jwt-access', options: { ...cookies } }],
       },
     });
   });
