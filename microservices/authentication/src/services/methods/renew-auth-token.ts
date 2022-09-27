@@ -4,8 +4,8 @@ import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { IsEnum, IsObject, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import type { Repository } from 'typeorm';
+import cookies from '@config/cookies';
 import type { IJwtConfig } from '@config/jwt';
-import { COOKIE_SAME_SITE, IS_HTTPONLY_COOKIE, IS_SECURE_COOKIE } from '@constants/index';
 import type Token from '@entities/token';
 import { TokenCreateReturnType } from '@services/methods/create-auth-token';
 import { IdentifyAuthToken } from '@services/methods/identity-auth-token';
@@ -21,7 +21,7 @@ class TokenRenewInput {
 
   @IsUndefinable()
   @IsObject()
-  params?: Record<string, any>;
+  params?: Record<string, any> & { maxAge?: number };
 
   @IsUndefinable()
   @IsObject()
@@ -127,7 +127,7 @@ class RenewAuthToken {
    * Renew auth token
    */
   async renew(options: TokenRenewInput, headers?: Record<string, any>): Promise<TokenRenewOutput> {
-    const { returnType, access } = options;
+    const { returnType, access, params } = options;
 
     const result = await this.renewJwtTokens({
       ...options,
@@ -147,9 +147,8 @@ class RenewAuthToken {
                 name: 'jwt-access',
                 value: result['access'],
                 options: {
-                  httpOnly: IS_HTTPONLY_COOKIE,
-                  secure: IS_SECURE_COOKIE,
-                  sameSite: COOKIE_SAME_SITE,
+                  ...cookies,
+                  maxAge: params?.maxAge,
                 },
               },
             ],

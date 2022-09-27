@@ -49,7 +49,13 @@ describe('services/methods/renew-auth-token', () => {
                 action: 'add',
                 name: 'jwt-access',
                 value: token.access,
-                options: { httpOnly: true, secure: true, sameSite: undefined },
+                options: {
+                  httpOnly: true,
+                  secure: true,
+                  sameSite: undefined,
+                  domain: undefined,
+                  maxAge: 20,
+                },
               },
             ],
           },
@@ -62,6 +68,7 @@ describe('services/methods/renew-auth-token', () => {
         access,
         refresh,
         returnType,
+        params: { maxAge: 20 },
       });
 
       const [, token] = TypeormMock.entityManager.save.firstCall.args;
@@ -71,7 +78,7 @@ describe('services/methods/renew-auth-token', () => {
       expect(token.refresh).to.not.empty.and.not.equal(refresh);
       expect(token.id).to.equal(tokenId);
       expect(String(token.expirationAt)).to.length(10);
-      expect(result).to.deep.equal(expectedResult(token));
+      expect(result).to.deep.equal(expectedResult(token as Token));
     }
   });
 
@@ -111,7 +118,7 @@ describe('services/methods/renew-auth-token', () => {
       expect(token.userId).to.equal(userId);
       expect(token.access).to.not.empty.and.not.equal(access);
       expect(token.refresh).to.not.empty.and.not.equal(refresh);
-      expect(result).to.deep.equal(expectedResult(token));
+      expect(result).to.deep.equal(expectedResult(token as Token));
     }
   });
 

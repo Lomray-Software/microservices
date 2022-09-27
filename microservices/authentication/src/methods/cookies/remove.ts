@@ -1,5 +1,6 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { IsBoolean } from 'class-validator';
+import cookies from '@config/cookies';
 
 class CookiesRemoveOutput {
   @IsBoolean()
@@ -17,7 +18,13 @@ const remove = Endpoint.custom(
   () => ({
     isRemoved: true,
     payload: {
-      cookies: [{ action: 'remove', name: 'jwt-access' }],
+      cookies: [
+        {
+          action: 'remove',
+          name: 'jwt-access',
+          options: { ...cookies },
+        },
+      ],
     },
   }),
 );

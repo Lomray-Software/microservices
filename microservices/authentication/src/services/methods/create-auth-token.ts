@@ -3,13 +3,8 @@ import type { IMicroserviceResponseCookie } from '@lomray/microservice-nodejs-li
 import { IsEnum, IsObject, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import type { Repository } from 'typeorm';
+import cookiesConfig from '@config/cookies';
 import type { IJwtConfig } from '@config/jwt';
-import {
-  COOKIE_DOMAIN,
-  COOKIE_SAME_SITE,
-  IS_HTTPONLY_COOKIE,
-  IS_SECURE_COOKIE,
-} from '@constants/index';
 import TokenType from '@constants/token-type';
 import type Token from '@entities/token';
 import Jwt from '@services/tokens/jwt';
@@ -173,10 +168,7 @@ class CreateAuthToken {
                 name: 'jwt-access',
                 value: result['access'],
                 options: {
-                  httpOnly: IS_HTTPONLY_COOKIE,
-                  secure: IS_SECURE_COOKIE,
-                  sameSite: COOKIE_SAME_SITE,
-                  domain: COOKIE_DOMAIN,
+                  ...cookiesConfig,
                   maxAge: params?.maxAge,
                 },
               },
