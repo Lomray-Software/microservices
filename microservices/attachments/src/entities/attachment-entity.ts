@@ -1,7 +1,14 @@
-import { IsUndefinable } from '@lomray/microservice-helpers';
+import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsNumber, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { Column, Entity, ManyToOne, Unique, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  Unique,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+} from 'typeorm';
 import type Attachment from '@entities/attachment';
 
 @JSONSchema({
@@ -18,7 +25,7 @@ class AttachmentEntity {
 
   @Column({ type: 'varchar', length: 36 })
   @Length(1, 36)
-  entityId: string | number;
+  entityId: string;
 
   @Column({ type: 'varchar' })
   @Length(1, 36)
@@ -36,6 +43,10 @@ class AttachmentEntity {
   @IsNumber()
   @IsUndefinable()
   order: number;
+
+  @CreateDateColumn()
+  @IsTypeormDate()
+  createdAt: Date;
 
   @ManyToOne('Attachment', 'attachmentEntities', {
     onDelete: 'CASCADE',
