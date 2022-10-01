@@ -211,7 +211,7 @@
         "query.where.id": "$task.params.payload.authentication.tokenId"
       },
       "convertResult": {
-        "payload.cookies": "$middleware.payload.cookies"
+        "payload.cookies": "$rolesResp.payload.cookies"
       }
     }
   }
