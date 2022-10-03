@@ -918,6 +918,7 @@
           "admin": "allow"
         },
         "out": {
+          "guest": "allow",
           "user": "allow"
         }
       },
