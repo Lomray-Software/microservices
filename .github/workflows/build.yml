@@ -7,7 +7,7 @@ on:
 jobs:
   changed-microservices:
     name: Get changed microservices & set tags
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     outputs:
       microservices: ${{ steps.microservices.outputs.list }}
       microservices-spaced: ${{ steps.microservices.outputs.list-spaced }}
@@ -45,7 +45,7 @@ jobs:
   checks-compile:
     name: Code checks & compile & npm publish
     needs: changed-microservices
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     if: needs.changed-microservices.outputs.microservices-spaced != ''
 
     env:
@@ -103,7 +103,7 @@ jobs:
   build-docker:
     name: Build docker images
     needs: [changed-microservices, checks-compile]
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     if: needs.changed-microservices.outputs.microservices != ''
 
     strategy:

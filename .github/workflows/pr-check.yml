@@ -7,7 +7,7 @@ on:
 jobs:
   changed-microservices:
     name: Get changed microservices
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     outputs:
       microservices: ${{ steps.microservices.outputs.list }}
 
