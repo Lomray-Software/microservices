@@ -54,7 +54,7 @@ const config = {
       targets: [
         { src: 'package.json', dest: 'lib' },
       ]
-    })
+    }),
   ],
 };
 
