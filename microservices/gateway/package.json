@@ -37,7 +37,7 @@
     "start:prod": "node --require ./lib/tracer.js ./lib/index.js"
   },
 	"dependencies": {
-    "@lomray/microservice-helpers": "^1.22.0",
+    "@lomray/microservice-helpers": "^1.23.1",
 		"cors": "^2.8.5",
 		"lodash": "^4.17.21",
 		"request-ip": "^2.2.0"

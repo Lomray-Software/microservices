@@ -32,7 +32,7 @@
 		"build": "node operations.js build",
 		"create-ms": "node operations.js create-ms",
 		"global-install": "node operations.js global-install",
-		"global-update-package": "node operations.js global-update-package",
+		"global-update": "node operations.js global-update",
 		"lint-staged": "node operations.js lint-staged",
 		"semantic-release": "node operations.js semantic-release",
 		"dotenv-update": "node operations.js update-dotenv",

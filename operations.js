@@ -2,7 +2,7 @@ const fs = require('fs');
 const fse = require('fs-extra');
 const childProcess = require('child_process');
 
-const [, , task, arg1] = process.argv;
+const [, , task, arg1, arg2] = process.argv;
 
 console.info('Running task:', task);
 
@@ -91,7 +91,7 @@ const runGlobalInstall = (isCI = true) => {
 /**
  * Update npm package for each microservice
  */
-const runGlobalUpdatePackage = (packageName) => {
+const runGlobalUpdate = (packageName, version = null) => {
   const microservices = getMicroservices(true, true);
 
   for (const msDir of microservices) {
@@ -103,9 +103,13 @@ const runGlobalUpdatePackage = (packageName) => {
       continue;
     }
 
+    if (version) {
+      replaceStrInFile(`"${packageName}": "\\^[\\d\\.]+"`, `"${packageName}": "^${version}"`, packageJson);
+    }
+
     childProcess.execSync(`cd ${msDir} && npm update ${packageName}`, { stdio: 'inherit' });
 
-    console.info(`Package updated for: ${msDir}`)
+    console.info(`Package updated for: ${msDir}`);
   }
 }
 
@@ -232,8 +236,8 @@ switch (task) {
     runGlobalInstall(arg1);
     break;
 
-  case 'global-update-package':
-    runGlobalUpdatePackage(arg1);
+  case 'global-update':
+    runGlobalUpdate(arg1, arg2);
     break;
 
   case 'semantic-release':
