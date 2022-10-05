@@ -1,7 +1,7 @@
 {
 	"name": "@lomray/microservice-configuration",
 	"version": "1.0.0",
-	"description": "Microservice based on NodeJS & inverted json.",
+	"description": "Configuration microservice based on NodeJS & inverted json.",
   "main": "index.js",
   "types": "index.d.ts",
 	"keywords": [

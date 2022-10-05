@@ -1,7 +1,7 @@
 {
 	"name": "@lomray/microservice-users",
 	"version": "1.0.0",
-	"description": "Microservice based on NodeJS & inverted json.",
+	"description": "Users microservice based on NodeJS & inverted json.",
   "main": "index.js",
   "types": "index.d.ts",
 	"keywords": [

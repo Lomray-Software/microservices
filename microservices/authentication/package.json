@@ -1,7 +1,7 @@
 {
 	"name": "@lomray/microservice-authentication",
 	"version": "1.0.0",
-	"description": "Microservice based on NodeJS & inverted json.",
+	"description": "Authentication microservice based on NodeJS & inverted json.",
   "main": "index.js",
   "types": "index.d.ts",
 	"keywords": [
