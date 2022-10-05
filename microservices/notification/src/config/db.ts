@@ -1,10 +1,13 @@
 import type { ConnectionOptions } from 'typeorm';
-import { DB_ENV, IS_BUILD, SRC_FOLDER } from '@constants/index';
+import { IS_BUILD, DB_ENV, SRC_FOLDER } from '@constants/index';
 
 const { URL, HOST, PORT, USERNAME, PASSWORD, DATABASE } = DB_ENV;
 const migrationsSrc = IS_BUILD ? 'lib/' : '';
 
-const db: ConnectionOptions = {
+/**
+ * Database connection options
+ */
+const db = (rootPath = SRC_FOLDER, migrationPath = migrationsSrc): ConnectionOptions => ({
   type: 'postgres',
   ...((URL?.length ?? 0) > 0
     ? {
@@ -17,18 +20,18 @@ const db: ConnectionOptions = {
         password: PASSWORD,
         database: DATABASE,
       }),
-  entities: [`${SRC_FOLDER}/entities/*.{ts,js}`],
-  subscribers: [`${SRC_FOLDER}/subscribers/*.{ts,js}`],
-  migrations: [`${migrationsSrc}migrations/*.{ts,js}`],
+  entities: [`${rootPath}/entities/*.{ts,js}`],
+  subscribers: [`${rootPath}/subscribers/*.{ts,js}`],
+  migrations: [`${migrationPath}migrations/*.{ts,js}`],
   cli: {
-    migrationsDir: `${migrationsSrc}migrations`,
+    migrationsDir: `${migrationPath}migrations`,
     // we shouldn't work with this in production
-    entitiesDir: `${SRC_FOLDER}/entities`,
-    subscribersDir: `${SRC_FOLDER}/subscribers`,
+    entitiesDir: `${rootPath}/entities`,
+    subscribersDir: `${rootPath}/subscribers`,
   },
   migrationsRun: true,
   synchronize: false,
   logging: false,
-};
+});
 
 export default db;

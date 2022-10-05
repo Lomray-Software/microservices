@@ -1,5 +1,4 @@
 import tracer from '@lomray/microservice-helpers/helpers/tracer';
-import { version } from '../package.json';
-import * as constants from './constants';
+import config from '@config/tracer';
 
-export default tracer({ ...constants, version });
+export default tracer(config);

@@ -3,6 +3,8 @@ import json from '@rollup/plugin-json';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import { folderInput } from 'rollup-plugin-folder-input'
 import replace from '@rollup/plugin-replace';
+import copy from 'rollup-plugin-copy';
+import cleaner from 'rollup-plugin-cleaner';
 
 /**
  * This is root config for microservices
@@ -17,8 +19,11 @@ const config = {
     preserveModulesRoot: 'src',
     exports: 'auto',
   },
-  external: ['crypto', '@lomray/microservice-nodejs-lib', '@lomray/microservices-types', 'fs', '@lomray/microservice-remote-middleware'],
+  external: ['crypto', 'fs', '@lomray/microservice-nodejs-lib', '@lomray/microservices-types', '@lomray/microservice-remote-middleware'],
   plugins: [
+    cleaner({
+      targets: ['./lib/'],
+    }),
     replace({
       preventAssignment: true,
       values: {
@@ -45,6 +50,11 @@ const config = {
         ]
       }),
     }),
+    copy({
+      targets: [
+        { src: 'package.json', dest: 'lib' },
+      ]
+    })
   ],
 };
 

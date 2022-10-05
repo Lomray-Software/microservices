@@ -1,20 +1,18 @@
 import { Log } from '@lomray/microservice-helpers';
 import type { IGatewayOptions, IGatewayParams } from '@lomray/microservice-nodejs-lib';
 import { ConsoleLogDriver, LogType } from '@lomray/microservice-nodejs-lib';
-import cors, { CorsOptions } from 'cors';
-import _ from 'lodash';
-import RequestIp from 'request-ip';
 import {
   MS_BATCH_LIMIT,
   MS_CONNECTION,
   MS_CONNECTION_SRV,
-  MS_CORS_CONFIG,
   MS_INFO_ROUTE,
   MS_JSON_LIMIT,
   MS_LISTENER_PORT,
   MS_NAME,
   MS_REQ_TIMEOUT,
 } from '@constants/index';
+import cors from '@middlewares/cors';
+import userInfo from '@middlewares/user-info';
 import { version } from '../../package.json';
 
 /**
@@ -34,47 +32,18 @@ const msOptions: Partial<IGatewayOptions> = {
   },
 };
 
+const msMiddlewares = [cors, userInfo];
+
 /**
  * Microservice params
  */
 const msParams: Partial<IGatewayParams> = {
   beforeRoute: (express) => {
-    const corsConfig = MS_CORS_CONFIG as CorsOptions;
-
-    // Check origin's and find regex
-    if (Array.isArray(corsConfig.origin)) {
-      corsConfig.origin = corsConfig.origin.map((origin: string) =>
-        // if string is regex, convert to regex instance
-        origin.startsWith('/') ? new RegExp(origin.replace(/^\/|\/$/g, '')) : origin,
-      );
-    }
-
-    express.use(cors(corsConfig));
-    express.use((req, res, next) => {
-      const clientIp = RequestIp.getClientIp(req);
-
-      // parse user info
-      try {
-        const userInfo = req.header('user-info');
-
-        if (userInfo) {
-          _.set(req.headers, 'user-info', JSON.parse(userInfo));
-        }
-      } catch (e) {
-        Log.error('Failed parse user info', e);
-      }
-
-      // set user ip
-      if (clientIp) {
-        _.set(req.headers, 'user-info.ipAddress', clientIp);
-      }
-
-      next();
-    });
+    msMiddlewares.forEach((middleware) => express.use(middleware()));
   },
   logDriver: ConsoleLogDriver((message, { type }) =>
     Log.log(type === LogType.ERROR ? 'error' : 'info', message),
   ),
 };
 
-export { msOptions, msParams };
+export { msOptions, msParams, msMiddlewares };

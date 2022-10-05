@@ -34,6 +34,7 @@
       "@__helpers__/*": ["./__helpers__/*"],
       "@config/*": ["./src/config/*"],
       "@constants/*": ["./src/constants/*"],
+      "@middlewares/*": ["./src/middlewares/*"],
       "@interfaces/*": ["./src/interfaces/*"],
       "@helpers/*": ["./src/helpers/*"],
       "@methods/*": ["./src/methods/*"],
