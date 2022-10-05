@@ -1,8 +1,8 @@
 import type { IEventHandler } from '@lomray/microservice-nodejs-lib';
+import type { IAttachment } from '@lomray/microservices-client-api/interfaces/attachments/entities/attachment';
 import { getRepository } from 'typeorm';
 import { msOptions } from '@config/ms';
 import Profile from '@entities/profile';
-import type { IAttachment } from '@interfaces/microservices/attachments/entities/attachment';
 
 /**
  * Event handler for Attachment from attachments microservice

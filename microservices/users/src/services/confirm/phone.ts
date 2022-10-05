@@ -1,6 +1,5 @@
-import { Log } from '@lomray/microservice-helpers';
+import { Log, Api } from '@lomray/microservice-helpers';
 import Abstract from '@services/confirm/abstract';
-import Api from '@services/external/api';
 
 /**
  * Phone confirmation service
@@ -24,16 +23,16 @@ class Phone extends Abstract {
    * @private
    */
   private static async sendCode(phone: string, code: string): Promise<boolean> {
-    const result = await Api.notification.phone.send({
+    const { error } = await Api.get().notification.phone.send({
       to: [phone],
       message: `Confirmation code is: ${code}`,
     });
 
-    if (!result.getError()) {
+    if (!error) {
       return true;
     }
 
-    Log.error('Failed send confirmation phone', result.getError());
+    Log.error('Failed send confirmation phone', error);
 
     return false;
   }

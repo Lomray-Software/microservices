@@ -1,10 +1,10 @@
+import { Api } from '@lomray/microservice-helpers';
 import type { IEventHandler } from '@lomray/microservice-nodejs-lib';
+import type IAttachmentEntity from '@lomray/microservices-client-api/interfaces/attachments/entities/attachment-entity';
 import { getRepository } from 'typeorm';
 import { msOptions } from '@config/ms';
 import Event from '@constants/event';
 import Profile from '@entities/profile';
-import type IAttachmentEntity from '@interfaces/microservices/attachments/entities/attachment-entity';
-import Api from '@services/external/api';
 
 /**
  * Event handler for AttachmentEntity from attachments microservice
@@ -29,10 +29,10 @@ const attachmentEntityChanged: IEventHandler<{ entity: IAttachmentEntity }> = as
   switch (eventName) {
     case Event.AttachmentEntityCreate:
     case Event.AttachmentEntityUpdate:
-      const response = await Api.attachments.attachment.view({
+      const { result } = await Api.get().attachments.attachment.view({
         query: { where: { id: attachmentId } },
       });
-      const photo = response.getResult()?.entity?.url;
+      const photo = result?.entity?.url;
 
       if (!photo) {
         return false;

@@ -1,10 +1,9 @@
+import { Api } from '@lomray/microservice-helpers';
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
-import { BaseException, MicroserviceResponse } from '@lomray/microservice-nodejs-lib';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import ConfirmCode from '@entities/confirm-code';
 import Email from '@services/confirm/email';
-import Api from '@services/external/api';
 
 describe('services/confirm/email', () => {
   const sandbox = sinon.createSandbox();
@@ -23,7 +22,7 @@ describe('services/confirm/email', () => {
   });
 
   it('should successful send confirm code', async () => {
-    sandbox.stub(Api.notification.email, 'send').resolves(new MicroserviceResponse());
+    sandbox.stub(Api.get().notification.email, 'send').resolves({});
 
     const isSuccess = await service.send(login);
 
@@ -37,11 +36,9 @@ describe('services/confirm/email', () => {
   });
 
   it('should return false if send email confirmation failed', async () => {
-    sandbox.stub(Api.notification.email, 'send').resolves(
-      new MicroserviceResponse({
-        error: new BaseException({ message: 'Failed send email message' }),
-      }),
-    );
+    sandbox.stub(Api.get().notification.email, 'send').resolves({
+      error: { message: 'Failed send email message', code: 2, status: 2, service: 'tests' },
+    });
 
     const isSuccess = await service.send(login);
 

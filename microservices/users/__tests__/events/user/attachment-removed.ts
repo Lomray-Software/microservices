@@ -1,11 +1,11 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { endpointOptions } from '@lomray/microservice-helpers/test-helpers';
+import { IAttachment } from '@lomray/microservices-client-api/interfaces/attachments/entities/attachment';
+import type IAttachmentEntity from '@lomray/microservices-client-api/interfaces/attachments/entities/attachment-entity';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
 import OriginalEventChangeAttachment from '@events/user/attachment-removed';
-import { IAttachment } from '@interfaces/microservices/attachments/entities/attachment';
-import type IAttachmentEntity from '@interfaces/microservices/attachments/entities/attachment-entity';
 
 const { default: RemoveAttachment } = rewiremock.proxy<{
   default: typeof OriginalEventChangeAttachment;

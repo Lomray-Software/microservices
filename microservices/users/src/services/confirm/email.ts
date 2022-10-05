@@ -1,6 +1,5 @@
-import { Log } from '@lomray/microservice-helpers';
+import { Log, Api } from '@lomray/microservice-helpers';
 import Abstract from '@services/confirm/abstract';
-import Api from '@services/external/api';
 
 /**
  * Email confirmation service
@@ -24,18 +23,18 @@ class Email extends Abstract {
    * @private
    */
   private static async sendEmail(email: string, code: string): Promise<boolean> {
-    const result = await Api.notification.email.send({
+    const { error } = await Api.get().notification.email.send({
       to: [email],
       subject: 'Email confirmation code.',
       text: `Your confirmation code is: ${code}`,
       html: `<p>Your confirmation code is: <strong>${code}</strong></p>`,
     });
 
-    if (!result.getError()) {
+    if (!error) {
       return true;
     }
 
-    Log.error('Failed send confirmation email', result.getError());
+    Log.error('Failed send confirmation email', error);
 
     return false;
   }

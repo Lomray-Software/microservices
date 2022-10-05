@@ -1,13 +1,13 @@
+import { Api } from '@lomray/microservice-helpers';
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { endpointOptions } from '@lomray/microservice-helpers/test-helpers';
-import { MicroserviceResponse } from '@lomray/microservice-nodejs-lib';
+import { IAttachment } from '@lomray/microservices-client-api/interfaces/attachments/entities/attachment';
+import type IAttachmentEntity from '@lomray/microservices-client-api/interfaces/attachments/entities/attachment-entity';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
 import Event from '@constants/event';
 import OriginalEventChangeAttachmentEntity from '@events/user/attachment-entity-changed';
-import type IAttachmentEntity from '@interfaces/microservices/attachments/entities/attachment-entity';
-import Api from '@services/external/api';
 
 const { default: ChangeAttachmentEntity } = rewiremock.proxy<{
   default: typeof OriginalEventChangeAttachmentEntity;
@@ -38,7 +38,7 @@ describe('events/user/attachment-entity-changed', () => {
   const attachment = {
     id: 'demo-id',
     url: 'https://demo-url.com/image.jpg',
-  };
+  } as IAttachment;
 
   const acceptCriteria = { userId: attachmentEntity.entityId };
   const acceptFields = { photo: attachment.url };
@@ -79,8 +79,8 @@ describe('events/user/attachment-entity-changed', () => {
 
   it('should update user photo if entity attachment has changed', async () => {
     sandbox
-      .stub(Api.attachments.attachment, 'view')
-      .resolves(new MicroserviceResponse({ result: { entity: attachment } }));
+      .stub(Api.get().attachments.attachment, 'view')
+      .resolves({ result: { entity: attachment } });
 
     for (const eventName of [Event.AttachmentEntityCreate, Event.AttachmentEntityUpdate]) {
       const isChanged = await ChangeAttachmentEntity(
@@ -100,9 +100,7 @@ describe('events/user/attachment-entity-changed', () => {
   });
 
   it('should skip update user photo if attachment has not url', async () => {
-    sandbox
-      .stub(Api.attachments.attachment, 'view')
-      .resolves(new MicroserviceResponse({ result: {} }));
+    sandbox.stub(Api.get().attachments.attachment, 'view').resolves({ result: {} as any });
 
     const isChanged = await ChangeAttachmentEntity(
       {
