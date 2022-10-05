@@ -12,7 +12,8 @@
 		"json",
 		"users",
 		"worker",
-		"typescript"
+		"typescript",
+    "users"
 	],
 	"publishConfig": {
 		"access": "public"
