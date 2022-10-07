@@ -45,7 +45,8 @@
 		"class-validator": "^0.13.2",
 		"class-validator-jsonschema": "^3.1.1",
 		"nodemailer": "^6.7.5",
-    "typeorm": "0.2.41"
+    "typeorm": "0.2.41",
+    "tslib": "^2.4.0"
   },
 	"devDependencies": {
 		"@types/nodemailer": "^6.4.4"

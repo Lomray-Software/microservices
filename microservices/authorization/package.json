@@ -47,7 +47,8 @@
 		"class-validator": "^0.13.2",
 		"class-validator-jsonschema": "^3.1.1",
 		"lodash": "^4.17.21",
-		"typeorm": "0.2.41"
+		"typeorm": "0.2.41",
+    "tslib": "^2.4.0"
 	},
 	"devDependencies": {
 		"@types/lodash": "^4.14.178",

@@ -70,7 +70,7 @@ const runUpdateDotenv = () => {
 /**
  * Install npm packages for each microservice
  */
-const runGlobalInstall = (isCI = true) => {
+const runGlobalInstall = (isCI = 'y') => {
   const microservices = getMicroservices(true, true);
 
   for (const msDir of microservices) {
@@ -82,7 +82,7 @@ const runGlobalInstall = (isCI = true) => {
       continue;
     }
 
-    childProcess.execSync(`cd ${msDir} && npm ${isCI ? 'ci' : 'i'}`, { stdio: 'inherit' });
+    childProcess.execSync(`cd ${msDir} && npm ${isCI === 'y' ? 'ci' : 'i'}`, { stdio: 'inherit' });
 
     console.info(`Install done: ${msDir}`)
   }
