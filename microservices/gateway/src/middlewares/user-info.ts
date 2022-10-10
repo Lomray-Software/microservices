@@ -23,8 +23,6 @@ const userInfo =
         const parsedInfo = JSON.parse(userInfoData) as Record<string, any>;
 
         _.set(req.headers, 'user-info', parsedInfo);
-
-        handleUserInfo?.(parsedInfo, req);
       }
     } catch (e) {
       Log.error('Failed parse user info', e);
@@ -34,6 +32,8 @@ const userInfo =
     if (clientIp) {
       _.set(req.headers, 'user-info.ipAddress', clientIp);
     }
+
+    handleUserInfo?.(_.get(req.headers, 'userInfo', {}) || {}, req);
 
     next();
   };
