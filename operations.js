@@ -151,6 +151,13 @@ const runBuild = () => {
   for (const msDir of microservices) {
     childProcess.execSync(`cd ${msDir} && npm run build`, { stdio: 'inherit' });
 
+    const packageJsonJs = `${msDir}/lib/package.json.js`;
+
+    if (!fs.existsSync(packageJsonJs)) {
+      fs.writeFileSync(packageJsonJs, 'Object.defineProperty(exports, \'__esModule\', { value: true });\nvar version = "1.0.0";\nexports.version = version;');
+      console.info(`Create package.json js: ${packageJsonJs}`)
+    }
+
     console.info(`Build done: ${msDir}`)
   }
 }
