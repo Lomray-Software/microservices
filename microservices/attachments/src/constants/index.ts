@@ -28,6 +28,7 @@ const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || '';
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY || '';
 const AWS_REGION = process.env.AWS_REGION || '';
 const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME || '';
+const AWS_BUCKET_ACL = process.env.AWS_BUCKET_ACL || '';
 const AWS_FROM_CONFIG_MS = Number(process.env.AWS_FROM_CONFIG_MS ?? 1);
 
 const DB_FROM_CONFIG_MS = Number(process.env.DB_FROM_CONFIG_MS ?? 1);
@@ -69,6 +70,7 @@ export {
   AWS_SECRET_ACCESS_KEY,
   AWS_REGION,
   AWS_BUCKET_NAME,
+  AWS_BUCKET_ACL,
   IMAGE_PROCESSING_CONFIG,
   IMAGE_CONFIG_FROM_CONFIG_MS,
   MS_STORAGE_DOMAIN,

@@ -1,7 +1,14 @@
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import type { S3 } from 'aws-sdk';
+import type { ObjectCannedACL } from 'aws-sdk/clients/s3';
 import type { ManagedUpload } from 'aws-sdk/lib/s3/managed_upload';
 import Abstract from './abstract';
+
+interface IS3StorageParams {
+  s3: S3;
+  bucketName: string;
+  bucketAcl?: ObjectCannedACL;
+}
 
 /**
  * S3 Storage service
@@ -18,12 +25,18 @@ class S3Storage extends Abstract {
   protected bucketName: string;
 
   /**
+   * @protected
+   */
+  protected bucketAcl?: ObjectCannedACL;
+
+  /**
    * @constructor
    */
-  public constructor({ s3, bucketName }: { s3: S3; bucketName: string }) {
+  public constructor({ s3, bucketName, bucketAcl }: IS3StorageParams) {
     super();
     this.s3 = s3;
     this.bucketName = bucketName;
+    this.bucketAcl = bucketAcl;
   }
 
   /**
@@ -35,7 +48,7 @@ class S3Storage extends Abstract {
       Bucket: this.bucketName,
       Key: key,
       Body: buffer,
-      ACL: 'public-read',
+      ...(this.bucketAcl ? { ACL: this.bucketAcl } : {}),
       ContentType: mime,
     };
 
