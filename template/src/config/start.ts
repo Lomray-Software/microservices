@@ -1,4 +1,4 @@
-import { IStartConfigWithDb } from '@lomray/microservice-helpers';
+import type { IStartConfig } from '@lomray/microservice-helpers';
 import { msOptions, msParams } from '@config/ms';
 import {
   MS_CONSOLE_LOG_LEVEL,
@@ -8,7 +8,7 @@ import {
 } from '@constants/index';
 import registerMethods from '@methods/index';
 
-const startConfig: IStartConfigWithDb = {
+const startConfig: IStartConfig = {
   type: 'microservice',
   msOptions,
   msParams,
