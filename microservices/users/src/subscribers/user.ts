@@ -59,7 +59,7 @@ class User implements EntitySubscriberInterface<UserEntity> {
    * Detect if user is soft removed
    * @private
    */
-  protected static isSoftRemoved({ entity, databaseEntity }: UpdateEvent<UserEntity>): boolean {
+  public static isSoftRemoved({ entity, databaseEntity }: UpdateEvent<UserEntity>): boolean {
     return typeof entity?.deletedAt?.toString() === 'string' && databaseEntity.deletedAt === null;
   }
 
@@ -67,7 +67,7 @@ class User implements EntitySubscriberInterface<UserEntity> {
    * Detect if user is restored
    * @private
    */
-  protected static isRecovered({ entity, databaseEntity }: UpdateEvent<UserEntity>): boolean {
+  public static isRecovered({ entity, databaseEntity }: UpdateEvent<UserEntity>): boolean {
     return entity?.deletedAt === null && typeof databaseEntity.deletedAt?.toString() === 'string';
   }
 }

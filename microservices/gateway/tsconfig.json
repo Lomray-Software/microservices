@@ -27,7 +27,7 @@
     "strict": false,
     "pretty": true,
     "suppressImplicitAnyIndexErrors": true,
-    "target": "es5",
+    "target": "ES6",
     "baseUrl": ".",
     "paths": {
       "@__mocks__/*": ["./__mocks__/*"],

@@ -11,8 +11,8 @@ import {
   OneToOne,
   OneToMany,
 } from 'typeorm';
-import IdentityProvider from '@entities/identity-provider';
-import Profile from '@entities/profile';
+import type IdentityProvider from '@entities/identity-provider';
+import type Profile from '@entities/profile';
 
 @JSONSchema({
   properties: {
@@ -89,10 +89,10 @@ class User {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  @OneToOne(() => Profile, (profile) => profile.user)
+  @OneToOne('Profile', 'user')
   profile: Profile;
 
-  @OneToMany(() => IdentityProvider, (idProvider) => idProvider.user)
+  @OneToMany('IdentityProvider', 'user')
   identityProviders: IdentityProvider[];
 }
 
