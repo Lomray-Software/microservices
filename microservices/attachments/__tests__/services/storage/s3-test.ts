@@ -1,4 +1,6 @@
 import { RemoteConfig } from '@lomray/microservice-helpers';
+import type { S3 } from 'aws-sdk';
+import type { S3Customizations } from 'aws-sdk/lib/services/s3';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { bucketNameMock } from '@__mocks__/common';
@@ -29,19 +31,20 @@ describe('services/attachment/image', () => {
 
     const { s3, bucketName } = await S3AwsSdk.get(options);
 
-    sinon.stub(s3, 'upload').returns({ promise: sinon.stub() });
+    const uploadStub = sandbox
+      .stub(s3, 'upload')
+      .returns({ promise: sinon.stub() } as unknown as ReturnType<S3Customizations['upload']>);
 
     const service = new S3Storage({ s3, bucketName });
     const params = {
       Key: 'key',
       Body: new Buffer('file'),
-      ACL: 'public-read',
       ContentType: 'image/jpeg',
     };
 
     await service.upload(params.Key, params.Body, 'image/jpeg');
 
-    expect(s3.upload).to.be.calledWith({ Bucket: bucketNameMock, ...params });
+    expect(uploadStub).to.be.calledWith({ Bucket: bucketNameMock, ...params });
   });
 
   it('should successfully delete files', async () => {
@@ -51,10 +54,12 @@ describe('services/attachment/image', () => {
 
     const { s3, bucketName } = await S3AwsSdk.get(options);
 
-    sinon
-      .stub(s3, 'listObjectsV2')
-      .returns({ promise: sinon.stub().returns({ Contents: [{ Key: 'key' }] }) });
-    sinon.stub(s3, 'deleteObjects').returns({ promise: sinon.stub() });
+    const listObjectsStub = sandbox.stub(s3, 'listObjectsV2').returns({
+      promise: sinon.stub().returns({ Contents: [{ Key: 'key' }] }),
+    } as unknown as ReturnType<S3['listObjectsV2']>);
+    const deleteObjectsStub = sandbox
+      .stub(s3, 'deleteObjects')
+      .returns({ promise: sinon.stub() } as unknown as ReturnType<S3['deleteObjects']>);
 
     const service = new S3Storage({ s3, bucketName });
     const params = {
@@ -68,7 +73,7 @@ describe('services/attachment/image', () => {
 
     await service.delete(params.Prefix);
 
-    expect(s3.listObjectsV2).to.be.calledWith(params);
-    expect(s3.deleteObjects).to.be.calledWith(deleteParams);
+    expect(listObjectsStub).to.be.calledWith(params);
+    expect(deleteObjectsStub).to.be.calledWith(deleteParams);
   });
 });

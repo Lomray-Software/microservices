@@ -2,6 +2,12 @@ import { RemoteConfig } from '@lomray/microservice-helpers';
 import AWS from 'aws-sdk';
 import type { S3 } from 'aws-sdk';
 
+interface IS3AwsSdkOutput {
+  s3: S3;
+  bucketName: string;
+  bucketAcl: string;
+}
+
 class S3AwsSdk {
   /**
    * @private
@@ -16,7 +22,12 @@ class S3AwsSdk {
   /**
    * @private
    */
-  private static bucketName: string | null;
+  private static bucketName: string;
+
+  /**
+   * @private
+   */
+  private static bucketAcl: string;
 
   /**
    * Create/get AWS S3
@@ -28,8 +39,9 @@ class S3AwsSdk {
       secretAccessKey?: string;
       region?: string;
       bucketName?: string;
+      bucketAcl?: string;
     };
-  }): Promise<any> {
+  }): Promise<IS3AwsSdkOutput> {
     const { isFromConfigMs, options } = params;
 
     if (!this.hasInit) {
@@ -41,6 +53,7 @@ class S3AwsSdk {
         });
 
         this.bucketName = remoteConfig?.s3.bucketName;
+        this.bucketAcl = remoteConfig?.s3.bucketAcl;
       }
 
       this.s3 = new AWS.S3({
@@ -52,8 +65,9 @@ class S3AwsSdk {
     }
 
     return {
-      s3: this.s3,
-      bucketName: this.bucketName || options?.bucketName,
+      s3: this.s3!,
+      bucketName: this.bucketName || options?.bucketName || '',
+      bucketAcl: this.bucketAcl || options?.bucketAcl || '',
     };
   }
 
@@ -62,7 +76,8 @@ class S3AwsSdk {
    */
   public static reset(): void {
     this.hasInit = false;
-    this.bucketName = null;
+    this.bucketName = '';
+    this.bucketAcl = '';
     this.s3 = null;
   }
 }

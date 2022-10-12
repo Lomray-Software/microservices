@@ -48,7 +48,9 @@ A microservice provides work with attachments for entities from other microservi
 - `AWS_SECRET_ACCESS_KEY` - AWS secret access key, if you will use S3 to store files (if not configured from remote config.) Default: `empty`
 - `AWS_REGION` - AWS region, if you will use S3 to store files (if not configured from remote config.) Default: `empty`
 - `AWS_BUCKET_NAME` - AWS S3 bucket name, if you will use S3 to store files (if not configured from remote config.) Default: `empty`
+- `AWS_BUCKET_ACL` - AWS S3 bucket ACL (e.g.: public-read). Default: `empty`
 - `AWS_FROM_CONFIG_MS` - Get AWS credentials from configuration microservice. Set `0` to disable. Default: `1`
+- `MS_STORAGE_DOMAIN` - Access to attachments through storage domain. Default: ``
 - `STORAGE_PATH_PREFIX` - Path (url) prefix for attachments. Default: `empty`
 - `IMAGE_CONFIG_FROM_CONFIG_MS` - Get image processing configuration from configuration microservice. Set `0` to disable. Default: `1`
 - `IMAGE_PROCESSING_CONFIG` - Image processing configuration JSON string. Default: `{}`
