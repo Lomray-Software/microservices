@@ -14,19 +14,19 @@ export interface ISignUpParams {
  */
 class SignUp {
   /**
-   * @private
+   * @protected
    */
-  private readonly fields: ISignUpParams['fields'];
+  protected readonly fields: ISignUpParams['fields'];
 
   /**
-   * @private
+   * @protected
    */
-  private readonly isConfirmed: ISignUpParams['isConfirmed'];
+  protected readonly isConfirmed: ISignUpParams['isConfirmed'];
 
   /**
-   * @private
+   * @protected
    */
-  private readonly repository: ISignUpParams['repository'];
+  protected readonly repository: ISignUpParams['repository'];
 
   /**
    * @constructor

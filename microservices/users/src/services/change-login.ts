@@ -17,29 +17,29 @@ export interface IChangeLoginParams {
  */
 class ChangeLogin {
   /**
-   * @private
+   * @protected
    */
-  private readonly userId: IChangeLoginParams['userId'];
+  protected readonly userId: IChangeLoginParams['userId'];
 
   /**
-   * @private
+   * @protected
    */
-  private readonly login: IChangeLoginParams['login'];
+  protected readonly login: IChangeLoginParams['login'];
 
   /**
-   * @private
+   * @protected
    */
-  private readonly confirmBy: IChangeLoginParams['confirmBy'];
+  protected readonly confirmBy: IChangeLoginParams['confirmBy'];
 
   /**
-   * @private
+   * @protected
    */
-  private readonly isConfirmed: IChangeLoginParams['isConfirmed'];
+  protected readonly isConfirmed: IChangeLoginParams['isConfirmed'];
 
   /**
-   * @private
+   * @protected
    */
-  private readonly repository: IChangeLoginParams['repository'];
+  protected readonly repository: IChangeLoginParams['repository'];
 
   /**
    * @constructor

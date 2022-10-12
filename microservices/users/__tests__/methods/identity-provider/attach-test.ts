@@ -6,11 +6,11 @@ import sinon from 'sinon';
 import { EntityManager } from 'typeorm';
 import IdProvider from '@constants/id-provider';
 import User from '@entities/user';
-import OriginalEndpointAttach from '@methods/identity-provider/attach';
+import { attach as OriginalEndpointAttach } from '@methods/identity-provider/attach';
 import Factory from '@services/identity-provider/factory';
 
-const { default: Attach } = rewiremock.proxy<{
-  default: typeof OriginalEndpointAttach;
+const { attach: Attach } = rewiremock.proxy<{
+  attach: typeof OriginalEndpointAttach;
 }>(() => require('@methods/identity-provider/attach'), {
   typeorm: TypeormMock.mock,
 });

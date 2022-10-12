@@ -40,4 +40,4 @@ const signIn = Endpoint.custom(
   },
 );
 
-export default signIn;
+export { SignInInput, SignInOutput, signIn };

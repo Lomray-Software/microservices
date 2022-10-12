@@ -23,4 +23,4 @@ const signOut = Endpoint.custom(
   }),
 );
 
-export default signOut;
+export { SignOutInput, SignOutOutput, signOut };

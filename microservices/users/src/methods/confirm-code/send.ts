@@ -31,4 +31,4 @@ const send = Endpoint.custom(
   },
 );
 
-export default send;
+export { ConfirmSendInput, ConfirmSendOutput, send };

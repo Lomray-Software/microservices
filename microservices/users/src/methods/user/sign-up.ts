@@ -47,4 +47,4 @@ const signUp = Endpoint.custom(
   },
 );
 
-export default signUp;
+export { SignUpInput, SignUpOutput, signUp };

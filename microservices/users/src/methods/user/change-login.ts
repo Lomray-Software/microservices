@@ -49,4 +49,4 @@ const changeLogin = Endpoint.custom(
   },
 );
 
-export default changeLogin;
+export { ChangeLoginInput, ChangeLoginOutput, changeLogin };

@@ -17,29 +17,29 @@ export type ChangePasswordParams = {
  */
 class ChangePassword {
   /**
-   * @private
+   * @protected
    */
-  private readonly userId: string;
+  protected readonly userId: string;
 
   /**
-   * @private
+   * @protected
    */
-  private readonly newPassword: string;
+  protected readonly newPassword: string;
 
   /**
-   * @private
+   * @protected
    */
-  private readonly oldPassword?: string;
+  protected readonly oldPassword?: string;
 
   /**
-   * @private
+   * @protected
    */
-  private readonly isConfirmed?: ChangePasswordThroughConfirmation['isConfirmed'];
+  protected readonly isConfirmed?: ChangePasswordThroughConfirmation['isConfirmed'];
 
   /**
-   * @private
+   * @protected
    */
-  private readonly repository: ChangePasswordParams['repository'];
+  protected readonly repository: ChangePasswordParams['repository'];
 
   /**
    * @constructor

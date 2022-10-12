@@ -3,10 +3,10 @@ import { endpointOptions, waitResult } from '@lomray/microservice-helpers/test-h
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
-import OriginalEndpointSignOut from '@methods/user/sign-out';
+import { signOut as OriginalEndpointSignOut } from '@methods/user/sign-out';
 
-const { default: SignOut } = rewiremock.proxy<{
-  default: typeof OriginalEndpointSignOut;
+const { signOut: SignOut } = rewiremock.proxy<{
+  signOut: typeof OriginalEndpointSignOut;
 }>(() => require('@methods/user/sign-out'), {
   typeorm: TypeormMock.mock,
 });

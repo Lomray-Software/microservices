@@ -5,11 +5,11 @@ import rewiremock from 'rewiremock';
 import sinon, { SinonStub } from 'sinon';
 import { Repository } from 'typeorm';
 import User from '@entities/user';
-import OriginalEndpointChangePassword from '@methods/user/change-password';
+import { changePassword as OriginalEndpointChangePassword } from '@methods/user/change-password';
 import ChangePasswordService, { ChangePasswordParams } from '@services/change-password';
 
-const { default: ChangePassword } = rewiremock.proxy<{
-  default: typeof OriginalEndpointChangePassword;
+const { changePassword: ChangePassword } = rewiremock.proxy<{
+  changePassword: typeof OriginalEndpointChangePassword;
 }>(() => require('@methods/user/change-password'), {
   typeorm: TypeormMock.mock,
 });

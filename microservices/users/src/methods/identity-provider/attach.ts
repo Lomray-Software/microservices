@@ -51,4 +51,4 @@ const attach = Endpoint.custom(
   },
 );
 
-export default attach;
+export { IdentityProviderAttachInput, IdentityProviderAttachOutput, attach };

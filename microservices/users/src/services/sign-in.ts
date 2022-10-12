@@ -15,19 +15,19 @@ export interface ISignInParams {
  */
 class SignIn {
   /**
-   * @private
+   * @protected
    */
-  private readonly login: ISignInParams['login'];
+  protected readonly login: ISignInParams['login'];
 
   /**
-   * @private
+   * @protected
    */
-  private readonly password: ISignInParams['password'];
+  protected readonly password: ISignInParams['password'];
 
   /**
-   * @private
+   * @protected
    */
-  private readonly repository: ISignInParams['repository'];
+  protected readonly repository: ISignInParams['repository'];
 
   /**
    * @constructor
@@ -69,9 +69,9 @@ class SignIn {
 
   /**
    * Check login is email
-   * @private
+   * @protected
    */
-  private isEmail(): boolean {
+  protected isEmail(): boolean {
     return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\.[\d]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
       String(this.login).toLowerCase(),
     );

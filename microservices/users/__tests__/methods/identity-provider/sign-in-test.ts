@@ -6,11 +6,11 @@ import sinon from 'sinon';
 import { EntityManager } from 'typeorm';
 import IdProvider from '@constants/id-provider';
 import User from '@entities/user';
-import OriginalEndpointSignIn from '@methods/identity-provider/sign-in';
+import { signIn as OriginalEndpointSignIn } from '@methods/identity-provider/sign-in';
 import Factory from '@services/identity-provider/factory';
 
-const { default: SignIn } = rewiremock.proxy<{
-  default: typeof OriginalEndpointSignIn;
+const { signIn: SignIn } = rewiremock.proxy<{
+  signIn: typeof OriginalEndpointSignIn;
 }>(() => require('@methods/identity-provider/sign-in'), {
   typeorm: TypeormMock.mock,
 });

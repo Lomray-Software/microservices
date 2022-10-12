@@ -72,9 +72,9 @@ abstract class Abstract {
 
   /**
    * Get current timestamp
-   * @private
+   * @protected
    */
-  private static getTimestamp(): number {
+  protected static getTimestamp(): number {
     return Math.round(Date.now() / 1000);
   }
 }

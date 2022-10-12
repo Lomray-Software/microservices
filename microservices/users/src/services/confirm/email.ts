@@ -20,9 +20,9 @@ class Email extends Abstract {
 
   /**
    * Send email with confirm code
-   * @private
+   * @protected
    */
-  private static async sendEmail(email: string, code: string): Promise<boolean> {
+  protected static async sendEmail(email: string, code: string): Promise<boolean> {
     const { error } = await Api.get().notification.email.send({
       to: [email],
       subject: 'Email confirmation code.',

@@ -22,7 +22,7 @@ class Phone extends Abstract {
    * Send sms with confirm code
    * @private
    */
-  private static async sendCode(phone: string, code: string): Promise<boolean> {
+  protected static async sendCode(phone: string, code: string): Promise<boolean> {
     const { error } = await Api.get().notification.phone.send({
       to: [phone],
       message: `Confirmation code is: ${code}`,

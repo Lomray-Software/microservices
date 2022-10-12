@@ -5,12 +5,12 @@ import rewiremock from 'rewiremock';
 import sinon, { SinonStub } from 'sinon';
 import { Repository } from 'typeorm';
 import User from '@entities/user';
-import OriginalEndpointChangeLogin from '@methods/user/change-login';
+import { changeLogin as OriginalEndpointChangeLogin } from '@methods/user/change-login';
 import ChangeLoginService, { IChangeLoginParams } from '@services/change-login';
 import { Factory, ConfirmBy } from '@services/confirm/factory';
 
-const { default: ChangeLogin } = rewiremock.proxy<{
-  default: typeof OriginalEndpointChangeLogin;
+const { changeLogin: ChangeLogin } = rewiremock.proxy<{
+  changeLogin: typeof OriginalEndpointChangeLogin;
 }>(() => require('@methods/user/change-login'), {
   typeorm: TypeormMock.mock,
 });

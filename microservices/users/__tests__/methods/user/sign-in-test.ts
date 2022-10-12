@@ -5,11 +5,11 @@ import rewiremock from 'rewiremock';
 import sinon from 'sinon';
 import { Repository } from 'typeorm';
 import User from '@entities/user';
-import OriginalEndpointSignIn from '@methods/user/sign-in';
+import { signIn as OriginalEndpointSignIn } from '@methods/user/sign-in';
 import SignInService, { ISignInParams } from '@services/sign-in';
 
-const { default: SignIn } = rewiremock.proxy<{
-  default: typeof OriginalEndpointSignIn;
+const { signIn: SignIn } = rewiremock.proxy<{
+  signIn: typeof OriginalEndpointSignIn;
 }>(() => require('@methods/user/sign-in'), {
   typeorm: TypeormMock.mock,
 });

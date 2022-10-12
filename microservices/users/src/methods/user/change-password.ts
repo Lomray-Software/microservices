@@ -73,4 +73,4 @@ const changePassword = Endpoint.custom(
   },
 );
 
-export default changePassword;
+export { ChangePasswordInput, ChangePasswordOutput, changePassword };

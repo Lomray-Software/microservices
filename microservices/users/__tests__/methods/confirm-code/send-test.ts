@@ -4,11 +4,11 @@ import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
 import { Repository } from 'typeorm';
-import OriginalEndpointSend from '@methods/confirm-code/send';
+import { send as OriginalEndpointSend } from '@methods/confirm-code/send';
 import { Factory, ConfirmBy } from '@services/confirm/factory';
 
-const { default: Send } = rewiremock.proxy<{
-  default: typeof OriginalEndpointSend;
+const { send: Send } = rewiremock.proxy<{
+  send: typeof OriginalEndpointSend;
 }>(() => require('@methods/confirm-code/send'), {
   typeorm: TypeormMock.mock,
 });

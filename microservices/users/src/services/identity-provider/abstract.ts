@@ -72,7 +72,7 @@ abstract class Abstract {
    * Validate entities
    * @private
    */
-  private async validateEntities(entitiesObj: (ObjectLiteral | undefined)[]): Promise<void> {
+  protected async validateEntities(entitiesObj: (ObjectLiteral | undefined)[]): Promise<void> {
     const entities = entitiesObj.filter(Boolean) as ObjectLiteral[];
     const errors = await Promise.all(
       entities.map((entity) =>

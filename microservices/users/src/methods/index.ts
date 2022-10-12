@@ -1,17 +1,17 @@
 import type { IEndpointHandler, Microservice } from '@lomray/microservice-nodejs-lib';
-import ConfirmCodeSend from '@methods/confirm-code/send';
-import IdentityProviderAttach from '@methods/identity-provider/attach';
+import { send as ConfirmCodeSend } from '@methods/confirm-code/send';
+import { attach as IdentityProviderAttach } from '@methods/identity-provider/attach';
 import CrudIdentityProvider from '@methods/identity-provider/crud';
-import IdentityProviderSignIn from '@methods/identity-provider/sign-in';
+import { signIn as IdentityProviderSignIn } from '@methods/identity-provider/sign-in';
 import MetaEndpoint from '@methods/meta';
 import CrudProfile from '@methods/profile/crud';
-import UserChangeLogin from '@methods/user/change-login';
-import UserChangePassword from '@methods/user/change-password';
+import { changeLogin as UserChangeLogin } from '@methods/user/change-login';
+import { changePassword as UserChangePassword } from '@methods/user/change-password';
 import CrudUser from '@methods/user/crud';
 import UserMe from '@methods/user/me';
-import UserSignIn from '@methods/user/sign-in';
-import UserSignOut from '@methods/user/sign-out';
-import UserSignUp from '@methods/user/sign-up';
+import { signIn as UserSignIn } from '@methods/user/sign-in';
+import { signOut as UserSignOut } from '@methods/user/sign-out';
+import { signUp as UserSignUp } from '@methods/user/sign-up';
 
 /**
  * Register methods

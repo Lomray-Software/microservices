@@ -9,7 +9,7 @@ class User implements EntitySubscriberInterface<UserEntity> {
   /**
    * This subscriber only for User entity
    */
-  listenTo(): typeof UserEntity {
+  public listenTo(): typeof UserEntity {
     return UserEntity;
   }
 
@@ -17,7 +17,10 @@ class User implements EntitySubscriberInterface<UserEntity> {
    * 1. Create profile when we create new user
    * 2. Generate username
    */
-  afterInsert({ entity, manager }: InsertEvent<UserEntity>): Promise<[UpdateResult, Profile]> {
+  public afterInsert({
+    entity,
+    manager,
+  }: InsertEvent<UserEntity>): Promise<[UpdateResult, Profile]> {
     const profileRepository = manager.getRepository(Profile);
     const userRepository = manager.getRepository(UserEntity);
 
@@ -35,7 +38,7 @@ class User implements EntitySubscriberInterface<UserEntity> {
    * Also soft delete or restore user profile
    * @inheritDoc
    */
-  afterUpdate(event: UpdateEvent<UserEntity>): Promise<UpdateResult[]> | void {
+  public afterUpdate(event: UpdateEvent<UserEntity>): Promise<UpdateResult[]> | void {
     const profileRepository = event.manager.getRepository(Profile);
     const idProviderRepository = event.manager.getRepository(IdentityProvider);
 
@@ -56,7 +59,7 @@ class User implements EntitySubscriberInterface<UserEntity> {
    * Detect if user is soft removed
    * @private
    */
-  private static isSoftRemoved({ entity, databaseEntity }: UpdateEvent<UserEntity>): boolean {
+  protected static isSoftRemoved({ entity, databaseEntity }: UpdateEvent<UserEntity>): boolean {
     return typeof entity?.deletedAt?.toString() === 'string' && databaseEntity.deletedAt === null;
   }
 
@@ -64,7 +67,7 @@ class User implements EntitySubscriberInterface<UserEntity> {
    * Detect if user is restored
    * @private
    */
-  private static isRecovered({ entity, databaseEntity }: UpdateEvent<UserEntity>): boolean {
+  protected static isRecovered({ entity, databaseEntity }: UpdateEvent<UserEntity>): boolean {
     return entity?.deletedAt === null && typeof databaseEntity.deletedAt?.toString() === 'string';
   }
 }

@@ -63,9 +63,9 @@ class Firebase extends Abstract {
 
   /**
    * Sign up user
-   * @private
+   * @protected
    */
-  private register(firebaseUser: UserRecord, type: string): Promise<User> {
+  protected register(firebaseUser: UserRecord, type: string): Promise<User> {
     const [firstName, lastName, middleName] = firebaseUser.displayName?.split(' ') ?? [];
     const user = this.userRepository.create({
       firstName,
@@ -82,9 +82,9 @@ class Firebase extends Abstract {
 
   /**
    * Make or update user profile
-   * @private
+   * @protected
    */
-  private getProfile(firebaseUser: UserRecord, profile?: Profile): Profile {
+  protected getProfile(firebaseUser: UserRecord, profile?: Profile): Profile {
     const updatedProfile = profile ?? this.profileRepository.create({ params: {} });
 
     if (!updatedProfile.photo) {
@@ -99,9 +99,9 @@ class Firebase extends Abstract {
 
   /**
    * Get current identity provider
-   * @private
+   * @protected
    */
-  private getIdentityProvider(firebaseUser: UserRecord, type: string): IdentityProvider {
+  protected getIdentityProvider(firebaseUser: UserRecord, type: string): IdentityProvider {
     return this.providerRepository.create({
       provider: this.provider,
       identifier: firebaseUser.uid,
@@ -114,9 +114,9 @@ class Firebase extends Abstract {
 
   /**
    * Get provider uid for facebook, google, etc...
-   * @private
+   * @protected
    */
-  private static getTypeUid(firebaseUser: UserRecord, type: string): string | undefined {
+  protected static getTypeUid(firebaseUser: UserRecord, type: string): string | undefined {
     for (const { providerId, uid } of firebaseUser.providerData) {
       if (providerId === type) {
         return uid;
@@ -128,9 +128,9 @@ class Firebase extends Abstract {
 
   /**
    * Get firebase user photo with large size
-   * @private
+   * @protected
    */
-  private static getUserPhoto(firebaseUser: UserRecord): string | undefined {
+  protected static getUserPhoto(firebaseUser: UserRecord): string | undefined {
     for (const { providerId, photoURL } of firebaseUser.providerData) {
       if (providerId.includes('google')) {
         return photoURL?.replace('s96-c', 's400-c');
@@ -144,9 +144,9 @@ class Firebase extends Abstract {
 
   /**
    * Get firebase user by token
-   * @private
+   * @protected
    */
-  private async getFirebaseUser(): Promise<[UserRecord, string]> {
+  protected async getFirebaseUser(): Promise<[UserRecord, string]> {
     const firebase = await FirebaseSdk();
 
     try {
