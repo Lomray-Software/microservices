@@ -24,12 +24,12 @@ export default (ms: Microservice): void => {
   /**
    * Email methods
    */
-  ms.addEndpoint('email.send', EmailSend, { isPrivate: true });
+  ms.addEndpoint('email.send', EmailSend);
 
   /**
    * Phone methods
    */
-  ms.addEndpoint('phone.send', PhoneSend, { isPrivate: true });
+  ms.addEndpoint('phone.send', PhoneSend);
 
   /**
    * Microservice metadata endpoint

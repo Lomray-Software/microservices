@@ -16,27 +16,21 @@ export default (ms: Microservice): void => {
    */
   ms.addEndpoint('middleware.count', MiddlewareCount, {
     isDisableMiddlewares: true,
-    isPrivate: true,
   });
   ms.addEndpoint('middleware.list', MiddlewareList, {
     isDisableMiddlewares: true,
-    isPrivate: true,
   });
   ms.addEndpoint('middleware.view', MiddlewareView, {
     isDisableMiddlewares: true,
-    isPrivate: true,
   });
   ms.addEndpoint('middleware.create', MiddlewareCreate, {
     isDisableMiddlewares: true,
-    isPrivate: true,
   });
   ms.addEndpoint('middleware.update', MiddlewareCreate, {
     isDisableMiddlewares: true,
-    isPrivate: true,
   });
   ms.addEndpoint('middleware.remove', MiddlewareRemove, {
     isDisableMiddlewares: true,
-    isPrivate: true,
   });
 
   /**
@@ -45,7 +39,6 @@ export default (ms: Microservice): void => {
   Object.entries(CrudConfig).forEach(([method, handler]) => {
     ms.addEndpoint(`config.${method}`, handler, {
       isDisableMiddlewares: true,
-      isPrivate: true,
     });
   });
 
