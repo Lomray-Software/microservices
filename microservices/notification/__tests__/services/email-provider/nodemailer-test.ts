@@ -20,6 +20,7 @@ describe('services/email-provider/nodemailer', () => {
     const params = {
       from: 'from@email.com',
       to: ['to@email.com', 'another@email.com'],
+      replyTo: undefined,
       subject: 'Subject',
       text: 'Text',
       html: '<strong>Html</strong>',
