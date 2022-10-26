@@ -6,6 +6,7 @@ import Message from '@entities/message';
 export interface IEmailParams {
   from?: string;
   to: string[];
+  replyTo?: string;
   subject: string;
   text: string;
   html: string;

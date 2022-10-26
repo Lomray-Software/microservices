@@ -10,10 +10,14 @@ class EmailSendInput {
   @IsUndefinable()
   from?: string;
 
-  @MaxLength(20, {
+  @MaxLength(30, {
     each: true,
   })
   to: string[];
+
+  @MaxLength(100)
+  @IsUndefinable()
+  replyTo?: string;
 
   @MaxLength(255)
   subject: string;

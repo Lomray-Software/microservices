@@ -12,10 +12,11 @@ class Nodemailer extends Abstract {
    */
   public async send(params: IEmailParams): Promise<boolean> {
     const { defaultEmailFrom } = this.params;
-    const { from = defaultEmailFrom, to, subject, text, html } = params;
+    const { from = defaultEmailFrom, to, subject, text, html, replyTo } = params;
 
     const info = await this.transporter.sendMail({
       from,
+      replyTo,
       to,
       subject,
       text,
