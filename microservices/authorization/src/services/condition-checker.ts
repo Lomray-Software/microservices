@@ -73,7 +73,11 @@ class ConditionChecker {
     let response;
 
     try {
-      response = await this.ms.sendRequest(msMethod, data);
+      if (method) {
+        response = await this.ms.sendRequest(msMethod, data);
+      } else {
+        Log.error('Condition request failed (#3): Empty switch case');
+      }
     } catch (e) {
       Log.error('Condition request failed (#1): ', e);
     } finally {
@@ -93,18 +97,25 @@ class ConditionChecker {
     const parallelRequest = [];
 
     for (const [key, request] of Object.entries(requests)) {
-      let requestParams;
+      let requestParams: IConditionRequest;
 
       if ('switch' in request) {
         const { value, cases } = request.switch;
         const compiledValue = _.template(value)(this.templateParams);
+        const compiledCases = Object.entries(cases).reduce(
+          (res, [caseKey, caseValue]) => ({
+            ...res,
+            [_.template(caseKey)(this.templateParams)]: caseValue,
+          }),
+          {},
+        );
 
-        requestParams = cases[compiledValue];
+        requestParams = compiledCases[compiledValue];
       } else {
         requestParams = request;
       }
 
-      const req = this.execRequest(key, requestParams);
+      const req = this.execRequest(key, requestParams ?? {});
 
       if (!requestParams?.isParallel) {
         await req;

@@ -10,7 +10,7 @@ describe('services/condition-checker', () => {
   const ms = Microservice.create();
   const templateParams = { hello: 'world', forSwitch: 'case1' };
 
-  const getService = () => new ConditionChecker(ms, { ...templateParams });
+  const getService = (params = templateParams) => new ConditionChecker(ms, { ...params });
 
   afterEach(() => {
     TypeormMock.sandbox.reset();
@@ -60,6 +60,16 @@ describe('services/condition-checker', () => {
                   },
                 },
               },
+              "<%= _.get({}, 'dynamic', 'case2') %>": {
+                method: "<%= _.join(['microservice', hello], '.') %>",
+                params: {
+                  query: {
+                    where: {
+                      hello: '<%= hello %>',
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -99,14 +109,27 @@ describe('services/condition-checker', () => {
       .onCall(4)
       .resolves(new MicroserviceResponse({ result: entityParallel2 }));
 
-    const isAllow = await getService().execConditions(condition);
-    const call1 = stubRequests.getCall(0).args;
+    for (const tParams of [
+      undefined,
+      { hello: 'another', forSwitch: 'case2' },
+      { hello: 'unknown', forSwitch: 'unknown' },
+    ]) {
+      stubRequests.resetHistory();
 
-    expect(isAllow).to.true;
-    expect(call1).to.deep.equal([
-      'microservice.world',
-      { query: { where: { hello: templateParams.hello } } },
-    ]);
+      const isAllow = await getService(tParams).execConditions(condition);
+      const call1 = stubRequests.getCall(0).args;
+      const helloVal = tParams?.hello ?? templateParams.hello;
+
+      if (helloVal !== 'unknown') {
+        expect(isAllow).to.true;
+        expect(call1).to.deep.equal([
+          `microservice.${helloVal}`,
+          { query: { where: { hello: helloVal } } },
+        ]);
+      } else {
+        expect(isAllow).to.false;
+      }
+    }
   });
 
   it('should correctly exec junction "or" conditions', async () => {

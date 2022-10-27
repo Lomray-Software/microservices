@@ -28,8 +28,8 @@
               "switch": {
                 "value": "<%= _.get(reqParams, 'fields.microservice') %>",
                 "cases": {
-                  "core": {
-                    "method": "<%= _.join(['core', _.get(reqParams, 'fields.type'), 'view'], '.') %>",
+                  "<%= _.get(reqParams, 'fields.microservice') %>": {
+                    "method": "<%= _.join([_.get(reqParams, 'fields.microservice'), _.get(reqParams, 'fields.type'), 'view'], '.') %>",
                     "params": {
                       "query": {
                         "where": {
