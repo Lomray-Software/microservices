@@ -51,7 +51,7 @@ class User {
   @JSONSchema({
     description: 'This field should be changed though special method (e.g.: change-login).',
   })
-  @Column({ type: 'varchar', length: 50, default: null, unique: true })
+  @Column({ type: 'varchar', length: 70, default: null, unique: true })
   @Length(1, 70)
   @IsEmail()
   @IsUndefinable()
@@ -62,7 +62,7 @@ class User {
     description: 'This field should be changed though special method (e.g.: change-login).',
   })
   @Column({ type: 'varchar', length: 20, default: null, unique: true })
-  @Length(1, 70)
+  @Length(1, 20)
   @IsMobilePhone()
   @IsUndefinable()
   @IsNullable()
