@@ -43,7 +43,7 @@
     "@lomray/microservice-helpers": "^1.24.5",
 		"class-validator": "^0.13.2",
 		"class-validator-jsonschema": "^3.1.1",
-		"cookie": "^0.4.1",
+		"cookie": "^0.4.2",
 		"jsonwebtoken": "^8.5.1",
 		"typeorm": "0.2.41",
 		"uuid": "^8.3.2",
