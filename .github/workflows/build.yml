@@ -73,6 +73,8 @@ jobs:
 
       - name: Compile microservices
         run: npm run build
+        env:
+          BRANCH: ${{ needs.changed-microservices.outputs.branch }}
 
       # note: this also update package.json version
       - name: Publish npm packages / create github release
