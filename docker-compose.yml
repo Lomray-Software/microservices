@@ -17,11 +17,14 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: example
 
-# for testing tracing
+# for testing opentelemetry
 #  agent:
-#    image: matthewpatell/grafana-agent
+#    image: matthewpatell/opentelemetry-collector:latest
+#    container_name: opentelemetry_collector
 #    environment:
-#      GRAFANA_TEMPO_USERNAME: FILL_THIS_FIELD
-#      GRAFANA_TEMPO_PASSWORD: FILL_THIS_FIELD
+#      TEMPO_ENDPOINT: tempo-us-central1.grafana.net:443
+#      TEMPO_BASIC_AUTH: FILL_THIS_FIELD
+#      METRIC_ENDPOINT: https://prometheus-prod-10-prod-us-central-0.grafana.net/api/prom/push
+#      METRIC_BASIC_AUTH: FILL_THIS_FIELD
 #    ports:
 #      - "4318:4318"
