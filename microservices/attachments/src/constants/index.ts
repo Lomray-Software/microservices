@@ -4,7 +4,7 @@ const ENV = process.env.NODE_ENV || 'development';
 const IS_PROD = ENV === 'production';
 const IS_DEV = ENV === 'development';
 const IS_TEST = ENV === 'tests';
-const BRANCH = process.env.__BRANCH__;
+const ENVIRONMENT = process.env.ENVIRONMENT || 'prod';
 const IS_BUILD = process.env.__IS_BUILD__;
 const SRC_FOLDER = IS_BUILD ? 'lib' : 'src';
 
@@ -60,7 +60,7 @@ export {
   IS_DEV,
   IS_TEST,
   IS_BUILD,
-  BRANCH,
+  ENVIRONMENT,
   SRC_FOLDER,
   DB_FROM_CONFIG_MS,
   DB_ENV,

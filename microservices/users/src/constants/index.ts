@@ -3,7 +3,7 @@ const IS_PROD = ENV === 'production';
 const IS_DEV = ENV === 'development';
 const IS_TEST = ENV === 'tests';
 const IS_BUILD = process.env.__IS_BUILD__;
-const BRANCH = process.env.__BRANCH__;
+const ENVIRONMENT = process.env.ENVIRONMENT || 'prod';
 const SRC_FOLDER = IS_BUILD ? 'lib' : 'src';
 
 const MS_NAME = process.env.MS_NAME || 'users';
@@ -54,7 +54,7 @@ export {
   IS_DEV,
   IS_TEST,
   IS_BUILD,
-  BRANCH,
+  ENVIRONMENT,
   SRC_FOLDER,
   MS_GRAFANA_LOKI_CONFIG,
   MS_ENABLE_GRAFANA_LOG,

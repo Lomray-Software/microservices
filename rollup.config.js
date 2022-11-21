@@ -28,7 +28,6 @@ const config = {
       preventAssignment: true,
       values: {
         'process.env.__IS_BUILD__': 'true',
-        'process.env.__BRANCH__': `'${process.env.BRANCH || 'staging'}'`,
       },
     }),
     folderInput(),
