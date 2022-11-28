@@ -5,7 +5,6 @@ const childProcess = require('child_process');
 const [, , task, arg1, arg2] = process.argv;
 
 console.info('Running task:', task);
-console.info('Detected branch:', process.env.BRANCH || 'not found, use default: staging');
 
 // environments
 const only = process.env.ONLY || '';
