@@ -1,5 +1,5 @@
 import type { ConnectionOptions } from 'typeorm';
-import { IS_BUILD, DB_ENV, SRC_FOLDER } from '@constants/index';
+import { IS_BUILD, DB_ENV, SRC_FOLDER, MS_WORKERS, MS_NAME } from '@constants/index';
 
 const { URL, HOST, PORT, USERNAME, PASSWORD, DATABASE } = DB_ENV;
 const migrationsSrc = IS_BUILD ? 'lib/' : '';
@@ -29,9 +29,14 @@ const db = (rootPath = SRC_FOLDER, migrationPath = migrationsSrc): ConnectionOpt
     entitiesDir: `${rootPath}/entities`,
     subscribersDir: `${rootPath}/subscribers`,
   },
+  extra: {
+    max: MS_WORKERS * 2, // max pool size
+    idleTimeoutMillis: 0, // disable auto-disconnection
+  },
+  applicationName: MS_NAME,
   migrationsRun: true,
   synchronize: false,
-  logging: false,
+  logging: true,
 });
 
 export default db;

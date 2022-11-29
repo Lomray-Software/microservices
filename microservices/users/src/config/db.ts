@@ -1,5 +1,5 @@
 import type { ConnectionOptions } from 'typeorm';
-import { IS_BUILD, DB_ENV, SRC_FOLDER } from '@constants/index';
+import { IS_BUILD, DB_ENV, SRC_FOLDER, MS_WORKERS } from '@constants/index';
 
 const { URL, HOST, PORT, USERNAME, PASSWORD, DATABASE } = DB_ENV;
 const migrationsSrc = IS_BUILD ? 'lib/' : '';
@@ -28,6 +28,10 @@ const db = (rootPath = SRC_FOLDER, migrationPath = migrationsSrc): ConnectionOpt
     // we shouldn't work with this in production
     entitiesDir: `${rootPath}/entities`,
     subscribersDir: `${rootPath}/subscribers`,
+  },
+  extra: {
+    max: MS_WORKERS * 2, // max pool size
+    idleTimeoutMillis: 0, // disable auto-disconnection
   },
   migrationsRun: true,
   synchronize: false,
