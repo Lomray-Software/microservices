@@ -36,7 +36,7 @@ const db = (rootPath = SRC_FOLDER, migrationPath = migrationsSrc): ConnectionOpt
   applicationName: MS_NAME,
   migrationsRun: true,
   synchronize: false,
-  logging: true,
+  logging: false,
 });
 
 export default db;
