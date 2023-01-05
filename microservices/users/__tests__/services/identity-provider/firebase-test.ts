@@ -91,6 +91,17 @@ describe('services/sign-up', () => {
     expect(await waitResult(service.signIn())).to.throw('Validation failed');
   });
 
+  it('should registration throw error: disabled registration', async () => {
+    sandbox
+      .stub(FirebaseSdk, 'get')
+      .resolves(
+        getFirebaseMock(firebaseMock({ user: { email: 'some@email.com', emailVerified: true } })),
+      );
+    TypeormMock.queryBuilder.getOne.resolves(undefined);
+
+    expect(await waitResult(service.signIn({ isDenyRegister: true }))).to.throw('User not found.');
+  });
+
   it('should register new user', async () => {
     const email = 'demo@email.com';
 

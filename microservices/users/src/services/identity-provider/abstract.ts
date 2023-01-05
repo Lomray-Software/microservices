@@ -12,6 +12,8 @@ export interface ISingInReturn {
   isNew: boolean;
 }
 
+export type TSingInParams = { isDenyRegister?: boolean } & Record<string, any>;
+
 /**
  * Abstract class for identity providers
  */
@@ -61,7 +63,7 @@ abstract class Abstract {
   /**
    * Sign in user
    */
-  public abstract signIn(params?: Record<string, any>): Promise<ISingInReturn>;
+  public abstract signIn(params?: TSingInParams): Promise<ISingInReturn>;
 
   /**
    * Attach new identity provider to existing user

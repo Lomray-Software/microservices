@@ -5,7 +5,8 @@ import IdentityProvider from '@entities/identity-provider';
 import Profile from '@entities/profile';
 import User from '@entities/user';
 import FirebaseSdk from '@services/external/firebase-sdk';
-import Abstract, { ISingInReturn } from '@services/identity-provider/abstract';
+import Abstract from '@services/identity-provider/abstract';
+import type { ISingInReturn, TSingInParams } from '@services/identity-provider/abstract';
 
 type UserRecord = auth.UserRecord;
 
@@ -16,12 +17,19 @@ class Firebase extends Abstract {
   /**
    * @inheritDoc
    */
-  public async signIn(): Promise<ISingInReturn> {
+  public async signIn({ isDenyRegister }: TSingInParams = {}): Promise<ISingInReturn> {
     const [firebaseUser, providerType] = await this.getFirebaseUser();
     let user = await this.userRepository.findUserByIdentifier(this.provider, firebaseUser.uid);
     let isNew = false;
 
     if (!user) {
+      if (isDenyRegister) {
+        throw new BaseException({
+          status: 500,
+          message: 'User not found.',
+        });
+      }
+
       user = await this.register(firebaseUser, providerType);
       isNew = true;
     }
@@ -38,7 +46,7 @@ class Firebase extends Abstract {
 
     if (!user) {
       throw new BaseException({
-        code: 404,
+        status: 404,
         message: 'User not found.',
       });
     }
@@ -163,7 +171,7 @@ class Firebase extends Abstract {
       Log.error('Failed verify firebase token', e);
 
       throw new BaseException({
-        code: 422,
+        status: 422,
         message: 'Bad firebase token.',
       });
     }
