@@ -1,0 +1,39 @@
+{
+	"name": "authorization",
+	"version": "1.0.0",
+	"description": "Authorization microservice based on NodeJS & inverted json.",
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"keywords": [
+		"node",
+		"js",
+		"microservice",
+		"inverted",
+		"json",
+		"authorization",
+		"worker",
+		"typescript"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"repository": {
+		"type": "git",
+		"url": ""
+	},
+	"bugs": {
+		"url": ""
+	},
+	"homepage": "",
+	"author": "Mikhail Yarmaliuk",
+	"license": "Apache-2.0",
+	"scripts": {
+    "test": "",
+    "lint:check": "",
+    "ts:check": "",
+    "build": "mkdir lib",
+    "sync:permissions": "node lib/migrations/permissions/sync.js"
+  },
+	"dependencies": {},
+	"devDependencies": {}
+}

@@ -22,26 +22,9 @@ This microservice provides configuration for all other microservices. Single poi
 - [MEMORY USAGE](#memory-usage)
 
 ### <a id="environments"></a>ENVIRONMENTS:
-- `NODE_ENV` - Can be `production` or `development` or `tests`. Default: `development`
-- `MS_CONNECTION` - Invert json host and port (with protocol). Default: `http://127.0.0.1:8001`
-- `MS_CONNECTION_SRV` - Invert json connection it is SRV record. Default: `false`
-- `MS_NAME` - Microservice name. Default: `configuration`
-- `MS_WORKERS` - Microservice queue workers count. Default: `5`
-- `MS_ENABLE_REMOTE_MIDDLEWARE` - Enable remote middleware feature. Set `0` to disable. Default: `1` (enabled)
-- `DB_URL` - Database url connection string. Default: `undefined`. Please use URL or credentials.
-- `DB_HOST` - Database host. Default: `127.0.0.1`
-- `DB_PORT` - Database port. Default: `5432`
-- `DB_USERNAME` - Database user name. Default: `postgres`
-- `DB_PASSWORD` - Database password. Default: `example`
-- `DB_DATABASE` - Database db name. Default: `ms-configuration`
 - `MS_INIT_CONFIGS` - JSON string for configure initial `Config` values. Default: `[]`
 - `MS_INIT_MIDDLEWARES` - JSON string for configure initial `Middleware` values. Default: `[]`
-- `MS_ENABLE_GRAFANA_LOKI_LOG` - Enable grafana loki logs. Default: `0`
-- `MS_OPENTELEMETRY_ENABLE` - Enable opentelemetry tracers. Default: `0`
-- `MS_OPENTELEMETRY_OTLP_URL` - Custom opentelemetry OTLP exporter URL. Default: `undefined`
-- `MS_OPENTELEMETRY_OTLP_URL_SRV` - Custom opentelemetry OTLP URL it is SRV record. Default: `0`
-- `MS_OPENTELEMETRY_DEBUG` - Enable debug log opentelemetry. Default: `0`
-- `MS_CONSOLE_LOG_LEVEL` - Change console log level. Default: `info`
+- [See full list `COMMON ENVIRONMENTS`](https://github.com/Lomray-Software/microservice-helpers#common-environments)
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.

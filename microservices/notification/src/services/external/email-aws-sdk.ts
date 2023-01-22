@@ -22,7 +22,7 @@ class EmailAwsSdk {
    * Create/get AWS nodemailer transporter
    */
   public static async get(params: {
-    isFromConfigMs?: number;
+    isFromConfigMs?: boolean;
     defaultFrom?: string;
     options?: {
       accessKeyId?: string;
@@ -30,7 +30,7 @@ class EmailAwsSdk {
       region?: string;
     };
   }): Promise<{
-    transporter: typeof EmailAwsSdk['transporter'];
+    transporter: (typeof EmailAwsSdk)['transporter'];
     defaultEmailFrom: string;
   }> {
     if (!this.hasInit) {

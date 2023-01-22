@@ -9,7 +9,7 @@ import S3Storage from '@services/storage/s3';
 
 describe('services/attachment/image', () => {
   const options = {
-    isFromConfigMs: 1,
+    isFromConfigMs: true,
     options: {
       accessKeyId: 'access_key_id',
       secretAccessKey: 'secret_access_key',

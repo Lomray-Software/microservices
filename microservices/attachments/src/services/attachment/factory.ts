@@ -1,10 +1,6 @@
 import { EntityManager } from 'typeorm';
 import AttachmentType from '@constants/attachment-type';
-import {
-  IMAGE_CONFIG_FROM_CONFIG_MS,
-  IMAGE_PROCESSING_CONFIG,
-  MS_STORAGE_TYPE,
-} from '@constants/index';
+import CONST from '@constants/index';
 import ImageProcessingConfig from '@services/external/image-processing-config';
 import StorageFactory from '@services/storage/factory';
 import Abstract from './abstract';
@@ -18,10 +14,10 @@ class Factory {
    * Create attachment type instance
    */
   public static async create(type: AttachmentType, manager: EntityManager): Promise<Abstract> {
-    const storage = await StorageFactory.create(MS_STORAGE_TYPE);
+    const storage = await StorageFactory.create(CONST.MS_STORAGE_TYPE);
     const config = await ImageProcessingConfig.get({
-      isFromConfigMs: IMAGE_CONFIG_FROM_CONFIG_MS,
-      config: IMAGE_PROCESSING_CONFIG,
+      isFromConfigMs: CONST.IS_IMAGE_CONFIG_FROM_CONFIG_MS,
+      config: CONST.IMAGE_PROCESSING_CONFIG,
     });
 
     switch (type) {

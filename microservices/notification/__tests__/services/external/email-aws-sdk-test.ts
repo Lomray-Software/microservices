@@ -45,7 +45,7 @@ describe('services/external/email-aws-sdk', () => {
       .onCall(1)
       .resolves(options);
 
-    const { transporter, defaultEmailFrom } = await EmailAWSSdk.get({ isFromConfigMs: 1 });
+    const { transporter, defaultEmailFrom } = await EmailAWSSdk.get({ isFromConfigMs: true });
 
     // @ts-ignore
     const { ses } = transporter.options.SES;

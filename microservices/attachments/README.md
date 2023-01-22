@@ -23,39 +23,13 @@ A microservice provides work with attachments for entities from other microservi
 - [MEMORY USAGE](#memory-usage)
 
 ### <a id="environments"></a>ENVIRONMENTS:
-- `NODE_ENV` - Can be `production` or `development` or `tests`. Default: `development`
-- `MS_CONNECTION` - Invert json host and port (with protocol). Default: `http://127.0.0.1:8001`
-- `MS_CONNECTION_SRV` - Invert json connection it is SRV record. Default: `false`
-- `MS_NAME` - Microservice name. Default: `attachments`
-- `MS_CONFIG_NAME` - Configuration microservice name. Default: `configuration` 
-- `MS_WORKERS` - Microservice queue workers count. Default: `1`
-- `MS_ENABLE_REMOTE_MIDDLEWARE` - Enable remote middleware feature. Set `0` to disable. Default: `1` (enabled)
 - `MS_STORAGE_TYPE` - Microservice storage type.
-- `DB_FROM_CONFIG_MS` - Get db credentials from configuration microservice. Set `0` to disable. Default: `1`
-- `DB_URL` - Database url connection string. Default: `undefined`. Please use URL or credentials.
-- `DB_HOST` - Database host. Default: `127.0.0.1`
-- `DB_PORT` - Database port. Default: `5432`
-- `DB_USERNAME` - Database user name. Default: `postgres`
-- `DB_PASSWORD` - Database password. Default: `example`
-- `DB_DATABASE` - Database db name. Default: `ms-users`
-- `MS_GRAFANA_LOKI_CONFIG` - Grafana loki config. Default: `null`
-- `MS_ENABLE_GRAFANA_LOG` - Enable grafana loki log (config from configuration ms). Default: `0`
-- `MS_OPENTELEMETRY_ENABLE` - Enable opentelemetry tracers. Default: `0`
-- `MS_OPENTELEMETRY_OTLP_URL` - Custom opentelemetry OTLP exporter URL. Default: `undefined`
-- `MS_OPENTELEMETRY_OTLP_URL_SRV` - Custom opentelemetry OTLP URL it is SRV record. Default: `0`
-- `MS_OPENTELEMETRY_DEBUG` - Enable debug log opentelemetry. Default: `0`
-- `AWS_ACCESS_KEY_ID` - AWS access key ID, if you will use S3 to store files (if not configured from remote config.). Default: `empty`
-- `AWS_SECRET_ACCESS_KEY` - AWS secret access key, if you will use S3 to store files (if not configured from remote config.) Default: `empty`
-- `AWS_REGION` - AWS region, if you will use S3 to store files (if not configured from remote config.) Default: `empty`
-- `AWS_BUCKET_NAME` - AWS S3 bucket name, if you will use S3 to store files (if not configured from remote config.) Default: `empty`
-- `AWS_BUCKET_ACL` - AWS S3 bucket ACL (e.g.: public-read). Default: `empty`
-- `AWS_FROM_CONFIG_MS` - Get AWS credentials from configuration microservice. Set `0` to disable. Default: `1`
 - `MS_STORAGE_DOMAIN` - Access to attachments through storage domain. Default: ``
 - `STORAGE_PATH_PREFIX` - Path (url) prefix for attachments. Default: `empty`
 - `IMAGE_CONFIG_FROM_CONFIG_MS` - Get image processing configuration from configuration microservice. Set `0` to disable. Default: `1`
 - `IMAGE_PROCESSING_CONFIG` - Image processing configuration JSON string. Default: `{}`
 - `LOCAL_STORAGE_PATH` - Directory where files are saved for local storage provider. Default: `data/files`
-- `MS_CONSOLE_LOG_LEVEL` - Change console log level. Default: `info`
+- [See full list `COMMON ENVIRONMENTS`](https://github.com/Lomray-Software/microservice-helpers#common-environments)
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.

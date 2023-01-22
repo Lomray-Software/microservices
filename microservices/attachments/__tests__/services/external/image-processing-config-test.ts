@@ -18,7 +18,7 @@ describe('services/external/s3-aws-sdk', () => {
   it('should successfully create instance with options', async () => {
     ImageProcessingConfig.reset();
 
-    const configMs = await ImageProcessingConfig.get({ isFromConfigMs: 0, config });
+    const configMs = await ImageProcessingConfig.get({ isFromConfigMs: false, config });
 
     expect(configMs).to.deep.equal(config);
   });
@@ -34,7 +34,7 @@ describe('services/external/s3-aws-sdk', () => {
     sandbox.stub(RemoteConfig, 'get').resolves(fromRemoteConfig);
 
     const remoteConfig = await ImageProcessingConfig.get({
-      isFromConfigMs: 1,
+      isFromConfigMs: true,
       config,
     });
 

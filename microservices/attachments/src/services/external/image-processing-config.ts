@@ -27,7 +27,7 @@ class ImageProcessingConfig {
    * Create/get image processing configuration
    */
   public static async get(params: {
-    isFromConfigMs?: number;
+    isFromConfigMs?: boolean;
     config: IImageProcessingConfig;
   }): Promise<IImageProcessingConfig> {
     const { isFromConfigMs, config } = params;

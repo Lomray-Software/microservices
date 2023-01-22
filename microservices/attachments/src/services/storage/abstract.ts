@@ -1,4 +1,4 @@
-import { MS_STORAGE_DOMAIN } from '@constants/index';
+import CONST from '@constants/index';
 
 /**
  * Abstract class for storage providers
@@ -18,7 +18,7 @@ abstract class Abstract {
    * Get storage domain
    */
   public getDomain(): string {
-    return MS_STORAGE_DOMAIN;
+    return CONST.MS_STORAGE_DOMAIN;
   }
 }
 

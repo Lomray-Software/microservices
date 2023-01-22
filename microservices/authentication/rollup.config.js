@@ -1,3 +1,3 @@
-import rootConfig from '../../rollup.config';
-
-export default rootConfig;
+module.exports = {
+  ...require('@lomray/microservice-config/rollup.config'),
+}

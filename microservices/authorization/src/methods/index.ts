@@ -1,12 +1,13 @@
+import MetaEndpoint from '@lomray/microservice-helpers/methods/meta';
 import type { Microservice } from '@lomray/microservice-nodejs-lib';
 import { IEndpointHandler } from '@lomray/microservice-nodejs-lib';
+import CONST from '@constants/index';
 import CrudCondition from '@methods/condition/crud';
 import CrudEndpointFilter from '@methods/endpoint-filter/crud';
 import CrudEndpoint from '@methods/endpoint/crud';
 import EndpointEnforce from '@methods/endpoint/enforce';
 import EndpointFilter from '@methods/endpoint/filter';
 import CrudFilter from '@methods/filter/crud';
-import MetaEndpoint from '@methods/meta';
 import CrudModel from '@methods/model/crud';
 import CrudRole from '@methods/role/crud';
 import ServiceSyncMetadata from '@methods/service/sync-metadata';
@@ -57,5 +58,8 @@ export default (ms: Microservice): void => {
   /**
    * Microservice metadata endpoint
    */
-  ms.addEndpoint('meta', MetaEndpoint, { isDisableMiddlewares: true, isPrivate: true });
+  ms.addEndpoint('meta', MetaEndpoint(CONST.VERSION), {
+    isDisableMiddlewares: true,
+    isPrivate: true,
+  });
 };

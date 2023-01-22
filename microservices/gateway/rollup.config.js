@@ -1,6 +1,6 @@
-import rootConfig from '../../rollup.config';
+const rootConfig = require('@lomray/microservice-config/rollup.config');
 
-export default {
+module.exports = {
   ...rootConfig,
   external: [...rootConfig?.external ?? [], 'cors'],
-};
+}

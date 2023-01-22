@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { EntityRepository, Repository } from 'typeorm';
 import IdProvider from '@constants/id-provider';
-import { MS_USER_PASSWORD_SALT_ROUNDS } from '@constants/index';
+import CONST from '@constants/index';
 import Profile from '@entities/profile';
 import UserEntity from '@entities/user';
 
@@ -12,7 +12,7 @@ class User extends Repository<UserEntity> {
    */
   public encryptPassword(user: UserEntity): UserEntity {
     if (user.password) {
-      user.password = bcrypt.hashSync(user.password, MS_USER_PASSWORD_SALT_ROUNDS);
+      user.password = bcrypt.hashSync(user.password, CONST.MS_USER_PASSWORD_SALT_ROUNDS);
     }
 
     return user;

@@ -20,7 +20,7 @@ describe('services/external/s3-aws-sdk', () => {
       bucketName: bucketNameMock,
     };
 
-    const { s3, bucketName } = await S3AwsSdk.get({ isFromConfigMs: 0, options });
+    const { s3, bucketName } = await S3AwsSdk.get({ isFromConfigMs: false, options });
 
     expect(s3.config.accessKeyId).to.equal(options.accessKeyId);
     expect(s3.config.secretAccessKey).to.equal(options.secretAccessKey);
@@ -40,7 +40,7 @@ describe('services/external/s3-aws-sdk', () => {
 
     sandbox.stub(RemoteConfig, 'get').resolves(fromRemoteConfig);
 
-    const { s3, bucketName } = await S3AwsSdk.get({ isFromConfigMs: 1 });
+    const { s3, bucketName } = await S3AwsSdk.get({ isFromConfigMs: true });
 
     expect(s3.config.accessKeyId).to.equal(fromRemoteConfig.accessKeyId);
     expect(s3.config.secretAccessKey).to.equal(fromRemoteConfig.secretAccessKey);

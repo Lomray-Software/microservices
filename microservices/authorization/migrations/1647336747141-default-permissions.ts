@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { MigrationInterface, QueryRunner } from 'typeorm';
-import { MS_DEFAULT_PERMISSION_MIGRATION } from '@constants/index';
+import CONST from '@constants/index';
 import Condition from '@entities/condition';
 import Filter from '@entities/filter';
 import Method from '@entities/method';
@@ -17,7 +18,7 @@ import {
 
 export default class defaultPermissions1647336747141 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    if (!MS_DEFAULT_PERMISSION_MIGRATION) {
+    if (!CONST.MS_DEFAULT_PERMISSION_MIGRATION) {
       return;
     }
 
@@ -100,7 +101,7 @@ export default class defaultPermissions1647336747141 implements MigrationInterfa
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    if (!MS_DEFAULT_PERMISSION_MIGRATION) {
+    if (!CONST.MS_DEFAULT_PERMISSION_MIGRATION) {
       return;
     }
 

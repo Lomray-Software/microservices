@@ -1,3 +1,3 @@
 module.exports = {
-  ...require('../../release.config'),
+  ...require('@lomray/microservice-config/release.config'),
 }

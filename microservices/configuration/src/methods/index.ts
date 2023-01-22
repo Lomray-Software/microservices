@@ -1,6 +1,7 @@
+import MetaEndpoint from '@lomray/microservice-helpers/methods/meta';
 import type { Microservice } from '@lomray/microservice-nodejs-lib';
+import CONST from '@constants/index';
 import CrudConfig from '@methods/config/crud';
-import MetaEndpoint from '@methods/meta';
 import MiddlewareCount from '@methods/middleware/count';
 import MiddlewareCreate from '@methods/middleware/create';
 import MiddlewareList from '@methods/middleware/list';
@@ -45,5 +46,8 @@ export default (ms: Microservice): void => {
   /**
    * Microservice metadata endpoint
    */
-  ms.addEndpoint('meta', MetaEndpoint, { isDisableMiddlewares: true, isPrivate: true });
+  ms.addEndpoint('meta', MetaEndpoint(CONST.VERSION), {
+    isDisableMiddlewares: true,
+    isPrivate: true,
+  });
 };

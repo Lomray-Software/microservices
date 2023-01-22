@@ -33,7 +33,7 @@ class S3AwsSdk {
    * Create/get AWS S3
    */
   public static async get(params: {
-    isFromConfigMs?: number;
+    isFromConfigMs?: boolean;
     options?: {
       accessKeyId?: string;
       secretAccessKey?: string;

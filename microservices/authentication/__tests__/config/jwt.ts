@@ -11,7 +11,7 @@ describe('config/jwt', () => {
   });
 
   it('should correctly return jwt config: without remote', async () => {
-    expect(await getJwtConfig(0)).to.have.property('secretKey');
+    expect(await getJwtConfig(false)).to.have.property('secretKey');
   });
 
   it('should correctly return jwt config: with remote', async () => {

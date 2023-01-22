@@ -1,9 +1,10 @@
+import MetaEndpoint from '@lomray/microservice-helpers/methods/meta';
 import type { IEndpointHandler, Microservice } from '@lomray/microservice-nodejs-lib';
+import CONST from '@constants/index';
 import { send as ConfirmCodeSend } from '@methods/confirm-code/send';
 import { attach as IdentityProviderAttach } from '@methods/identity-provider/attach';
 import CrudIdentityProvider from '@methods/identity-provider/crud';
 import { signIn as IdentityProviderSignIn } from '@methods/identity-provider/sign-in';
-import MetaEndpoint from '@methods/meta';
 import CrudProfile from '@methods/profile/crud';
 import { changeLogin as UserChangeLogin } from '@methods/user/change-login';
 import { changePassword as UserChangePassword } from '@methods/user/change-password';
@@ -56,5 +57,8 @@ export default (ms: Microservice): void => {
   /**
    * Microservice metadata endpoint
    */
-  ms.addEndpoint('meta', MetaEndpoint, { isDisableMiddlewares: true, isPrivate: true });
+  ms.addEndpoint('meta', MetaEndpoint(CONST.VERSION), {
+    isDisableMiddlewares: true,
+    isPrivate: true,
+  });
 };

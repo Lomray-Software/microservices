@@ -1,9 +1,7 @@
-import { Log } from '@lomray/microservice-helpers';
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
-import { msParams } from '@config/ms';
 import MiddlewareRepository from '@repositories/middleware-repository';
 
 describe('microservice: start', () => {
@@ -69,16 +67,5 @@ describe('microservice: start', () => {
     await afterCreateMicroservice();
 
     expect(bulkSaveStub).not.called;
-  });
-
-  it('should have microservice custom logger', () => {
-    const { logDriver } = msParams;
-    const LogInfoSpy = sandbox.spy(Log, 'log');
-
-    if (typeof logDriver !== 'boolean') {
-      logDriver?.(() => 'test');
-    }
-
-    expect(LogInfoSpy).to.calledOnce;
   });
 });

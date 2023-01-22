@@ -6,6 +6,14 @@ import ImageExtensions from '@constants/image-extensions';
 import Attachment from '@entities/attachment';
 import Abstract from './abstract';
 
+interface IUploadImage {
+  buffer: Buffer;
+  url: string;
+  fileMime: string;
+}
+
+const defaultMime = 'text/plain';
+
 /**
  * Image attachment
  */
@@ -73,7 +81,10 @@ class Image extends Abstract {
    * Compose data
    * @private
    */
-  private async composeData(file: string, id: string) {
+  private async composeData(
+    file: string,
+    id: string,
+  ): Promise<{ attachmentData: Partial<Attachment>; images: IUploadImage[] }> {
     const fileBuffer = Buffer.from(file.replace(/^data:image\/([a-zA-Z]*);base64,/, ''), 'base64');
     const imageMetadata = await sharp(fileBuffer).metadata();
     const extension = imageMetadata.format;
@@ -87,7 +98,7 @@ class Image extends Abstract {
     }
 
     const imageUrl = this.getFilePath(id, 'origin', extension);
-    const fileMime = mime.lookup(extension);
+    const fileMime = mime.getType(extension) || defaultMime;
     const { formattedImages, metadata } = await this.makeFormats(fileBuffer, extension, id);
 
     const mappedFormats = metadata.reduce(
@@ -125,9 +136,7 @@ class Image extends Abstract {
    * Upload images to storage
    * @private
    */
-  private async uploadImages(
-    images: { buffer: Buffer; url: string; fileMime: string }[],
-  ): Promise<void> {
+  private async uploadImages(images: IUploadImage[]): Promise<void> {
     await Promise.all(
       images.map(({ buffer, url, fileMime }) => this.storage.upload(url, buffer, fileMime)),
     );
@@ -136,7 +145,14 @@ class Image extends Abstract {
   /**
    * Create image formats and create webp
    */
-  private async makeFormats(buffer: Buffer, extension: string, id: string) {
+  private async makeFormats(
+    buffer: Buffer,
+    extension: string,
+    id: string,
+  ): Promise<{
+    formattedImages: IUploadImage[];
+    metadata: { meta: sharp.OutputInfo; hasWebp: boolean; format: string; url: string }[];
+  }> {
     const { thumbnails, outputOptions, isWebp } = this.config;
     const formattedImages = [];
     const metadata = [];
@@ -154,14 +170,14 @@ class Image extends Abstract {
         formattedImages.push({
           buffer: webpBuffer,
           url: this.getFilePath(id, name, ImageExtensions.webp),
-          fileMime: mime.lookup(ImageExtensions.webp),
+          fileMime: mime.getType(ImageExtensions.webp) || defaultMime,
         });
       }
 
       formattedImages.push({
         buffer: imageBuffer,
         url,
-        fileMime: mime.lookup(extension),
+        fileMime: mime.getType(extension) || defaultMime,
       });
 
       metadata.push({

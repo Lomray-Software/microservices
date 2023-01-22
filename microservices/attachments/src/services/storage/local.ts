@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import { LOCAL_STORAGE_PATH } from '@constants/index';
+import CONST from '@constants/index';
 import Abstract from './abstract';
 
 /**
@@ -19,7 +19,7 @@ class LocalStorage extends Abstract {
    */
   public upload(key: string, buffer: Buffer): void {
     const [folder, file] = key.split('/');
-    const path = `${LOCAL_STORAGE_PATH}/${folder}`;
+    const path = `${CONST.LOCAL_STORAGE_PATH}/${folder}`;
 
     if (!fs.existsSync(path)) {
       fs.mkdirSync(`${path}`, { recursive: true });

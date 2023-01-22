@@ -1,8 +1,6 @@
-import { Log } from '@lomray/microservice-helpers';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
-import { msParams } from '@config/ms';
 
 describe('microservice: start', () => {
   const sandbox = sinon.createSandbox();
@@ -25,16 +23,5 @@ describe('microservice: start', () => {
     expect(args).to.have.property('msOptions');
     expect(args).to.have.property('msParams');
     expect(args).to.have.property('registerMethods');
-  });
-
-  it('should have microservice custom logger', () => {
-    const { logDriver } = msParams;
-    const LogInfoSpy = sandbox.spy(Log, 'log');
-
-    if (typeof logDriver !== 'boolean') {
-      logDriver?.(() => 'test');
-    }
-
-    expect(LogInfoSpy).to.calledOnce;
   });
 });

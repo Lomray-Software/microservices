@@ -136,7 +136,7 @@ jobs:
         with:
           name: "Lomray-Software/microservices/${{ env.MICROSERVICE_NAME }}"
           tags: "latest${{ needs.changed-microservices.outputs.docker-tag }},${{ steps.package-version.outputs.version}}"
-          dockerfile: Dockerfile-nodejs
+          dockerfile: node_modules/@lomray/microservice-config/Dockerfile-nodejs
           context: ${{ env.WORK_DIR }}
           buildoptions: "--compress --force-rm --no-cache"
           username: ${{ github.actor }}

@@ -1,4 +1,6 @@
+import MetaEndpoint from '@lomray/microservice-helpers/methods/meta';
 import type { Microservice } from '@lomray/microservice-nodejs-lib';
+import CONST from '@constants/index';
 import CrudAttachmentEntity from '@methods/attachment-entity/crud';
 import AttachmentEntityList from '@methods/attachment-entity/list';
 import AttachmentEntityView from '@methods/attachment-entity/view';
@@ -9,7 +11,6 @@ import AttachmentList from '@methods/attachment/list';
 import AttachmentRemove from '@methods/attachment/remove';
 import AttachmentUpdate from '@methods/attachment/update';
 import AttachmentView from '@methods/attachment/view';
-import MetaEndpoint from '@methods/meta';
 
 /**
  * Register methods
@@ -45,5 +46,8 @@ export default (ms: Microservice): void => {
   /**
    * Microservice metadata endpoint
    */
-  ms.addEndpoint('meta', MetaEndpoint, { isDisableMiddlewares: true, isPrivate: true });
+  ms.addEndpoint('meta', MetaEndpoint(CONST.VERSION), {
+    isDisableMiddlewares: true,
+    isPrivate: true,
+  });
 };

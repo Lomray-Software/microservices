@@ -23,12 +23,12 @@ class EmailSimpleSdk {
    */
   public static async get(
     params: {
-      isFromConfigMs?: number;
+      isFromConfigMs?: boolean;
       defaultFrom?: string;
       options?: string; // json string
     } = {},
   ): Promise<{
-    transporter: typeof EmailSimpleSdk['transporter'];
+    transporter: (typeof EmailSimpleSdk)['transporter'];
     defaultEmailFrom: string;
   }> {
     if (!this.hasInit) {

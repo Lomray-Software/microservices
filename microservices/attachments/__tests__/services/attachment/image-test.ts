@@ -5,7 +5,7 @@ import sinon from 'sinon';
 import { getRepository } from 'typeorm';
 import { bucketNameMock } from '@__mocks__/common';
 import AttachmentType from '@constants/attachment-type';
-import { IMAGE_CONFIG_FROM_CONFIG_MS, IMAGE_PROCESSING_CONFIG } from '@constants/index';
+import CONST from '@constants/index';
 import StorageType from '@constants/storage-type';
 import Attachment from '@entities/attachment';
 import Image from '@services/attachment/image';
@@ -29,8 +29,8 @@ describe('services/attachment/image', () => {
 
     const storage = await StorageFactory.create(StorageType.s3);
     const config = await ImageProcessingConfig.get({
-      isFromConfigMs: IMAGE_CONFIG_FROM_CONFIG_MS,
-      config: IMAGE_PROCESSING_CONFIG,
+      isFromConfigMs: CONST.IS_IMAGE_CONFIG_FROM_CONFIG_MS,
+      config: CONST.IMAGE_PROCESSING_CONFIG,
     });
 
     const service = new Image(AttachmentType.image, TypeormMock.entityManager, storage, config);
@@ -59,8 +59,8 @@ describe('services/attachment/image', () => {
 
     const storage = await StorageFactory.create('S3');
     const config = await ImageProcessingConfig.get({
-      isFromConfigMs: IMAGE_CONFIG_FROM_CONFIG_MS,
-      config: IMAGE_PROCESSING_CONFIG,
+      isFromConfigMs: CONST.IS_IMAGE_CONFIG_FROM_CONFIG_MS,
+      config: CONST.IMAGE_PROCESSING_CONFIG,
     });
 
     const service = new Image(AttachmentType.image, TypeormMock.entityManager, storage, config);
@@ -81,8 +81,8 @@ describe('services/attachment/image', () => {
 
     const storage = await StorageFactory.create('S3');
     const config = await ImageProcessingConfig.get({
-      isFromConfigMs: IMAGE_CONFIG_FROM_CONFIG_MS,
-      config: IMAGE_PROCESSING_CONFIG,
+      isFromConfigMs: CONST.IS_IMAGE_CONFIG_FROM_CONFIG_MS,
+      config: CONST.IMAGE_PROCESSING_CONFIG,
     });
 
     const service = new Image(AttachmentType.image, TypeormMock.entityManager, storage, config);

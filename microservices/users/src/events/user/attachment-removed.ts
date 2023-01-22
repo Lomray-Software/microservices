@@ -1,7 +1,7 @@
 import type { IEventHandler } from '@lomray/microservice-nodejs-lib';
 import type { IAttachment } from '@lomray/microservices-client-api/interfaces/attachments/entities/attachment';
 import { getRepository } from 'typeorm';
-import { msOptions } from '@config/ms';
+import CONST from '@constants/index';
 import Profile from '@entities/profile';
 
 /**
@@ -16,7 +16,7 @@ const removed: IEventHandler<{ entity: IAttachment }> = async ({ entity }) => {
   // detect only related with user attachment entities
   const usersEntities =
     attachmentEntities?.filter(
-      ({ type, microservice }) => type === 'user' && microservice === msOptions.name,
+      ({ type, microservice }) => type === 'user' && microservice === CONST.MS_NAME,
     ) || [];
 
   if (!usersEntities.length) {

@@ -1,4 +1,4 @@
-import { MS_STORAGE_TYPE } from '@constants/index';
+import CONST from '@constants/index';
 import Attachment, { IAttachmentFormat } from '@entities/attachment';
 import AttachmentEntity from '@entities/attachment-entity';
 import StorageFactory from '@services/storage/factory';
@@ -16,7 +16,7 @@ class AttachmentDomain {
     entity: Attachment,
     options: IAttachmentDomainOptions = {},
   ): Promise<Attachment> {
-    const storage = await StorageFactory.create(MS_STORAGE_TYPE);
+    const storage = await StorageFactory.create(CONST.MS_STORAGE_TYPE);
     const { onlyFormats } = options;
 
     if (entity.url) {

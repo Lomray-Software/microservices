@@ -1,6 +1,7 @@
+import MetaEndpoint from '@lomray/microservice-helpers/methods/meta';
 import type { Microservice } from '@lomray/microservice-nodejs-lib';
+import CONST from '@constants/index';
 import CookiesRemove from '@methods/cookies/remove';
-import MetaEndpoint from '@methods/meta';
 import TokenCreate from '@methods/token/create';
 import TokenIdentify from '@methods/token/identify';
 import TokenList from '@methods/token/list';
@@ -32,5 +33,8 @@ export default (ms: Microservice): void => {
   /**
    * Microservice metadata endpoint
    */
-  ms.addEndpoint('meta', MetaEndpoint, { isDisableMiddlewares: true, isPrivate: true });
+  ms.addEndpoint('meta', MetaEndpoint(CONST.VERSION), {
+    isDisableMiddlewares: true,
+    isPrivate: true,
+  });
 };

@@ -1,7 +1,7 @@
 import type { EntityManager, Repository } from 'typeorm';
 import { v4 } from 'uuid';
 import AttachmentType from '@constants/attachment-type';
-import { STORAGE_PATH_PREFIX } from '@constants/index';
+import CONST from '@constants/index';
 import Attachment from '@entities/attachment';
 import type { IImageProcessingConfig } from '@services/external/image-processing-config';
 import type StorageAbstract from '@services/storage/abstract';
@@ -70,7 +70,7 @@ abstract class Abstract {
    * Get correct storage path
    */
   protected getFilePath = (id: string, name?: string, extension?: string): string => {
-    const pathPrefix = [STORAGE_PATH_PREFIX, id].filter(Boolean).join('/');
+    const pathPrefix = [CONST.STORAGE_PATH_PREFIX, id].filter(Boolean).join('/');
 
     return [pathPrefix, name && extension && `${name}_${v4()}.${extension}`]
       .filter(Boolean)

@@ -296,7 +296,7 @@ class MethodsImporter {
 
           related.add(alias);
         } else if (
-          fieldSchema.$ref &&
+          '$ref' in fieldSchema &&
           !fieldSchema.$ref.endsWith('/Object') &&
           !fieldSchema.$ref.endsWith('/Array') &&
           !fieldSchema.$ref.endsWith('/Date') &&

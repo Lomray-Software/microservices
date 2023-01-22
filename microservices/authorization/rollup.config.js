@@ -1,7 +1,7 @@
-import copy from 'rollup-plugin-copy';
-import rootConfig from '../../rollup.config';
+const copy = require('rollup-plugin-copy');
+const rootConfig = require('@lomray/microservice-config/rollup.config');
 
-const config = {
+module.exports = {
   ...rootConfig,
   input: [...rootConfig.input, 'migrations/permissions/*.ts'],
   external: [
@@ -17,5 +17,3 @@ const config = {
     })
   ],
 }
-
-export default config;

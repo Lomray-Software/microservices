@@ -1,7 +1,7 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsBoolean, IsString, MaxLength } from 'class-validator';
 import { getRepository } from 'typeorm';
-import { EMAIL_PROVIDER } from '@constants/index';
+import CONST from '@constants/index';
 import Message from '@entities/message';
 import Factory from '@services/email-provider/factory';
 
@@ -40,7 +40,7 @@ class EmailSendOutput {
 const send = Endpoint.custom(
   () => ({ input: EmailSendInput, output: EmailSendOutput, description: 'Send message to email' }),
   async (params) => {
-    const service = await Factory.create(EMAIL_PROVIDER, getRepository(Message));
+    const service = await Factory.create(CONST.EMAIL_PROVIDER, getRepository(Message));
 
     return {
       isSent: await service.send(params),

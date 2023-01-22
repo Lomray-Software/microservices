@@ -33,7 +33,7 @@ describe('services/external/email-simple-sdk', () => {
       .stub(RemoteConfig, 'get')
       .resolves({ transportOptions: options, defaultEmailFrom: defaultFrom });
 
-    const { transporter, defaultEmailFrom } = await EmailSimpleSdk.get({ isFromConfigMs: 1 });
+    const { transporter, defaultEmailFrom } = await EmailSimpleSdk.get({ isFromConfigMs: true });
 
     expect(transporter.options).to.deep.equal(options);
     expect(transporter).instanceof(Mail);

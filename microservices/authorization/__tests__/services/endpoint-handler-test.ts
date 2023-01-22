@@ -5,7 +5,7 @@ import rewiremock from 'rewiremock';
 import sinon, { SinonSpy } from 'sinon';
 import { Repository } from 'typeorm';
 import { FilterType } from '@constants/filter';
-import { MS_DEFAULT_ROLE_ALIAS } from '@constants/index';
+import CONST from '@constants/index';
 import Condition from '@entities/condition';
 import Method from '@entities/method';
 import MethodFilter from '@entities/method-filter';
@@ -97,7 +97,7 @@ describe('services/endpoint-handler', () => {
 
     // enforcer
     expect(enforcerInitParams?.userId).to.equal(userId);
-    expect(enforcerInitParams?.defaultRole).to.equal(MS_DEFAULT_ROLE_ALIAS);
+    expect(enforcerInitParams?.defaultRole).to.equal(CONST.MS_DEFAULT_ROLE_ALIAS);
     expect(enforcerInitParams?.userRoleRepository).to.instanceof(Repository);
     expect(enforcerInitParams?.rolesTreeRepository).to.instanceof(Repository);
     expect(enforcerInitParams?.conditionChecker).to.instanceof(ConditionChecker);

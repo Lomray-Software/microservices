@@ -1,13 +1,6 @@
 import { Repository } from 'typeorm';
 import EmailProvider from '@constants/email-provider';
-import {
-  AWS_ACCESS_KEY_ID,
-  AWS_REGION,
-  AWS_SECRET_ACCESS_KEY,
-  EMAIL_DEFAULT_FROM,
-  EMAIL_FROM_CONFIG_MS,
-  EMAIL_TRANSPORTER_OPTIONS,
-} from '@constants/index';
+import CONST from '@constants/index';
 import Message from '@entities/message';
 import EmailAwsSdk from '@services/external/email-aws-sdk';
 import EmailSimpleSdk from '@services/external/email-simple-sdk';
@@ -31,20 +24,20 @@ class Factory {
     switch (provider) {
       case EmailProvider.SIMPLE:
         ({ transporter, defaultEmailFrom } = await EmailSimpleSdk.get({
-          defaultFrom: EMAIL_DEFAULT_FROM,
-          isFromConfigMs: EMAIL_FROM_CONFIG_MS,
-          options: EMAIL_TRANSPORTER_OPTIONS,
+          defaultFrom: CONST.EMAIL_DEFAULT_FROM,
+          isFromConfigMs: CONST.IS_EMAIL_FROM_CONFIG_MS,
+          options: CONST.EMAIL_TRANSPORTER_OPTIONS,
         }));
         break;
 
       case EmailProvider.AWS_SES:
         ({ transporter, defaultEmailFrom } = await EmailAwsSdk.get({
-          defaultFrom: EMAIL_DEFAULT_FROM,
-          isFromConfigMs: EMAIL_FROM_CONFIG_MS,
+          defaultFrom: CONST.EMAIL_DEFAULT_FROM,
+          isFromConfigMs: CONST.IS_EMAIL_FROM_CONFIG_MS,
           options: {
-            accessKeyId: AWS_ACCESS_KEY_ID,
-            secretAccessKey: AWS_SECRET_ACCESS_KEY,
-            region: AWS_REGION,
+            accessKeyId: CONST.AWS.ACCESS_KEY_ID,
+            secretAccessKey: CONST.AWS.SECRET_ACCESS_KEY,
+            region: CONST.AWS.REGION,
           },
         }));
         break;
