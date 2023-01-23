@@ -65,6 +65,4 @@ That is all. **Don't forget install npm dependencies**
 
 ### <a id="memory-usage"></a>MEMORY USAGE:
 
-__Run on typescript__: ~194 MB PEAK / ~162 MB  
-__Run on JS__: ~38 MB PEAK / ~26 MB
-__AWS Memory__: ~100 MB
+__AWS Memory__: ~150 MB
