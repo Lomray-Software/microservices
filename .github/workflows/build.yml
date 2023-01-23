@@ -16,8 +16,28 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 30
 
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+
+      - name: Branch name & docker tag & latest release sha
+        id: other-params
+        shell: bash
+        run: |
+          branch=$(echo ${GITHUB_REF#refs/heads/})
+          git fetch --tags origin $branch
+          tag=$(git describe --tags --abbrev=0)
+          sha=$(git --no-pager log -1 --format="%H" "$tag")
+          echo "branch=$branch" >> $GITHUB_OUTPUT
+          echo "sha=$sha" >> $GITHUB_OUTPUT
+          # define docker tag
+          if [ "$branch" == "staging" ]; then
+            echo "docker-tag=-$branch" >> $GITHUB_OUTPUT
+          else
+            echo "docker-tag=" >> $GITHUB_OUTPUT
+          fi
+          echo "tag=$tag && sha=$sha"
 
       - name: Get changed files
         id: changed-files
@@ -26,24 +46,12 @@ jobs:
           json: true
           dir_names: true
           dir_names_max_depth: 3
+          base_sha: ${{ steps.other-params.outputs.sha }}
 
       - id: microservices
-        run: npx @lomray/microservice-cli changed-microservices
+        run: npx @lomray/microservices-cli changed-microservices
         env:
           FILES: '${{ steps.changed-files.outputs.all_changed_files }}'
-
-      - name: Branch name & docker tag
-        id: other-params
-        shell: bash
-        run: |
-          branch=$(echo ${GITHUB_REF#refs/heads/})
-          echo "branch=$branch" >> $GITHUB_OUTPUT
-          # define docker tag
-          if [ "$branch" == "staging" ]; then
-            echo "docker-tag=-$branch" >> $GITHUB_OUTPUT
-          else
-            echo "docker-tag=" >> $GITHUB_OUTPUT
-          fi
 
   checks-compile:
     name: Code checks & compile & npm publish
@@ -68,23 +76,23 @@ jobs:
         run: npm ci
 
       - name: Install microservices dependencies
-        run: npx @lomray/microservice-cli global-install
+        run: npx @lomray/microservices-cli global-install
 
       - name: Check microservice eslint
-        run: npx @lomray/microservice-cli lint:check
+        run: npx @lomray/microservices-cli lint
 
       - name: Check microservice typescript
-        run: npx @lomray/microservice-cli ts:check
+        run: npx @lomray/microservices-cli ts-check
 
       - name: Run microservices tests with coverage
-        run: npx @lomray/microservice-cli test --coverage
+        run: npx @lomray/microservices-cli test --coverage
 
       - name: Compile microservices
-        run: npx @lomray/microservice-cli build
+        run: npx @lomray/microservices-cli build
 
       # note: this also update package.json version
       - name: Publish npm packages / create github release
-        run: npx @lomray/microservice-cli semantic-release
+        run: npx @lomray/microservices-cli semantic-release
         env:
           GIT_BRANCH: ${{ needs.changed-microservices.outputs.branch }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -134,7 +142,7 @@ jobs:
           path: microservices
 
       - id: package-version
-        run: npx @lomray/microservice-cli package-version
+        run: npx @lomray/microservices-cli package-version
         env:
           WORK_DIR: ${{ env.WORK_DIR }}
 
@@ -176,7 +184,7 @@ jobs:
           path: microservices
 
       - id: package-version
-        run: npx @lomray/microservice-cli package-version
+        run: npx @lomray/microservices-cli package-version
         env:
           WORK_DIR: ${{ env.WORK_DIR }}
 
