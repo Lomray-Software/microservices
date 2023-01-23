@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   configuration:
-    image: ghcr.io/lomray-software/microservices/configuration:latest-staging
+    image: ghcr.io/lomray-software/microservices/configuration:${VERSION_TAG}
     container_name: configuration
     restart: always
     environment:
@@ -12,7 +12,7 @@ services:
       MS_INIT_MIDDLEWARES: $MS_INIT_MIDDLEWARES
 
   gateway:
-    image: ghcr.io/lomray-software/microservices/gateway:latest-staging
+    image: ghcr.io/lomray-software/microservices/gateway:${VERSION_TAG}
     container_name: gateway
     restart: always
     ports:
@@ -23,7 +23,7 @@ services:
       MS_CONNECTION: $MS_CONNECTION
 
   authentication:
-    image: ghcr.io/lomray-software/microservices/authentication:latest-staging
+    image: ghcr.io/lomray-software/microservices/authentication:${VERSION_TAG}
     container_name: authentication
     restart: always
     depends_on:
@@ -32,7 +32,7 @@ services:
       MS_CONNECTION: $MS_CONNECTION
 
   authorization:
-    image: ghcr.io/lomray-software/microservices/authorization:latest-staging
+    image: ghcr.io/lomray-software/microservices/authorization:${VERSION_TAG}
     container_name: authorization
     restart: always
     environment:
@@ -40,9 +40,11 @@ services:
       MS_CONNECTION: $MS_CONNECTION
     depends_on:
       - configuration
+    #volumes:
+    #  - ./microservices/authorization/permissions:/var/www/lib/migrations/permissions/list
 
   notification:
-    image: ghcr.io/lomray-software/microservices/notification:latest-staging
+    image: ghcr.io/lomray-software/microservices/notification:${VERSION_TAG}
     container_name: notification
     restart: always
     depends_on:
@@ -51,7 +53,7 @@ services:
       MS_CONNECTION: $MS_CONNECTION
 
   users:
-    image: ghcr.io/lomray-software/microservices/users:latest-staging
+    image: ghcr.io/lomray-software/microservices/users:${VERSION_TAG}
     container_name: users
     restart: always
     depends_on:

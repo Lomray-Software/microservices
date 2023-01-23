@@ -1,5 +1,5 @@
 {
-	"name": "@lomray/microservice-name",
+	"name": "microservice-name",
 	"version": "1.0.0",
 	"description": "Microservice based on NodeJS & inverted json.",
   "main": "index.js",
@@ -19,12 +19,12 @@
   },
   "repository": {
 		"type": "git",
-		"url": "https://github.com/Lomray-Software/microservices.git"
+		"url": ""
 	},
 	"bugs": {
-		"url": "https://github.com/Lomray-Software/microservices/issues"
+		"url": ""
 	},
-	"homepage": "https://github.com/Lomray-Software/microservices/microservice-name",
+	"homepage": "",
 	"author": "Mikhail Yarmaliuk",
 	"license": "Apache-2.0",
 	"scripts": {

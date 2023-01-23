@@ -1,4 +1,4 @@
-import CONST from '@lomray/microservice-name';
+import CONST from '@lomray/microservice-name/constants';
 import { version, name } from '../../package.json';
 
 const isBuild = process.env.__IS_BUILD__;

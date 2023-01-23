@@ -15,31 +15,34 @@ jobs:
       docker-tag: ${{ steps.other-params.outputs.docker-tag }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
 
-      - id: files
-        uses: Ana06/get-changed-files@v2.1.0
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v35
         with:
-          format: 'json'
+          json: true
+          dir_names: true
+          dir_names_max_depth: 3
 
       - id: microservices
-        run: ./.github/get-changed-microservices.sh
+        run: npx @lomray/microservice-cli changed-microservices
         env:
-          FILES: '${{ steps.files.outputs.all }}'
+          FILES: '${{ steps.changed-files.outputs.all_changed_files }}'
 
       - name: Branch name & docker tag
         id: other-params
         shell: bash
         run: |
           branch=$(echo ${GITHUB_REF#refs/heads/})
-          echo "::set-output name=branch::$branch"
+          echo "branch=$branch" >> $GITHUB_OUTPUT
           # define docker tag
           if [ "$branch" == "staging" ]; then
-            echo "::set-output name=docker-tag::-$branch"
+            echo "docker-tag=-$branch" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=docker-tag::"
+            echo "docker-tag=" >> $GITHUB_OUTPUT
           fi
 
   checks-compile:
@@ -52,38 +55,43 @@ jobs:
       ONLY: ${{ needs.changed-microservices.outputs.microservices-spaced }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18.13.0'
+          cache: 'npm'
 
       - name: Install global dependencies
         run: npm ci
 
       - name: Install microservices dependencies
-        run: npm run global-install
+        run: npx @lomray/microservice-cli global-install
 
       - name: Check microservice eslint
-        run: npm run lint:check
+        run: npx @lomray/microservice-cli lint:check
 
       - name: Check microservice typescript
-        run: npm run ts:check
+        run: npx @lomray/microservice-cli ts:check
 
       - name: Run microservices tests with coverage
-        run: npm run test yes
+        run: npx @lomray/microservice-cli test --coverage
 
       - name: Compile microservices
-        run: npm run build
+        run: npx @lomray/microservice-cli build
 
       # note: this also update package.json version
       - name: Publish npm packages / create github release
-        run: npm run semantic-release
+        run: npx @lomray/microservice-cli semantic-release
         env:
           GIT_BRANCH: ${{ needs.changed-microservices.outputs.branch }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Archive microservices artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: microservice-artifacts
           path: |
@@ -92,7 +100,7 @@ jobs:
             microservices/*/package.json
 
       - name: Archive code coverage artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         # only for staging
         if: ${{ needs.changed-microservices.outputs.branch }} == "staging"
         with:
@@ -116,20 +124,19 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
 
-      - uses: actions/download-artifact@master
+      - uses: actions/download-artifact@v3
         with:
           name: microservice-artifacts
           path: microservices
 
-      - name: Get npm package version
-        id: package-version
-        uses: Saionaro/extract-package-version@v1.1.1
-        with:
-          path: ${{ env.WORK_DIR }}
+      - id: package-version
+        run: npx @lomray/microservice-cli package-version
+        env:
+          WORK_DIR: ${{ env.WORK_DIR }}
 
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@master
@@ -159,20 +166,19 @@ jobs:
       WORK_DIR: "microservices/${{ matrix.microservice }}"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - uses: actions/download-artifact@master
+      - uses: actions/download-artifact@v3
         with:
           name: coverage-artifacts
           path: microservices
 
-      - name: Get npm package version
-        id: package-version
-        uses: Saionaro/extract-package-version@v1.1.1
-        with:
-          path: ${{ env.WORK_DIR }}
+      - id: package-version
+        run: npx @lomray/microservice-cli package-version
+        env:
+          WORK_DIR: ${{ env.WORK_DIR }}
 
       - uses: SonarSource/sonarcloud-github-action@master
         env:

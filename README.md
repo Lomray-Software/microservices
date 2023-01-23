@@ -16,9 +16,9 @@ Prod: [![Build prod](https://github.com/Lomray-Software/microservices/actions/wo
  - [Users](microservices/users)
  - [Attachments](microservices/attachments)
  
-Use `npm run create-microservice your-ms-name` for create new microservice from template.
+## Use [CLI](https://github.com/Lomray-Software/microservices-cli) to start your own art.
 
-## How to start
+## How to investigate it
 
 ### Method 1:
 Use docker to run all in one command:

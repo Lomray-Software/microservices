@@ -12,19 +12,22 @@ jobs:
       microservices: ${{ steps.microservices.outputs.list }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
 
-      - id: files
-        uses: Ana06/get-changed-files@v2.1.0
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v35
         with:
-          format: 'json'
+          json: true
+          dir_names: true
+          dir_names_max_depth: 3
 
       - id: microservices
-        run: ./.github/get-changed-microservices.sh
+        run: npx @lomray/microservice-cli changed-microservices
         env:
-          FILES: '${{ steps.files.outputs.all }}'
+          FILES: '${{ steps.changed-files.outputs.all_changed_files }}'
 
   checks:
     name: Run code checks
@@ -40,7 +43,7 @@ jobs:
       MICROSERVICE_NAME: ${{ matrix.microservice }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
 
@@ -48,21 +51,21 @@ jobs:
         run: npm ci
 
       - name: Install microservice dependencies
-        run: npm run global-install
+        run: npx @lomray/microservice-cli global-install
         env:
           ONLY: ${{ env.MICROSERVICE_NAME }}
 
       - name: Check microservice eslint
-        run: npm run lint:check
+        run: npx @lomray/microservice-cli lint:check
         env:
           ONLY: ${{ env.MICROSERVICE_NAME }}
 
       - name: Check microservice typescript
-        run: npm run ts:check
+        run: npx @lomray/microservice-cli ts:check
         env:
           ONLY: ${{ env.MICROSERVICE_NAME }}
 
       - name: Run microservices tests
-        run: npm run test
+        run: npx @lomray/microservice-cli test
         env:
           ONLY: ${{ env.MICROSERVICE_NAME }}
