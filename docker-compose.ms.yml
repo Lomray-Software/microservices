@@ -60,3 +60,12 @@ services:
       - configuration
     environment:
       MS_CONNECTION: $MS_CONNECTION
+
+  attachments:
+    image: ghcr.io/lomray-software/microservices/attachments:${VERSION_TAG}
+    container_name: attachments
+    restart: always
+    depends_on:
+      - configuration
+    environment:
+      MS_CONNECTION: $MS_CONNECTION
