@@ -9,7 +9,7 @@ const constants = {
   MS_BATCH_LIMIT: Number(process.env.MS_BATCH_LIMIT) || undefined,
   MS_INFO_ROUTE: process.env.MS_INFO_ROUTE,
   MS_REQ_TIMEOUT: Number(process.env.MS_REQ_TIMEOUT) || undefined,
-  MS_JSON_LIMIT: process.env.MS_JSON_LIMIT ?? '20',
+  MS_JSON_LIMIT: process.env.MS_JSON_LIMIT || '20',
   MS_LISTENER_PORT: process.env.MS_LISTENER_PORT || '3000',
   MS_CORS_CONFIG: JSON.parse(
     process.env.MS_CORS_CONFIG || '{"origin":["http://localhost:3000"],"credentials":true}',

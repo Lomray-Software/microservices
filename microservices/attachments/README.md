@@ -5,7 +5,10 @@ RPC 2.0 Microservice.
 
 A microservice provides work with attachments for entities from other microservices. For example: images, videos.
 
-![Version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fraw.githubusercontent.com%2FLomray-Software%2Fmicroservices%2Fstaging%2Fmicroservices%2Fattachments%2Fpackage.json&label=Staging%20version&query=$.version&colorB=blue)  
+![npm (scoped)](https://img.shields.io/npm/v/@lomray/microservice-attachments)  
+![Docker](https://img.shields.io/npm/v/@lomray/microservice-attachments?label=docker)  
+![Docker prod](https://img.shields.io/badge/Docker%20prod-%3Alatest-blue)  
+![Docker staging](https://img.shields.io/badge/Docker%20staging-%3Alatest--staging-orange)  
 ![GitHub](https://img.shields.io/github/license/Lomray-Software/microservices)
 ![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
 
@@ -72,3 +75,5 @@ That is all. **Don't forget install npm dependencies**
 ### <a id="memory-usage"></a>MEMORY USAGE:
 
 __AWS Memory__: ~200 MB (depends on allow file size)
+
+### Use [CLI](https://github.com/Lomray-Software/microservices-cli) to start your own art.

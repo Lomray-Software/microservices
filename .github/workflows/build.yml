@@ -107,6 +107,12 @@ jobs:
             # keep update version
             microservices/*/package.json
 
+      - name: Archive Dockerfile
+        uses: actions/upload-artifact@v3
+        with:
+          name: dockerfile
+          path: node_modules/@lomray/microservice-config/Dockerfile-nodejs
+
       - name: Archive code coverage artifacts
         uses: actions/upload-artifact@v3
         # only for staging
@@ -141,17 +147,21 @@ jobs:
           name: microservice-artifacts
           path: microservices
 
+      - uses: actions/download-artifact@v3
+        with:
+          name: dockerfile
+
       - id: package-version
         run: npx @lomray/microservices-cli package-version
         env:
           WORK_DIR: ${{ env.WORK_DIR }}
 
       - name: Publish to Registry
-        uses: elgohr/Publish-Docker-Github-Action@master
+        uses: elgohr/Publish-Docker-Github-Action@v5
         with:
           name: "Lomray-Software/microservices/${{ env.MICROSERVICE_NAME }}"
           tags: "latest${{ needs.changed-microservices.outputs.docker-tag }},${{ steps.package-version.outputs.version}}"
-          dockerfile: node_modules/@lomray/microservice-config/Dockerfile-nodejs
+          dockerfile: Dockerfile-nodejs
           context: ${{ env.WORK_DIR }}
           buildoptions: "--compress --force-rm --no-cache"
           username: ${{ github.actor }}
