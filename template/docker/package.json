@@ -32,7 +32,8 @@
     "lint:check": "",
     "ts:check": "",
     "build": "mkdir lib",
-    "sync:permissions": "node lib/migrations/permissions/sync.js"
+    "permissions:export:prod": "node lib/migrations/permissions/export.js",
+    "permissions:sync:prod": "node lib/migrations/permissions/export.js"
   },
 	"dependencies": {},
 	"devDependencies": {}
