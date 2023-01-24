@@ -10,7 +10,6 @@
 		"microservice",
 		"inverted",
 		"json",
-		"gateway",
 		"worker",
 		"typescript"
 	],

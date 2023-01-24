@@ -7,7 +7,7 @@ const constants = {
   ...CONST,
   VERSION: version,
   PACKAGE_NAME: name,
-  IS_BUILD: isBuild,
+  IS_BUILD: isBuild as unknown as boolean,
   EXTEND_PACKAGE_NAME: CONST.PACKAGE_NAME,
 };
 

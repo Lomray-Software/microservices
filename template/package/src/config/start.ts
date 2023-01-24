@@ -1,7 +1,4 @@
-import {
-  GetDbConfig,
-  GetMsStartConfig,
-} from '@lomray/microservice-helpers';
+import { GetDbConfig, GetMsStartConfig } from '@lomray/microservice-helpers';
 import defaultStartConfig from '@lomray/microservice-name/config/start';
 import CONST from '@constants/index';
 
@@ -10,7 +7,6 @@ import CONST from '@constants/index';
  */
 const startConfig = GetMsStartConfig(CONST, {
   ...defaultStartConfig,
-  version: CONST.VERSION,
   dbOptions: GetDbConfig(CONST, CONST.EXTEND_PACKAGE_NAME),
 });
 
