@@ -1,0 +1,475 @@
+[
+  {
+    "microservice": "files",
+    "alias": "files.File",
+    "title": "File",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "admin": "allow",
+          "user": {
+            "template": "<%= value === current.userId ? value : undefined %>"
+          }
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "url": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "alt": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "formats": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "meta": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "fileEntities": "files.FileEntity"
+    },
+    "createdAt": "2022-05-16T06:36:58.754Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.ListOutputParams.a9f15987954880944ab25da08050726b",
+    "title": "List Output Params",
+    "schema": {
+      "list": "files.File",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-05-16T06:36:58.754Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.ViewOutputParams.9c5be4bcf134753a09bebd1e6a10d287",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "files.File"
+    },
+    "createdAt": "2022-05-16T06:36:58.754Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.FileCreateInput",
+    "title": "File Create Input",
+    "schema": {
+      "type": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "admin": "allow",
+          "user": {
+            "template": "<%= value === current.userId ? value : undefined %>"
+          }
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "alt": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "file": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-05-16T06:36:58.754Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.FileCreateOutput",
+    "title": "File Create Output",
+    "schema": {
+      "entity": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-05-16T06:36:58.754Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.FileUpdateInput",
+    "title": "File Update Input",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "alt": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "file": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-05-16T06:36:58.754Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.FileUpdateOutput",
+    "title": "File Update Output",
+    "schema": {
+      "entity": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-05-16T06:36:58.754Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.FileRemoveInput",
+    "title": "File Remove Input",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-05-16T06:36:58.754Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.FileRemoveOutput",
+    "title": "File Remove Output",
+    "schema": {
+      "isRemoved": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-05-16T06:36:58.754Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.FileEntity",
+    "title": "File Entity",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "entityId": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "fileId": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "microservice": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "order": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "file": "files.File"
+    },
+    "createdAt": "2022-05-17T08:46:00.144Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.CreateRequestParams.aba63b42785a944dcf8d37e0520e785a",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "files.File"
+    },
+    "createdAt": "2022-05-17T08:46:00.144Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.CreateOutputParams.9c5be4bcf134753a09bebd1e6a10d287",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "files.File"
+    },
+    "createdAt": "2022-05-17T08:46:00.144Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.UpdateRequestParams.aba63b42785a944dcf8d37e0520e785a",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "files.File",
+      "query": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-05-17T08:46:00.144Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.UpdateOutputParams.9c5be4bcf134753a09bebd1e6a10d287",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "files.File"
+    },
+    "createdAt": "2022-05-17T08:46:00.144Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.RemoveOutputParams.3ef3389bdff90861df4b47bdc606550e",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "files.File",
+      "entities": "files.File"
+    },
+    "createdAt": "2022-05-17T08:46:00.144Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.ListOutputParams.319714928df40845dd8ad2c56de4a6ca",
+    "title": "List Output Params",
+    "schema": {
+      "list": "files.FileEntity",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-05-18T10:50:33.019Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.ViewOutputParams.0b5f303eb38783c2421b2c7c2db0a78f",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "files.FileEntity"
+    },
+    "createdAt": "2022-05-18T10:50:33.019Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.CreateRequestParams.676a71495ed8f8b5ebd1310970e420de",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "files.FileEntity"
+    },
+    "createdAt": "2022-05-18T10:50:33.019Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.CreateOutputParams.0b5f303eb38783c2421b2c7c2db0a78f",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "files.FileEntity"
+    },
+    "createdAt": "2022-05-18T10:50:33.019Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.UpdateRequestParams.676a71495ed8f8b5ebd1310970e420de",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "files.FileEntity",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-05-18T10:50:33.019Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.UpdateOutputParams.0b5f303eb38783c2421b2c7c2db0a78f",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "files.FileEntity"
+    },
+    "createdAt": "2022-05-18T10:50:33.019Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.RemoveOutputParams.d05d727a1c3f0e5fbc2a9d274674605e",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "files.FileEntity",
+      "entities": "files.FileEntity"
+    },
+    "createdAt": "2022-05-18T10:50:33.019Z"
+  }
+]

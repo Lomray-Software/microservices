@@ -7,7 +7,7 @@
  - [Authorization](https://github.com/Lomray-Software/microservices/authorization)
  - [Notification](https://github.com/Lomray-Software/microservices/notification)
  - [Users](https://github.com/Lomray-Software/microservices/users)
- - [Attachments](https://github.com/Lomray-Software/microservices/attachments)
+ - [Files](https://github.com/Lomray-Software/microservices/files)
  
 Use `microservices create your-ms-name` for create new microservice from template.
 

@@ -16,7 +16,22 @@
   },
   {
     "id": 2,
-    "title": "Check if entities belong to a user",
+    "title": "Get list with not empty query.where",
+    "conditions": {
+      "or": [
+        {
+          "template": "<%= _.includes(roles, 'admin') %>"
+        },
+        {
+          "template": "<%= !_.isEmpty(_.get(reqParams, 'query.where')) %>"
+        }
+      ]
+    },
+    "createdAt": "2022-06-09T06:47:43.453Z"
+  },
+  {
+    "id": 3,
+    "title": "Check if file and related entity belong to a user",
     "conditions": {
       "or": [
         {
@@ -52,42 +67,27 @@
                 }
               }
             },
-            "attachment": {
-              "method": "attachments.attachment.view",
+            "file": {
+              "method": "files.file.view",
               "params": {
                 "query": {
                   "where": {
-                    "id": "<%= _.get(reqParams, 'fields.attachmentId') %>",
+                    "id": "<%= _.get(reqParams, 'fields.fileId') %>",
                     "userId": "<%= _.get(payload, 'authentication.userId') %>"
                   }
                 }
               }
             }
           },
-          "template": "<%= !_.isEmpty(_.get(entity, 'entity')) && !_.isEmpty(_.get(attachment, 'entity')) %>"
+          "template": "<%= !_.isEmpty(_.get(entity, 'entity')) && !_.isEmpty(_.get(file, 'entity')) %>"
         }
       ]
     },
     "createdAt": "2022-05-23T11:33:19.258Z"
   },
   {
-    "id": 3,
-    "title": "Get list with not empty query.where",
-    "conditions": {
-      "or": [
-        {
-          "template": "<%= _.includes(roles, 'admin') %>"
-        },
-        {
-          "template": "<%= !_.isEmpty(_.get(reqParams, 'query.where')) %>"
-        }
-      ]
-    },
-    "createdAt": "2022-06-09T06:47:43.453Z"
-  },
-  {
     "id": 4,
-    "title": "Update only user-owned review",
+    "title": "Remove or update only user-owned file",
     "conditions": {
       "or": [
         {
@@ -96,35 +96,7 @@
         {
           "requests": {
             "entity": {
-              "method": "core.review.view",
-              "params": {
-                "query": {
-                  "where": {
-                    "id": "<%= _.get(reqParams, 'id') %>",
-                    "userId": "<%= _.get(payload, 'authentication.userId') %>"
-                  }
-                }
-              }
-            }
-          },
-          "template": "<%= !_.isEmpty(_.get(entity, 'entity')) %>"
-        }
-      ]
-    },
-    "createdAt": "2022-06-16T05:00:42.754Z"
-  },
-  {
-    "id": 5,
-    "title": "Remove or update only user-owned attachment",
-    "conditions": {
-      "or": [
-        {
-          "template": "<%= _.includes(roles, 'admin') %>"
-        },
-        {
-          "requests": {
-            "entity": {
-              "method": "attachments.attachment.view",
+              "method": "files.file.view",
               "params": {
                 "query": {
                   "where": {

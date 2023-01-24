@@ -1,7 +1,7 @@
 {
-	"name": "@lomray/microservice-authorization",
+	"name": "@lomray/microservice-files",
 	"version": "1.0.0",
-	"description": "Authorization microservice based on NodeJS & inverted json.",
+	"description": "Files microservice based on NodeJS & inverted json.",
 	"main": "index.js",
 	"types": "index.d.ts",
 	"keywords": [
@@ -10,10 +10,9 @@
 		"microservice",
 		"inverted",
 		"json",
-		"authorization",
+		"files",
 		"worker",
-		"typescript",
-		"permissions"
+		"typescript"
 	],
 	"publishConfig": {
 		"access": "public"
@@ -25,7 +24,7 @@
 	"bugs": {
 		"url": "https://github.com/Lomray-Software/microservices/issues"
 	},
-	"homepage": "https://github.com/Lomray-Software/microservices/authorization",
+	"homepage": "https://github.com/Lomray-Software/microservices/files",
 	"author": "Mikhail Yarmaliuk",
 	"license": "Apache-2.0",
 	"scripts": {
@@ -37,24 +36,24 @@
 		"typeorm:dev": "node --require ts-node/register node_modules/typeorm/cli.js",
 		"typeorm:prod": "node node_modules/typeorm/cli.js",
 		"start:dev": "node --require ts-node/register src/index.ts",
-		"start:prod": "node --require ./lib/tracer.js ./lib/index.js",
-		"permissions:export:dev": "node --require ts-node/register migrations/permissions/export.ts",
-		"permissions:export:prod": "node lib/migrations/permissions/export.js",
-		"permissions:sync:dev": "node --require ts-node/register migrations/permissions/sync.ts",
-		"permissions:sync:prod": "node lib/migrations/permissions/sync.js"
+		"start:prod": "node --require ./lib/tracer.js ./lib/index.js"
 	},
 	"dependencies": {
-		"@lomray/microservice-helpers": "^1.28.2",
-		"axios": "^0.27.2",
+		"@lomray/microservice-helpers": "^1.28.1",
+		"aws-sdk": "^2.1298.0",
 		"class-transformer": "0.4.1",
 		"class-validator": "^0.14.0",
 		"class-validator-jsonschema": "^5.0.0",
-		"lodash": "^4.17.21",
+		"mime": "^3.0.0",
+		"sharp": "^0.31.3",
 		"tslib": "^2.4.1",
-		"typeorm": "0.2.41"
+		"typeorm": "0.2.41",
+		"uuid": "^9.0.0"
 	},
 	"devDependencies": {
-		"@types/lodash": "^4.14.191",
-		"rollup-plugin-copy": "^3.4.0"
+		"@types/mime": "^3.0.1",
+		"@types/node": "^18.11.18",
+		"@types/sharp": "^0.31.1",
+		"@types/uuid": "^9.0.0"
 	}
 }
