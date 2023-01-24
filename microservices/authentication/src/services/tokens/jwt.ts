@@ -67,14 +67,17 @@ class Jwt {
   /**
    * Create access & refresh tokens
    */
-  public create(jwtid: string, payload?: Record<string, any>): { access: string; refresh: string } {
+  public create(
+    jwtid: string,
+    payload: Record<string, any> = {},
+  ): { access: string; refresh: string } {
     return {
       access: jsonwebtoken.sign(payload ?? {}, this.secretKey, {
         ...this.getOptions(),
         expiresIn: this.expiration,
         jwtid,
       }),
-      refresh: jsonwebtoken.sign(payload ?? {}, this.secretKey, {
+      refresh: jsonwebtoken.sign({ ...payload, accessExpiresIn: this.expiration }, this.secretKey, {
         ...this.getOptions(),
         expiresIn: this.expirationRefresh,
         jwtid,
