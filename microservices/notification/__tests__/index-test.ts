@@ -4,12 +4,12 @@ import sinon from 'sinon';
 
 describe('microservice: start', () => {
   const sandbox = sinon.createSandbox();
-  const startWithDb = sandbox.stub();
+  const run = sandbox.stub();
 
   rewiremock.proxy(() => require('../src'), {
     '@lomray/microservice-helpers': rewiremock('@lomray/microservice-helpers')
       .callThrough()
-      .with({ startWithDb }),
+      .with({ run }),
   });
 
   afterEach(() => {
@@ -17,9 +17,9 @@ describe('microservice: start', () => {
   });
 
   it('should correctly start microservice', () => {
-    const args = startWithDb.firstCall.firstArg;
+    const args = run.firstCall.firstArg;
 
-    expect(startWithDb).to.calledOnce;
+    expect(run).to.calledOnce;
     expect(args).to.have.property('msOptions');
     expect(args).to.have.property('msParams');
     expect(args).to.have.property('registerMethods');
