@@ -1,11 +1,4 @@
-import {
-  ILokiTransportOptions,
-  Log,
-  GetDbConfig,
-  GetMsOptions,
-  GetMsParams,
-  GetMsStartConfig,
-} from '@lomray/microservice-helpers';
+import { ILokiTransportOptions, Log, GetMsStartConfig } from '@lomray/microservice-helpers';
 import { getCustomRepository, In } from 'typeorm';
 import CONST from '@constants/index';
 import Config from '@entities/config';
@@ -20,9 +13,6 @@ import MiddlewareRepository from '@repositories/middleware-repository';
 const startConfig = GetMsStartConfig(CONST, {
   type: 'microservice',
   registerMethods,
-  msOptions: GetMsOptions(CONST),
-  msParams: GetMsParams(),
-  dbOptions: GetDbConfig(CONST),
   shouldUseDbRemoteOptions: false,
   remoteConfig: { isEnable: false },
   remoteMiddleware: {
