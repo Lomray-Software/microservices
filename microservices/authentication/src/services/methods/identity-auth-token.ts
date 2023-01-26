@@ -11,7 +11,7 @@ import Token from '@entities/token';
 import Jwt from '@services/tokens/jwt';
 
 class TokenIdentifyInput {
-  @Length(1, 300)
+  @Length(1, 1000)
   @IsUndefinable()
   token?: string;
 }

@@ -13,10 +13,10 @@ import Jwt from '@services/tokens/jwt';
 
 class TokenRenewInput {
   @IsUndefinable() // can be obtained from headers
-  @Length(1, 300)
+  @Length(1, 1000)
   access?: string;
 
-  @Length(1, 300)
+  @Length(1, 1000)
   refresh: string;
 
   @IsUndefinable()
