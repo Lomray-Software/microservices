@@ -95,6 +95,7 @@ jobs:
         run: npx @lomray/microservices-cli semantic-release
         env:
           GIT_BRANCH: ${{ needs.changed-microservices.outputs.branch }}
+          PUBLISH_PACKAGE: ${{ secrets.PUBLISH_PACKAGE }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
