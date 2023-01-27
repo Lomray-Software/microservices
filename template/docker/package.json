@@ -33,7 +33,8 @@
     "ts:check": "",
     "build": "mkdir lib",
     "permissions:export:prod": "node lib/migrations/permissions/export.js",
-    "permissions:sync:prod": "node lib/migrations/permissions/export.js"
+    "permissions:import:prod": "node lib/migrations/permissions/import.js",
+    "permissions:sync:prod": "node lib/migrations/permissions/sync.js"
   },
 	"dependencies": {},
 	"devDependencies": {}

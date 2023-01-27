@@ -40,6 +40,8 @@
 		"start:prod": "node --require ./lib/tracer.js ./lib/index.js",
 		"permissions:export:dev": "node --require ts-node/register migrations/permissions/export.ts",
 		"permissions:export:prod": "node lib/migrations/permissions/export.js",
+    "permissions:import:dev": "node --require ts-node/register migrations/permissions/import.ts",
+    "permissions:import:prod": "node lib/migrations/permissions/import.js",
 		"permissions:sync:dev": "node --require ts-node/register migrations/permissions/sync.ts",
 		"permissions:sync:prod": "node lib/migrations/permissions/sync.js"
 	},
