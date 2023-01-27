@@ -16,7 +16,7 @@
   {
     "microservice": "files",
     "method": "file.view",
-    "description": "Returns file by given condition",
+    "description": "Returns File by given condition",
     "allowGroup": [
       "user",
       "admin"
@@ -24,13 +24,13 @@
     "denyGroup": [],
     "createdAt": "2022-05-16T06:36:58.754Z",
     "modelIn": "ViewRequestParams",
-    "modelOut": "files.ViewOutputParams.9c5be4bcf134753a09bebd1e6a10d287",
+    "modelOut": "files.ViewOutputParams.a1d4fea78f4e098f7d0b186c2ae4e7d2",
     "methodFilters": []
   },
   {
     "microservice": "files",
     "method": "file.count",
-    "description": "Returns count of file by given condition",
+    "description": "Returns count of File by given condition",
     "allowGroup": [
       "admin"
     ],
@@ -77,8 +77,14 @@
     "createdAt": "2022-05-16T06:36:58.754Z",
     "modelIn": "files.FileRemoveInput",
     "modelOut": "files.FileRemoveOutput",
-    "condition": "Remove or update only user-owned file",
-    "methodFilters": []
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "only",
+        "roleAlias": "user",
+        "createdAt": "2022-03-15T06:17:44.538Z"
+      }
+    ]
   },
   {
     "microservice": "files",
@@ -95,7 +101,7 @@
   {
     "microservice": "files",
     "method": "file.list",
-    "description": "Returns list of file by given condition",
+    "description": "Returns list of File by given condition",
     "allowGroup": [
       "user",
       "admin"
@@ -103,7 +109,7 @@
     "denyGroup": [],
     "createdAt": "2022-05-16T06:36:58.754Z",
     "modelIn": "ListRequestParams",
-    "modelOut": "files.ListOutputParams.a9f15987954880944ab25da08050726b",
+    "modelOut": "files.ListOutputParams.aea86e8430ea229a8bcc9d24e27e967c",
     "condition": "Get list with not empty query.where",
     "methodFilters": []
   },
@@ -119,8 +125,14 @@
     "createdAt": "2022-05-16T06:36:58.754Z",
     "modelIn": "files.FileUpdateInput",
     "modelOut": "files.FileUpdateOutput",
-    "condition": "Remove or update only user-owned file",
-    "methodFilters": []
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "only",
+        "roleAlias": "user",
+        "createdAt": "2022-03-15T06:17:44.538Z"
+      }
+    ]
   },
   {
     "microservice": "files",
@@ -132,7 +144,7 @@
     "denyGroup": [],
     "createdAt": "2022-05-17T08:46:00.144Z",
     "modelIn": "RemoveRequestParams",
-    "modelOut": "files.RemoveOutputParams.d05d727a1c3f0e5fbc2a9d274674605e",
+    "modelOut": "files.RemoveOutputParams.ec838f2c2c56d414086e968a493681d5",
     "methodFilters": []
   },
   {
@@ -144,8 +156,8 @@
     ],
     "denyGroup": [],
     "createdAt": "2022-05-17T08:46:00.144Z",
-    "modelIn": "files.UpdateRequestParams.676a71495ed8f8b5ebd1310970e420de",
-    "modelOut": "files.UpdateOutputParams.0b5f303eb38783c2421b2c7c2db0a78f",
+    "modelIn": "files.UpdateRequestParams.8703aec5d6de0368b3d1c8c2d7f2494d",
+    "modelOut": "files.UpdateOutputParams.6ec4a0f5dbdd91e9a8a32d93d00fef17",
     "methodFilters": []
   },
   {
@@ -159,7 +171,7 @@
     "denyGroup": [],
     "createdAt": "2022-05-17T08:46:00.144Z",
     "modelIn": "ViewRequestParams",
-    "modelOut": "files.ViewOutputParams.0b5f303eb38783c2421b2c7c2db0a78f",
+    "modelOut": "files.ViewOutputParams.6ec4a0f5dbdd91e9a8a32d93d00fef17",
     "methodFilters": []
   },
   {
@@ -172,7 +184,7 @@
     "denyGroup": [],
     "createdAt": "2022-05-17T08:46:00.144Z",
     "modelIn": "ListRequestParams",
-    "modelOut": "files.ListOutputParams.319714928df40845dd8ad2c56de4a6ca",
+    "modelOut": "files.ListOutputParams.2158144d7cba1f31f2caed149d459717",
     "methodFilters": []
   },
   {
@@ -185,8 +197,8 @@
     ],
     "denyGroup": [],
     "createdAt": "2022-05-17T08:46:00.144Z",
-    "modelIn": "files.CreateRequestParams.676a71495ed8f8b5ebd1310970e420de",
-    "modelOut": "files.CreateOutputParams.0b5f303eb38783c2421b2c7c2db0a78f",
+    "modelIn": "files.CreateRequestParams.8703aec5d6de0368b3d1c8c2d7f2494d",
+    "modelOut": "files.CreateOutputParams.6ec4a0f5dbdd91e9a8a32d93d00fef17",
     "condition": "Check if file and related entity belong to a user",
     "methodFilters": []
   },
@@ -206,15 +218,15 @@
   {
     "microservice": "files",
     "method": "file.create-empty",
-    "description": "Create a new empty file",
+    "description": "Create a new File",
     "allowGroup": [
       "user",
       "admin"
     ],
     "denyGroup": [],
     "createdAt": "2022-05-24T07:24:43.479Z",
-    "modelIn": "files.CreateRequestParams.aba63b42785a944dcf8d37e0520e785a",
-    "modelOut": "files.CreateOutputParams.9c5be4bcf134753a09bebd1e6a10d287",
+    "modelIn": "files.CreateRequestParams.59fb6dc97e65c5661e87220713b512eb",
+    "modelOut": "files.CreateOutputParams.a1d4fea78f4e098f7d0b186c2ae4e7d2",
     "methodFilters": []
   }
 ]

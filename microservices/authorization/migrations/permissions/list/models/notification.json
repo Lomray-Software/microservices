@@ -36,6 +36,14 @@
           "admin": "allow"
         }
       },
+      "replyTo": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "subject": {
         "in": {
           "admin": "allow"

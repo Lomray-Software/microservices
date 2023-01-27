@@ -87,7 +87,7 @@
   },
   {
     "id": 4,
-    "title": "Remove or update only user-owned file",
+    "title": "Remove or update only user-owned entity",
     "conditions": {
       "or": [
         {
@@ -96,7 +96,7 @@
         {
           "requests": {
             "entity": {
-              "method": "files.file.view",
+              "method": "<%= _.join([_.get(reqParams, 'fields.microservice'), _.get(reqParams, 'fields.type'), 'view'], '.') %>",
               "params": {
                 "query": {
                   "where": {

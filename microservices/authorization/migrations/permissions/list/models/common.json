@@ -125,6 +125,14 @@
         "out": {
           "admin": "allow"
         }
+      },
+      "version": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
       }
     },
     "createdAt": "2022-04-14T05:34:30.394Z"

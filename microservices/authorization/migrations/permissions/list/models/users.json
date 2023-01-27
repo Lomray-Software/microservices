@@ -214,6 +214,17 @@
           "admin": "allow"
         }
       },
+      "username": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow",
+          "guest": "allow"
+        }
+      },
       "firstName": {
         "in": {
           "user": "allow",
@@ -301,17 +312,6 @@
         },
         "out": {
           "admin": "allow"
-        }
-      },
-      "username": {
-        "in": {
-          "admin": "allow",
-          "user": "allow"
-        },
-        "out": {
-          "admin": "allow",
-          "user": "allow",
-          "guest": "allow"
         }
       },
       "profile": "users.Profile",
