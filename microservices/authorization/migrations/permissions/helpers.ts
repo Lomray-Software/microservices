@@ -137,46 +137,49 @@ const importMethodsPermissions = async (
  */
 const importPermissions = async (conn: Connection | null = null, onlyCleanup = false) => {
   const connection = conn || (await createConnection());
-  const methodRepo = connection.getRepository(Method);
-  const modelRepo = connection.getRepository(Model);
-  const conditionRepo = connection.getRepository(Condition);
-  const filtersRepo = connection.getRepository(Filter);
-  const methodFilterRepo = connection.getRepository(MethodFilter);
-  const rolesRepo = connection.getRepository(Role);
-  const userRolesRepo = connection.getRepository(UserRole);
 
-  const entities = [
-    { repository: rolesRepo, file: 'roles' },
-    { repository: userRolesRepo, file: 'user-roles' },
-    { repository: filtersRepo, file: 'filters' },
-    { repository: conditionRepo, file: 'conditions' },
-    { repository: modelRepo, file: getDumpEntitiesInFiles(DUMP_PATH_MODELS) },
-    () =>
-      importMethodsPermissions(
-        methodRepo,
-        methodFilterRepo,
-        modelRepo,
-        conditionRepo,
-        filtersRepo,
-        onlyCleanup,
-      ),
-  ];
+  await connection.transaction(async (manager) => {
+    const methodRepo = manager.getRepository(Method);
+    const modelRepo = manager.getRepository(Model);
+    const conditionRepo = manager.getRepository(Condition);
+    const filtersRepo = manager.getRepository(Filter);
+    const methodFilterRepo = manager.getRepository(MethodFilter);
+    const rolesRepo = manager.getRepository(Role);
+    const userRolesRepo = manager.getRepository(UserRole);
 
-  if (onlyCleanup) {
-    entities.reverse();
-  }
+    const entities = [
+      { repository: rolesRepo, file: 'roles' },
+      { repository: userRolesRepo, file: 'user-roles' },
+      { repository: filtersRepo, file: 'filters' },
+      { repository: conditionRepo, file: 'conditions' },
+      { repository: modelRepo, file: getDumpEntitiesInFiles(DUMP_PATH_MODELS) },
+      () =>
+        importMethodsPermissions(
+          methodRepo,
+          methodFilterRepo,
+          modelRepo,
+          conditionRepo,
+          filtersRepo,
+          onlyCleanup,
+        ),
+    ];
 
-  for (const data of entities) {
-    if (typeof data === 'function') {
-      await data();
-
-      continue;
+    if (onlyCleanup) {
+      entities.reverse();
     }
 
-    const { repository, file } = data;
+    for (const data of entities) {
+      if (typeof data === 'function') {
+        await data();
 
-    await importEntityPermissions(repository, file, onlyCleanup);
-  }
+        continue;
+      }
+
+      const { repository, file } = data;
+
+      await importEntityPermissions(repository, file, onlyCleanup);
+    }
+  });
 
   if (!conn) {
     await connection.close();
