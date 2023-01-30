@@ -120,6 +120,8 @@ class CreateAuthToken {
     const { userId, expirationAt, params, jwtPayload } = options;
     const { secretKey, ...jwtOptions } = this.jwtConfig;
 
+    const { domain } = await cookiesConfig();
+
     const dbToken = await this.repository.save(
       this.repository.create({
         type: TokenType.jwt,
@@ -131,7 +133,13 @@ class CreateAuthToken {
         jwtPayload,
       }),
     );
-    const jwtService = new Jwt(secretKey, jwtOptions);
+    const jwtService = new Jwt(secretKey, {
+      ...jwtOptions,
+      options: {
+        ...(jwtOptions?.options ?? {}),
+        ...Jwt.getAudience([domain], jwtOptions?.options),
+      },
+    });
     const { access, refresh } = jwtService.create(dbToken.id, { ...(jwtPayload ?? {}), userId });
     const { exp } = jwtService.decode(refresh);
 

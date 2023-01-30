@@ -19,9 +19,10 @@ describe('services/methods/identify-auth-token', () => {
   const repository = TypeormMock.entityManager.getRepository(Token);
   const userId = 'test-id';
   const tokenId = 'token-id';
-  const jwtConfig = { secretKey: 'secret' };
+  const audience = 'identify-auth-token';
+  const jwtConfig = { secretKey: 'secret', options: { audience } };
   const service = new IdentifyAuthToken(repository, jwtConfig);
-  const jwtService = new Jwt(jwtConfig.secretKey);
+  const jwtService = new Jwt(jwtConfig.secretKey, { options: { audience: [audience] } });
 
   /**
    * Helper for mock find personal token
@@ -88,6 +89,9 @@ describe('services/methods/identify-auth-token', () => {
 
   it('should correctly identify token: jwt', async () => {
     const { access } = jwtService.create(tokenId);
+    const { access: audAccess } = new Jwt(jwtConfig.secretKey, {
+      options: { audience: ['test-unknown-aud'] },
+    }).create(tokenId);
 
     TypeormMock.entityManager.findOne.callsFake(jwtFakeFind(tokenId));
 
@@ -130,9 +134,43 @@ describe('services/methods/identify-auth-token', () => {
           provider: AuthProviders.jwt,
         },
       },
+      // test cookies with multiple keys, find right token with correct audience
+      {
+        headers: {
+          cookie: `_octo=GH1.1.410839147.1623154775; jwt-access=${audAccess}; _device_id=bd16babbc28b1bd75915ce011104d00c; jwt-access=${access};`,
+        },
+        expectedResult: {
+          tokenId,
+          userId,
+          isAuth: true,
+          provider: AuthProviders.jwt,
+        },
+      },
+      {
+        headers: {
+          cookie: `_octo=GH1.1.410839147.1623154775; jwt-access=${audAccess}; _device_id=bd16babbc28b1bd75915ce011104d00c; jwt-access=${access}; jwt-access=${audAccess};`,
+        },
+        expectedResult: {
+          tokenId,
+          userId,
+          isAuth: true,
+          provider: AuthProviders.jwt,
+        },
+      },
+      {
+        headers: {
+          cookie: `_octo=GH1.1.410839147.1623154775; jwt-access=${audAccess}; jwt-access=${audAccess};`,
+        },
+        expectedResult: 'Unauthorized',
+      },
     ];
 
     for (const { expectedResult, token, headers } of cases) {
+      if (typeof expectedResult === 'string') {
+        expect(await waitResult(service.identify({ token }, headers))).to.throw(expectedResult);
+        continue;
+      }
+
       const result = await service.identify({ token }, headers);
 
       expect(result).to.deep.equal(expectedResult);

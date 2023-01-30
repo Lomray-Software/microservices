@@ -66,6 +66,18 @@ class Jwt {
   }
 
   /**
+   * Build audience array
+   */
+  public static getAudience(
+    baseAud: (string | undefined)[],
+    options?: SignOptions,
+  ): { audience?: string[] } {
+    const audience = [...baseAud, options?.audience].flat().filter(Boolean) as string[];
+
+    return audience.length ? { audience } : {};
+  }
+
+  /**
    * Create access & refresh tokens
    */
   public create(
@@ -89,13 +101,20 @@ class Jwt {
   /**
    * Validate JWT token
    */
-  public validate(token?: string, options: VerifyOptions = {}): JwtPayload {
+  public validate(tokens?: string | string[], options: VerifyOptions = {}): JwtPayload {
+    const tokensArr = Array.isArray(tokens) ? tokens : ([tokens] as string[]);
+
     try {
-      return jsonwebtoken.verify(token ?? '', this.secretKey, {
+      return jsonwebtoken.verify(tokensArr.shift() ?? '', this.secretKey, {
         ...this.getOptions(),
         ...options,
       }) as JwtPayload;
     } catch (e) {
+      // try to find token with valid audience
+      if (e.message.includes('jwt audience invalid') && tokensArr?.length) {
+        return this.validate(tokensArr, options);
+      }
+
       throw new BaseException({
         message: 'Unauthorized',
         status: 401,

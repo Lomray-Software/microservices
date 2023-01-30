@@ -4,7 +4,7 @@ import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { IsEnum, IsObject, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import type { Repository } from 'typeorm';
-import cookies from '@config/cookies';
+import cookiesConfig from '@config/cookies';
 import type { IJwtConfig } from '@config/jwt';
 import CONST from '@constants/index';
 import type Token from '@entities/token';
@@ -82,11 +82,20 @@ class RenewAuthToken {
    * @private
    */
   private async renewJwtTokens(
-    options: TokenRenewInput,
+    options: Omit<TokenRenewInput, 'access'> & { access?: string | string[] },
   ): Promise<{ access: string; refresh: string }> {
     const { access, refresh, params, jwtPayload } = options;
     const { secretKey, ...jwtOptions } = this.jwtConfig;
-    const jwtService = new Jwt(secretKey, jwtOptions);
+
+    const { domain } = await cookiesConfig();
+
+    const jwtService = new Jwt(secretKey, {
+      ...jwtOptions,
+      options: {
+        ...(jwtOptions?.options ?? {}),
+        ...Jwt.getAudience([domain], jwtOptions?.options),
+      },
+    });
     const { jti } = jwtService.validate(access, { ignoreExpiration: true });
     const { jti: refreshJti } = jwtService.validate(refresh);
 
@@ -148,7 +157,7 @@ class RenewAuthToken {
                 name: 'jwt-access',
                 value: result['access'],
                 options: {
-                  ...(await cookies()),
+                  ...(await cookiesConfig()),
                   maxAge:
                     params?.maxAge ??
                     (this.jwtConfig?.expirationRefresh ?? CONST.DEFAULT_REFRESH_EXPIRATION) * 1000,

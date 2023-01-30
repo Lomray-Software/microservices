@@ -121,4 +121,17 @@ describe('services/tokens/jwt', () => {
 
     expect(jti).to.equal('id-7');
   });
+
+  it('should correctly validate token with audience', () => {
+    const tokenId = 'id-aud-1';
+    const jwtServiceAud = new Jwt(secretKey, { options: { audience: ['test-aud'] } });
+    const jwtService = new Jwt(secretKey);
+    const { access } = jwtServiceAud.create(tokenId);
+    const { jti } = jwtService.validate(access, { ignoreExpiration: true });
+
+    expect(jti).to.equal(tokenId);
+    expect(() =>
+      jwtService.validate(access, { ignoreExpiration: true, audience: ['unknown'] }),
+    ).to.throw('Unauthorized');
+  });
 });

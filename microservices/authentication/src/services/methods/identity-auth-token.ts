@@ -1,9 +1,10 @@
+import Cookie from '@lomray/cookie';
 import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { IsBoolean, IsEnum, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import Cookie from 'cookie';
 import { Repository } from 'typeorm';
+import cookiesConf from '@config/cookies';
 import type { IJwtConfig } from '@config/jwt';
 import AuthProviders from '@constants/auth-providers';
 import UnauthorizedCode from '@constants/unauthorized-code';
@@ -79,14 +80,14 @@ class IdentifyAuthToken {
    * Get auth token from cookies
    * @private
    */
-  public static getCookieAuth(headers?: Record<string, any>): string | undefined {
+  public static getCookieAuth(headers?: Record<string, any>): string[] | undefined {
     const cookies: string | undefined = headers?.cookie;
 
     if (!cookies) {
       return undefined;
     }
 
-    const parsedCookies = Cookie.parse(cookies);
+    const parsedCookies = Cookie.parse(cookies, { multiValuedCookies: true });
 
     return parsedCookies?.['jwt-access'];
   }
@@ -95,14 +96,24 @@ class IdentifyAuthToken {
    * Find auth token in db
    * @private
    */
-  private async findToken(token: string): Promise<Required<Omit<TokenIdentifyOutput, 'payload'>>> {
-    const isPersonal = String(token).length === 32;
-
+  private async findToken(
+    token: string | string[],
+  ): Promise<Required<Omit<TokenIdentifyOutput, 'payload'>>> {
+    const isPersonal = !Array.isArray(token) && String(token).length === 32;
     let dbToken: Token | undefined;
 
     if (!isPersonal) {
       const { secretKey, ...jwtOptions } = this.jwtConfig;
-      const jwtService = new Jwt(secretKey, jwtOptions);
+
+      const { domain } = await cookiesConf();
+
+      const jwtService = new Jwt(secretKey, {
+        ...jwtOptions,
+        options: {
+          ...(jwtOptions?.options ?? {}),
+          ...Jwt.getAudience([domain], jwtOptions?.options),
+        },
+      });
       const { jti } = jwtService.validate(token);
 
       dbToken = await this.repository.findOne({ id: jti });
