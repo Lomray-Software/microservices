@@ -1,13 +1,20 @@
-import { FirebaseSdk } from '@lomray/microservice-helpers';
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
+import rewiremock from 'rewiremock';
 import sinon from 'sinon';
 import IdProvider from '@constants/id-provider';
 import Profile from '@entities/profile';
 import User from '@entities/user';
-import type { TFirebaseAdmin } from '@services/external/firebase-sdk';
-import Firebase from '@services/identity-provider/firebase';
+import OriginalFirebase from '@services/identity-provider/firebase';
+
+const FirebaseSdkStub = sinon.stub();
+
+const { default: Firebase } = rewiremock.proxy<{
+  default: typeof OriginalFirebase;
+}>(() => require('@services/identity-provider/firebase'), {
+  '@services/external/firebase-sdk': FirebaseSdkStub,
+});
 
 describe('services/sign-up', () => {
   const sandbox = sinon.createSandbox();
@@ -43,8 +50,6 @@ describe('services/sign-up', () => {
 
   mockUser.profile = mockProfile();
 
-  const getFirebaseMock = (mock: Partial<TFirebaseAdmin> | Record<string, any>): TFirebaseAdmin =>
-    mock as unknown as TFirebaseAdmin;
   const service = new Firebase(IdProvider.FIREBASE, 'firebase-token', TypeormMock.entityManager);
 
   beforeEach(() => {
@@ -52,29 +57,26 @@ describe('services/sign-up', () => {
   });
 
   afterEach(() => {
+    FirebaseSdkStub.reset();
     sandbox.restore();
   });
 
   it('should throw error: firebase token invalid', async () => {
-    sandbox.stub(FirebaseSdk, 'get').resolves(
-      getFirebaseMock({
-        auth: () => ({ verifyIdToken: sandbox.stub().rejects() }),
-      }),
-    );
+    FirebaseSdkStub.resolves({
+      auth: () => ({ verifyIdToken: sandbox.stub().rejects() }),
+    });
 
     expect(await waitResult(service.signIn())).to.throw('Bad firebase token');
   });
 
   it('should throw error: firebase user disabled', async () => {
-    sandbox
-      .stub(FirebaseSdk, 'get')
-      .resolves(getFirebaseMock(firebaseMock({ user: { disabled: true } })));
+    FirebaseSdkStub.resolves(firebaseMock({ user: { disabled: true } }));
 
     expect(await waitResult(service.signIn())).to.throw('Bad firebase token');
   });
 
   it('should successful sign in existing user', async () => {
-    sandbox.stub(FirebaseSdk, 'get').resolves(getFirebaseMock(firebaseMock()));
+    FirebaseSdkStub.resolves(firebaseMock());
     TypeormMock.queryBuilder.getOne.resolves(mockUser);
 
     const resp = await service.signIn();
@@ -83,20 +85,16 @@ describe('services/sign-up', () => {
   });
 
   it('should registration throw error: validation failed', async () => {
-    sandbox
-      .stub(FirebaseSdk, 'get')
-      .resolves(getFirebaseMock(firebaseMock({ user: { email: 'invalid-email' } })));
+    FirebaseSdkStub.resolves(firebaseMock({ user: { email: 'invalid-email' } }));
     TypeormMock.queryBuilder.getOne.resolves(undefined);
 
     expect(await waitResult(service.signIn())).to.throw('Validation failed');
   });
 
   it('should registration throw error: disabled registration', async () => {
-    sandbox
-      .stub(FirebaseSdk, 'get')
-      .resolves(
-        getFirebaseMock(firebaseMock({ user: { email: 'some@email.com', emailVerified: true } })),
-      );
+    FirebaseSdkStub.resolves(
+      firebaseMock({ user: { email: 'some@email.com', emailVerified: true } }),
+    );
     TypeormMock.queryBuilder.getOne.resolves(undefined);
 
     expect(await waitResult(service.signIn({ isDenyRegister: true }))).to.throw('User not found.');
@@ -105,9 +103,7 @@ describe('services/sign-up', () => {
   it('should register new user', async () => {
     const email = 'demo@email.com';
 
-    sandbox
-      .stub(FirebaseSdk, 'get')
-      .resolves(getFirebaseMock(firebaseMock({ user: { email, emailVerified: true } })));
+    FirebaseSdkStub.resolves(firebaseMock({ user: { email, emailVerified: true } }));
     TypeormMock.queryBuilder.getOne.resolves(undefined);
 
     // mock transaction
@@ -145,26 +141,24 @@ describe('services/sign-up', () => {
   });
 
   it('should attach provider throw error: user not found', async () => {
-    sandbox.stub(FirebaseSdk, 'get').resolves(getFirebaseMock(firebaseMock()));
+    FirebaseSdkStub.resolves(firebaseMock());
     TypeormMock.entityManager.findOne.resolves(undefined);
 
     expect(await waitResult(service.attachProvider('not-exist'))).to.throw('User not found');
   });
 
   it('should attach identity provider to exist user', async () => {
-    const phone = '+375291112233';
+    const phone = '+12342355678';
 
-    sandbox.stub(FirebaseSdk, 'get').resolves(
-      getFirebaseMock(
-        firebaseMock({
-          user: {
-            phoneNumber: phone,
-            providerData: [providerFacebook],
-          },
-          // eslint-disable-next-line camelcase
-          token: { firebase: { sign_in_provider: providerFacebook.providerId } },
-        }),
-      ),
+    FirebaseSdkStub.resolves(
+      firebaseMock({
+        user: {
+          phoneNumber: phone,
+          providerData: [providerFacebook],
+        },
+        // eslint-disable-next-line camelcase
+        token: { firebase: { sign_in_provider: providerFacebook.providerId } },
+      }),
     );
     mockUser.profile = mockProfile();
     TypeormMock.entityManager.findOne.resolves(mockUser);
@@ -180,7 +174,7 @@ describe('services/sign-up', () => {
     const [, profile] = TypeormMock.entityManager.save.thirdCall.args;
 
     expect(res).to.equal(mockUser);
-    expect(entityUser).to.deep.equal({ id: 'user-id', firstName: 'Mike', phone: '+375291112233' });
+    expect(entityUser).to.deep.equal({ id: 'user-id', firstName: 'Mike', phone });
     expect(identityProvider).to.deep.equal({
       provider: 'firebase',
       identifier: firebaseUid,

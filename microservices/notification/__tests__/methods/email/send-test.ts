@@ -54,7 +54,7 @@ describe('methods/email/send', () => {
     const res = await Send(methodParams, endpointOptions);
 
     expect(res).to.deep.equal({ isSent: true });
-    expect(serviceParams?.[1]).to.instanceof(Repository);
+    expect(serviceParams?.[0]).to.instanceof(Repository);
     expect(sendStub).to.calledOnceWith(methodParams);
   });
 });

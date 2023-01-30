@@ -5,7 +5,6 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import { bucketNameMock } from '@__mocks__/common';
 import FileType from '@constants/file-type';
-import ImageProcessingConfig from '@services/external/image-processing-config';
 import Factory from '@services/file/factory';
 import Image from '@services/file/image';
 import StorageFactory from '@services/storage/factory';
@@ -21,11 +20,9 @@ describe('services/file/factory', () => {
     sandbox.stub(RemoteConfig, 'get').resolves({});
     sandbox.stub(StorageFactory, 'create');
 
-    const configSpy = sandbox.spy(ImageProcessingConfig, 'get');
     const service = await Factory.create(FileType.image, TypeormMock.entityManager);
 
     expect(service).instanceof(Image);
-    expect(configSpy).to.calledOnce;
   });
 
   it('should throw error: Not implemented', async () => {

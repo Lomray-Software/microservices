@@ -14,7 +14,9 @@ describe('services/sign-out', () => {
     password: correctPassword,
   });
 
-  repository.encryptPassword(mockUser);
+  before(async () => {
+    await repository.encryptPassword(mockUser);
+  });
 
   beforeEach(() => {
     TypeormMock.sandbox.reset();

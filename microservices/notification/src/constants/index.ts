@@ -16,8 +16,7 @@ const constants = {
   }),
   EMAIL_PROVIDER: process.env.EMAIL_PROVIDER ?? EmailProvider.SIMPLE,
   EMAIL_DEFAULT_FROM: process.env.EMAIL_DEFAULT_FROM,
-  EMAIL_TRANSPORTER_OPTIONS: process.env.EMAIL_FROM_CONFIG_MS || '{}',
-  IS_EMAIL_FROM_CONFIG_MS: Boolean(Number(process.env.EMAIL_FROM_CONFIG_MS ?? 1)),
+  EMAIL_TRANSPORTER_OPTIONS: JSON.parse(process.env.EMAIL_FROM_CONFIG_MS || '{}'),
 };
 
 export default constants;

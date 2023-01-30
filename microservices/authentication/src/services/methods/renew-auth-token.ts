@@ -6,6 +6,7 @@ import { JSONSchema } from 'class-validator-jsonschema';
 import type { Repository } from 'typeorm';
 import cookies from '@config/cookies';
 import type { IJwtConfig } from '@config/jwt';
+import CONST from '@constants/index';
 import type Token from '@entities/token';
 import { TokenCreateReturnType } from '@services/methods/create-auth-token';
 import { IdentifyAuthToken } from '@services/methods/identity-auth-token';
@@ -147,8 +148,10 @@ class RenewAuthToken {
                 name: 'jwt-access',
                 value: result['access'],
                 options: {
-                  ...cookies,
-                  maxAge: params?.maxAge,
+                  ...(await cookies()),
+                  maxAge:
+                    params?.maxAge ??
+                    (this.jwtConfig?.expirationRefresh ?? CONST.DEFAULT_REFRESH_EXPIRATION) * 1000,
                 },
               },
             ],

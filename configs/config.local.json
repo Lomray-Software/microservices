@@ -20,7 +20,7 @@
   },
   {
     "microservice": "notification",
-    "type": "emailTransportOptions",
+    "type": "config",
     "params": {
       "defaultEmailFrom": "change@me.com",
       "transportOptions": {
@@ -31,6 +31,59 @@
           "user": "generated ethereal user",
           "pass": "generated ethereal password"
         }
+      }
+    }
+  },
+  {
+    "microservice": "files",
+    "type": "config",
+    "params": {
+      "imageProcessingConfig": {
+        "thumbnails": [
+          {
+            "name": "thumbnail",
+            "options": {
+              "width": 75
+            }
+          },
+          {
+            "name": "small",
+            "options": {
+              "width": 150
+            }
+          },
+          {
+            "name": "medium",
+            "options": {
+              "width": 300
+            }
+          },
+          {
+            "name": "large",
+            "options": {
+              "width": 600
+            }
+          },
+          {
+            "name": "extra-large",
+            "options": {
+              "width": 1200
+            }
+          }
+        ],
+        "outputOptions": {
+          "jpeg": {
+            "quality": 80,
+            "mozjpeg": true
+          },
+          "png": {
+            "quality": 80
+          },
+          "webp": {
+            "quality": 80
+          }
+        },
+        "isWebp": true
       }
     }
   }

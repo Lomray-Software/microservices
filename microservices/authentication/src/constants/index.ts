@@ -19,6 +19,10 @@ const constants = {
   COOKIE_SAME_SITE,
   COOKIE_DOMAIN,
   IS_HTTPONLY_COOKIE,
+  // Expiration token in seconds. Default: 30 min
+  DEFAULT_ACCESS_EXPIRATION: 1800,
+  // Expiration refresh token in seconds. Default: 30 days
+  DEFAULT_REFRESH_EXPIRATION: 2592000,
 };
 
 export default constants;

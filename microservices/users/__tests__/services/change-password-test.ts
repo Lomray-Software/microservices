@@ -1,6 +1,7 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
+import User from '@entities/user';
 import UserRepository from '@repositories/user';
 import ChangePassword from '@services/change-password';
 
@@ -15,7 +16,9 @@ describe('services/change-password', () => {
     password: oldPassword,
   });
 
-  repository.encryptPassword(mockUser);
+  before(async () => {
+    await repository.encryptPassword(mockUser);
+  });
 
   beforeEach(() => {
     TypeormMock.sandbox.reset();
@@ -87,6 +90,6 @@ describe('services/change-password', () => {
 
     const [, user] = TypeormMock.entityManager.save.firstCall.args;
 
-    expect(repository.isValidPassword(user, newPassword)).to.true;
+    expect(repository.isValidPassword(user as User, newPassword)).to.true;
   });
 });

@@ -24,8 +24,10 @@ const msMiddlewares = [cors, userInfo];
  * Microservice params
  */
 const msParams: Partial<IGatewayParams> = {
-  beforeRoute: (express) => {
-    msMiddlewares.forEach((middleware) => express.use(middleware()));
+  beforeRoute: async (express) => {
+    for (const middleware of msMiddlewares) {
+      express.use(await middleware());
+    }
   },
   ...GetMsParams(),
 };

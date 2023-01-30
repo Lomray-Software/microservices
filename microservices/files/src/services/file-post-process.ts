@@ -1,4 +1,3 @@
-import CONST from '@constants/index';
 import File from '@entities/file';
 import type { IImageFormat } from '@entities/file';
 import FileEntity from '@entities/file-entity';
@@ -15,7 +14,7 @@ class FilePostProcess {
    * E.g. add domain to the url of the file and to the url of its formats
    */
   public static async handle(entity: File, options: IFileDomainOptions = {}): Promise<File> {
-    const storage = await StorageFactory.create(CONST.MS_STORAGE_TYPE);
+    const storage = await StorageFactory.create();
     const { onlyFormats } = options;
 
     if (entity.url) {

@@ -88,7 +88,7 @@ class Image extends Abstract {
     const fileBuffer = Buffer.from(file.replace(/^data:image\/([a-zA-Z]*);base64,/, ''), 'base64');
     const imageMetadata = await sharp(fileBuffer).metadata();
     const extension = imageMetadata.format;
-    const { isWebp } = this.config;
+    const { isWebp } = this.imageProcessingConfig;
 
     if (!extension || !ImageExtensions[extension]) {
       throw new BaseException({
@@ -153,7 +153,7 @@ class Image extends Abstract {
     formattedImages: IUploadImage[];
     metadata: { meta: sharp.OutputInfo; hasWebp: boolean; format: string; url: string }[];
   }> {
-    const { thumbnails, outputOptions, isWebp } = this.config;
+    const { thumbnails, outputOptions, isWebp } = this.imageProcessingConfig;
     const formattedImages = [];
     const metadata = [];
 

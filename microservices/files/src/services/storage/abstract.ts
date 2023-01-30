@@ -1,9 +1,20 @@
-import CONST from '@constants/index';
-
 /**
  * Abstract class for storage providers
  */
 abstract class Abstract {
+  /**
+   * Storage domain
+   * @protected
+   */
+  protected readonly domain?: string;
+
+  /**
+   * @constructor
+   */
+  protected constructor(domain?: string) {
+    this.domain = domain;
+  }
+
   /**
    * Upload file
    */
@@ -18,14 +29,14 @@ abstract class Abstract {
    * Get storage domain
    */
   public getDomain(): string {
-    return CONST.MS_STORAGE_DOMAIN;
+    return this.domain || '';
   }
 
   /**
    * Post process handling file url
    */
   public handleUrl(url: string): string {
-    return `${this.getDomain()}${url}`;
+    return `${this.getDomain() || ''}${url}`;
   }
 }
 

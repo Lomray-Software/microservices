@@ -20,7 +20,6 @@ describe('services/enforcer', () => {
   const conditionRepository = TypeormMock.entityManager.getRepository(Condition);
   const service = Enforcer.init({
     userId,
-    defaultRole: 'users',
     userRoleRepository,
     rolesTreeRepository,
   });
@@ -110,7 +109,6 @@ describe('services/enforcer', () => {
     const localService = Enforcer.init({
       userRoleRepository,
       rolesTreeRepository,
-      defaultRole: 'default',
     });
 
     const result = await localService.findUserRoles();
@@ -124,7 +122,6 @@ describe('services/enforcer', () => {
     const localService = Enforcer.init({
       userRoleRepository,
       rolesTreeRepository,
-      defaultRole: 'user',
       userId: '123',
     });
 
@@ -150,7 +147,6 @@ describe('services/enforcer', () => {
     const localService = Enforcer.init({
       userRoleRepository,
       rolesTreeRepository,
-      defaultRole: 'user',
       userId,
       conditionChecker,
     });

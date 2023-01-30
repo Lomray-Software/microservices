@@ -29,7 +29,6 @@ A microservice provides work with files for entities from other microservices. F
 - `MS_STORAGE_TYPE` - Microservice storage type.
 - `MS_STORAGE_DOMAIN` - Access to files through storage domain. Default: ``
 - `STORAGE_PATH_PREFIX` - Path (url) prefix for files. Default: `empty`
-- `IMAGE_CONFIG_FROM_CONFIG_MS` - Get image processing configuration from configuration microservice. Set `0` to disable. Default: `1`
 - `IMAGE_PROCESSING_CONFIG` - Image processing configuration JSON string. Default: `{}`
 - `LOCAL_STORAGE_PATH` - Directory where files are saved for local storage provider. Default: `data/files`
 - [See full list `COMMON ENVIRONMENTS`](https://github.com/Lomray-Software/microservice-helpers#common-environments)

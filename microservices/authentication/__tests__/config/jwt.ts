@@ -10,10 +10,6 @@ describe('config/jwt', () => {
     sandbox.restore();
   });
 
-  it('should correctly return jwt config: without remote', async () => {
-    expect(await getJwtConfig(false)).to.have.property('secretKey');
-  });
-
   it('should correctly return jwt config: with remote', async () => {
     const remoteConfig = { secretKey: 'remote-key' };
 

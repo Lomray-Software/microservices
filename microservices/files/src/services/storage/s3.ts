@@ -8,6 +8,7 @@ interface IS3StorageParams {
   s3: S3;
   bucketName: string;
   bucketAcl?: ObjectCannedACL;
+  domain?: string;
 }
 
 /**
@@ -32,8 +33,8 @@ class S3Storage extends Abstract {
   /**
    * @constructor
    */
-  public constructor({ s3, bucketName, bucketAcl }: IS3StorageParams) {
-    super();
+  public constructor({ s3, bucketName, bucketAcl, domain }: IS3StorageParams) {
+    super(domain);
     this.s3 = s3;
     this.bucketName = bucketName;
     this.bucketAcl = bucketAcl;
@@ -103,7 +104,7 @@ class S3Storage extends Abstract {
    * @inheritDoc
    */
   public getDomain(): string {
-    return super.getDomain() || `https://${this.bucketName}.s3.amazonaws.com`;
+    return this.domain || `https://${this.bucketName}.s3.amazonaws.com`;
   }
 }
 

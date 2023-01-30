@@ -5,6 +5,7 @@ import { JSONSchema } from 'class-validator-jsonschema';
 import type { Repository } from 'typeorm';
 import cookiesConfig from '@config/cookies';
 import type { IJwtConfig } from '@config/jwt';
+import CONST from '@constants/index';
 import TokenType from '@constants/token-type';
 import type Token from '@entities/token';
 import Jwt from '@services/tokens/jwt';
@@ -168,8 +169,10 @@ class CreateAuthToken {
                 name: 'jwt-access',
                 value: result['access'],
                 options: {
-                  ...cookiesConfig,
-                  maxAge: params?.maxAge,
+                  ...(await cookiesConfig()),
+                  maxAge:
+                    params?.maxAge ??
+                    (this.jwtConfig?.expirationRefresh ?? CONST.DEFAULT_REFRESH_EXPIRATION) * 1000,
                 },
               },
             ],

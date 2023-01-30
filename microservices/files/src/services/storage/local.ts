@@ -1,5 +1,5 @@
 import * as fs from 'fs';
-import CONST from '@constants/index';
+import remoteConfig from '@config/remote';
 import Abstract from './abstract';
 
 /**
@@ -17,9 +17,10 @@ class LocalStorage extends Abstract {
    * Save file locally
    * @inheritDoc
    */
-  public upload(key: string, buffer: Buffer): void {
+  public async upload(key: string, buffer: Buffer): Promise<void> {
+    const { localStoragePath } = await remoteConfig();
     const [folder, file] = key.split('/');
-    const path = `${CONST.LOCAL_STORAGE_PATH}/${folder}`;
+    const path = `${localStoragePath!}/${folder}`;
 
     if (!fs.existsSync(path)) {
       fs.mkdirSync(`${path}`, { recursive: true });

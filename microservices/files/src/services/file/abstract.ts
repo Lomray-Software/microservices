@@ -3,7 +3,8 @@ import { v4 } from 'uuid';
 import FileType from '@constants/file-type';
 import CONST from '@constants/index';
 import File from '@entities/file';
-import type { IImageProcessingConfig } from '@services/external/image-processing-config';
+import type { IImageProcessingConfig } from '@interfaces/image-processing-config';
+import { IRemoteConfig } from '@interfaces/remote-config';
 import type StorageAbstract from '@services/storage/abstract';
 
 /**
@@ -28,7 +29,12 @@ abstract class Abstract {
   /**
    * @protected
    */
-  protected config: IImageProcessingConfig;
+  protected imageProcessingConfig: IImageProcessingConfig;
+
+  /**
+   * @protected
+   */
+  protected storagePathPrefix: string;
 
   /**
    * @protected
@@ -42,12 +48,13 @@ abstract class Abstract {
     type: FileType,
     manager: EntityManager,
     storage: StorageAbstract,
-    config: IImageProcessingConfig,
+    config: IRemoteConfig,
   ) {
     this.type = type;
     this.manager = manager;
     this.storage = storage;
-    this.config = config;
+    this.imageProcessingConfig = config?.imageProcessingConfig ?? CONST.IMAGE_PROCESSING_CONFIG;
+    this.storagePathPrefix = config?.storagePathPrefix ?? CONST.STORAGE_PATH_PREFIX;
     this.fileRepository = manager.getRepository(File);
   }
 
@@ -70,7 +77,7 @@ abstract class Abstract {
    * Get correct storage path
    */
   protected getFilePath = (id: string, name?: string, extension?: string): string => {
-    const pathPrefix = [CONST.STORAGE_PATH_PREFIX, id].filter(Boolean).join('/');
+    const pathPrefix = [this.storagePathPrefix, id].filter(Boolean).join('/');
 
     return [pathPrefix, name && extension && `${name}_${v4()}.${extension}`]
       .filter(Boolean)

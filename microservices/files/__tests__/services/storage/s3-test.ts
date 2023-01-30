@@ -1,23 +1,14 @@
 import { RemoteConfig } from '@lomray/microservice-helpers';
 import type { S3 } from 'aws-sdk';
+import AWS from 'aws-sdk';
 import type { S3Customizations } from 'aws-sdk/lib/services/s3';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { bucketNameMock } from '@__mocks__/common';
-import S3AwsSdk from '@services/external/s3-aws-sdk';
 import S3Storage from '@services/storage/s3';
 
 describe('services/file/image', () => {
-  const options = {
-    isFromConfigMs: true,
-    options: {
-      accessKeyId: 'access_key_id',
-      secretAccessKey: 'secret_access_key',
-      region: 'region',
-      bucketName: bucketNameMock,
-    },
-  };
-
+  const s3 = new AWS.S3();
   const sandbox = sinon.createSandbox();
 
   afterEach(() => {
@@ -25,17 +16,13 @@ describe('services/file/image', () => {
   });
 
   it('should successfully upload file', async () => {
-    S3AwsSdk.reset();
-
     sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: bucketNameMock } });
-
-    const { s3, bucketName } = await S3AwsSdk.get(options);
 
     const uploadStub = sandbox
       .stub(s3, 'upload')
       .returns({ promise: sinon.stub() } as unknown as ReturnType<S3Customizations['upload']>);
 
-    const service = new S3Storage({ s3, bucketName });
+    const service = new S3Storage({ s3, bucketName: bucketNameMock });
     const params = {
       Key: 'key',
       Body: new Buffer('file'),
@@ -48,11 +35,7 @@ describe('services/file/image', () => {
   });
 
   it('should successfully delete files', async () => {
-    S3AwsSdk.reset();
-
     sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: bucketNameMock } });
-
-    const { s3, bucketName } = await S3AwsSdk.get(options);
 
     const listObjectsStub = sandbox.stub(s3, 'listObjectsV2').returns({
       promise: sinon.stub().returns({ Contents: [{ Key: 'key' }] }),
@@ -61,7 +44,7 @@ describe('services/file/image', () => {
       .stub(s3, 'deleteObjects')
       .returns({ promise: sinon.stub() } as unknown as ReturnType<S3['deleteObjects']>);
 
-    const service = new S3Storage({ s3, bucketName });
+    const service = new S3Storage({ s3, bucketName: bucketNameMock });
     const params = {
       Bucket: bucketNameMock,
       Prefix: 'prefix',
@@ -77,9 +60,8 @@ describe('services/file/image', () => {
     expect(deleteObjectsStub).to.be.calledWith(deleteParams);
   });
 
-  it('should correctly handle url', async () => {
-    const { s3, bucketName } = await S3AwsSdk.get(options);
-    const service = new S3Storage({ s3, bucketName });
+  it('should correctly handle url', () => {
+    const service = new S3Storage({ s3, bucketName: bucketNameMock });
     const testUrl = '/my/test/file.txt';
     const url = service.handleUrl(testUrl);
 

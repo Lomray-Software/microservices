@@ -77,7 +77,7 @@ class SignUp {
       });
     }
 
-    this.repository.encryptPassword(entity);
+    await this.repository.encryptPassword(entity);
 
     const user = await this.repository.save(entity);
 

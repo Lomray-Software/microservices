@@ -15,14 +15,14 @@ const remove = Endpoint.custom(
     output: CookiesRemoveOutput,
     description: 'Remove auth token from cookies',
   }),
-  () => ({
+  async () => ({
     isRemoved: true,
     payload: {
       cookies: [
         {
           action: 'remove',
           name: 'jwt-access',
-          options: { ...cookies },
+          options: { ...(await cookies()) },
         },
       ],
     },

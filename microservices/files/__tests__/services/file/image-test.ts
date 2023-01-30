@@ -6,18 +6,20 @@ import { getRepository } from 'typeorm';
 import { bucketNameMock } from '@__mocks__/common';
 import FileType from '@constants/file-type';
 import CONST from '@constants/index';
-import StorageType from '@constants/storage-type';
 import File from '@entities/file';
-import ImageProcessingConfig from '@services/external/image-processing-config';
+import type { IRemoteConfig } from '@interfaces/remote-config';
 import Image from '@services/file/image';
 import StorageFactory from '@services/storage/factory';
 
 describe('services/file/image', () => {
+  const sandbox = sinon.createSandbox();
   const fileData = getRepository(File).create({
     id: 'file_id',
   });
-
-  const sandbox = sinon.createSandbox();
+  const processingConfig: IRemoteConfig = {
+    imageProcessingConfig: CONST.IMAGE_PROCESSING_CONFIG,
+    storagePathPrefix: CONST.STORAGE_PATH_PREFIX,
+  };
 
   afterEach(() => {
     sandbox.restore();
@@ -27,13 +29,8 @@ describe('services/file/image', () => {
     TypeormMock.entityManager.save.resolves(fileData);
     sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: bucketNameMock } });
 
-    const storage = await StorageFactory.create(StorageType.s3);
-    const config = await ImageProcessingConfig.get({
-      isFromConfigMs: CONST.IS_IMAGE_CONFIG_FROM_CONFIG_MS,
-      config: CONST.IMAGE_PROCESSING_CONFIG,
-    });
-
-    const service = new Image(FileType.image, TypeormMock.entityManager, storage, config);
+    const storage = await StorageFactory.create();
+    const service = new Image(FileType.image, TypeormMock.entityManager, storage, processingConfig);
 
     sandbox.stub(service, <any>'composeData').resolves({
       fileData: { url: 'url', type: FileType.image },
@@ -57,13 +54,8 @@ describe('services/file/image', () => {
   it('should successfully remove image', async () => {
     sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: bucketNameMock } });
 
-    const storage = await StorageFactory.create('S3');
-    const config = await ImageProcessingConfig.get({
-      isFromConfigMs: CONST.IS_IMAGE_CONFIG_FROM_CONFIG_MS,
-      config: CONST.IMAGE_PROCESSING_CONFIG,
-    });
-
-    const service = new Image(FileType.image, TypeormMock.entityManager, storage, config);
+    const storage = await StorageFactory.create();
+    const service = new Image(FileType.image, TypeormMock.entityManager, storage, processingConfig);
 
     sandbox.stub(storage, 'delete');
 
@@ -79,13 +71,8 @@ describe('services/file/image', () => {
     TypeormMock.entityManager.save.resolves(fileData);
     sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: bucketNameMock } });
 
-    const storage = await StorageFactory.create('S3');
-    const config = await ImageProcessingConfig.get({
-      isFromConfigMs: CONST.IS_IMAGE_CONFIG_FROM_CONFIG_MS,
-      config: CONST.IMAGE_PROCESSING_CONFIG,
-    });
-
-    const service = new Image(FileType.image, TypeormMock.entityManager, storage, config);
+    const storage = await StorageFactory.create();
+    const service = new Image(FileType.image, TypeormMock.entityManager, storage, processingConfig);
 
     sandbox.stub(service, <any>'composeData').resolves({
       fileData: { url: 'url', type: FileType.image },

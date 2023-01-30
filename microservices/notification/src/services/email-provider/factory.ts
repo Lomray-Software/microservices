@@ -1,9 +1,11 @@
+import * as aws from '@aws-sdk/client-ses';
+import { awsConfig } from '@lomray/microservice-helpers';
+import nodemailer from 'nodemailer';
 import { Repository } from 'typeorm';
+import remoteConfig from '@config/remote';
 import EmailProvider from '@constants/email-provider';
 import CONST from '@constants/index';
 import Message from '@entities/message';
-import EmailAwsSdk from '@services/external/email-aws-sdk';
-import EmailSimpleSdk from '@services/external/email-simple-sdk';
 import Abstract from './abstract';
 import Nodemailer from './nodemailer';
 
@@ -14,39 +16,35 @@ class Factory {
   /**
    * Create identity provider instance
    */
-  public static async create(
-    provider: EmailProvider | string,
-    messageRepository: Repository<Message>,
-  ): Promise<Abstract> {
+  public static async create(messageRepository: Repository<Message>): Promise<Abstract> {
     let transporter;
-    let defaultEmailFrom;
 
-    switch (provider) {
+    const { emailProvider, defaultEmailFrom, transportOptions } = await remoteConfig();
+
+    switch (emailProvider) {
       case EmailProvider.SIMPLE:
-        ({ transporter, defaultEmailFrom } = await EmailSimpleSdk.get({
-          defaultFrom: CONST.EMAIL_DEFAULT_FROM,
-          isFromConfigMs: CONST.IS_EMAIL_FROM_CONFIG_MS,
-          options: CONST.EMAIL_TRANSPORTER_OPTIONS,
-        }));
+        transporter = nodemailer.createTransport(transportOptions);
         break;
 
       case EmailProvider.AWS_SES:
-        ({ transporter, defaultEmailFrom } = await EmailAwsSdk.get({
-          defaultFrom: CONST.EMAIL_DEFAULT_FROM,
-          isFromConfigMs: CONST.IS_EMAIL_FROM_CONFIG_MS,
-          options: {
-            accessKeyId: CONST.AWS.ACCESS_KEY_ID,
-            secretAccessKey: CONST.AWS.SECRET_ACCESS_KEY,
-            region: CONST.AWS.REGION,
+        const { accessKeyId, secretAccessKey, region } = await awsConfig(CONST);
+        const ses = new aws.SES({
+          apiVersion: '2010-12-01',
+          region,
+          credentials: {
+            accessKeyId: accessKeyId!,
+            secretAccessKey: secretAccessKey!,
           },
-        }));
+        });
+
+        transporter = nodemailer.createTransport({ SES: { ses, aws } });
         break;
 
       default:
-        throw new Error(`Unknown email provider: ${provider}`);
+        throw new Error(`Unknown email provider: ${emailProvider as string}`);
     }
 
-    return new Nodemailer(provider, transporter, messageRepository, { defaultEmailFrom });
+    return new Nodemailer(emailProvider, transporter, messageRepository, { defaultEmailFrom });
   }
 }
 

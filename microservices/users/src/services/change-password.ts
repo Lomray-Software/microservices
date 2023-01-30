@@ -94,7 +94,8 @@ class ChangePassword {
     }
 
     user.password = this.newPassword;
-    this.repository.encryptPassword(user);
+
+    await this.repository.encryptPassword(user);
 
     return this.repository.save(user);
   }

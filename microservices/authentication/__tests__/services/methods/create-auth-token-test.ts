@@ -3,7 +3,7 @@ import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import jsonwebtoken from 'jsonwebtoken';
 import rewiremock from 'rewiremock';
-import cookies from '@config/cookies';
+import cookiesMock from '@__mocks__/cookies';
 import TokenType from '@constants/token-type';
 import Token from '@entities/token';
 import type { CreateAuthToken as OriginalCreateAuthToken } from '@services/methods/create-auth-token';
@@ -107,7 +107,7 @@ describe('services/methods/create-auth-token', () => {
             name: 'jwt-access',
             value: token.access,
             options: {
-              ...cookies,
+              ...cookiesMock,
               maxAge: 15,
             },
           },

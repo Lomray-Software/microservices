@@ -2,7 +2,6 @@ import type { AbstractMicroservice } from '@lomray/microservice-nodejs-lib';
 import type { IJsonQuery } from '@lomray/microservices-types';
 import { getRepository } from 'typeorm';
 import { FilterType } from '@constants/filter';
-import CONST from '@constants/index';
 import Method from '@entities/method';
 import Model from '@entities/model';
 import RolesTree from '@entities/roles-tree';
@@ -124,7 +123,6 @@ class EndpointHandler {
 
     this.enforcer = Enforcer.init({
       userId,
-      defaultRole: CONST.MS_DEFAULT_ROLE_ALIAS,
       userRoleRepository: getRepository(UserRole),
       rolesTreeRepository: getRepository(RolesTree),
       ...(hasCondition && ms

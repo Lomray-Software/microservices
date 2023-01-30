@@ -6,6 +6,7 @@ import jsonwebtoken, {
   SignOptions,
   VerifyOptions,
 } from 'jsonwebtoken';
+import CONST from '@constants/index';
 import UnauthorizedCode from '@constants/unauthorized-code';
 
 export interface IJwtParams {
@@ -25,16 +26,16 @@ class Jwt {
   private readonly secretKey: string;
 
   /**
-   * Expiration token in seconds. Default: 30 min
+   * Expiration token in seconds.
    * @private
    */
-  private expiration = 1800;
+  private expiration = CONST.DEFAULT_ACCESS_EXPIRATION;
 
   /**
-   * Expiration refresh token in seconds. Default: 30 days
+   * Expiration refresh token in seconds.
    * @private
    */
-  private expirationRefresh = 2592000;
+  private expirationRefresh = CONST.DEFAULT_REFRESH_EXPIRATION;
 
   /**
    * @private

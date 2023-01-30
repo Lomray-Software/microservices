@@ -173,6 +173,9 @@ class Firebase extends Abstract {
       throw new BaseException({
         status: 422,
         message: 'Bad firebase token.',
+        payload: {
+          original: e.message,
+        },
       });
     }
   }

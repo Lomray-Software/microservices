@@ -1,14 +1,21 @@
-import { FirebaseSdk } from '@lomray/microservice-helpers';
+import { firebaseConfig } from '@lomray/microservice-helpers';
 import FirebaseAdmin from 'firebase-admin';
 import CONST from '@constants/index';
 
 export type TFirebaseAdmin = typeof FirebaseAdmin;
 
-export default (): Promise<TFirebaseAdmin> => {
-  FirebaseSdk.init(FirebaseAdmin, {
-    hasConfigMs: CONST.FIREBASE.IS_FROM_CONFIG_MS,
-    credential: CONST.FIREBASE.CREDENTIAL,
-  });
+let isInit = false;
 
-  return FirebaseSdk.get();
+export default async (): Promise<TFirebaseAdmin> => {
+  if (!isInit) {
+    const { credential } = await firebaseConfig(CONST);
+
+    FirebaseAdmin.initializeApp({
+      credential: FirebaseAdmin.credential.cert(credential!),
+    });
+
+    isInit = true;
+  }
+
+  return FirebaseAdmin;
 };

@@ -1,15 +1,17 @@
+import { RemoteConfig } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import _ from 'lodash';
 import { Repository } from 'typeorm';
 import ExceptionCode from '@constants/exception-code';
+import CONST from '@constants/index';
 import Method from '@entities/method';
 import RolesTree from '@entities/roles-tree';
 import UserRole from '@entities/user-role';
+import { IRemoteConfig } from '@interfaces/remote-config';
 import type ConditionChecker from '@services/condition-checker';
 
 export interface IEnforcerParams {
   userId?: string | null;
-  defaultRole: string;
   userRoleRepository: Repository<UserRole>;
   rolesTreeRepository: Repository<RolesTree>;
   conditionChecker?: ConditionChecker;
@@ -23,11 +25,6 @@ class Enforcer {
    * @private
    */
   private readonly userId: IEnforcerParams['userId'];
-
-  /**
-   * @private
-   */
-  private readonly defaultRole: IEnforcerParams['defaultRole'];
 
   /**
    * @private
@@ -55,13 +52,11 @@ class Enforcer {
    */
   protected constructor({
     userId,
-    defaultRole,
     userRoleRepository,
     rolesTreeRepository,
     conditionChecker,
   }: IEnforcerParams) {
     this.userId = userId;
-    this.defaultRole = defaultRole;
     this.userRoleRepository = userRoleRepository;
     this.rolesTreeRepository = rolesTreeRepository;
     this.conditionChecker = conditionChecker;
@@ -128,6 +123,16 @@ class Enforcer {
   }
 
   /**
+   * Get default user role
+   * @private
+   */
+  private async getDefaultUserRole(): Promise<string> {
+    const config = await RemoteConfig.get<IRemoteConfig>('config');
+
+    return config?.defaultRole ?? CONST.MS_DEFAULT_ROLE_ALIAS;
+  }
+
+  /**
    * Find user roles
    */
   public async findUserRoles(): Promise<NonNullable<Enforcer['userInfo']>> {
@@ -143,7 +148,7 @@ class Enforcer {
 
     const { userId, roleAlias } = (await this.userRoleRepository.findOne({
       userId: this.userId,
-    })) ?? { userId: this.userId, roleAlias: this.defaultRole };
+    })) ?? { userId: this.userId, roleAlias: await this.getDefaultUserRole() };
     const { path } = (await this.rolesTreeRepository.findOne({ alias: roleAlias })) ?? {};
 
     this.userInfo = { userId, roles: path ?? [roleAlias] };

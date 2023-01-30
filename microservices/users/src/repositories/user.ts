@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { EntityRepository, Repository } from 'typeorm';
+import remoteConfig from '@config/remote';
 import IdProvider from '@constants/id-provider';
-import CONST from '@constants/index';
 import Profile from '@entities/profile';
 import UserEntity from '@entities/user';
 
@@ -10,9 +10,11 @@ class User extends Repository<UserEntity> {
   /**
    * Encrypt user password
    */
-  public encryptPassword(user: UserEntity): UserEntity {
+  public async encryptPassword(user: UserEntity): Promise<UserEntity> {
     if (user.password) {
-      user.password = bcrypt.hashSync(user.password, CONST.MS_USER_PASSWORD_SALT_ROUNDS);
+      const { passwordSaltRounds } = await remoteConfig();
+
+      user.password = bcrypt.hashSync(user.password, passwordSaltRounds);
     }
 
     return user;

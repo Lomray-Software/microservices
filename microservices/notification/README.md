@@ -27,7 +27,6 @@ This microservice provides notifications mechanism.
 ### <a id="environments"></a>ENVIRONMENTS:
 - `EMAIL_PROVIDER` - Email provider. Default: `nodemailer`
 - `EMAIL_DEFAULT_FROM` - The email address from which messages will be sent. It can be configured from remote config. Default: `undefined`
-- `EMAIL_FROM_CONFIG_MS` - Get email sdk credentials (nodemailer) from configuration microservice. Set `0` to disable. Default: `1`
 - `EMAIL_TRANSPORTER_OPTIONS` - Nodemailer transport options (if not configured from remote config.). JSON string. Default: `{}`
 - [See full list `COMMON ENVIRONMENTS`](https://github.com/Lomray-Software/microservice-helpers#common-environments)
 
