@@ -1,15 +1,13 @@
-import Cookie from '@lomray/cookie';
 import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { IsBoolean, IsEnum, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Repository } from 'typeorm';
-import cookiesConf from '@config/cookies';
 import type { IJwtConfig } from '@config/jwt';
 import AuthProviders from '@constants/auth-providers';
 import UnauthorizedCode from '@constants/unauthorized-code';
 import Token from '@entities/token';
-import Jwt from '@services/tokens/jwt';
+import BaseAuthToken from '@services/methods/base-auth-token';
 
 class TokenIdentifyInput {
   @Length(1, 1000)
@@ -43,77 +41,31 @@ class TokenIdentifyOutput {
 /**
  * Identify auth token
  */
-class IdentifyAuthToken {
+class IdentifyAuthToken extends BaseAuthToken {
   /**
    * @private
    */
   private repository: Repository<Token>;
 
   /**
-   * @private
-   */
-  private readonly jwtConfig: IJwtConfig;
-
-  /**
    * @constructor
    */
   constructor(repository: Repository<Token>, jwtConfig: IJwtConfig) {
+    super(jwtConfig);
+
     this.repository = repository;
-    this.jwtConfig = jwtConfig;
-  }
-
-  /**
-   * Get authorization token from headers
-   * @private
-   */
-  public static getHeaderAuth(headers?: Record<string, any>): string | undefined {
-    const token = headers?.Authorization ?? headers?.authorization;
-
-    if (token) {
-      return token.split('Bearer ')?.[1];
-    }
-
-    return undefined;
-  }
-
-  /**
-   * Get auth token from cookies
-   * @private
-   */
-  public static getCookieAuth(headers?: Record<string, any>): string[] | undefined {
-    const cookies: string | undefined = headers?.cookie;
-
-    if (!cookies) {
-      return undefined;
-    }
-
-    const parsedCookies = Cookie.parse(cookies, { multiValuedCookies: true });
-
-    return parsedCookies?.['jwt-access'];
   }
 
   /**
    * Find auth token in db
    * @private
    */
-  private async findToken(
-    token: string | string[],
-  ): Promise<Required<Omit<TokenIdentifyOutput, 'payload'>>> {
-    const isPersonal = !Array.isArray(token) && String(token).length === 32;
+  private async findToken(token: string): Promise<Required<Omit<TokenIdentifyOutput, 'payload'>>> {
+    const isPersonal = String(token).length === 32;
     let dbToken: Token | undefined;
 
     if (!isPersonal) {
-      const { secretKey, ...jwtOptions } = this.jwtConfig;
-
-      const { domain } = await cookiesConf();
-
-      const jwtService = new Jwt(secretKey, {
-        ...jwtOptions,
-        options: {
-          ...(jwtOptions?.options ?? {}),
-          ...Jwt.getAudience([domain], jwtOptions?.options),
-        },
-      });
+      const jwtService = await this.getJwtService();
       const { jti } = jwtService.validate(token);
 
       dbToken = await this.repository.findOne({ id: jti });
@@ -155,13 +107,12 @@ class IdentifyAuthToken {
   /**
    * Identify token
    */
-  identify(
+  public async identify(
     params: TokenIdentifyInput,
     headers?: Record<string, any>,
   ): Promise<TokenIdentifyOutput> {
     const { token } = params;
-    const authToken =
-      token ?? IdentifyAuthToken.getHeaderAuth(headers) ?? IdentifyAuthToken.getCookieAuth(headers);
+    const authToken = token ?? (await this.getToken(headers));
 
     if (!authToken) {
       return Promise.resolve({

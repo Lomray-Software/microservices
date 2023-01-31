@@ -92,6 +92,7 @@ describe('services/methods/identify-auth-token', () => {
     const { access: audAccess } = new Jwt(jwtConfig.secretKey, {
       options: { audience: ['test-unknown-aud'] },
     }).create(tokenId);
+    const { access: audAnotherAccess } = new Jwt('another-secret').create(tokenId);
 
     TypeormMock.entityManager.findOne.callsFake(jwtFakeFind(tokenId));
 
@@ -162,6 +163,17 @@ describe('services/methods/identify-auth-token', () => {
           cookie: `_octo=GH1.1.410839147.1623154775; jwt-access=${audAccess}; jwt-access=${audAccess};`,
         },
         expectedResult: 'Unauthorized',
+      },
+      {
+        headers: {
+          cookie: `_octo=GH1.1.410839147.1623154775; jwt-access=${audAnotherAccess}; jwt-access=${access};`,
+        },
+        expectedResult: {
+          tokenId,
+          userId,
+          isAuth: true,
+          provider: AuthProviders.jwt,
+        },
       },
     ];
 

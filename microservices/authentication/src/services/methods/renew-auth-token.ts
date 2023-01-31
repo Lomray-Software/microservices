@@ -8,9 +8,8 @@ import cookiesConfig from '@config/cookies';
 import type { IJwtConfig } from '@config/jwt';
 import CONST from '@constants/index';
 import type Token from '@entities/token';
+import BaseAuthToken from '@services/methods/base-auth-token';
 import { TokenCreateReturnType } from '@services/methods/create-auth-token';
-import { IdentifyAuthToken } from '@services/methods/identity-auth-token';
-import Jwt from '@services/tokens/jwt';
 
 class TokenRenewInput {
   @IsUndefinable() // can be obtained from headers
@@ -58,23 +57,19 @@ class TokenRenewOutput {
 /**
  * Renew auth tokens
  */
-class RenewAuthToken {
+class RenewAuthToken extends BaseAuthToken {
   /**
    * @private
    */
   private repository: Repository<Token>;
 
   /**
-   * @private
-   */
-  private readonly jwtConfig: IJwtConfig;
-
-  /**
    * @constructor
    */
   constructor(repository: Repository<Token>, jwtConfig: IJwtConfig) {
+    super(jwtConfig);
+
     this.repository = repository;
-    this.jwtConfig = jwtConfig;
   }
 
   /**
@@ -82,20 +77,11 @@ class RenewAuthToken {
    * @private
    */
   private async renewJwtTokens(
-    options: Omit<TokenRenewInput, 'access'> & { access?: string | string[] },
+    options: TokenRenewInput,
   ): Promise<{ access: string; refresh: string }> {
     const { access, refresh, params, jwtPayload } = options;
-    const { secretKey, ...jwtOptions } = this.jwtConfig;
 
-    const { domain } = await cookiesConfig();
-
-    const jwtService = new Jwt(secretKey, {
-      ...jwtOptions,
-      options: {
-        ...(jwtOptions?.options ?? {}),
-        ...Jwt.getAudience([domain], jwtOptions?.options),
-      },
-    });
+    const jwtService = await this.getJwtService();
     const { jti } = jwtService.validate(access, { ignoreExpiration: true });
     const { jti: refreshJti } = jwtService.validate(refresh);
 
@@ -141,10 +127,7 @@ class RenewAuthToken {
 
     const result = await this.renewJwtTokens({
       ...options,
-      access:
-        access ??
-        IdentifyAuthToken.getHeaderAuth(headers) ??
-        IdentifyAuthToken.getCookieAuth(headers),
+      access: access ?? (await this.getToken(headers)),
     });
 
     return returnType === TokenCreateReturnType.cookies

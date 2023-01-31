@@ -8,7 +8,7 @@ import type { IJwtConfig } from '@config/jwt';
 import CONST from '@constants/index';
 import TokenType from '@constants/token-type';
 import type Token from '@entities/token';
-import Jwt from '@services/tokens/jwt';
+import BaseAuthToken from '@services/methods/base-auth-token';
 import Personal from '@services/tokens/personal';
 
 enum TokenCreateReturnType {
@@ -70,23 +70,19 @@ class TokenCreateOutput {
 /**
  * Create auth tokens
  */
-class CreateAuthToken {
+class CreateAuthToken extends BaseAuthToken {
   /**
    * @private
    */
   private repository: Repository<Token>;
 
   /**
-   * @private
-   */
-  private readonly jwtConfig: IJwtConfig;
-
-  /**
    * @constructor
    */
   constructor(repository: Repository<Token>, jwtConfig: IJwtConfig) {
+    super(jwtConfig);
+
     this.repository = repository;
-    this.jwtConfig = jwtConfig;
   }
 
   /**
@@ -118,9 +114,6 @@ class CreateAuthToken {
     options: TokenCreateInput,
   ): Promise<{ access: string; refresh: string }> {
     const { userId, expirationAt, params, jwtPayload } = options;
-    const { secretKey, ...jwtOptions } = this.jwtConfig;
-
-    const { domain } = await cookiesConfig();
 
     const dbToken = await this.repository.save(
       this.repository.create({
@@ -133,13 +126,7 @@ class CreateAuthToken {
         jwtPayload,
       }),
     );
-    const jwtService = new Jwt(secretKey, {
-      ...jwtOptions,
-      options: {
-        ...(jwtOptions?.options ?? {}),
-        ...Jwt.getAudience([domain], jwtOptions?.options),
-      },
-    });
+    const jwtService = await this.getJwtService();
     const { access, refresh } = jwtService.create(dbToken.id, { ...(jwtPayload ?? {}), userId });
     const { exp } = jwtService.decode(refresh);
 

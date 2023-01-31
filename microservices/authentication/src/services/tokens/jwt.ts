@@ -101,20 +101,13 @@ class Jwt {
   /**
    * Validate JWT token
    */
-  public validate(tokens?: string | string[], options: VerifyOptions = {}): JwtPayload {
-    const tokensArr = Array.isArray(tokens) ? tokens : ([tokens] as string[]);
-
+  public validate(token?: string, options: VerifyOptions = {}): JwtPayload {
     try {
-      return jsonwebtoken.verify(tokensArr.shift() ?? '', this.secretKey, {
+      return jsonwebtoken.verify(token ?? '', this.secretKey, {
         ...this.getOptions(),
         ...options,
       }) as JwtPayload;
     } catch (e) {
-      // try to find token with valid audience
-      if (e.message.includes('jwt audience invalid') && tokensArr?.length) {
-        return this.validate(tokensArr, options);
-      }
-
       throw new BaseException({
         message: 'Unauthorized',
         status: 401,
@@ -129,6 +122,26 @@ class Jwt {
    */
   public decode(token: string, options?: DecodeOptions): JwtPayload {
     return jsonwebtoken.decode(token, options) as JwtPayload;
+  }
+
+  /**
+   * Compare service audience with token audience
+   */
+  public checkAudience(token: string): boolean {
+    const { audience: serviceAud } = Jwt.getAudience([], this.options);
+    const { aud } = this.decode(token);
+
+    const audiences = (Array.isArray(serviceAud) ? serviceAud : [serviceAud]) as (
+      | string
+      | RegExp
+    )[];
+    const target = (Array.isArray(aud) ? aud : [aud]).filter(Boolean) as string[];
+
+    return target.some((targetAudience) =>
+      audiences.some((audience) =>
+        audience instanceof RegExp ? audience.test(targetAudience) : audience === targetAudience,
+      ),
+    );
   }
 }
 
