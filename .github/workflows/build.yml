@@ -159,12 +159,18 @@ jobs:
         env:
           WORK_DIR: ${{ env.WORK_DIR }}
 
+      - name: Detect dockerfile
+        id: docker-file
+        run: npx @lomray/microservices-cli detect-docker-file
+        env:
+          WORK_DIR: '${{ env.WORK_DIR }}'
+
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@v5
         with:
           name: "Lomray-Software/microservices/${{ env.MICROSERVICE_NAME }}"
           tags: "latest${{ needs.changed-microservices.outputs.docker-tag }},${{ steps.package-version.outputs.version}}"
-          dockerfile: Dockerfile-nodejs
+          dockerfile: ${{ steps.docker-file.outputs.path }}
           context: ${{ env.WORK_DIR }}
           buildoptions: "--compress --force-rm --no-cache"
           username: ${{ github.actor }}
