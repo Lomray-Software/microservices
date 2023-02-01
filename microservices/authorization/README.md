@@ -27,7 +27,7 @@ This microservice provides authorization mechanism for all other microservices.
 
 ### <a id="environments"></a>ENVIRONMENTS:
 - `MS_DEFAULT_ROLE_ALIAS` - Default role alias for authenticated users. Default: `user`
-- `MS_DEFAULT_PERMISSION_MIGRATION` - Apply migration with default permissions. Default: `0`
+- `MS_IMPORT_PERMISSION` - Import permissions from files to DB. 0 - disable, 1 - only once (first start), 2 - always. Default: `0`
 - [See full list `COMMON ENVIRONMENTS`](https://github.com/Lomray-Software/microservice-helpers#common-environments)
 
 ### <a id="how-to-run"></a>HOW TO RUN:

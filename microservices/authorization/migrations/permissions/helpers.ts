@@ -1,5 +1,6 @@
 import fs from 'fs';
-import { Connection, createConnection, Repository } from 'typeorm';
+import { createConnection, Repository } from 'typeorm';
+import CONST from '@constants/index';
 import Condition from '@entities/condition';
 import Filter from '@entities/filter';
 import Method from '@entities/method';
@@ -135,8 +136,9 @@ const importMethodsPermissions = async (
 /**
  * Import permissions from json files to DB
  */
-const importPermissions = async (conn: Connection | null = null, onlyCleanup = false) => {
-  const connection = conn || (await createConnection());
+const importPermissions = async (onlyCleanup = false) => {
+  const connection = await createConnection();
+  const isReImport = CONST.MS_IMPORT_PERMISSION === 2;
 
   await connection.transaction(async (manager) => {
     const methodRepo = manager.getRepository(Method);
@@ -146,6 +148,10 @@ const importPermissions = async (conn: Connection | null = null, onlyCleanup = f
     const methodFilterRepo = manager.getRepository(MethodFilter);
     const rolesRepo = manager.getRepository(Role);
     const userRolesRepo = manager.getRepository(UserRole);
+
+    if (!isReImport && (await rolesRepo.find({ take: 1 })).length) {
+      return;
+    }
 
     const entities = [
       { repository: rolesRepo, file: 'roles' },
@@ -179,11 +185,11 @@ const importPermissions = async (conn: Connection | null = null, onlyCleanup = f
 
       await importEntityPermissions(repository, file, onlyCleanup);
     }
+
+    console.log('Permissions imported.');
   });
 
-  if (!conn) {
-    await connection.close();
-  }
+  await connection.close();
 };
 
 export {

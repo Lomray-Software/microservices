@@ -7,7 +7,7 @@ const msNameDefault = 'authorization';
 const constants = {
   ...GetConstants({ msNameDefault, version, isBuild, packageName: name, withDb: true }),
   MS_DEFAULT_ROLE_ALIAS: process.env.MS_DEFAULT_ROLE_ALIAS || 'user',
-  MS_DEFAULT_PERMISSION_MIGRATION: Number(process.env.MS_DEFAULT_PERMISSION_MIGRATION || 0),
+  MS_IMPORT_PERMISSION: Number(process.env.MS_IMPORT_PERMISSION || 0),
 };
 
 export default constants;
