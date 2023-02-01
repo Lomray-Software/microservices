@@ -116,10 +116,10 @@
     "microservice": "users",
     "method": "user.sign-up",
     "description": "Sign up user",
-    "allowGroup": [
-      "admin"
+    "allowGroup": [],
+    "denyGroup": [
+      "user"
     ],
-    "denyGroup": [],
     "createdAt": "2022-04-14T05:34:31.363Z",
     "modelIn": "users.SignUpInput",
     "modelOut": "users.SignUpOutput",
