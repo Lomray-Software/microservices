@@ -31,7 +31,7 @@
 	"devDependencies": {
 		"@lomray/eslint-config": "^2.0.2",
 		"@lomray/microservice-config": "^1.2.7",
-		"@lomray/microservices-cli": "^1.4.1",
+		"@lomray/microservices-cli": "^1.4.2",
 		"@lomray/prettier-config": "^1.2.0",
 		"@types/chai": "^4.3.4",
 		"@types/mocha": "^10.0.1",
