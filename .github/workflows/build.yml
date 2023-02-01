@@ -25,10 +25,12 @@ jobs:
         id: other-params
         shell: bash
         run: |
+          # ignore errors
+          set +e
           branch=$(echo ${GITHUB_REF#refs/heads/})
           git fetch --tags origin $branch
-          tag=$(git describe --tags --abbrev=0)
-          sha=$(git --no-pager log -1 --format="%H" "$tag")
+          tag=$(git describe --tags --abbrev=0 2>/dev/null)
+          sha=$(git --no-pager log -1 --format="%H" "$tag" 2>/dev/null || git rev-list --max-parents=0 HEAD)
           echo "branch=$branch" >> $GITHUB_OUTPUT
           echo "sha=$sha" >> $GITHUB_OUTPUT
           # define docker tag
