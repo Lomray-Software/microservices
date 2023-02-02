@@ -1,7 +1,9 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsEnum, IsObject, Length } from 'class-validator';
-import { Entity, Column, CreateDateColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { JSONSchema } from 'class-validator-jsonschema';
+import { Entity, Column, CreateDateColumn, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import NotifyType from '@constants/notify-type';
+import type Notice from '@entities/notice';
 
 @Entity()
 class Message {
@@ -20,6 +22,9 @@ class Message {
   @Length(1, 255)
   from: string;
 
+  @JSONSchema({
+    description: 'It can be email, phone, userId',
+  })
   @Column({ type: 'varchar' })
   @Length(1, 255)
   to: string;
@@ -41,6 +46,10 @@ class Message {
   @IsTypeormDate()
   @CreateDateColumn()
   createdAt: Date;
+
+  @ManyToOne('Notice', 'messages', { onDelete: 'SET NULL' })
+  @IsUndefinable()
+  notice: Notice;
 }
 
 export default Message;

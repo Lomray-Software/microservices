@@ -36,14 +36,6 @@
           "admin": "allow"
         }
       },
-      "replyTo": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
       "subject": {
         "in": {
           "admin": "allow"
@@ -69,6 +61,14 @@
         }
       },
       "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "notice": {
         "in": {
           "admin": "allow"
         },
@@ -119,6 +119,14 @@
         }
       },
       "to": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "replyTo": {
         "in": {
           "admin": "allow"
         },
@@ -208,5 +216,225 @@
       }
     },
     "createdAt": "2022-04-14T05:34:31.136Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.Notice",
+    "title": "Notice",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "title": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "description": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "isViewed": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "isHidden": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-02T17:50:12.559Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.ListOutputParams.1a56a01aef38158212093c4024ea81e9",
+    "title": "List Output Params",
+    "schema": {
+      "list": "notification.Notice",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-02T17:50:12.559Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.ViewOutputParams.93a44b31efa4e855004aebaf08d0985e",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "notification.Notice"
+    },
+    "createdAt": "2023-02-02T17:50:12.559Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.CreateRequestParams.0f1a3346617b86c0da2de5fdc113cfba",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "notification.Notice"
+    },
+    "createdAt": "2023-02-02T17:50:12.559Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.CreateOutputParams.93a44b31efa4e855004aebaf08d0985e",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "notification.Notice"
+    },
+    "createdAt": "2023-02-02T17:50:12.559Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.UpdateRequestParams.0f1a3346617b86c0da2de5fdc113cfba",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "notification.Notice",
+      "query": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-02T17:50:12.559Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.UpdateOutputParams.93a44b31efa4e855004aebaf08d0985e",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "notification.Notice"
+    },
+    "createdAt": "2023-02-02T17:50:12.559Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.RemoveOutputParams.a9e906d37b883b73cb3167ce1366e392",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "notification.Notice",
+      "entities": "notification.Notice"
+    },
+    "createdAt": "2023-02-02T17:50:12.559Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.PushSendInput",
+    "title": "Push Send Input",
+    "schema": {
+      "to": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "message": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-02T17:50:12.559Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.PushSendOutput",
+    "title": "Push Send Output",
+    "schema": {
+      "isSent": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-02T17:50:12.559Z"
   }
 ]

@@ -1,9 +1,11 @@
 import MetaEndpoint from '@lomray/microservice-helpers/methods/meta';
-import type { Microservice } from '@lomray/microservice-nodejs-lib';
+import type { Microservice, IEndpointHandler } from '@lomray/microservice-nodejs-lib';
 import CONST from '@constants/index';
 import EmailSend from '@methods/email/send';
 import CrudMessage from '@methods/messages/crud';
+import CrudNotice from '@methods/notice/crud';
 import PhoneSend from '@methods/phone/send';
+import PushSend from '@methods/push/send';
 
 /**
  * Register methods
@@ -11,13 +13,14 @@ import PhoneSend from '@methods/phone/send';
 export default (ms: Microservice): void => {
   const crud = {
     message: CrudMessage,
+    notice: CrudNotice,
   };
 
   /**
    * CRUD methods
    */
   Object.entries(crud).forEach(([endpoint, crudMethods]) => {
-    Object.entries(crudMethods).forEach(([method, handler]) => {
+    Object.entries<IEndpointHandler>(crudMethods).forEach(([method, handler]) => {
       ms.addEndpoint(`${endpoint}.${method}`, handler);
     });
   });
@@ -31,6 +34,11 @@ export default (ms: Microservice): void => {
    * Phone methods
    */
   ms.addEndpoint('phone.send', PhoneSend);
+
+  /**
+   * Push methods
+   */
+  ms.addEndpoint('push.send', PushSend);
 
   /**
    * Microservice metadata endpoint

@@ -100,5 +100,128 @@
     "createdAt": "2022-04-14T05:34:31.136Z",
     "modelOut": "MicroserviceMetaOutput",
     "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "notice.create",
+    "description": "Create a new Notice",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-02T17:50:12.559Z",
+    "modelIn": "notification.CreateRequestParams.0f1a3346617b86c0da2de5fdc113cfba",
+    "modelOut": "notification.CreateOutputParams.93a44b31efa4e855004aebaf08d0985e",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "notice.view",
+    "description": "Returns Notice by given condition",
+    "allowGroup": [
+      "admin",
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-02T17:50:12.559Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "notification.ViewOutputParams.93a44b31efa4e855004aebaf08d0985e",
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "only",
+        "roleAlias": "user",
+        "createdAt": "2022-03-15T06:18:07.204Z"
+      }
+    ]
+  },
+  {
+    "microservice": "notification",
+    "method": "notice.list",
+    "description": "Returns list of Notice by given condition",
+    "allowGroup": [
+      "admin",
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-02T17:50:12.559Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "notification.ListOutputParams.1a56a01aef38158212093c4024ea81e9",
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "only",
+        "roleAlias": "user",
+        "createdAt": "2022-03-15T06:18:07.204Z"
+      }
+    ]
+  },
+  {
+    "microservice": "notification",
+    "method": "notice.remove",
+    "description": "Remove Notice by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-02T17:50:12.559Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "notification.RemoveOutputParams.a9e906d37b883b73cb3167ce1366e392",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "push.send",
+    "description": "Send push notification to user device",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-02T17:50:12.559Z",
+    "modelIn": "notification.PushSendInput",
+    "modelOut": "notification.PushSendOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "notice.update",
+    "description": "Update Notice by given condition",
+    "allowGroup": [
+      "admin",
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-02T17:50:12.559Z",
+    "modelIn": "notification.UpdateRequestParams.0f1a3346617b86c0da2de5fdc113cfba",
+    "modelOut": "notification.UpdateOutputParams.93a44b31efa4e855004aebaf08d0985e",
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "only",
+        "roleAlias": "user",
+        "createdAt": "2022-03-15T06:18:07.204Z"
+      }
+    ]
+  },
+  {
+    "microservice": "notification",
+    "method": "notice.count",
+    "description": "Returns count of Notice by given condition",
+    "allowGroup": [
+      "admin",
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-02T17:50:12.559Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "only",
+        "roleAlias": "user",
+        "createdAt": "2022-03-15T06:18:07.204Z"
+      }
+    ]
   }
 ]
