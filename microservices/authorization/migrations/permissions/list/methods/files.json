@@ -228,5 +228,83 @@
     "modelIn": "files.CreateRequestParams.59fb6dc97e65c5661e87220713b512eb",
     "modelOut": "files.CreateOutputParams.a1d4fea78f4e098f7d0b186c2ae4e7d2",
     "methodFilters": []
+  },
+  {
+    "microservice": "files",
+    "method": "folder.count",
+    "description": "Returns count of Folder by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-02T16:27:17.146Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "files",
+    "method": "folder.view",
+    "description": "Returns Folder by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-02T16:27:17.146Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "files.ViewOutputParams.1b78041e7563db953be3dd8bd70eda33",
+    "methodFilters": []
+  },
+  {
+    "microservice": "files",
+    "method": "folder.create",
+    "description": "Create a new Folder",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-02T16:27:17.146Z",
+    "modelIn": "files.CreateRequestParams.23d068711394ccec5edac0779feb900a",
+    "modelOut": "files.CreateOutputParams.1b78041e7563db953be3dd8bd70eda33",
+    "methodFilters": []
+  },
+  {
+    "microservice": "files",
+    "method": "folder.remove",
+    "description": "Remove Folder by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-02T16:27:17.146Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "files.RemoveOutputParams.c695cb59d8fd6cc2ad2b4301e23b5332",
+    "methodFilters": []
+  },
+  {
+    "microservice": "files",
+    "method": "folder.list",
+    "description": "Returns list of Folder by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-02T16:27:17.146Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "files.ListOutputParams.935f9ef088ff23a49aa85c4e8811000a",
+    "methodFilters": []
+  },
+  {
+    "microservice": "files",
+    "method": "folder.update",
+    "description": "Update Folder by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-02T16:27:17.146Z",
+    "modelIn": "files.UpdateRequestParams.23d068711394ccec5edac0779feb900a",
+    "modelOut": "files.UpdateOutputParams.1b78041e7563db953be3dd8bd70eda33",
+    "methodFilters": []
   }
 ]

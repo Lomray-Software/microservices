@@ -8,9 +8,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
+  Index,
 } from 'typeorm';
 import FileType from '@constants/file-type';
 import FileEntity from '@entities/file-entity';
+import type Folder from '@entities/folder';
 
 export interface IImageFormat {
   [key: string]: {
@@ -33,6 +36,7 @@ interface IFileMeta {
 @JSONSchema({
   properties: {
     fileEntities: { $ref: '#/definitions/FileEntity' },
+    folder: { $ref: '#/definitions/Folder' },
   },
 })
 @Entity()
@@ -41,11 +45,18 @@ class File {
   @Allow()
   id: string;
 
+  @Index('IDX_file_userId', ['userId'])
   @Column({ type: 'varchar', length: 36, default: null })
   @Length(1, 36)
   @IsNullable()
   @IsUndefinable()
   userId: string | null;
+
+  @Column({ type: 'varchar', default: null })
+  @Length(36, 36)
+  @IsNullable()
+  @IsUndefinable()
+  folderId: string | null;
 
   @Column({ type: 'varchar', length: 255 })
   @Length(1, 255)
@@ -80,6 +91,10 @@ class File {
 
   @OneToMany(() => FileEntity, (entityFile) => entityFile.file)
   fileEntities: FileEntity[];
+
+  @ManyToOne('Folder', 'files', { onDelete: 'SET NULL' })
+  @IsUndefinable()
+  folder: Folder;
 }
 
 export default File;

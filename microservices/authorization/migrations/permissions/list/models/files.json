@@ -25,6 +25,14 @@
           "user": "allow"
         }
       },
+      "folderId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "url": {
         "in": {
           "admin": "allow"
@@ -88,6 +96,7 @@
           "admin": "allow"
         }
       },
+      "folder": "files.Folder",
       "fileEntities": "files.FileEntity"
     },
     "createdAt": "2022-05-16T06:36:58.754Z"
@@ -479,5 +488,162 @@
       }
     },
     "createdAt": "2023-01-27T14:10:08.321Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.Folder",
+    "title": "Folder",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "alias": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "title": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "order": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "parent": "files.Folder",
+      "children": "files.Folder",
+      "files": "files.File"
+    },
+    "createdAt": "2023-02-02T16:27:17.146Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.ListOutputParams.935f9ef088ff23a49aa85c4e8811000a",
+    "title": "List Output Params",
+    "schema": {
+      "list": "files.Folder",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-02T16:27:17.146Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.ViewOutputParams.1b78041e7563db953be3dd8bd70eda33",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "files.Folder"
+    },
+    "createdAt": "2023-02-02T16:27:17.146Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.CreateRequestParams.23d068711394ccec5edac0779feb900a",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "files.Folder"
+    },
+    "createdAt": "2023-02-02T16:27:17.146Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.CreateOutputParams.1b78041e7563db953be3dd8bd70eda33",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "files.Folder"
+    },
+    "createdAt": "2023-02-02T16:27:17.146Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.UpdateRequestParams.23d068711394ccec5edac0779feb900a",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "files.Folder",
+      "query": {
+        "in": {
+          "admin": "allow",
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-02T16:27:17.146Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.UpdateOutputParams.1b78041e7563db953be3dd8bd70eda33",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "files.Folder"
+    },
+    "createdAt": "2023-02-02T16:27:17.146Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.RemoveOutputParams.c695cb59d8fd6cc2ad2b4301e23b5332",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "files.Folder",
+      "entities": "files.Folder"
+    },
+    "createdAt": "2023-02-02T16:27:17.146Z"
   }
 ]

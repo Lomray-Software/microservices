@@ -1,5 +1,5 @@
 import MetaEndpoint from '@lomray/microservice-helpers/methods/meta';
-import type { Microservice } from '@lomray/microservice-nodejs-lib';
+import type { Microservice, IEndpointHandler } from '@lomray/microservice-nodejs-lib';
 import CONST from '@constants/index';
 import CrudFileEntity from '@methods/file-entity/crud';
 import FileEntityList from '@methods/file-entity/list';
@@ -11,6 +11,7 @@ import FileList from '@methods/file/list';
 import FileRemove from '@methods/file/remove';
 import FileUpdate from '@methods/file/update';
 import FileView from '@methods/file/view';
+import CrudFolder from '@methods/folder/crud';
 
 /**
  * Register methods
@@ -18,10 +19,14 @@ import FileView from '@methods/file/view';
 export default (ms: Microservice): void => {
   const crud = {
     'file-entity': CrudFileEntity,
+    folder: CrudFolder,
   };
 
+  /**
+   * CRUD methods
+   */
   Object.entries(crud).forEach(([endpoint, crudMethods]) => {
-    Object.entries(crudMethods).forEach(([method, handler]) => {
+    Object.entries<IEndpointHandler>(crudMethods).forEach(([method, handler]) => {
       ms.addEndpoint(`${endpoint}.${method}`, handler);
     });
   });
