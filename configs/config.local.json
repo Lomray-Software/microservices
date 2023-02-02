@@ -19,6 +19,18 @@
     }
   },
   {
+    "microservice": "gateway",
+    "type": "config",
+    "params": {
+      "corsOptions": {}
+    }
+  },
+  {
+    "microservice": "users",
+    "type": "config",
+    "params": {}
+  },
+  {
     "microservice": "notification",
     "type": "config",
     "params": {
