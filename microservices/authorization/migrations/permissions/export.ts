@@ -58,7 +58,7 @@ const createOrUpdateConditions = (conditions: Condition[]): void => {
   const dumpFilters = getDumpEntities('conditions', DUMP_PATH_ROOT);
   const keepActual = _.intersectionBy(dumpFilters, conditions, 'title');
   const merged = _.merge(_.keyBy(keepActual, 'title'), _.keyBy(conditions, 'title'));
-  const values = _.values(merged).map((f) => _.omit(f, ['updatedAt']));
+  const values = _.values(merged).map((f) => _.omit(f, ['id', 'updatedAt']));
 
   saveDump(values, 'conditions', DUMP_PATH_ROOT);
 };

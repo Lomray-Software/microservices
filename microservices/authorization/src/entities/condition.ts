@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn,
   OneToMany,
+  Unique,
 } from 'typeorm';
 import type Method from '@entities/method';
 import type { IConditions } from '@services/condition-checker';
@@ -23,6 +24,7 @@ class Condition {
   @Allow()
   id: number;
 
+  @Unique('condition(uq):title', ['title'])
   @Column({ type: 'varchar', length: 50 })
   @Length(3, 50)
   title: string;

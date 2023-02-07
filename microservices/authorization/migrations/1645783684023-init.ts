@@ -20,10 +20,10 @@ export default class init1645783684023 implements MigrationInterface {
       `CREATE TABLE "method_filter" ("methodId" integer NOT NULL, "filterId" integer NOT NULL, "operator" "public"."method_filter_operator_enum" NOT NULL, "roleAlias" character varying(30) NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "method_filter(uq):methodId_filterId_roleAlias" UNIQUE ("methodId", "filterId", "roleAlias"), CONSTRAINT "method_filter(pk):methodId_filterId" PRIMARY KEY ("methodId", "filterId"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "filter" ("id" SERIAL NOT NULL, "title" character varying(50) NOT NULL, "condition" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "filter(pk):id" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "filter" ("id" SERIAL NOT NULL, "title" character varying(50) NOT NULL, "condition" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "filter(uq):title" UNIQUE ("title"), CONSTRAINT "filter(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "condition" ("id" SERIAL NOT NULL, "title" character varying(50) NOT NULL, "conditions" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "condition(pk):id" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "condition" ("id" SERIAL NOT NULL, "title" character varying(50) NOT NULL, "conditions" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "condition(uq):title" UNIQUE ("title"), CONSTRAINT "condition(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "user_role" ("userId" character varying(36) NOT NULL, "roleAlias" character varying(30) NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "user_role(pk):userId_roleAlias" PRIMARY KEY ("userId", "roleAlias"))`,

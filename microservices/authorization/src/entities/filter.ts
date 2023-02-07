@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
   PrimaryGeneratedColumn,
   OneToMany,
+  Unique,
 } from 'typeorm';
 import MethodFilter from '@entities/method-filter';
 
@@ -23,6 +24,7 @@ class Filter {
   @Allow()
   id: number;
 
+  @Unique('filter(uq):title', ['title'])
   @Column({ type: 'varchar', length: 50 })
   @Length(3, 50)
   title: string;
