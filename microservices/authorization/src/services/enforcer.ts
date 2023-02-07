@@ -1,13 +1,11 @@
-import { RemoteConfig } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import _ from 'lodash';
 import { Repository } from 'typeorm';
+import remoteConfig from '@config/remote';
 import ExceptionCode from '@constants/exception-code';
-import CONST from '@constants/index';
 import Method from '@entities/method';
 import RolesTree from '@entities/roles-tree';
 import UserRole from '@entities/user-role';
-import { IRemoteConfig } from '@interfaces/remote-config';
 import type ConditionChecker from '@services/condition-checker';
 
 export interface IEnforcerParams {
@@ -127,9 +125,9 @@ class Enforcer {
    * @private
    */
   private async getDefaultUserRole(): Promise<string> {
-    const config = await RemoteConfig.get<IRemoteConfig>('config');
+    const { defaultRole } = await remoteConfig();
 
-    return config?.defaultRole ?? CONST.MS_DEFAULT_ROLE_ALIAS;
+    return defaultRole;
   }
 
   /**
