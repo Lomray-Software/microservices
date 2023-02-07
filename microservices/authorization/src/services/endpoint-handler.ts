@@ -1,7 +1,7 @@
 import type { AbstractMicroservice } from '@lomray/microservice-nodejs-lib';
-import type { IJsonQuery } from '@lomray/microservices-types';
 import { getRepository } from 'typeorm';
 import { FilterType } from '@constants/filter';
+import type Filter from '@entities/filter';
 import Method from '@entities/method';
 import Model from '@entities/model';
 import RolesTree from '@entities/roles-tree';
@@ -78,15 +78,13 @@ class EndpointHandler {
   /**
    * Return typeorm query filters for method
    */
-  public async getMethodFilters(reqParams: Record<string, any> = {}): Promise<IJsonQuery> {
+  public async getMethodFilters(reqParams: Record<string, any> = {}): Promise<Filter['condition']> {
     const { roles } = await this.getEnforcer().findUserRoles();
 
-    const filters = MethodFilters.init({
+    return MethodFilters.init({
       userRoles: roles,
       templateOptions: { userId: this.params.userId, fields: reqParams },
     }).getFilters((await this.getMethod())?.methodFilters ?? []);
-
-    return { where: filters };
   }
 
   /**

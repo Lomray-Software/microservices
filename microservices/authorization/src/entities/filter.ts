@@ -1,5 +1,6 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { IJsonQueryWhere } from '@lomray/microservices-types';
+import type { IJsonQuery } from '@lomray/microservices-types';
+import type { ITypeormJsonQueryOptions } from '@lomray/typeorm-json-query';
 import { Allow, Length, IsObject } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
@@ -31,12 +32,25 @@ class Filter {
 
   @JSONSchema({
     description:
-      'IJsonWhere condition. Template variables used only like this: "{{ userId }}". Available variables: fields - input data, userId, userRole, timestamp, datetime }',
+      'Accept IJsonQuery and IJsonQueryOptions. Template variables used only like this: "{{ userId }}". Available variables: fields - input data, userId, userRole, timestamp, datetime }',
+    examples: [
+      {
+        options: { maxPageSize: 200 },
+        query: {
+          where: { id: '{{ userId }}' },
+        },
+      },
+      {
+        query: {
+          where: { userId: '{{ userId }}' },
+        },
+      },
+    ],
   })
   @Column({ type: 'json', default: {} })
   @IsObject()
   @IsUndefinable()
-  condition: IJsonQueryWhere;
+  condition: { options?: Partial<ITypeormJsonQueryOptions>; query?: IJsonQuery };
 
   @IsTypeormDate()
   @CreateDateColumn()

@@ -1,4 +1,4 @@
-import { IJsonQueryWhere } from '@lomray/microservices-types';
+import type { IJsonQuery } from '@lomray/microservices-types';
 import _ from 'lodash';
 import { FilterOperator } from '@constants/filter';
 import Filter from '@entities/filter';
@@ -42,11 +42,11 @@ class MethodFilters {
   /**
    * Collect filters
    */
-  getFilters(filters: MethodFiltersEntity[]): IJsonQueryWhere {
-    const filter: IJsonQueryWhere = {};
+  getFilters(filters: MethodFiltersEntity[]): Filter['condition'] {
+    const condition: Filter['condition'] = {};
 
     if (filters.length === 0) {
-      return filter;
+      return condition;
     }
 
     const filtersByRoles = _.keyBy(filters, 'roleAlias');
@@ -60,38 +60,78 @@ class MethodFilters {
         continue;
       }
 
+      const {
+        operator,
+        filter: {
+          condition: { query, options },
+        },
+      } = roleFilter;
+
       // direct role filter
-      if (roleFilter.operator === FilterOperator.only) {
+      if (operator === FilterOperator.only) {
         if (userRole === role) {
-          return this.getCondition(roleFilter.filter);
+          return { ...(options ? { options } : {}), query: this.getCondition(query) };
         }
 
         continue;
       }
 
-      if (!filter[roleFilter.operator]) {
-        filter[roleFilter.operator] = [];
+      if (options) {
+        condition.options = { ...condition.options, ...options };
       }
 
-      filter[roleFilter.operator].push(this.getCondition(roleFilter.filter));
+      if (!condition.query) {
+        condition.query = {};
+      }
+
+      this.mergeConditions(condition.query, this.getCondition(query), operator);
     }
 
-    return filter;
+    return condition;
+  }
+
+  /**
+   * Merge filter conditions
+   * @private
+   */
+  private mergeConditions(baseQuery: IJsonQuery, mergeQuery: IJsonQuery, operator: string): void {
+    if (!baseQuery.where?.[operator]) {
+      baseQuery.where = { [operator]: [] };
+    }
+
+    if (mergeQuery.attributes) {
+      baseQuery.attributes = [...(baseQuery.attributes ?? []), ...mergeQuery.attributes];
+    }
+
+    if (mergeQuery.relations) {
+      baseQuery.relations = [...(baseQuery.relations ?? []), ...mergeQuery.relations];
+    }
+
+    if (mergeQuery.where) {
+      baseQuery.where[operator].push(mergeQuery.where);
+    }
+
+    if (mergeQuery.groupBy) {
+      baseQuery.groupBy = [...(baseQuery.groupBy ?? []), ...mergeQuery.groupBy];
+    }
   }
 
   /**
    * Template and return filter condition
    * @private
    */
-  private getCondition(filter: Filter): IJsonQueryWhere {
-    const { condition } = filter;
+  private getCondition(query?: IJsonQuery): IJsonQuery {
+    if (!query) {
+      return {};
+    }
+
     const [templateVariables, simpleTypeFieldNames] = this.getTemplateVariables({
       ...this.templateOptions,
       userRole: this.getUserRole(),
       timestamp: Math.floor(Date.now() / 1000),
       datetime: new Date().toISOString(),
     });
-    const stringCondition = JSON.stringify(condition)
+    const stringCondition = JSON.stringify(query)
       /**
        * Replace double quotes to one for simple types. E.g.:
        *
