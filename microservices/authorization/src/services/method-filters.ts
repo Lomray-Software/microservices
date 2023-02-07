@@ -95,7 +95,7 @@ class MethodFilters {
    * @private
    */
   private mergeConditions(baseQuery: IJsonQuery, mergeQuery: IJsonQuery, operator: string): void {
-    if (!baseQuery.where?.[operator]) {
+    if (!baseQuery.where?.[operator] && mergeQuery.where) {
       baseQuery.where = { [operator]: [] };
     }
 
@@ -108,7 +108,7 @@ class MethodFilters {
     }
 
     if (mergeQuery.where) {
-      baseQuery.where[operator].push(mergeQuery.where);
+      baseQuery.where![operator].push(mergeQuery.where);
     }
 
     if (mergeQuery.groupBy) {
