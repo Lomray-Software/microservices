@@ -51,10 +51,20 @@ class User extends Repository<UserEntity> {
   /**
    * Add profile entity to user
    */
-  public async attachProfile(user: UserEntity): Promise<UserEntity> {
-    user.profile = (await this.manager
-      .getRepository(Profile)
-      .findOne({ userId: user.id })) as Profile;
+  public async attachProfile(
+    user: UserEntity,
+    updateParams?: Partial<Profile['params']>,
+  ): Promise<UserEntity> {
+    const repository = this.manager.getRepository(Profile);
+    const profile = (await repository.findOne({ userId: user.id }))!;
+
+    if (updateParams) {
+      profile.params = { ...profile.params, ...updateParams };
+
+      await repository.save(profile);
+    }
+
+    user.profile = profile;
 
     return user;
   }

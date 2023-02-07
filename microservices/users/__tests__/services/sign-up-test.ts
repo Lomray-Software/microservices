@@ -74,5 +74,6 @@ describe('services/sign-up', () => {
     const user = await service.register();
 
     expect(mockUser).to.deep.equal(user);
+    expect(user.profile.params.isEmailVerified).to.true;
   });
 });

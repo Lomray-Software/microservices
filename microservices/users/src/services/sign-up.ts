@@ -81,7 +81,11 @@ class SignUp {
 
     const user = await this.repository.save(entity);
 
-    return this.repository.attachProfile(user);
+    await this.repository.attachProfile(user, {
+      ...(entity.email ? { isEmailVerified: true } : { isPhoneVerified: true }),
+    });
+
+    return user;
   }
 }
 
