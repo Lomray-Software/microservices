@@ -41,7 +41,7 @@
 	},
 	"dependencies": {
 		"@lomray/cookie": "^0.6.2",
-		"@lomray/microservice-helpers": "^2.0.0",
+		"@lomray/microservice-helpers": "^2.0.1",
 		"class-validator": "^0.14.0",
 		"class-validator-jsonschema": "^5.0.0",
 		"jsonwebtoken": "^9.0.0",
