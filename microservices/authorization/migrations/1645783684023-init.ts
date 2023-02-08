@@ -5,7 +5,7 @@ export default class init1645783684023 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "model" ("id" SERIAL NOT NULL, "microservice" character varying(50), "alias" character varying(150) NOT NULL, "title" character varying(50) NOT NULL, "schema" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "model(uq):alias" UNIQUE ("alias"), CONSTRAINT "model(pk):id" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "model" ("id" SERIAL NOT NULL, "microservice" character varying(50), "alias" character varying(150) NOT NULL, "title" character varying(255) NOT NULL, "schema" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "model(uq):alias" UNIQUE ("alias"), CONSTRAINT "model(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "method" ("id" SERIAL NOT NULL, "microservice" character varying(50), "method" character varying(100) NOT NULL, "description" character varying(255) NOT NULL DEFAULT '', "allowGroup" text array NOT NULL DEFAULT '{}', "denyGroup" text array NOT NULL DEFAULT '{}', "modelInId" integer, "modelOutId" integer, "conditionId" integer, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "method(uq):microservice_method" UNIQUE ("microservice", "method"), CONSTRAINT "method(pk):id" PRIMARY KEY ("id"))`,
@@ -20,10 +20,10 @@ export default class init1645783684023 implements MigrationInterface {
       `CREATE TABLE "method_filter" ("methodId" integer NOT NULL, "filterId" integer NOT NULL, "operator" "public"."method_filter_operator_enum" NOT NULL, "roleAlias" character varying(30) NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "method_filter(uq):methodId_filterId_roleAlias" UNIQUE ("methodId", "filterId", "roleAlias"), CONSTRAINT "method_filter(pk):methodId_filterId" PRIMARY KEY ("methodId", "filterId"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "filter" ("id" SERIAL NOT NULL, "title" character varying(50) NOT NULL, "condition" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "filter(uq):title" UNIQUE ("title"), CONSTRAINT "filter(pk):id" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "filter" ("id" SERIAL NOT NULL, "title" character varying(255) NOT NULL, "condition" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "filter(uq):title" UNIQUE ("title"), CONSTRAINT "filter(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "condition" ("id" SERIAL NOT NULL, "title" character varying(50) NOT NULL, "conditions" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "condition(uq):title" UNIQUE ("title"), CONSTRAINT "condition(pk):id" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "condition" ("id" SERIAL NOT NULL, "title" character varying(255) NOT NULL, "conditions" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "condition(uq):title" UNIQUE ("title"), CONSTRAINT "condition(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "user_role" ("userId" character varying(36) NOT NULL, "roleAlias" character varying(30) NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "user_role(pk):userId_roleAlias" PRIMARY KEY ("userId", "roleAlias"))`,

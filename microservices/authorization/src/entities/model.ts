@@ -42,13 +42,13 @@ class Model {
   @IsNullable()
   microservice: string | null;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 150 })
   @Unique(['alias'])
   @Length(1, 150)
   alias: string;
 
-  @Column({ type: 'varchar', length: 50 })
-  @Length(3, 50)
+  @Column({ type: 'varchar', length: 255 })
+  @Length(3, 255)
   title: string;
 
   @JSONSchema({

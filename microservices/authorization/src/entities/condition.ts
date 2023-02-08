@@ -25,8 +25,8 @@ class Condition {
   id: number;
 
   @Unique('condition(uq):title', ['title'])
-  @Column({ type: 'varchar', length: 50 })
-  @Length(3, 50)
+  @Column({ type: 'varchar', length: 255 })
+  @Length(3, 255)
   title: string;
 
   @JSONSchema({
