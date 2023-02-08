@@ -1,3 +1,5 @@
+import TokenCreateReturnType from '@lomray/microservices-client-api/constants/token-return-type';
+import TokenType from '@lomray/microservices-client-api/constants/token-type';
 import Endpoints from '@helpers/api/endpoints';
 
 class Commands {
@@ -44,16 +46,17 @@ class Commands {
       throw userResponse.error;
     }
 
-    const user = userResponse.result?.entity;
+    const { entity } = userResponse.result!;
 
     /**
      * Create personal token
      */
     const tokenResponse = await this.endpoints.authentication.token.create(
       {
-        type: 'personal',
-        userId: user.id,
+        type: TokenType.personal,
+        userId: entity.id,
         expirationAt: Math.round(Date.now() / 1000) + 1000000,
+        returnType: TokenCreateReturnType.directly,
       },
       {
         isDirectReq: true,
@@ -64,7 +67,7 @@ class Commands {
       throw tokenResponse.error;
     }
 
-    const token = tokenResponse.result?.token;
+    const token = tokenResponse.result!.token!;
 
     /**
      * Assign role
@@ -72,7 +75,7 @@ class Commands {
     const assignResponse = await this.endpoints.authorization.userRole.assign(
       {
         fields: {
-          userId: user.id,
+          userId: entity.id,
           roleAlias,
         },
       },
@@ -86,7 +89,7 @@ class Commands {
     }
 
     return {
-      user,
+      user: entity,
       token,
     };
   };

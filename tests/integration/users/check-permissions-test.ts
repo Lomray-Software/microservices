@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import { STATUS_CODE } from '@constants/index';
 import Endpoints from '@helpers/api/endpoints';
 import Commands from '@helpers/commands';
+import type { TRequest } from '@interfaces/request';
 
 describe('Check users microservice permissions', () => {
   const client = Endpoints.create();
@@ -13,7 +14,7 @@ describe('Check users microservice permissions', () => {
   });
 
   it('client have not access to these methods', async () => {
-    const requests = [
+    const requests: TRequest[] = [
       client.users.user.signUp,
       client.users.user.changePassword,
       client.users.user.changeLogin,
@@ -30,7 +31,11 @@ describe('Check users microservice permissions', () => {
   });
 
   it('client have access to these methods', async () => {
-    const requests = [client.users.user.view, client.users.user.me, client.users.profile.view];
+    const requests: TRequest[] = [
+      client.users.user.view,
+      client.users.user.me,
+      client.users.profile.view,
+    ];
 
     for (const request of requests) {
       const response = await request({}, { authToken: token });

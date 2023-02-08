@@ -10,19 +10,19 @@
 		"json",
 		"tests",
 		"typescript",
-    "integration"
+		"integration"
 	],
 	"publishConfig": {
 		"access": "public"
 	},
 	"repository": {
 		"type": "git",
-    "url": "https://github.com/Lomray-Software/microservices.git"
+		"url": "https://github.com/Lomray-Software/microservices.git"
 	},
 	"bugs": {
-    "url": "https://github.com/Lomray-Software/microservices/issues"
+		"url": "https://github.com/Lomray-Software/microservices/issues"
 	},
-  "homepage": "https://github.com/Lomray-Software/microservices",
+	"homepage": "https://github.com/Lomray-Software/microservices",
 	"author": "Mikhail Yarmaliuk",
 	"license": "Apache-2.0",
 	"scripts": {
@@ -34,6 +34,7 @@
 		"ts:check": "tsc --project ./tsconfig.json --skipLibCheck --noemit"
 	},
 	"dependencies": {
+		"@lomray/microservices-client-api": "^2.3.0",
 		"axios": "^0.27.2",
 		"lodash": "^4.17.21"
 	},

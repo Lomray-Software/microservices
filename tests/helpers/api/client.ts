@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import _ from 'lodash';
 import { API_GATEWAY, IJSON_CONNECTION } from '@constants/index';
@@ -27,6 +29,13 @@ export interface IApiClientReqOptions {
  * API client
  */
 class Client {
+  /**
+   * Get client language
+   */
+  public getLanguage() {
+    return undefined;
+  }
+
   /**
    * Send request to API
    */
