@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import TokenCreateReturnType from '@lomray/microservices-client-api/constants/token-return-type';
 import TokenType from '@lomray/microservices-client-api/constants/token-type';
 import Endpoints from '@helpers/api/endpoints';
@@ -30,20 +31,26 @@ class Commands {
    */
   public createUser = async (
     userFields: Record<string, any>,
-    roleAlias = 'user',
+    { roleAlias = 'user', isOnlyToken = true } = {},
   ): Promise<{ user: Record<string, any>; token: string }> => {
-    /**
-     * Create user
-     */
-    const userResponse = await this.endpoints.users.user.create(
-      { fields: userFields },
-      {
-        isDirectReq: true,
-      },
-    );
+    let userResponse;
 
-    if (userResponse.error) {
-      throw userResponse.error;
+    if (!isOnlyToken) {
+      /**
+       * Create user
+       */
+      userResponse = await this.endpoints.users.user.create(
+        { fields: userFields },
+        {
+          isDirectReq: true,
+        },
+      );
+
+      if (userResponse.error) {
+        throw userResponse.error;
+      }
+    } else {
+      userResponse = { result: { entity: { id: randomUUID() } } };
     }
 
     const { entity } = userResponse.result!;

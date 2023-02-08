@@ -1,5 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 
+import type { TReqData } from '@lomray/microservices-client-api/api-client';
 import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import _ from 'lodash';
 import { API_GATEWAY, IJSON_CONNECTION } from '@constants/index';
@@ -22,7 +23,7 @@ type MSResponse<TResponse> = {
 export interface IApiClientReqOptions {
   authToken?: string;
   isDirectReq?: boolean; // send request to ijson directly
-  req?: AxiosRequestConfig;
+  request?: AxiosRequestConfig;
 }
 
 /**
@@ -39,17 +40,17 @@ class Client {
   /**
    * Send request to API
    */
-  public async sendRequest<TResponse>(
-    method: string,
-    params = {},
+  public async sendRequest<TResponse, TRequest>(
+    reqData: TReqData<TRequest>,
     options: IApiClientReqOptions = {},
   ): Promise<MSResponse<TResponse>> {
-    const { authToken, isDirectReq = false, req = {} } = options;
+    const { authToken, isDirectReq = false, request = {} } = options;
+    const { method, params = {} } = Array.isArray(reqData) ? reqData[0] : reqData;
     const [microservice, ...methodParts] = method.split('.');
 
     try {
       if (authToken) {
-        _.set(req, 'headers.Authorization', `Bearer ${authToken}`);
+        _.set(request, 'headers.Authorization', `Bearer ${authToken}`);
       }
 
       if (isDirectReq) {
@@ -59,7 +60,7 @@ class Client {
       const { data } = await axios.request<MSResponse<TResponse>>({
         baseURL: isDirectReq ? `${IJSON_CONNECTION}/ms/${microservice}` : API_GATEWAY,
         method: 'POST',
-        ...req,
+        ...request,
         data: {
           method: isDirectReq ? methodParts.join('.') : method,
           params,

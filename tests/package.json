@@ -39,6 +39,7 @@
 		"lodash": "^4.17.21"
 	},
 	"devDependencies": {
-		"@types/lodash": "^4.14.182"
+		"@types/lodash": "^4.14.182",
+		"tsconfig-paths": "^4.1.2"
 	}
 }
