@@ -2,6 +2,7 @@ import { Endpoint } from '@lomray/microservice-helpers';
 import { getRepository } from 'typeorm';
 import File from '@entities/file';
 import FilePostProcess from '@services/file-post-process';
+
 /**
  * View file
  */
