@@ -1,6 +1,7 @@
 import type { IJsonQuery } from '@lomray/microservices-types';
+import { JQJunction } from '@lomray/microservices-types';
 import _ from 'lodash';
-import { FilterOperator } from '@constants/filter';
+import { FilterIgnoreType, FilterOperator } from '@constants/filter';
 import Filter from '@entities/filter';
 import MethodFiltersEntity from '@entities/method-filter';
 
@@ -42,59 +43,91 @@ class MethodFilters {
   /**
    * Collect filters
    */
-  getFilters(filters: MethodFiltersEntity[]): Filter['condition'] {
+  public getFilters(filters: MethodFiltersEntity[]): Filter['condition'] {
     const condition: Filter['condition'] = {};
 
     if (filters.length === 0) {
       return condition;
     }
 
-    const filtersByRoles = _.keyBy(filters, 'roleAlias');
     const userRole = this.getUserRole();
     const roles = [...this.userRoles].reverse();
+    const filtersByRoles = filters.reduce(
+      (res, methodFilter) => ({
+        [methodFilter.roleAlias]: [
+          ...(res[methodFilter.roleAlias] ?? []),
+          ...(this.isFilterIgnored(methodFilter.filter.ignore, this.userRoles)
+            ? []
+            : [methodFilter]),
+        ],
+        ...res,
+      }),
+      {} as Record<string, MethodFiltersEntity[]>,
+    );
 
     for (const role of roles) {
-      const roleFilter = filtersByRoles[role];
+      const roleFilters = filtersByRoles[role] ?? [];
 
-      if (!roleFilter) {
+      if (!roleFilters.length) {
         continue;
       }
 
-      const {
-        operator,
-        filter: {
-          condition: { query, options },
-        },
-      } = roleFilter;
+      for (const roleFilter of roleFilters) {
+        const {
+          operator,
+          filter: {
+            condition: { query, options, methodOptions },
+          },
+        } = roleFilter;
 
-      // direct role filter
-      if (operator === FilterOperator.only) {
-        if (userRole === role) {
-          return { ...(options ? { options } : {}), query: this.getCondition(query) };
+        // skip apply filter, because filter have direct role
+        if (operator === FilterOperator.only && role !== userRole) {
+          continue;
         }
 
-        continue;
-      }
+        if (options) {
+          condition.options = { ...condition.options, ...options };
+        }
 
-      if (options) {
-        condition.options = { ...condition.options, ...options };
-      }
+        if (methodOptions) {
+          condition.methodOptions = { ...condition.methodOptions, ...methodOptions };
+        }
 
-      if (!condition.query) {
-        condition.query = {};
-      }
+        if (!condition.query) {
+          condition.query = {};
+        }
 
-      this.mergeConditions(condition.query, this.getCondition(query), operator);
+        this.mergeConditions(condition.query, this.getCondition(query));
+      }
     }
 
     return condition;
   }
 
   /**
+   * Check is filter should be ignored
+   * @private
+   */
+  private isFilterIgnored(
+    ignore: MethodFiltersEntity['filter']['ignore'],
+    roles: string[],
+  ): boolean {
+    // skip apply filter, because role ignored
+    if (ignore?.[this.getUserRole()]) {
+      return true;
+    }
+
+    // skip apply filter, because parent role ignored and prevent propagation
+    return roles.some((role) => ignore?.[role] === FilterIgnoreType.stop);
+  }
+
+  /**
    * Merge filter conditions
    * @private
    */
-  private mergeConditions(baseQuery: IJsonQuery, mergeQuery: IJsonQuery, operator: string): void {
+  private mergeConditions(baseQuery: IJsonQuery, mergeQuery: IJsonQuery): void {
+    const operator: string = JQJunction.and;
+
     if (!baseQuery.where?.[operator] && mergeQuery.where) {
       baseQuery.where = { [operator]: [] };
     }
@@ -128,8 +161,6 @@ class MethodFilters {
     const [templateVariables, simpleTypeFieldNames] = this.getTemplateVariables({
       ...this.templateOptions,
       userRole: this.getUserRole(),
-      timestamp: Math.floor(Date.now() / 1000),
-      datetime: new Date().toISOString(),
     });
     const stringCondition = JSON.stringify(query)
       /**

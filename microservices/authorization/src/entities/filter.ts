@@ -12,6 +12,7 @@ import {
   OneToMany,
   Unique,
 } from 'typeorm';
+import { FilterIgnoreType } from '@constants/filter';
 import MethodFilter from '@entities/method-filter';
 
 @JSONSchema({
@@ -32,7 +33,9 @@ class Filter {
 
   @JSONSchema({
     description:
-      'Accept IJsonQuery and IJsonQueryOptions. Template variables used only like this: "{{ userId }}". Available variables: fields - input data, userId, userRole, timestamp, datetime }',
+      'Accept IJsonQuery, IJsonQueryOptions and method options. Template variables used only like this: "{{ userId }}". ' +
+      'Available variables: fields - input data, userId, userRole. ' +
+      'Available lodash template expressions.',
     examples: [
       {
         options: { maxPageSize: 200 },
@@ -45,12 +48,38 @@ class Filter {
           where: { userId: '{{ userId }}' },
         },
       },
+      {
+        methodOptions: {
+          isAllowMultiple: true,
+        },
+      },
     ],
   })
   @Column({ type: 'json', default: {} })
   @IsObject()
   @IsUndefinable()
-  condition: { options?: Partial<ITypeormJsonQueryOptions>; query?: IJsonQuery };
+  condition: {
+    options?: Partial<ITypeormJsonQueryOptions>;
+    query?: IJsonQuery;
+    methodOptions?: {
+      isAllowMultiple?: boolean;
+      isSoftDelete?: boolean;
+      isListWithCount?: boolean;
+      isParallel?: boolean;
+      shouldReturnEntity?: boolean;
+      shouldResetCache?: boolean;
+    };
+  };
+
+  @JSONSchema({
+    description:
+      'Roles to be ignored. stop - stop propagation, only - ignore only the specified role',
+    example: { admin: 'stop', user: 'only' },
+  })
+  @Column({ type: 'text', default: {} })
+  @IsObject()
+  @IsUndefinable()
+  ignore: { [role: string]: FilterIgnoreType };
 
   @IsTypeormDate()
   @CreateDateColumn()

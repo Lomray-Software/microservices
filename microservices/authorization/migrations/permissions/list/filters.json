@@ -1,5 +1,17 @@
 [
   {
+    "title": "By user id: ignore admin",
+    "condition": {
+      "query": {
+        "where": {
+          "id": "{{ userId }}"
+        }
+      }
+    },
+    "ignore": { "admin": "stop" },
+    "createdAt": "2022-03-15T06:15:14.739Z"
+  },
+  {
     "title": "By user id",
     "condition": {
       "query": {
@@ -19,6 +31,7 @@
         }
       }
     },
+    "ignore": { "admin": "stop" },
     "createdAt": "2022-03-15T06:15:40.656Z"
   }
 ]

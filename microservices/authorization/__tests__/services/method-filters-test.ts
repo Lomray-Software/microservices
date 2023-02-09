@@ -1,6 +1,6 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { expect } from 'chai';
-import { FilterOperator } from '@constants/filter';
+import { FilterIgnoreType, FilterOperator } from '@constants/filter';
 import MethodFiltersEntity from '@entities/method-filter';
 import MethodFilters from '@services/method-filters';
 
@@ -13,7 +13,7 @@ describe('services/method-filters', () => {
     filter: {
       condition: {
         options: { maxPageSize: 10 },
-        query: { where: { field: 1 } },
+        query: { where: { isGuest: 1 } },
       },
     },
   });
@@ -29,22 +29,27 @@ describe('services/method-filters', () => {
   const admins = methodFiltersRepo.create({
     roleAlias: 'admins',
     operator: FilterOperator.only,
-    filter: { condition: {} },
+    filter: {
+      condition: {
+        query: { where: { isAdmin: 1 } },
+      },
+    },
   });
   const methodFilters = [guests, users, admins];
+  const userId = 99;
 
   it('should correctly handler empty filters', () => {
-    const userId = null;
     const userRoles = ['guests'];
-    const filters = MethodFilters.init({ userRoles, templateOptions: { userId } }).getFilters([]);
+    const filters = MethodFilters.init({ userRoles, templateOptions: { userId: null } }).getFilters(
+      [],
+    );
 
     expect(filters).to.deep.equal({});
   });
 
   it('should correctly collect filters for method: guest role', () => {
-    const userId = null;
     const userRoles = ['guests'];
-    const filters = MethodFilters.init({ userRoles, templateOptions: { userId } }).getFilters(
+    const filters = MethodFilters.init({ userRoles, templateOptions: { userId: null } }).getFilters(
       methodFilters,
     );
 
@@ -52,15 +57,30 @@ describe('services/method-filters', () => {
       options: guests.filter.condition.options,
       query: {
         where: {
-          and: [{ field: 1 }],
+          and: [{ isGuest: 1 }],
         },
       },
     });
   });
 
   it('should correctly collect filters for method: users role', () => {
-    const userId = 1;
     const userRoles = ['users', 'guests']; // order matters
+    const filters = MethodFilters.init({ userRoles, templateOptions: { userId: 1 } }).getFilters(
+      methodFilters,
+    );
+
+    expect(filters).to.deep.equal({
+      options: guests.filter.condition.options,
+      query: {
+        where: {
+          and: [{ isGuest: 1 }, { userId: 1 }],
+        },
+      },
+    });
+  });
+
+  it('should correctly collect filters for method: admins role', () => {
+    const userRoles = ['admins', 'users', 'guests']; // order matters
     const filters = MethodFilters.init({ userRoles, templateOptions: { userId } }).getFilters(
       methodFilters,
     );
@@ -69,54 +89,101 @@ describe('services/method-filters', () => {
       options: guests.filter.condition.options,
       query: {
         where: {
-          and: [{ field: 1 }, { userId: 1 }],
+          and: [{ isGuest: 1 }, { userId }, { isAdmin: 1 }],
         },
       },
     });
   });
 
-  it('should correctly collect filters for method: admins role', () => {
-    const userId = 99;
+  it('should correctly collect filters for method: collect for admins - except users filter', () => {
+    const usersFilter = { ...users, operator: 'only' };
     const userRoles = ['admins', 'users', 'guests']; // order matters
-    const filters = MethodFilters.init({ userRoles, templateOptions: { userId } }).getFilters(
-      methodFilters,
-    );
+    const filters = MethodFilters.init({ userRoles, templateOptions: { userId } }).getFilters([
+      methodFilters[0],
+      usersFilter,
+      methodFilters[2],
+    ]);
 
     expect(filters).to.deep.equal({
-      query: {},
+      options: guests.filter.condition.options,
+      query: {
+        where: {
+          and: [{ isGuest: 1 }, { isAdmin: 1 }],
+        },
+      },
     });
   });
 
-  it('should correctly collect filters for method: test case #1', () => {
-    const usersFilter = { ...users, operator: 'only' };
-    const adminsFilter = methodFiltersRepo.create({
-      roleAlias: 'admins',
-      operator: FilterOperator.only,
-      filter: { condition: { query: { where: { admin: 1 } } } },
-    });
-
-    const userId = 99;
+  it('should correctly collect filters for method: stop propagate guest filter', () => {
+    const guestFilter = {
+      ...guests,
+      filter: { ...guests.filter, ignore: { users: FilterIgnoreType.stop } },
+    };
     const userRoles = ['admins', 'users', 'guests']; // order matters
     const filters = MethodFilters.init({ userRoles, templateOptions: { userId } }).getFilters([
-      usersFilter,
-      adminsFilter,
+      guestFilter,
+      methodFilters[1],
+      methodFilters[2],
     ]);
 
     expect(filters).to.deep.equal({
       query: {
         where: {
-          admin: 1,
+          and: [{ userId }, { isAdmin: 1 }],
         },
       },
     });
   });
 
-  it('should correctly collect filters for method: test case #2 (autodetect template variable type)', () => {
-    const userId = 'string-user-id';
+  it('should correctly collect filters for method: ignore guest filter for admins', () => {
+    const guestFilter = {
+      ...guests,
+      filter: { ...guests.filter, ignore: { admins: FilterIgnoreType.stop } },
+    };
+    const userRoles = ['admins', 'users', 'guests']; // order matters
+    const filters = MethodFilters.init({ userRoles, templateOptions: { userId } }).getFilters([
+      guestFilter,
+      methodFilters[1],
+      methodFilters[2],
+    ]);
+
+    expect(filters).to.deep.equal({
+      query: {
+        where: {
+          and: [{ userId }, { isAdmin: 1 }],
+        },
+      },
+    });
+  });
+
+  it('should correctly collect filters for method: ignore guest filter only for users', () => {
+    const guestFilter = {
+      ...guests,
+      filter: { ...guests.filter, ignore: { users: FilterIgnoreType.only } },
+    };
+    const userRoles = ['admins', 'users', 'guests']; // order matters
+    const filters = MethodFilters.init({ userRoles, templateOptions: { userId } }).getFilters([
+      guestFilter,
+      methodFilters[1],
+      methodFilters[2],
+    ]);
+
+    expect(filters).to.deep.equal({
+      options: guests.filter.condition.options,
+      query: {
+        where: {
+          and: [{ isGuest: 1 }, { userId }, { isAdmin: 1 }],
+        },
+      },
+    });
+  });
+
+  it('should correctly collect filters for method: autodetect template variable type', () => {
+    const userIdStr = 'string-user-id';
     const userRoles = ['users', 'guests']; // order matters
     const filters = MethodFilters.init({
       userRoles,
-      templateOptions: { userId, nested: { hi: 'world', it: null } },
+      templateOptions: { userId: userIdStr, nested: { hi: 'world', it: null } },
     }).getFilters([
       guests,
       admins,
@@ -130,7 +197,6 @@ describe('services/method-filters', () => {
                 userId: '{{ userId }}',
                 hi: '{{ nested.hi }}',
                 it: '{{ nested.it }}',
-                datetime: '{{ datetime }}',
               },
             },
           },
@@ -138,23 +204,18 @@ describe('services/method-filters', () => {
       }),
     ]);
 
-    // @ts-ignore
-    const datetimeFilled = filters.query?.where?.and?.[1].datetime;
-
-    expect(datetimeFilled.split('T')[0]).to.equal(new Date().toISOString().split('T')[0]);
     expect(filters).to.deep.equal({
       options: guests.filter.condition.options,
       query: {
         where: {
           and: [
             {
-              field: 1,
+              isGuest: 1,
             },
             {
               hi: 'world',
               it: null,
-              userId: 'string-user-id',
-              datetime: datetimeFilled,
+              userId: userIdStr,
             },
           ],
         },
@@ -162,12 +223,13 @@ describe('services/method-filters', () => {
     });
   });
 
-  it('should correctly collect filters for method: merge relations & attributes & groupBy', () => {
+  it('should correctly collect filters for method: merge relations & attributes & groupBy & options & methodOptions', () => {
     const usersFilter = methodFiltersRepo.create({
       roleAlias: 'guests',
       operator: FilterOperator.and,
       filter: {
         condition: {
+          methodOptions: { isAllowMultiple: false },
           options: { defaultPageSize: 20 },
           query: {
             attributes: ['id'],
@@ -181,6 +243,7 @@ describe('services/method-filters', () => {
       operator: FilterOperator.and,
       filter: {
         condition: {
+          methodOptions: { isAllowMultiple: true },
           options: { defaultPageSize: 50 },
           query: {
             attributes: ['name'],
@@ -198,6 +261,9 @@ describe('services/method-filters', () => {
     ]);
 
     expect(filters).to.deep.equal({
+      methodOptions: {
+        isAllowMultiple: true,
+      },
       options: {
         defaultPageSize: 50,
       },

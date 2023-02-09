@@ -12,9 +12,9 @@
     "modelOut": "users.ViewOutputParams.7c0210cc643ff04cde41d75273968a95",
     "methodFilters": [
       {
-        "filterTitle": "By user id",
-        "operator": "only",
-        "roleAlias": "user",
+        "filterTitle": "By user id: ignore admin",
+        "operator": "and",
+        "roleAlias": "guest",
         "createdAt": "2022-03-15T06:16:55.264Z"
       }
     ]
@@ -32,9 +32,9 @@
     "modelOut": "users.UpdateOutputParams.7c0210cc643ff04cde41d75273968a95",
     "methodFilters": [
       {
-        "filterTitle": "By user id",
-        "operator": "only",
-        "roleAlias": "user",
+        "filterTitle": "By user id: ignore admin",
+        "operator": "and",
+        "roleAlias": "guest",
         "createdAt": "2022-03-15T06:17:44.538Z"
       }
     ]
@@ -54,7 +54,7 @@
       {
         "filterTitle": "By user id",
         "operator": "and",
-        "roleAlias": "user",
+        "roleAlias": "guest",
         "createdAt": "2022-03-15T06:18:07.204Z"
       }
     ]
@@ -73,8 +73,8 @@
     "methodFilters": [
       {
         "filterTitle": "By userId",
-        "operator": "only",
-        "roleAlias": "user",
+        "operator": "and",
+        "roleAlias": "guest",
         "createdAt": "2022-03-15T06:17:23.698Z"
       }
     ]
@@ -93,8 +93,8 @@
     "methodFilters": [
       {
         "filterTitle": "By userId",
-        "operator": "only",
-        "roleAlias": "user",
+        "operator": "and",
+        "roleAlias": "guest",
         "createdAt": "2022-03-15T06:18:07.204Z"
       }
     ]

@@ -13,8 +13,8 @@
     "methodFilters": [
       {
         "filterTitle": "By userId",
-        "operator": "only",
-        "roleAlias": "user",
+        "operator": "and",
+        "roleAlias": "guest",
         "createdAt": "2022-03-15T06:18:07.204Z"
       }
     ]

@@ -119,7 +119,6 @@
     "method": "notice.view",
     "description": "Returns Notice by given condition",
     "allowGroup": [
-      "admin",
       "user"
     ],
     "denyGroup": [],
@@ -129,8 +128,8 @@
     "methodFilters": [
       {
         "filterTitle": "By userId",
-        "operator": "only",
-        "roleAlias": "user",
+        "operator": "and",
+        "roleAlias": "guest",
         "createdAt": "2022-03-15T06:18:07.204Z"
       }
     ]
@@ -140,7 +139,6 @@
     "method": "notice.list",
     "description": "Returns list of Notice by given condition",
     "allowGroup": [
-      "admin",
       "user"
     ],
     "denyGroup": [],
@@ -150,8 +148,8 @@
     "methodFilters": [
       {
         "filterTitle": "By userId",
-        "operator": "only",
-        "roleAlias": "user",
+        "operator": "and",
+        "roleAlias": "guest",
         "createdAt": "2022-03-15T06:18:07.204Z"
       }
     ]
@@ -187,7 +185,6 @@
     "method": "notice.update",
     "description": "Update Notice by given condition",
     "allowGroup": [
-      "admin",
       "user"
     ],
     "denyGroup": [],
@@ -197,8 +194,8 @@
     "methodFilters": [
       {
         "filterTitle": "By userId",
-        "operator": "only",
-        "roleAlias": "user",
+        "operator": "and",
+        "roleAlias": "guest",
         "createdAt": "2022-03-15T06:18:07.204Z"
       }
     ]
@@ -208,7 +205,6 @@
     "method": "notice.count",
     "description": "Returns count of Notice by given condition",
     "allowGroup": [
-      "admin",
       "user"
     ],
     "denyGroup": [],
@@ -218,8 +214,8 @@
     "methodFilters": [
       {
         "filterTitle": "By userId",
-        "operator": "only",
-        "roleAlias": "user",
+        "operator": "and",
+        "roleAlias": "guest",
         "createdAt": "2022-03-15T06:18:07.204Z"
       }
     ]

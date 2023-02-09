@@ -20,7 +20,7 @@ export default class init1645783684023 implements MigrationInterface {
       `CREATE TABLE "method_filter" ("methodId" integer NOT NULL, "filterId" integer NOT NULL, "operator" "public"."method_filter_operator_enum" NOT NULL, "roleAlias" character varying(30) NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "method_filter(uq):methodId_filterId_roleAlias" UNIQUE ("methodId", "filterId", "roleAlias"), CONSTRAINT "method_filter(pk):methodId_filterId" PRIMARY KEY ("methodId", "filterId"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "filter" ("id" SERIAL NOT NULL, "title" character varying(255) NOT NULL, "condition" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "filter(uq):title" UNIQUE ("title"), CONSTRAINT "filter(pk):id" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "filter" ("id" SERIAL NOT NULL, "title" character varying(255) NOT NULL, "condition" json NOT NULL DEFAULT '{}', "ignore" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "filter(uq):title" UNIQUE ("title"), CONSTRAINT "filter(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "condition" ("id" SERIAL NOT NULL, "title" character varying(255) NOT NULL, "conditions" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "condition(uq):title" UNIQUE ("title"), CONSTRAINT "condition(pk):id" PRIMARY KEY ("id"))`,

@@ -70,8 +70,7 @@
     "method": "file.remove",
     "description": "Remove file",
     "allowGroup": [
-      "user",
-      "admin"
+      "user"
     ],
     "denyGroup": [],
     "createdAt": "2022-05-16T06:36:58.754Z",
@@ -80,8 +79,8 @@
     "methodFilters": [
       {
         "filterTitle": "By userId",
-        "operator": "only",
-        "roleAlias": "user",
+        "operator": "and",
+        "roleAlias": "guest",
         "createdAt": "2022-03-15T06:17:44.538Z"
       }
     ]
@@ -128,8 +127,8 @@
     "methodFilters": [
       {
         "filterTitle": "By userId",
-        "operator": "only",
-        "roleAlias": "user",
+        "operator": "and",
+        "roleAlias": "guest",
         "createdAt": "2022-03-15T06:17:44.538Z"
       }
     ]

@@ -2,7 +2,13 @@
  * Method filter operator
  */
 export enum FilterOperator {
+  /**
+   * Only for the specified role
+   */
   only = 'only',
+  /**
+   * For all nested roles
+   */
   and = 'and',
 }
 
@@ -12,4 +18,9 @@ export enum FilterOperator {
 export enum FilterType {
   IN = 'in',
   OUT = 'out',
+}
+
+export enum FilterIgnoreType {
+  only = 'only',
+  stop = 'stop',
 }
