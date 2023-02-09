@@ -42,7 +42,9 @@ describe('services/endpoint-handler', () => {
   const methodRepository = TypeormMock.entityManager.getRepository(Method);
 
   const methodFilters = [
-    TypeormMock.entityManager.getRepository(MethodFilter).create({ methodId: 1, filterId: 2 }),
+    TypeormMock.entityManager
+      .getRepository(MethodFilter)
+      .create({ methodId: 1, filterId: 2, filter: {} }),
   ];
   const modelIn = TypeormMock.entityManager
     .getRepository(Model)
