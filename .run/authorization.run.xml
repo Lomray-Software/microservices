@@ -18,7 +18,7 @@
   <configuration default="false" name="authorization" type="NodeJSConfigurationType" folderName="microservices" node-parameters="--require ts-node/register" path-to-js-file="src/index.ts" working-dir="$PROJECT_DIR$/microservices/authorization">
     <envs>
       <env name="DB_FROM_CONFIG_MS" value="0" />
-      <env name="MS_IMPORT_PERMISSION" value="2" />
+      <env name="MS_IMPORT_PERMISSION" value="0" />
     </envs>
     <method v="2" />
   </configuration>

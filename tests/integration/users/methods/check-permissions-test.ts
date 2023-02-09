@@ -7,10 +7,10 @@ import type { TRequest } from '@interfaces/request';
 describe('Check users microservice permissions', () => {
   const client = Endpoints.create();
   const commands = Commands.create(client);
-  let token: string;
+  let authToken: string;
 
   before(async () => {
-    ({ token } = await commands.createUser({ firstName: 'John' }));
+    ({ token: authToken } = await commands.users.createUser({ firstName: 'John' }));
   });
 
   it('client have not access to these methods', async () => {
@@ -38,7 +38,7 @@ describe('Check users microservice permissions', () => {
     ];
 
     for (const request of requests) {
-      const response = await request({}, { authToken: token });
+      const response = await request({}, { authToken });
 
       expect(response.error, response.error?.message).to.undefined;
     }
