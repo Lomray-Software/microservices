@@ -8,6 +8,7 @@ import { signIn as IdentityProviderSignIn } from '@methods/identity-provider/sig
 import CrudProfile from '@methods/profile/crud';
 import { changeLogin as UserChangeLogin } from '@methods/user/change-login';
 import { changePassword as UserChangePassword } from '@methods/user/change-password';
+import { checkUsername as UserCheckUsername } from '@methods/user/check-username';
 import CrudUser from '@methods/user/crud';
 import UserMe from '@methods/user/me';
 import { signIn as UserSignIn } from '@methods/user/sign-in';
@@ -41,6 +42,7 @@ export default (ms: Microservice): void => {
   ms.addEndpoint('user.sign-out', UserSignOut);
   ms.addEndpoint('user.change-password', UserChangePassword);
   ms.addEndpoint('user.change-login', UserChangeLogin);
+  ms.addEndpoint('user.check-username', UserCheckUsername);
   ms.addEndpoint('user.me', UserMe);
 
   /**

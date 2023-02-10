@@ -42,14 +42,14 @@ class Profile {
   @IsUndefinable()
   birthDay: string | null;
 
-  @Column({ type: 'varchar', length: 255, default: null })
-  @Length(1, 255)
+  @Column({ type: 'varchar', length: 3000, default: null })
+  @Length(1, 3000)
   @IsNullable()
   @IsUndefinable()
   photo: null | string;
 
-  @Column({ type: 'varchar', length: 255, default: null })
-  @Length(1, 255)
+  @Column({ type: 'varchar', length: 500, default: null })
+  @Length(1, 500)
   @IsNullable()
   @IsUndefinable()
   location: null | string;
