@@ -995,5 +995,37 @@
       "user": "users.User"
     },
     "createdAt": "2022-04-14T05:34:31.363Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.CheckUsernameInput",
+    "title": "Check Username Input",
+    "schema": {
+      "username": {
+        "in": {
+          "guest": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-10-06T09:23:16.257Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.CheckUsernameOutput",
+    "title": "Check Username Output",
+    "schema": {
+      "isUnique": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "guest": "allow"
+        }
+      }
+    },
+    "createdAt": "2022-10-06T09:23:16.257Z"
   }
 ]

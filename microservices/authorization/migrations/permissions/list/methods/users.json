@@ -388,5 +388,18 @@
     "modelIn": "RestoreRequestParams",
     "modelOut": "users.RestoreOutputParams.1398bbf6eb0a1781b464f0a9352da056",
     "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "user.check-username",
+    "description": "Check if username is unique",
+    "allowGroup": [
+      "guest"
+    ],
+    "denyGroup": [],
+    "createdAt": "2022-10-06T09:00:51.030Z",
+    "modelIn": "users.CheckUsernameInput",
+    "modelOut": "users.CheckUsernameOutput",
+    "methodFilters": []
   }
 ]
