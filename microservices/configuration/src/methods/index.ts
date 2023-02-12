@@ -1,45 +1,36 @@
 import MetaEndpoint from '@lomray/microservice-helpers/methods/meta';
-import type { Microservice } from '@lomray/microservice-nodejs-lib';
+import type { IEndpointHandler, Microservice } from '@lomray/microservice-nodejs-lib';
 import CONST from '@constants/index';
 import CrudConfig from '@methods/config/crud';
 import MiddlewareCount from '@methods/middleware/count';
 import MiddlewareCreate from '@methods/middleware/create';
 import MiddlewareList from '@methods/middleware/list';
 import MiddlewareRemove from '@methods/middleware/remove';
+import MiddlewareUpdate from '@methods/middleware/update';
 import MiddlewareView from '@methods/middleware/view';
 
 /**
  * Register methods
  */
 export default (ms: Microservice): void => {
-  /**
-   * Middleware entity CRUD methods
-   */
-  ms.addEndpoint('middleware.count', MiddlewareCount, {
-    isDisableMiddlewares: true,
-  });
-  ms.addEndpoint('middleware.list', MiddlewareList, {
-    isDisableMiddlewares: true,
-  });
-  ms.addEndpoint('middleware.view', MiddlewareView, {
-    isDisableMiddlewares: true,
-  });
-  ms.addEndpoint('middleware.create', MiddlewareCreate, {
-    isDisableMiddlewares: true,
-  });
-  ms.addEndpoint('middleware.update', MiddlewareCreate, {
-    isDisableMiddlewares: true,
-  });
-  ms.addEndpoint('middleware.remove', MiddlewareRemove, {
-    isDisableMiddlewares: true,
-  });
+  const crud = {
+    config: CrudConfig,
+    middleware: {
+      count: MiddlewareCount,
+      list: MiddlewareList,
+      view: MiddlewareView,
+      create: MiddlewareCreate,
+      update: MiddlewareUpdate,
+      remove: MiddlewareRemove,
+    },
+  };
 
   /**
-   * Config entity CRUD methods
+   * CRUD methods
    */
-  Object.entries(CrudConfig).forEach(([method, handler]) => {
-    ms.addEndpoint(`config.${method}`, handler, {
-      isDisableMiddlewares: true,
+  Object.entries(crud).forEach(([endpoint, crudMethods]) => {
+    Object.entries<IEndpointHandler>(crudMethods).forEach(([method, handler]) => {
+      ms.addEndpoint(`${endpoint}.${method}`, handler);
     });
   });
 

@@ -1,5 +1,6 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsObject, Length } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
   CreateDateColumn,
@@ -16,16 +17,16 @@ class Config<TParams = Record<string, any>> {
   @Allow()
   id: number;
 
-  /**
-   * This field can be '*', it means - for all microservices
-   */
+  @JSONSchema({
+    description: "This field can be '*', it means - for all microservices",
+  })
   @Column({ type: 'varchar', length: 50 })
   @Length(1, 50)
   microservice: string;
 
-  /**
-   * db, aws, mail, microservice (personal configs) etc.
-   */
+  @JSONSchema({
+    example: 'db, aws, mail, microservice (personal configs) etc.',
+  })
   @Column({ type: 'varchar', length: 30 })
   @Length(1, 30)
   type: string;
