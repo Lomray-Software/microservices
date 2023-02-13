@@ -31,6 +31,11 @@ class Task {
   @Length(1, 100)
   method: string;
 
+  @Column({ type: 'varchar', length: 255, default: '' })
+  @Length(0, 255)
+  @IsUndefinable()
+  description: string;
+
   @JSONSchema({
     description: 'Request params and options',
   })
