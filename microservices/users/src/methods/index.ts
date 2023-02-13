@@ -1,6 +1,7 @@
 import MetaEndpoint from '@lomray/microservice-helpers/methods/meta';
 import type { IEndpointHandler, Microservice } from '@lomray/microservice-nodejs-lib';
 import CONST from '@constants/index';
+import CrudConfirmCode from '@methods/confirm-code/crud';
 import { send as ConfirmCodeSend } from '@methods/confirm-code/send';
 import { attach as IdentityProviderAttach } from '@methods/identity-provider/attach';
 import CrudIdentityProvider from '@methods/identity-provider/crud';
@@ -23,6 +24,7 @@ export default (ms: Microservice): void => {
     user: CrudUser,
     profile: CrudProfile,
     'identity-provider': CrudIdentityProvider,
+    'confirm-code': CrudConfirmCode,
   };
 
   /**
