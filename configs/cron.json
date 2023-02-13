@@ -1,0 +1,52 @@
+[
+  {
+    "rule": "0 1 * * *",
+    "method": "users.confirm-code.remove",
+    "description": "Cleanup old confirmation codes",
+    "payload": {
+      "params": {
+        "query": {
+          "where": {
+            "expirationAt": {
+              "<": "<%= Math.floor(Date.now() / 1000) %>"
+            }
+          }
+        },
+        "payload": {
+          "authorization": {
+            "filter": {
+              "methodOptions": {
+                "isAllowMultiple": true
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "rule": "0 1 * * *",
+    "method": "authentication.token.remove",
+    "description": "Cleanup old auth tokens",
+    "payload": {
+      "params": {
+        "query": {
+          "where": {
+            "expirationAt": {
+              "<": "<%= Math.floor(Date.now() / 1000) %>"
+            }
+          }
+        },
+        "payload": {
+          "authorization": {
+            "filter": {
+              "methodOptions": {
+                "isAllowMultiple": true
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+]

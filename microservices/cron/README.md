@@ -26,7 +26,7 @@ This microservice provides mechanism for cron jobs.
 
 ### <a id="environments"></a>ENVIRONMENTS:
 - [See full list `COMMON ENVIRONMENTS`](https://github.com/Lomray-Software/microservice-helpers#common-environments)
-- `MS_INIT_CONFIGS` - JSON string for configure initial `Taks` values. Default: `[]`
+- `MS_INIT_TASKS` - JSON string for configure initial `Taks` values. Default: `[]`
 
 ### <a id="how-to-run"></a>HOW TO RUN:
 1. Run `Inverted Json` job server.
