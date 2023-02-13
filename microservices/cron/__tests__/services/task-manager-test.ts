@@ -16,7 +16,11 @@ describe('services/task-manager', () => {
     nodeId: 'node1',
     method: 'method',
     rule: '1 * * * *',
-    payload: {},
+    payload: {
+      params: {
+        world: "<%= 'hello' %>",
+      },
+    },
   });
   const tasks = [task];
 
@@ -141,9 +145,13 @@ describe('services/task-manager', () => {
     await callback();
 
     const [, { response, status, taskId }] = TypeormMock.entityManager.save.lastCall.args;
+    const [, params] = sendStub.firstCall.args;
 
     expect(TypeormMock.entityManager.save).to.calledTwice;
     expect(sendStub).to.calledOnce;
+    expect(params).to.deep.equal({
+      world: 'hello',
+    });
     expect(response).to.deep.equal(responseMock);
     expect(status).to.equal(TaskStatus.success);
     expect(taskId).to.equal(task.id);

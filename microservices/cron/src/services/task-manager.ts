@@ -1,6 +1,7 @@
 import { performance } from 'perf_hooks';
 import { Log } from '@lomray/microservice-helpers';
 import type { AbstractMicroservice } from '@lomray/microservice-nodejs-lib';
+import _ from 'lodash';
 import schedule from 'node-schedule';
 import { getCustomRepository, getRepository, Repository } from 'typeorm';
 import CONST from '@constants/index';
@@ -148,11 +149,12 @@ class TaskManager {
           taskId: id,
           status: TaskStatus.running,
         });
+        const templatedParams = JSON.parse(_.template(JSON.stringify(params || {}))() as string);
 
         await this.historyRepository.save(historyRecord);
 
         try {
-          const response = await this.ms.sendRequest(method, params, options);
+          const response = await this.ms.sendRequest(method, templatedParams, options);
 
           if (response.getError()) {
             throw response.getError();
