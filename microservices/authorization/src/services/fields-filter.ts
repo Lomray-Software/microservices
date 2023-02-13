@@ -129,6 +129,15 @@ class FieldsFilter {
         const nestedSchema = await this.getSchemaByAlias(policy);
 
         newValue = await this.filterBySchema(nestedSchema, type, value);
+      } else if ('case' in policy) {
+        const caseValue = this.templateValue(policy.case.template, value);
+        const dynamicSchema = { [field]: policy.object[caseValue] } as IModelSchema;
+
+        newValue = (await this.filterBySchema(dynamicSchema, type, { [field]: value }))?.[field];
+
+        if (_.isEmpty(newValue)) {
+          newValue = undefined;
+        }
       } else if ('object' in policy) {
         // nested schema
         newValue = await this.filterBySchema(policy.object, type, value);
@@ -166,14 +175,7 @@ class FieldsFilter {
       }
 
       if (permission.template) {
-        const newValue = _.template(permission.template)({
-          value,
-          params: this.templateOptions,
-          current: {
-            userId: this.userId,
-            roles: this.userRoles,
-          },
-        });
+        const newValue = this.templateValue(permission.template, value);
 
         if (newValue === 'undefined') {
           return undefined;
@@ -185,6 +187,21 @@ class FieldsFilter {
 
       return undefined;
     }
+  }
+
+  /**
+   * Template value
+   * @private
+   */
+  private templateValue(template: string, value?: any): string {
+    return _.template(template)({
+      value,
+      params: this.templateOptions,
+      current: {
+        userId: this.userId,
+        roles: this.userRoles,
+      },
+    });
   }
 
   /**

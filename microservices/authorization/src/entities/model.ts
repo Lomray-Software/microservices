@@ -25,6 +25,11 @@ export interface IModelSchema {
     | string // related model alias
     | { object: IModelSchema; isCustom?: boolean }
     | {
+        case: IFieldCondition;
+        object: { [key: string]: string | IModelSchema };
+        isCustom?: boolean;
+      }
+    | {
         in?: IRolePermissions;
         out?: IRolePermissions;
         isCustom?: boolean;
@@ -58,6 +63,12 @@ class Model {
       { '*': 'allow' },
       { '*': 'deny' },
       { field1: 'aliasAnotherModel', field2: { object: { nestedField: 'aliasModel' } } }, // aliases
+      {
+        field1: {
+          case: 'case2', // dynamic choose scheme
+          cases: { case1: 'aliasModel', case2: 'modelAlias' },
+        },
+      }, // dynamic schema => { field1: 'modelAlias' }
       { simpleField: { in: { guests: 'deny', users: 'allow' }, out: { guest: 'allow' } } }, // standard fields
       {
         // standard field

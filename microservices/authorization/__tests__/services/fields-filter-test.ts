@@ -259,4 +259,121 @@ describe('services/fields-filter', () => {
       userId: input.userId,
     });
   });
+
+  it('should correctly filter field: dynamic schema', async () => {
+    const input1 = {
+      value: {
+        test1: {
+          user: 'name',
+          email: 'email',
+        },
+      },
+    };
+    const input2 = {
+      value: {
+        test2: {
+          response: {
+            test: true,
+            private: 'private',
+          },
+        },
+      },
+    };
+    const input1Model = modelRepository.create({
+      alias: 'aliasToInput1',
+      schema: {
+        test1: {
+          object: {
+            user: {
+              in: { users: FieldPolicy.allow },
+              out: { users: FieldPolicy.allow },
+            },
+            email: {
+              in: { admins: FieldPolicy.allow },
+              out: { admins: FieldPolicy.allow },
+            },
+          },
+        },
+      },
+    });
+    const input2Model = modelRepository.create({
+      alias: 'aliasToInput2',
+      schema: {
+        test2: {
+          object: {
+            response: {
+              object: {
+                test: {
+                  in: { users: FieldPolicy.deny },
+                  out: { users: FieldPolicy.allow },
+                },
+                private: {
+                  in: { admins: FieldPolicy.deny },
+                  out: { admins: FieldPolicy.allow },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+    const getModel = (modelAlias = 'input1') =>
+      modelRepository.create({
+        alias: 'alias',
+        schema: {
+          value: {
+            case: {
+              template: `<%= "${modelAlias}" %>`,
+            },
+            object: {
+              input1: 'aliasToInput1',
+              input2: 'aliasToInput2',
+            },
+          },
+        },
+      });
+
+    // resolve allow schema on first call (on second call return cached schema)
+    TypeormMock.entityManager.findOne.callsFake((...args) => {
+      const [, { alias }] = args;
+
+      if (alias === 'aliasToInput1') {
+        return input1Model;
+      } else if (alias === 'aliasToInput2') {
+        return input2Model;
+      }
+
+      return null;
+    });
+
+    const res1 = await service.filter(FilterType.OUT, getModel(), input1);
+    const res2 = await service.filter(FilterType.OUT, getModel('input2'), input2);
+    const res3 = await service.filter(FilterType.IN, getModel('input2'), input2);
+    const res4 = await service.filter(FilterType.IN, getModel(), input2); // mismatch input data and caseValue
+
+    expect(res1).to.deep.equal({
+      value: {
+        test1: {
+          user: 'name',
+        },
+      },
+    });
+    expect(res2).to.deep.equal({
+      value: {
+        test2: {
+          response: {
+            test: true,
+          },
+        },
+      },
+    });
+    expect(res3).to.deep.equal({
+      value: {
+        test2: {
+          response: {},
+        },
+      },
+    });
+    expect(res4).to.deep.equal({});
+  });
 });
