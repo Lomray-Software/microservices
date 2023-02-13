@@ -51,5 +51,21 @@
       "admin": "stop"
     },
     "createdAt": "2022-03-15T06:15:14.739Z"
+  },
+  {
+    "title": "If 5 minutes have not passed",
+    "condition": {
+      "query": {
+        "where": {
+          "createdAt": {
+            ">": "{{ new Date(Date.now() - 1000 * 60 * 5).toISOString() }}"
+          }
+        }
+      }
+    },
+    "ignore": {
+      "admin": "stop"
+    },
+    "createdAt": "2022-03-15T06:15:40.656Z"
   }
 ]

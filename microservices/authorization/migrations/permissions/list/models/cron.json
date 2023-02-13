@@ -36,6 +36,14 @@
           "admin": "allow"
         }
       },
+      "description": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "payload": {
         "in": {
           "admin": "allow"
