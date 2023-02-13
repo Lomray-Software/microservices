@@ -39,7 +39,7 @@
 		"start:prod": "node --require ./lib/tracer.js ./lib/index.js"
 	},
 	"dependencies": {
-		"@lomray/microservice-helpers": "^2.2.0",
+		"@lomray/microservice-helpers": "^2.2.1",
 		"class-validator": "^0.14.0",
 		"class-validator-jsonschema": "^5.0.0",
 		"lodash": "^4.17.21",

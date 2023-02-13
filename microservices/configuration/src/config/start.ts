@@ -14,7 +14,7 @@ const startConfig = GetMsStartConfig(CONST, {
   type: 'microservice',
   registerMethods,
   shouldUseDbRemoteOptions: false,
-  remoteConfig: { isEnable: false },
+  remoteConfig: { isDisable: false },
   remoteMiddleware: {
     isEnable: CONST.IS_ENABLE_REMOTE_MIDDLEWARE,
     type: 'server',
