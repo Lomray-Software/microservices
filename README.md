@@ -15,6 +15,7 @@ Prod: [![Build prod](https://github.com/Lomray-Software/microservices/actions/wo
  - [Notification](microservices/notification)
  - [Users](microservices/users)
  - [Files](microservices/files)
+ - [Cron](microservices/cron)
  
 ## Use [CLI](https://github.com/Lomray-Software/microservices-cli) to start your own art.
 
