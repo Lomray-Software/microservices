@@ -1,0 +1,195 @@
+[
+  {
+    "microservice": "cron",
+    "method": "config-reset",
+    "description": "Reset RemoteConfig cache",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelOut": "RemoteConfigOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "cron",
+    "method": "task.count",
+    "description": "Returns count of Task by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "cron",
+    "method": "task.list",
+    "description": "Returns list of Task by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "cron.ListOutputParams.bbbcb6cef990d65df49a90e21dec6e66",
+    "methodFilters": []
+  },
+  {
+    "microservice": "cron",
+    "method": "task.view",
+    "description": "Returns Task by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "cron.ViewOutputParams.6cc49e5e15754ec8fd6013ccc05489d9",
+    "methodFilters": []
+  },
+  {
+    "microservice": "cron",
+    "method": "task.create",
+    "description": "Create a new Task",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelIn": "cron.CreateRequestParams.540b18ddac00a8a1654f4d3704c482bc",
+    "modelOut": "cron.CreateOutputParams.6cc49e5e15754ec8fd6013ccc05489d9",
+    "methodFilters": []
+  },
+  {
+    "microservice": "cron",
+    "method": "task.update",
+    "description": "Update Task by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelIn": "cron.UpdateRequestParams.540b18ddac00a8a1654f4d3704c482bc",
+    "modelOut": "cron.UpdateOutputParams.6cc49e5e15754ec8fd6013ccc05489d9",
+    "methodFilters": []
+  },
+  {
+    "microservice": "cron",
+    "method": "task.remove",
+    "description": "Remove Task by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "cron.RemoveOutputParams.76da26644ee5b1db84b77f612d3aed27",
+    "methodFilters": []
+  },
+  {
+    "microservice": "cron",
+    "method": "history.count",
+    "description": "Returns count of History by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "cron",
+    "method": "history.list",
+    "description": "Returns list of History by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "cron.ListOutputParams.a4fdb453bf66c4f66fa5abb4e7e1cdef",
+    "methodFilters": []
+  },
+  {
+    "microservice": "cron",
+    "method": "history.view",
+    "description": "Returns History by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "cron.ViewOutputParams.c41565f0fa3066508e8a0862688f2fd3",
+    "methodFilters": []
+  },
+  {
+    "microservice": "cron",
+    "method": "history.create",
+    "description": "Create a new History",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelIn": "cron.CreateRequestParams.6c5e0b92a872714cf86ccbb9a4a87a65",
+    "modelOut": "cron.CreateOutputParams.c41565f0fa3066508e8a0862688f2fd3",
+    "methodFilters": []
+  },
+  {
+    "microservice": "cron",
+    "method": "history.update",
+    "description": "Update History by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelIn": "cron.UpdateRequestParams.6c5e0b92a872714cf86ccbb9a4a87a65",
+    "modelOut": "cron.UpdateOutputParams.c41565f0fa3066508e8a0862688f2fd3",
+    "methodFilters": []
+  },
+  {
+    "microservice": "cron",
+    "method": "history.remove",
+    "description": "Remove History by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "cron.RemoveOutputParams.e51dd87bc152fca51cce21af451acb7b",
+    "methodFilters": []
+  },
+  {
+    "microservice": "cron",
+    "method": "meta",
+    "description": "Get microservice metadata",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelOut": "MicroserviceMetaOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "cron",
+    "method": "middleware-register",
+    "description": "Register remote middleware on this microservice",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T16:09:34.174Z",
+    "modelIn": "ClientRegisterMiddlewareInput",
+    "modelOut": "ClientRegisterMiddlewareOutput",
+    "methodFilters": []
+  }
+]

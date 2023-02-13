@@ -460,6 +460,14 @@
           "admin": "allow"
         }
       },
+      "ignore": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "createdAt": {
         "in": {
           "admin": "allow"

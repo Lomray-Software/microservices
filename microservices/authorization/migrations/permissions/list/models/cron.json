@@ -1,0 +1,290 @@
+[
+  {
+    "microservice": "cron",
+    "alias": "cron.Task",
+    "title": "Task",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "nodeId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "rule": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "method": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "payload": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.ListOutputParams.bbbcb6cef990d65df49a90e21dec6e66",
+    "title": "List Output Params",
+    "schema": {
+      "list": "cron.Task",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.ViewOutputParams.6cc49e5e15754ec8fd6013ccc05489d9",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "cron.Task"
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.CreateRequestParams.540b18ddac00a8a1654f4d3704c482bc",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "cron.Task"
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.CreateOutputParams.6cc49e5e15754ec8fd6013ccc05489d9",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "cron.Task"
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.UpdateRequestParams.540b18ddac00a8a1654f4d3704c482bc",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "cron.Task",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.UpdateOutputParams.6cc49e5e15754ec8fd6013ccc05489d9",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "cron.Task"
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.RemoveOutputParams.76da26644ee5b1db84b77f612d3aed27",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "cron.Task",
+      "entities": "cron.Task"
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.History",
+    "title": "History",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "taskId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "status": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "response": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "executionTime": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.ListOutputParams.a4fdb453bf66c4f66fa5abb4e7e1cdef",
+    "title": "List Output Params",
+    "schema": {
+      "list": "cron.History",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.ViewOutputParams.c41565f0fa3066508e8a0862688f2fd3",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "cron.History"
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.CreateRequestParams.6c5e0b92a872714cf86ccbb9a4a87a65",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "cron.History"
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.CreateOutputParams.c41565f0fa3066508e8a0862688f2fd3",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "cron.History"
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.UpdateRequestParams.6c5e0b92a872714cf86ccbb9a4a87a65",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "cron.History",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.UpdateOutputParams.c41565f0fa3066508e8a0862688f2fd3",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "cron.History"
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  },
+  {
+    "microservice": "cron",
+    "alias": "cron.RemoveOutputParams.e51dd87bc152fca51cce21af451acb7b",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "cron.History",
+      "entities": "cron.History"
+    },
+    "createdAt": "2023-02-13T14:58:15.444Z"
+  }
+]

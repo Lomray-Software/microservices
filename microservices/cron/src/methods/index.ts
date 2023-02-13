@@ -9,7 +9,7 @@ import CrudTask from '@methods/task/crud';
  */
 export default (ms: Microservice): void => {
   const crud = {
-    config: CrudTask,
+    task: CrudTask,
     history: CrudHistory,
   };
 

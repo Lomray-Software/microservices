@@ -8,7 +8,9 @@
         }
       }
     },
-    "ignore": { "admin": "stop" },
+    "ignore": {
+      "admin": "stop"
+    },
     "createdAt": "2022-03-15T06:15:14.739Z"
   },
   {
@@ -31,7 +33,23 @@
         }
       }
     },
-    "ignore": { "admin": "stop" },
+    "ignore": {
+      "admin": "stop"
+    },
     "createdAt": "2022-03-15T06:15:40.656Z"
+  },
+  {
+    "title": "Disable select all relations",
+    "condition": {
+      "options": {
+        "relationOptions": [
+          "*"
+        ]
+      }
+    },
+    "ignore": {
+      "admin": "stop"
+    },
+    "createdAt": "2022-03-15T06:15:14.739Z"
   }
 ]
