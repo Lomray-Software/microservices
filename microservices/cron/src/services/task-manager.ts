@@ -139,6 +139,12 @@ class TaskManager {
    * Run cron tasks
    */
   public runTasks(tasks: Task[]): void {
+    if (!this.nodeId) {
+      Log.warn('Trying schedule task before assign node id');
+
+      return;
+    }
+
     for (const { id, rule, method, payload } of tasks) {
       schedule.scheduleJob(this.getTaskName(id), rule, async () => {
         Log.info(`Start task - ${id} - ${new Date().toISOString()}: ${method}`);

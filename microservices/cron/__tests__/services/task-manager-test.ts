@@ -42,6 +42,14 @@ describe('services/task-manager', () => {
     expect(TaskManager.init(ms)).to.equal(TaskManager.get());
   });
 
+  it('should correctly skip task run: node id not assigned', () => {
+    const scheduleStub = sandbox.stub(schedule, 'scheduleJob');
+
+    TaskManager.get().runTasks(tasks);
+
+    expect(scheduleStub).to.not.called;
+  });
+
   it('should correctly assign node id', async () => {
     const getWorkersStub = sandbox.stub(ms, 'getWorkers').resolves(['1', '2']);
 
