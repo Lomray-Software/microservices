@@ -252,6 +252,11 @@ class MethodsImporter {
           continue;
         }
 
+        // skip another microservice referencing
+        if (relatedSchemaName.includes('.')) {
+          continue;
+        }
+
         await this.updateOrCreateModel(repository, {
           microservice,
           schemaEntities,
@@ -360,6 +365,11 @@ class MethodsImporter {
   private getRefSchemaAlias(name: string, microservice: string): string[] {
     const refParts = name.split('/');
     const schemaAlias = refParts[refParts.length - 1];
+
+    // direct alias to another microservice
+    if (schemaAlias.includes('.')) {
+      return [schemaAlias, schemaAlias];
+    }
 
     return [schemaAlias, this.getSchemaAlias(schemaAlias, microservice)];
   }
