@@ -1,8 +1,8 @@
 import { Api } from '@lomray/microservice-helpers';
 import type { IEventHandler } from '@lomray/microservice-nodejs-lib';
+import FilesEvent from '@lomray/microservices-client-api/constants/events/files';
 import type IFileEntity from '@lomray/microservices-client-api/interfaces/files/entities/file-entity';
 import { getRepository } from 'typeorm';
-import Event from '@constants/event';
 import CONST from '@constants/index';
 import Profile from '@entities/profile';
 
@@ -27,8 +27,8 @@ const fileEntityChanged: IEventHandler<{ entity: IFileEntity }> = async ({
   const repository = getRepository(Profile);
 
   switch (eventName) {
-    case Event.FileEntityCreate:
-    case Event.FileEntityUpdate:
+    case FilesEvent.FileEntityCreate:
+    case FilesEvent.FileEntityUpdate:
       const { result } = await Api.get().files.file.view({
         query: { where: { id: fileId } },
       });
@@ -41,7 +41,7 @@ const fileEntityChanged: IEventHandler<{ entity: IFileEntity }> = async ({
       await repository.update({ userId }, { photo });
       break;
 
-    case Event.FileEntityRemove:
+    case FilesEvent.FileEntityRemove:
       await repository.update({ userId }, { photo: null });
       break;
 

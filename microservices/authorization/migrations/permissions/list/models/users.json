@@ -1027,5 +1027,99 @@
       }
     },
     "createdAt": "2022-10-06T09:23:16.257Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.ConfirmCode",
+    "title": "Confirm Code",
+    "schema": {
+      "login": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "code": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "expirationAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-13T19:37:46.275Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.ListOutputParams.f25cc90f863270adb45a4c9b5d360c55",
+    "title": "List Output Params",
+    "schema": {
+      "list": "users.ConfirmCode",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-13T19:37:46.275Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.ViewOutputParams.e4f9764497f6cb11820828decf238c3b",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "users.ConfirmCode"
+    },
+    "createdAt": "2023-02-13T19:37:46.275Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.CreateRequestParams.8317992649ef04def55012348f4f7f18",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "users.ConfirmCode"
+    },
+    "createdAt": "2023-02-13T19:37:46.275Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.CreateOutputParams.e4f9764497f6cb11820828decf238c3b",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "users.ConfirmCode"
+    },
+    "createdAt": "2023-02-13T19:37:46.275Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.RemoveOutputParams.a28f429696a14c44bcc1d3f30506e901",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "users.ConfirmCode",
+      "entities": "users.ConfirmCode"
+    },
+    "createdAt": "2023-02-13T19:37:46.275Z"
   }
 ]

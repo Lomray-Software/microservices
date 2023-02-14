@@ -401,5 +401,70 @@
     "modelIn": "users.CheckUsernameInput",
     "modelOut": "users.CheckUsernameOutput",
     "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "confirm-code.count",
+    "description": "Returns count of ConfirmCode by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T19:37:46.275Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "confirm-code.list",
+    "description": "Returns list of ConfirmCode by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T19:37:46.275Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "users.ListOutputParams.f25cc90f863270adb45a4c9b5d360c55",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "confirm-code.view",
+    "description": "Returns ConfirmCode by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T19:37:46.275Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "users.ViewOutputParams.e4f9764497f6cb11820828decf238c3b",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "confirm-code.create",
+    "description": "Create a new ConfirmCode",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T19:37:46.275Z",
+    "modelIn": "users.CreateRequestParams.8317992649ef04def55012348f4f7f18",
+    "modelOut": "users.CreateOutputParams.e4f9764497f6cb11820828decf238c3b",
+    "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "confirm-code.remove",
+    "description": "Remove ConfirmCode by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-13T19:37:46.275Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "users.RemoveOutputParams.a28f429696a14c44bcc1d3f30506e901",
+    "methodFilters": []
   }
 ]

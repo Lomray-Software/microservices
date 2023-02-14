@@ -1,5 +1,5 @@
 import type { Microservice } from '@lomray/microservice-nodejs-lib';
-import Event from '@constants/event';
+import FilesEvent from '@lomray/microservices-client-api/constants/events/files';
 import FileEntityChanged from '@events/user/file-entity-changed';
 import FileChanged from '@events/user/file-removed';
 
@@ -10,12 +10,12 @@ export default (ms: Microservice): void => {
   /**
    * Event handler for file
    */
-  ms.addEventHandler(Event.FileRemove, FileChanged);
+  ms.addEventHandler(FilesEvent.FileRemove, FileChanged);
 
   /**
    * Event handler for file entity
    */
-  ms.addEventHandler(Event.FileEntityCreate, FileEntityChanged);
-  ms.addEventHandler(Event.FileEntityUpdate, FileEntityChanged);
-  ms.addEventHandler(Event.FileEntityRemove, FileEntityChanged);
+  ms.addEventHandler(FilesEvent.FileEntityCreate, FileEntityChanged);
+  ms.addEventHandler(FilesEvent.FileEntityUpdate, FileEntityChanged);
+  ms.addEventHandler(FilesEvent.FileEntityRemove, FileEntityChanged);
 };

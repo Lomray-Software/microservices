@@ -1,7 +1,7 @@
 import { Microservice } from '@lomray/microservice-nodejs-lib';
+import Event from '@lomray/microservices-client-api/constants/events/files';
 import type { InsertEvent, RemoveEvent, UpdateEvent } from 'typeorm';
 import { EntityManager, EntitySubscriberInterface, EventSubscriber } from 'typeorm';
-import Event from '@constants/event';
 import FileModel from '@entities/file';
 import FileEntity from '@entities/file-entity';
 

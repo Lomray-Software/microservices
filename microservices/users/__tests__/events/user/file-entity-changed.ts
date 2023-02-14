@@ -1,12 +1,12 @@
 import { Api } from '@lomray/microservice-helpers';
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { endpointOptions } from '@lomray/microservice-helpers/test-helpers';
+import FilesEvent from '@lomray/microservices-client-api/constants/events/files';
 import { IFile } from '@lomray/microservices-client-api/interfaces/files/entities/file';
 import type IFileEntity from '@lomray/microservices-client-api/interfaces/files/entities/file-entity';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
-import Event from '@constants/event';
 import OriginalEventChangeFileEntity from '@events/user/file-entity-changed';
 
 const { default: ChangeFileEntity } = rewiremock.proxy<{
@@ -65,7 +65,7 @@ describe('events/user/file-entity-changed', () => {
     const isChanged = await ChangeFileEntity(
       {
         entity: fileEntity,
-        payload: { eventName: Event.FileEntityRemove },
+        payload: { eventName: FilesEvent.FileEntityRemove },
       },
       endpointOptions,
     );
@@ -80,7 +80,7 @@ describe('events/user/file-entity-changed', () => {
   it('should update user photo if entity file has changed', async () => {
     sandbox.stub(Api.get().files.file, 'view').resolves({ result: { entity: file } });
 
-    for (const eventName of [Event.FileEntityCreate, Event.FileEntityUpdate]) {
+    for (const eventName of [FilesEvent.FileEntityCreate, FilesEvent.FileEntityUpdate]) {
       const isChanged = await ChangeFileEntity(
         {
           entity: fileEntity,
@@ -103,7 +103,7 @@ describe('events/user/file-entity-changed', () => {
     const isChanged = await ChangeFileEntity(
       {
         entity: fileEntity,
-        payload: { eventName: Event.FileEntityCreate },
+        payload: { eventName: FilesEvent.FileEntityCreate },
       },
       endpointOptions,
     );
