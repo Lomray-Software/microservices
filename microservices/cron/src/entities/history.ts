@@ -33,7 +33,7 @@ class History {
   @IsUndefinable()
   response: Record<string, any>;
 
-  @Column({ type: 'integer', default: null })
+  @Column({ type: 'decimal', precision: 6, scale: 2, default: 0 })
   @IsNumber()
   @IsUndefinable()
   executionTime: number;
