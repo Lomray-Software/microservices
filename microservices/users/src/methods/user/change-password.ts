@@ -52,7 +52,7 @@ const changePassword = Endpoint.custom(
     output: ChangePasswordOutput,
     description: 'Change user password',
   }),
-  async ({ userId, newPassword, oldPassword, confirmBy, confirmCode, allowByAdmin = false }) => {
+  async ({ userId, newPassword, oldPassword, confirmBy, confirmCode, allowByAdmin }) => {
     const service = ChangePassword.init({
       userId,
       newPassword,

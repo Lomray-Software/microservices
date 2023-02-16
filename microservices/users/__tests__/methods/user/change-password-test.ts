@@ -61,9 +61,9 @@ describe('methods/user/change-password', () => {
     expect(changeStub).to.calledOnce;
 
     // because 'confirmBy' not set
-    const isFalse = await serviceParams?.['isConfirmed']();
+    const isUndefined = await serviceParams?.['isConfirmed']();
 
     // confirm service
-    expect(isFalse).to.false;
+    expect(isUndefined).to.undefined;
   });
 });

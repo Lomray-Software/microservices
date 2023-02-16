@@ -1,9 +1,10 @@
+import { EntityColumns } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import User from '@entities/user';
 import UserRepository from '@repositories/user';
 
 type ChangePasswordThroughConfirmation = {
-  isConfirmed: (user: User) => Promise<boolean> | boolean;
+  isConfirmed: (user: User) => Promise<boolean> | boolean | undefined;
 };
 
 export type ChangePasswordParams = {
@@ -63,7 +64,10 @@ class ChangePassword {
    * Change password
    */
   public async change(): Promise<User> {
-    const user = await this.repository.findOne({ id: this.userId });
+    const user = await this.repository.findOne(
+      { id: this.userId },
+      { select: EntityColumns(this.repository) },
+    );
 
     if (!user) {
       throw new BaseException({
@@ -86,7 +90,7 @@ class ChangePassword {
       });
     }
 
-    if (this.isConfirmed && !(await this.isConfirmed(user))) {
+    if (this.isConfirmed && (await this.isConfirmed(user)) === false) {
       throw new BaseException({
         status: 422,
         message: 'Invalid confirmation code.',
