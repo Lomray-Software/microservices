@@ -45,6 +45,7 @@ class Task {
   payload: {
     params?: Record<string, any>;
     options?: Partial<IInnerRequestParams>;
+    responseTemplate?: string; // lodash template
   };
 
   @IsTypeormDate()

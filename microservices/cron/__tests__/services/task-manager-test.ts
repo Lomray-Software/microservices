@@ -137,7 +137,7 @@ describe('services/task-manager', () => {
   });
 
   it('should correctly execute task: success response', async () => {
-    const responseMock = { task: 'result' };
+    const responseMock = { task: 'result', deleted: [1, 2] };
 
     const scheduleStub = sandbox.stub(schedule, 'scheduleJob');
     const sendStub = sandbox.stub(ms, 'sendRequest').resolves(
@@ -145,24 +145,44 @@ describe('services/task-manager', () => {
         result: responseMock,
       }),
     );
+    const cases = [
+      task,
+      // add response template for test
+      {
+        ...task,
+        payload: { ...task.payload, responseTemplate: '<%= `deleted: ${deleted.length}` %>' },
+      },
+    ];
 
-    TaskManager.get().runTasks(tasks);
+    for (const taskCase of cases) {
+      scheduleStub.resetHistory();
+      TypeormMock.entityManager.save.resetHistory();
+      sendStub.resetHistory();
 
-    const callback = scheduleStub.firstCall.lastArg;
+      TaskManager.get().runTasks([taskCase]);
 
-    await callback();
+      const callback = scheduleStub.firstCall.lastArg;
 
-    const [, { response, status, taskId }] = TypeormMock.entityManager.save.lastCall.args;
-    const [, params] = sendStub.firstCall.args;
+      await callback();
 
-    expect(TypeormMock.entityManager.save).to.calledTwice;
-    expect(sendStub).to.calledOnce;
-    expect(params).to.deep.equal({
-      world: 'hello',
-    });
-    expect(response).to.deep.equal(responseMock);
-    expect(status).to.equal(TaskStatus.success);
-    expect(taskId).to.equal(task.id);
+      const [, { response, status, taskId }] = TypeormMock.entityManager.save.lastCall.args;
+      const [, params] = sendStub.firstCall.args;
+
+      expect(TypeormMock.entityManager.save).to.calledTwice;
+      expect(sendStub).to.calledOnce;
+      expect(params).to.deep.equal({
+        world: 'hello',
+      });
+      expect(response).to.deep.equal({
+        ...(taskCase.payload.responseTemplate !== undefined
+          ? {
+              result: 'deleted: 2',
+            }
+          : responseMock),
+      });
+      expect(status).to.equal(TaskStatus.success);
+      expect(taskId).to.equal(task.id);
+    }
   });
 
   it('should correctly execute task: error response', async () => {

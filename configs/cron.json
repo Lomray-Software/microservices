@@ -21,7 +21,8 @@
             }
           }
         }
-      }
+      },
+      "responseTemplate": "<%= `deleted: ${deleted.length}` %>"
     }
   },
   {
@@ -46,7 +47,8 @@
             }
           }
         }
-      }
+      },
+      "responseTemplate": "<%= `deleted: ${deleted.length}` %>"
     }
   }
 ]

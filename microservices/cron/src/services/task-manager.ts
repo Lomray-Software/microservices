@@ -149,7 +149,7 @@ class TaskManager {
       schedule.scheduleJob(this.getTaskName(id), rule, async () => {
         Log.info(`Start task - ${id} - ${new Date().toISOString()}: ${method}`);
 
-        const { params, options } = payload;
+        const { params, options, responseTemplate } = payload;
         const perfNow = performance.now();
         const historyRecord = this.historyRepository.create({
           taskId: id,
@@ -166,8 +166,12 @@ class TaskManager {
             throw response.getError();
           }
 
+          const result = response.getResult() ?? {};
+
           historyRecord.status = TaskStatus.success;
-          historyRecord.response = response.getResult() ?? {};
+          historyRecord.response = responseTemplate
+            ? { result: _.template(responseTemplate)(result) }
+            : result;
         } catch (e) {
           Log.error(`Error task - ${id}: ${method} --> ${e as string}`);
 
