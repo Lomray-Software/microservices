@@ -324,6 +324,12 @@ class MethodsImporter {
           });
 
           res[fieldName] = { object: nestedSchema };
+
+          // keep case template from previous schema
+          if (baseSchema?.[fieldName]?.['case']) {
+            res[fieldName]['case'] = baseSchema[fieldName]['case'];
+          }
+
           childrenSchemas.forEach((childrenSchema) => related.add(childrenSchema));
         } else {
           // new schema field - set default permission, or copy prev permissions

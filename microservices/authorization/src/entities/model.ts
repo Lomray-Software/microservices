@@ -66,7 +66,7 @@ class Model {
       {
         field1: {
           case: 'case2', // dynamic choose scheme
-          cases: { case1: 'aliasModel', case2: 'modelAlias' },
+          object: { case1: 'aliasModel', case2: 'modelAlias' },
         },
       }, // dynamic schema => { field1: 'modelAlias' }
       { simpleField: { in: { guests: 'deny', users: 'allow' }, out: { guest: 'allow' } } }, // standard fields

@@ -129,6 +129,12 @@ describe('services/methods-importer', () => {
         properties: {
           newField: { type: 'string' },
           keepIt: { type: 'boolean' },
+          keepObj: {
+            type: 'object',
+            properties: {
+              hello: { type: 'string' },
+            },
+          },
         },
       },
     };
@@ -154,6 +160,20 @@ describe('services/methods-importer', () => {
       schema: {
         sampleField: { in: {}, out: {} },
         keepIt: { in: { user: FieldPolicy.deny }, out: {} },
+        keepObj: {
+          case: {
+            template: 'my-template',
+          },
+          object: {
+            hello: { in: { user: FieldPolicy.deny }, out: {} },
+          },
+        },
+        keepCustom: {
+          isCustom: true,
+          object: {
+            custom: { in: { user: FieldPolicy.deny }, out: {} },
+          },
+        },
       },
     });
 
@@ -210,6 +230,32 @@ describe('services/methods-importer', () => {
       schema: {
         keepIt: { in: { user: 'deny' }, out: {} },
         newField: { in: { admin: 'allow' }, out: { admin: 'allow' } },
+        keepObj: {
+          case: {
+            template: 'my-template',
+          },
+          object: {
+            hello: {
+              in: {
+                admin: 'allow',
+              },
+              out: {
+                admin: 'allow',
+              },
+            },
+          },
+        },
+        keepCustom: {
+          isCustom: true,
+          object: {
+            custom: {
+              in: {
+                user: 'deny',
+              },
+              out: {},
+            },
+          },
+        },
       },
     });
     expect(outputModel).to.deep.equal({
