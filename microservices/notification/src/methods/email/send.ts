@@ -9,7 +9,7 @@ class EmailSendInput {
   @IsUndefinable()
   from?: string;
 
-  @MaxLength(30, {
+  @MaxLength(100, {
     each: true,
   })
   to: string[];
