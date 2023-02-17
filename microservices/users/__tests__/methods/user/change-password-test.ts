@@ -22,10 +22,32 @@ describe('methods/user/change-password', () => {
   });
 
   it('should throw error: validation failed', async () => {
-    // @ts-ignore
-    const res = ChangePassword({}, endpointOptions);
+    const params = [
+      {},
+      {
+        userId: 'userId',
+        newPassword: '1',
+        confirmCode: 'unknown',
+      },
+      {
+        userId: 'userId',
+        newPassword: '1',
+        oldPassword: '1',
+        confirmCode: 'unknown',
+      },
+      {
+        userId: 'userId',
+        newPassword: '1',
+        confirmBy: 'email',
+      },
+    ];
 
-    expect(await waitResult(res)).to.throw('Invalid request params');
+    for (const caseParams of params) {
+      // @ts-ignore
+      const res = ChangePassword(caseParams, endpointOptions);
+
+      expect(await waitResult(res)).to.throw('Invalid request params');
+    }
   });
 
   it('should correctly change password', async () => {

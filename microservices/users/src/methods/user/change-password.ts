@@ -18,18 +18,15 @@ class ChangePasswordInput {
 
   @IsString()
   @IsNotEmpty()
-  @IsUndefinable()
   @ValidateIf(({ confirmCode, oldPassword }) => !confirmCode || oldPassword)
   oldPassword?: string;
 
   @IsEnum(ConfirmBy)
-  @IsUndefinable()
   @ValidateIf(({ confirmCode }) => confirmCode)
   confirmBy?: ConfirmBy;
 
   @IsType(['string', 'number'])
   @IsNotEmpty()
-  @IsUndefinable()
   @ValidateIf(({ confirmCode, oldPassword }) => !oldPassword || confirmCode)
   confirmCode?: string | number;
 
