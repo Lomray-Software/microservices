@@ -40,6 +40,11 @@ describe('methods/user/change-password', () => {
         newPassword: '1',
         confirmBy: 'email',
       },
+      {
+        login: 'login',
+        newPassword: '1',
+        confirmBy: 'email',
+      },
     ];
 
     for (const caseParams of params) {
@@ -76,14 +81,12 @@ describe('methods/user/change-password', () => {
     // change password service
     expect(res).to.deep.equal({ isChanged: true });
     expect(methodParams.userId).to.deep.equal(serviceParams?.userId);
-    expect(methodParams.newPassword).to.deep.equal(serviceParams?.newPassword);
-    expect(methodParams.oldPassword).to.deep.equal(serviceParams?.['oldPassword']);
     expect(serviceParams?.repository).to.instanceof(Repository);
     expect(typeof serviceParams?.['isConfirmed']).to.equal('function');
-    expect(changeStub).to.calledOnce;
+    expect(changeStub).to.calledOnceWith(methodParams.newPassword, methodParams.oldPassword);
 
     // because 'confirmBy' not set
-    const isUndefined = await serviceParams?.['isConfirmed']();
+    const isUndefined = await serviceParams?.isConfirmed?.({} as never);
 
     // confirm service
     expect(isUndefined).to.undefined;

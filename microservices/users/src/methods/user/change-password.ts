@@ -10,7 +10,13 @@ import { Factory, ConfirmBy } from '@services/confirm/factory';
 class ChangePasswordInput {
   @IsString()
   @IsNotEmpty()
-  userId: string;
+  @ValidateIf(({ login }) => !login)
+  userId?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ValidateIf(({ userId }) => !userId)
+  login?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -49,11 +55,11 @@ const changePassword = Endpoint.custom(
     output: ChangePasswordOutput,
     description: 'Change user password',
   }),
-  async ({ userId, newPassword, oldPassword, confirmBy, confirmCode, allowByAdmin }) => {
+  async ({ userId, login, newPassword, oldPassword, confirmBy, confirmCode, allowByAdmin }) => {
     const service = ChangePassword.init({
       userId,
-      newPassword,
-      oldPassword,
+      confirmBy,
+      login,
       isConfirmed: (user: User) =>
         (confirmBy &&
           Factory.create(confirmBy, getRepository(ConfirmCode)).verifyCode(
@@ -65,7 +71,7 @@ const changePassword = Endpoint.custom(
     });
 
     return {
-      isChanged: Boolean(await service.change()),
+      isChanged: Boolean(await service.change(newPassword, oldPassword)),
     };
   },
 );

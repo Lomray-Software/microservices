@@ -2,16 +2,15 @@ import { EntityColumns } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import User from '@entities/user';
 import UserRepository from '@repositories/user';
-
-type ChangePasswordThroughConfirmation = {
-  isConfirmed: (user: User) => Promise<boolean> | boolean | undefined;
-};
+import { ConfirmBy } from '@services/confirm/factory';
 
 export type ChangePasswordParams = {
-  userId: string;
-  newPassword: string;
+  userId?: string;
+  login?: string;
+  confirmBy?: ConfirmBy;
   repository: UserRepository;
-} & ({ oldPassword: string } | ChangePasswordThroughConfirmation);
+  isConfirmed?: (user: User) => Promise<boolean> | boolean | undefined;
+};
 
 /**
  * Change user password
@@ -20,22 +19,22 @@ class ChangePassword {
   /**
    * @protected
    */
-  protected readonly userId: string;
+  protected readonly userId?: string;
 
   /**
    * @protected
    */
-  protected readonly newPassword: string;
+  protected readonly login?: string;
 
   /**
    * @protected
    */
-  protected readonly oldPassword?: string;
+  protected readonly confirmBy?: ConfirmBy;
 
   /**
    * @protected
    */
-  protected readonly isConfirmed?: ChangePasswordThroughConfirmation['isConfirmed'];
+  protected readonly isConfirmed?: ChangePasswordParams['isConfirmed'];
 
   /**
    * @protected
@@ -45,12 +44,18 @@ class ChangePassword {
   /**
    * @constructor
    */
-  protected constructor(params: ChangePasswordParams) {
-    this.userId = params.userId;
-    this.newPassword = params.newPassword;
-    this.repository = params.repository;
-    this.oldPassword = ('oldPassword' in params && params.oldPassword) || undefined;
-    this.isConfirmed = ('isConfirmed' in params && params.isConfirmed) || undefined;
+  protected constructor({
+    userId,
+    login,
+    confirmBy,
+    repository,
+    isConfirmed,
+  }: ChangePasswordParams) {
+    this.userId = userId;
+    this.login = login;
+    this.confirmBy = confirmBy;
+    this.isConfirmed = isConfirmed;
+    this.repository = repository;
   }
 
   /**
@@ -63,9 +68,9 @@ class ChangePassword {
   /**
    * Change password
    */
-  public async change(): Promise<User> {
+  public async change(newPassword: string, oldPassword?: string): Promise<User> {
     const user = await this.repository.findOne(
-      { id: this.userId },
+      { ...(this.userId ? { id: this.userId } : { [this.confirmBy as string]: this.login }) },
       { select: EntityColumns(this.repository) },
     );
 
@@ -76,14 +81,14 @@ class ChangePassword {
       });
     }
 
-    if (!this.oldPassword && !this.isConfirmed) {
+    if (!oldPassword && !this.isConfirmed) {
       throw new BaseException({
         status: 422,
         message: 'Either of confirm methods should be provided.',
       });
     }
 
-    if (this.oldPassword && !this.repository.isValidPassword(user, this.oldPassword)) {
+    if (oldPassword && !this.repository.isValidPassword(user, oldPassword)) {
       throw new BaseException({
         status: 422,
         message: 'Invalid old password.',
@@ -97,7 +102,7 @@ class ChangePassword {
       });
     }
 
-    user.password = this.newPassword;
+    user.password = newPassword;
 
     await this.repository.encryptPassword(user);
 
