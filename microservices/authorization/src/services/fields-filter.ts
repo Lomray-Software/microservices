@@ -3,6 +3,7 @@ import type { Repository } from 'typeorm';
 import FieldPolicy from '@constants/field-policy';
 import { FilterType } from '@constants/filter';
 import Model, { IModelSchema, IRolePermissions } from '@entities/model';
+import Templater from '@services/templater';
 
 export interface IFieldsFilter {
   userId?: string | null;
@@ -194,7 +195,7 @@ class FieldsFilter {
    * @private
    */
   private templateValue(template: string, value?: any): string {
-    return _.template(template)({
+    return Templater.compile(template, {
       value,
       params: this.templateOptions,
       current: {

@@ -2,7 +2,7 @@ import { Log } from '@lomray/microservice-helpers';
 import type { AbstractMicroservice } from '@lomray/microservice-nodejs-lib';
 import type { IJsonQuery } from '@lomray/microservices-types';
 import { JQJunction } from '@lomray/microservices-types';
-import _ from 'lodash';
+import Templater from '@services/templater';
 
 interface IConditionRequest {
   isParallel?: boolean;
@@ -68,8 +68,10 @@ class ConditionChecker {
    * @private
    */
   private async execRequest(key: string, { params, method }: IConditionRequest): Promise<void> {
-    const msMethod = _.template(method)({ ...this.templateParams });
-    const data = params ? JSON.parse(_.template(JSON.stringify(params))(this.templateParams)) : {};
+    const msMethod = Templater.compile(method, this.templateParams);
+    const data = params
+      ? Templater.compile(params, { ...this.templateParams, method: msMethod })
+      : {};
     let response;
 
     try {
@@ -101,11 +103,11 @@ class ConditionChecker {
 
       if ('switch' in request) {
         const { value, cases } = request.switch;
-        const compiledValue = _.template(value)(this.templateParams);
+        const compiledValue = Templater.compile(value, this.templateParams);
         const compiledCases = Object.entries(cases).reduce(
           (res, [caseKey, caseValue]) => ({
             ...res,
-            [_.template(caseKey)(this.templateParams)]: caseValue,
+            [Templater.compile(caseKey, this.templateParams)]: caseValue,
           }),
           {},
         );
@@ -138,7 +140,7 @@ class ConditionChecker {
       await this.execRequests(requests);
     }
 
-    return _.template(template)(this.templateParams) === 'true';
+    return Templater.compile(template, this.templateParams) === 'true';
   }
 
   /**

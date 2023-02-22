@@ -90,7 +90,7 @@ const enforce = Endpoint.custom(
       hasFilterOutput: false,
       enforcerParams: {
         ms: app,
-        templateParams: { payload, reqParams: filterInput },
+        templateParams: { payload, reqParams: filterInput, method },
       },
     });
 
@@ -104,7 +104,7 @@ const enforce = Endpoint.custom(
         isAllow && hasFilters ? await endpointService.getMethodFilters(filterInput) : undefined,
       filteredInput:
         isAllow && hasFilterInput
-          ? await endpointService.filterFields(FilterType.IN, filterInput, { payload })
+          ? await endpointService.filterFields(FilterType.IN, filterInput, { payload, method })
           : undefined,
     };
   },

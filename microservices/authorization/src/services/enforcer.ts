@@ -75,7 +75,7 @@ class Enforcer {
       return Enforcer.enforceResponse(false, shouldThrowError, this.userId);
     }
 
-    const { denyGroup, allowGroup, condition } = method;
+    const { denyGroup, allowGroup, condition, microservice } = method;
     const { userId, roles } = await this.findUserRoles();
     const userGroups = [userId, ...roles];
 
@@ -90,7 +90,7 @@ class Enforcer {
       return isAllow;
     }
 
-    this.conditionChecker?.addTemplateParams({ roles });
+    this.conditionChecker?.addTemplateParams({ roles, method: method.method, microservice });
 
     return Enforcer.enforceResponse(
       (await this.conditionChecker?.execConditions(condition.conditions)) ?? false,

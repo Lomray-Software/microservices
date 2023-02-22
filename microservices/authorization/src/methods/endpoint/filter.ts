@@ -46,7 +46,7 @@ const filter = Endpoint.custom(
     });
 
     return {
-      filtered: await endpointService.filterFields(type, filterInput, { payload }),
+      filtered: await endpointService.filterFields(type, filterInput, { payload, method }),
     };
   },
 );

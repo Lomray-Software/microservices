@@ -1,9 +1,9 @@
 import type { IJsonQuery } from '@lomray/microservices-types';
 import { JQJunction } from '@lomray/microservices-types';
-import _ from 'lodash';
 import { FilterIgnoreType, FilterOperator } from '@constants/filter';
 import Filter from '@entities/filter';
 import MethodFiltersEntity from '@entities/method-filter';
+import Templater from '@services/templater';
 
 export interface IMethodFiltersParams {
   userRoles: string[];
@@ -173,10 +173,10 @@ class MethodFilters {
        */
       .replace(new RegExp(`(:)"({{ (${simpleTypeFieldNames.join('|')}) }})"`, 'g'), '$1$2');
 
-    const templatedCondition = _.template(stringCondition, {
+    const templatedCondition = Templater.compile(stringCondition, templateVariables, {
       // Use custom template delimiters. E.g.: {{ userId }}
       interpolate: /{{([\s\S]+?)}}/g,
-    })(templateVariables);
+    });
 
     return JSON.parse(templatedCondition);
   }
