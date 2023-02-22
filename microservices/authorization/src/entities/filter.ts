@@ -76,7 +76,7 @@ class Filter {
       'Roles to be ignored. stop - stop propagation, only - ignore only the specified role',
     example: { admin: 'stop', user: 'only' },
   })
-  @Column({ type: 'text', default: {} })
+  @Column({ type: 'json', default: {} })
   @IsObject()
   @IsUndefinable()
   ignore: { [role: string]: FilterIgnoreType };

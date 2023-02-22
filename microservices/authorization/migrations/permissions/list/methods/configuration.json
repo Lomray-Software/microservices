@@ -78,14 +78,14 @@
   {
     "microservice": "configuration",
     "method": "middleware.update",
-    "description": "Create a new Middleware",
+    "description": "Update Middleware by given condition",
     "allowGroup": [
       "admin"
     ],
     "denyGroup": [],
     "createdAt": "2022-04-14T05:34:30.394Z",
-    "modelIn": "configuration.CreateRequestParams.feed7528232e4069088c29908e6addfc",
-    "modelOut": "configuration.CreateOutputParams.9da16b07f4df7998b36997fabebc911b",
+    "modelIn": "configuration.UpdateRequestParams.feed7528232e4069088c29908e6addfc",
+    "modelOut": "configuration.UpdateOutputParams.9da16b07f4df7998b36997fabebc911b",
     "methodFilters": []
   },
   {

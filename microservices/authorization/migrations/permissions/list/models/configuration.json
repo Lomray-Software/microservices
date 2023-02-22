@@ -445,5 +445,31 @@
       "list": "configuration.MiddlewareEntity"
     },
     "createdAt": "2022-04-14T05:34:30.394Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.UpdateRequestParams.feed7528232e4069088c29908e6addfc",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "configuration.Middleware",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-22T11:33:06.342Z"
+  },
+  {
+    "microservice": "configuration",
+    "alias": "configuration.UpdateOutputParams.9da16b07f4df7998b36997fabebc911b",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "configuration.Middleware"
+    },
+    "createdAt": "2023-02-22T11:33:06.342Z"
   }
 ]
