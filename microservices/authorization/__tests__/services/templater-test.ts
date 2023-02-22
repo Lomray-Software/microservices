@@ -6,7 +6,8 @@ describe('services/templater', () => {
     const result = Templater.compile(
       {
         test: {
-          field: "$array:[<%= userIds.join(',') %>]",
+          field: "$array:<%= userIds.join(',') %>",
+          field2: '$array_strings:<%= userIds.join(\'","\') %>',
           hello: 'world',
         },
       },
@@ -18,6 +19,7 @@ describe('services/templater', () => {
     expect(result).to.deep.equal({
       test: {
         field: [1, 2],
+        field2: ['1', '2'],
         hello: 'world',
       },
     });
@@ -71,5 +73,16 @@ describe('services/templater', () => {
         hello: 'world',
       },
     });
+  });
+
+  it('should throw error: invalid json parse', () => {
+    const result = () =>
+      Templater.compile({
+        test: {
+          field: '$array:<%= {"test":1} %>',
+        },
+      });
+
+    expect(result).to.throw('Internal error: failed execute permissions.');
   });
 });
