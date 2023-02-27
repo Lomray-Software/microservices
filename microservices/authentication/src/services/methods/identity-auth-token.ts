@@ -1,6 +1,6 @@
 import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
-import { IsBoolean, IsEnum, Length } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Repository } from 'typeorm';
 import type { IJwtConfig } from '@config/jwt';
@@ -36,6 +36,16 @@ class TokenIdentifyOutput {
   @IsEnum(AuthProviders)
   @IsUndefinable()
   provider?: AuthProviders | null;
+
+  @IsNumber()
+  @IsNullable()
+  @IsUndefinable()
+  accessExpirationAt?: number | null;
+
+  @IsNumber()
+  @IsNullable()
+  @IsUndefinable()
+  expirationAt?: number | null;
 }
 
 /**
@@ -63,10 +73,15 @@ class IdentifyAuthToken extends BaseAuthToken {
   private async findToken(token: string): Promise<Required<Omit<TokenIdentifyOutput, 'payload'>>> {
     const isPersonal = String(token).length === 32;
     let dbToken: Token | undefined;
+    let accessExpirationAt = null;
 
     if (!isPersonal) {
       const jwtService = await this.getJwtService();
-      const { jti } = jwtService.validate(token);
+      const { jti, exp } = jwtService.validate(token);
+
+      if (exp) {
+        accessExpirationAt = exp;
+      }
 
       dbToken = await this.repository.findOne({ id: jti });
     } else {
@@ -101,6 +116,8 @@ class IdentifyAuthToken extends BaseAuthToken {
       userId: dbToken.userId,
       isAuth: true,
       provider: isPersonal ? AuthProviders.personal : AuthProviders.jwt,
+      expirationAt: dbToken.expirationAt || null,
+      accessExpirationAt,
     };
   }
 
@@ -120,6 +137,8 @@ class IdentifyAuthToken extends BaseAuthToken {
         userId: null,
         isAuth: false,
         provider: null,
+        expirationAt: null,
+        accessExpirationAt: null,
       });
     }
 

@@ -239,6 +239,22 @@
         "out": {
           "admin": "allow"
         }
+      },
+      "expirationAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "accessExpirationAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
       }
     },
     "createdAt": "2022-04-14T05:34:31.238Z"

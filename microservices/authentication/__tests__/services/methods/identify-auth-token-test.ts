@@ -67,6 +67,8 @@ describe('services/methods/identify-auth-token', () => {
           userId,
           isAuth: true,
           provider: AuthProviders.personal,
+          accessExpirationAt: null,
+          expirationAt: null,
         },
       },
       {
@@ -76,6 +78,8 @@ describe('services/methods/identify-auth-token', () => {
           userId,
           isAuth: true,
           provider: AuthProviders.personal,
+          accessExpirationAt: null,
+          expirationAt: null,
         },
       },
     ];
@@ -104,6 +108,7 @@ describe('services/methods/identify-auth-token', () => {
           userId,
           isAuth: true,
           provider: AuthProviders.jwt,
+          expirationAt: null,
         },
       },
       {
@@ -113,6 +118,7 @@ describe('services/methods/identify-auth-token', () => {
           userId,
           isAuth: true,
           provider: AuthProviders.jwt,
+          expirationAt: null,
         },
       },
       {
@@ -122,6 +128,7 @@ describe('services/methods/identify-auth-token', () => {
           userId,
           isAuth: true,
           provider: AuthProviders.jwt,
+          expirationAt: null,
         },
       },
       {
@@ -133,6 +140,7 @@ describe('services/methods/identify-auth-token', () => {
           userId,
           isAuth: true,
           provider: AuthProviders.jwt,
+          expirationAt: null,
         },
       },
       // test cookies with multiple keys, find right token with correct audience
@@ -145,6 +153,7 @@ describe('services/methods/identify-auth-token', () => {
           userId,
           isAuth: true,
           provider: AuthProviders.jwt,
+          expirationAt: null,
         },
       },
       {
@@ -156,6 +165,7 @@ describe('services/methods/identify-auth-token', () => {
           userId,
           isAuth: true,
           provider: AuthProviders.jwt,
+          expirationAt: null,
         },
       },
       {
@@ -173,6 +183,7 @@ describe('services/methods/identify-auth-token', () => {
           userId,
           isAuth: true,
           provider: AuthProviders.jwt,
+          expirationAt: null,
         },
       },
     ];
@@ -184,6 +195,10 @@ describe('services/methods/identify-auth-token', () => {
       }
 
       const result = await service.identify({ token }, headers);
+
+      expect(typeof result.accessExpirationAt).to.equal('number');
+
+      delete result.accessExpirationAt;
 
       expect(result).to.deep.equal(expectedResult);
     }
@@ -197,6 +212,8 @@ describe('services/methods/identify-auth-token', () => {
       userId: null,
       isAuth: false,
       provider: null,
+      accessExpirationAt: null,
+      expirationAt: null,
     });
   });
 
