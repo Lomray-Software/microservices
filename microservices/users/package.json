@@ -40,7 +40,7 @@
 		"start:prod": "node --require ./lib/tracer.js ./lib/index.js"
 	},
 	"dependencies": {
-		"@lomray/microservice-helpers": "^2.2.6",
+		"@lomray/microservice-helpers": "^2.2.7",
 		"@lomray/microservices-client-api": "^2.5.0",
 		"bcrypt": "^5.1.0",
 		"class-transformer": "0.4.1",
