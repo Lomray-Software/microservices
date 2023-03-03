@@ -1,9 +1,15 @@
 import { Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/files';
 import type { InsertEvent, RemoveEvent, UpdateEvent } from 'typeorm';
-import { EntityManager, EntitySubscriberInterface, EventSubscriber } from 'typeorm';
+import {
+  EntityManager,
+  EntitySubscriberInterface,
+  EventSubscriber,
+  getCustomRepository,
+} from 'typeorm';
 import FileModel from '@entities/file';
 import FileEntity from '@entities/file-entity';
+import FileEntityRepository from '@repositories/file-entity';
 
 @EventSubscriber()
 class File implements EntitySubscriberInterface<FileModel> {
@@ -41,19 +47,29 @@ class File implements EntitySubscriberInterface<FileModel> {
 
   /**
    * 1. Trigger remove event
+   * 2. Refresh order column for file entities
    */
   afterRemove(event: RemoveEvent<FileModel>): void {
-    void Microservice.eventPublish(Event.FileRemove, {
-      entity: { ...event.databaseEntity, ...event.entity },
-    });
+    const entity = { ...event.databaseEntity, ...event.entity };
+
+    void Microservice.eventPublish(Event.FileRemove, { entity });
+    void Promise.all(entity.fileEntities?.map(({ entityId }) => this.refreshOrderColumn(entityId)));
   }
 
   /**
    * Get file entities
    * @private
    */
-  private static getRelations(manager: EntityManager, fileId: string): Promise<FileEntity[]> {
+  protected static getRelations(manager: EntityManager, fileId: string): Promise<FileEntity[]> {
     return manager.getRepository(FileEntity).find({ fileId });
+  }
+
+  /**
+   * Resort file entities
+   * @protected
+   */
+  protected refreshOrderColumn(entityId: string): Promise<void> {
+    return getCustomRepository(FileEntityRepository).refreshOrder(entityId);
   }
 }
 

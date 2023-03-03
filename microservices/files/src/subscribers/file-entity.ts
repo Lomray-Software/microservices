@@ -1,8 +1,9 @@
 import { Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/files';
 import type { InsertEvent, RemoveEvent, UpdateEvent } from 'typeorm';
-import { EntityManager, EntitySubscriberInterface, EventSubscriber } from 'typeorm';
+import { EntitySubscriberInterface, EventSubscriber, getCustomRepository } from 'typeorm';
 import FileEntityModel from '@entities/file-entity';
+import FileEntityRepository from '@repositories/file-entity';
 
 @EventSubscriber()
 class FileEntity implements EntitySubscriberInterface<FileEntityModel> {
@@ -23,8 +24,8 @@ class FileEntity implements EntitySubscriberInterface<FileEntityModel> {
   /**
    * 1. Trigger create event
    */
-  afterInsert({ manager, entity }: InsertEvent<FileEntityModel>): void {
-    void this.refreshOrderColumn(manager, entity.entityId);
+  afterInsert({ entity }: InsertEvent<FileEntityModel>): void {
+    void this.refreshOrderColumn(entity.entityId);
     void Microservice.eventPublish(Event.FileEntityCreate, { entity });
   }
 
@@ -38,8 +39,8 @@ class FileEntity implements EntitySubscriberInterface<FileEntityModel> {
   /**
    * 1. Trigger remove event
    */
-  afterRemove({ manager, databaseEntity }: RemoveEvent<FileEntityModel>): void {
-    void this.refreshOrderColumn(manager, databaseEntity.entityId);
+  afterRemove({ databaseEntity }: RemoveEvent<FileEntityModel>): void {
+    void this.refreshOrderColumn(databaseEntity.entityId);
     void Microservice.eventPublish(Event.FileEntityRemove, { entity: databaseEntity });
   }
 
@@ -47,23 +48,8 @@ class FileEntity implements EntitySubscriberInterface<FileEntityModel> {
    * Resort file entities
    * @protected
    */
-  protected refreshOrderColumn(manager: EntityManager, entityId: string): Promise<void> {
-    const { tableName } = manager.getRepository(FileEntityModel).metadata;
-
-    return manager.query(
-      `
-        UPDATE ${tableName}
-        SET "order" = c.counter
-        FROM
-            (
-                SELECT row_number() over (order by a."order", a."createdAt" DESC) AS counter, a."id" as rowId
-                FROM ${tableName} a
-                WHERE a."entityId" = $1
-            ) AS c
-        WHERE "id" = c.rowId
-    `,
-      [entityId],
-    );
+  protected refreshOrderColumn(entityId: string): Promise<void> {
+    return getCustomRepository(FileEntityRepository).refreshOrder(entityId);
   }
 }
 

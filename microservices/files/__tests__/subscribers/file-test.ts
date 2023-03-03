@@ -9,6 +9,7 @@ import Event from '@lomray/microservices-client-api/constants/events/files';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import File from '@entities/file';
+import FileEntity from '@entities/file-entity';
 import FileSubscriber from '@subscribers/file';
 
 describe('subscribers/file', () => {
@@ -67,6 +68,8 @@ describe('subscribers/file', () => {
   it('should send event after remove', async () => {
     const publishStub = sandbox.stub(Microservice, 'eventPublish');
 
+    mockEntity.fileEntities = [{ entityId: 'entityId2' }] as FileEntity[];
+
     subscriber.afterRemove({
       ...subscriptionEventUpdate(),
       databaseEntity: mockEntity,
@@ -79,6 +82,7 @@ describe('subscribers/file', () => {
 
     expect(eventName).to.equal(Event.FileRemove);
     expect(params).to.deep.equal({ entity: mockEntity });
+    expect(TypeormMock.entityManager.query.firstCall.lastArg).to.deep.equal(['entityId2']);
   });
 
   it('should attach related entities before remove', async () => {
