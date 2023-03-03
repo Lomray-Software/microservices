@@ -16,30 +16,31 @@ class FileEntity implements EntitySubscriberInterface<FileEntityModel> {
   /**
    * 1. Manage "order" field, put new entity at end (this field will be updated after insert)
    */
-  beforeInsert(event: InsertEvent<FileEntityModel>): Promise<any> | void {
-    event.entity.order = event.entity.order ?? 999999999;
+  beforeInsert({ entity }: InsertEvent<FileEntityModel>): Promise<any> | void {
+    entity.order = entity.order ?? 999999999;
   }
 
   /**
    * 1. Trigger create event
    */
-  afterInsert(event: InsertEvent<FileEntityModel>): void {
-    void this.refreshOrderColumn(event.manager, event.entity.entityId);
-    void Microservice.eventPublish(Event.FileEntityCreate, { entity: event.entity });
+  afterInsert({ manager, entity }: InsertEvent<FileEntityModel>): void {
+    void this.refreshOrderColumn(manager, entity.entityId);
+    void Microservice.eventPublish(Event.FileEntityCreate, { entity });
   }
 
   /**
    * 1. Trigger create event
    */
-  afterUpdate(event: UpdateEvent<FileEntityModel>): void {
-    void Microservice.eventPublish(Event.FileEntityUpdate, { entity: event.databaseEntity });
+  afterUpdate({ databaseEntity }: UpdateEvent<FileEntityModel>): void {
+    void Microservice.eventPublish(Event.FileEntityUpdate, { entity: databaseEntity });
   }
 
   /**
    * 1. Trigger remove event
    */
-  afterRemove(event: RemoveEvent<FileEntityModel>): void {
-    void Microservice.eventPublish(Event.FileEntityRemove, { entity: event.databaseEntity });
+  afterRemove({ manager, databaseEntity }: RemoveEvent<FileEntityModel>): void {
+    void this.refreshOrderColumn(manager, databaseEntity.entityId);
+    void Microservice.eventPublish(Event.FileEntityRemove, { entity: databaseEntity });
   }
 
   /**

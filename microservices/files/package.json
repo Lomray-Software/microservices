@@ -40,14 +40,14 @@
 	},
 	"dependencies": {
 		"@lomray/microservice-helpers": "^2.2.7",
-		"@lomray/microservices-client-api": "^2.5.0",
-		"aws-sdk": "^2.1298.0",
+		"@lomray/microservices-client-api": "^2.7.2",
+		"aws-sdk": "^2.1327.0",
 		"class-transformer": "0.4.1",
 		"class-validator": "^0.14.0",
 		"class-validator-jsonschema": "^5.0.0",
 		"mime": "^3.0.0",
 		"sharp": "^0.31.3",
-		"tslib": "^2.4.1",
+		"tslib": "^2.5.0",
 		"typeorm": "0.2.41",
 		"uuid": "^9.0.0"
 	},
