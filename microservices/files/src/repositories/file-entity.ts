@@ -1,3 +1,4 @@
+import type { EntityManager } from 'typeorm';
 import { EntityRepository, Repository } from 'typeorm';
 import FileEntityModel from '@entities/file-entity';
 
@@ -6,10 +7,10 @@ class FileEntity extends Repository<FileEntityModel> {
   /**
    * Resort entities by entityId
    */
-  public refreshOrder(entityId: string): Promise<void> {
+  public refreshOrder(entityId: string, manager?: EntityManager): Promise<void> {
     const { tableName } = this.metadata;
 
-    return this.query(
+    return (manager ?? this).query(
       `
         UPDATE ${tableName}
         SET "order" = c.counter

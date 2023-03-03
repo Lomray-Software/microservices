@@ -70,7 +70,7 @@ describe('subscribers/file', () => {
 
     mockEntity.fileEntities = [{ entityId: 'entityId2' }] as FileEntity[];
 
-    subscriber.afterRemove({
+    await subscriber.afterRemove({
       ...subscriptionEventUpdate(),
       databaseEntity: mockEntity,
       entity: mockEntity,

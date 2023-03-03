@@ -28,7 +28,7 @@ class File implements EntitySubscriberInterface<FileModel> {
   }
 
   /**
-   * 1. Trigger create event
+   * 1. Trigger update event
    */
   afterUpdate(event: UpdateEvent<FileModel>): void {
     void Microservice.eventPublish(Event.FileUpdate, { entity: event.databaseEntity });
@@ -46,14 +46,20 @@ class File implements EntitySubscriberInterface<FileModel> {
   }
 
   /**
-   * 1. Trigger remove event
-   * 2. Refresh order column for file entities
+   * 1. Refresh order column for file entities
+   * 2. Trigger remove event
    */
-  afterRemove(event: RemoveEvent<FileModel>): void {
-    const entity = { ...event.databaseEntity, ...event.entity };
+  async afterRemove({
+    entity: ent,
+    databaseEntity,
+    manager,
+  }: RemoveEvent<FileModel>): Promise<void> {
+    const entity = { ...databaseEntity, ...(ent ?? {}) };
 
+    await Promise.all(
+      entity.fileEntities?.map(({ entityId }) => this.refreshOrderColumn(entityId, manager)),
+    );
     void Microservice.eventPublish(Event.FileRemove, { entity });
-    void Promise.all(entity.fileEntities?.map(({ entityId }) => this.refreshOrderColumn(entityId)));
   }
 
   /**
@@ -68,8 +74,8 @@ class File implements EntitySubscriberInterface<FileModel> {
    * Resort file entities
    * @protected
    */
-  protected refreshOrderColumn(entityId: string): Promise<void> {
-    return getCustomRepository(FileEntityRepository).refreshOrder(entityId);
+  protected refreshOrderColumn(entityId: string, manager: EntityManager): Promise<void> {
+    return getCustomRepository(FileEntityRepository).refreshOrder(entityId, manager);
   }
 }
 

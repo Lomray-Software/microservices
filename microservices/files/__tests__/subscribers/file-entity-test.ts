@@ -44,7 +44,7 @@ describe('subscribers/file-entity', () => {
   it('should refresh order and send event after create', async () => {
     const publishStub = sandbox.stub(Microservice, 'eventPublish');
 
-    subscriber.afterInsert({
+    await subscriber.afterInsert({
       ...subscriptionEventInsert(),
       entity: mockEntity,
     });
@@ -77,7 +77,7 @@ describe('subscribers/file-entity', () => {
   it('should refresh order and send event after remove', async () => {
     const publishStub = sandbox.stub(Microservice, 'eventPublish');
 
-    subscriber.afterRemove({
+    await subscriber.afterRemove({
       ...subscriptionEventUpdate(),
       databaseEntity: mockEntity,
       entity: mockEntity,

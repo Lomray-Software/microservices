@@ -1,7 +1,13 @@
 import { Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/files';
-import type { InsertEvent, RemoveEvent, UpdateEvent } from 'typeorm';
-import { EntitySubscriberInterface, EventSubscriber, getCustomRepository } from 'typeorm';
+import type {
+  InsertEvent,
+  RemoveEvent,
+  UpdateEvent,
+  EntityManager,
+  EntitySubscriberInterface,
+} from 'typeorm';
+import { EventSubscriber, getCustomRepository } from 'typeorm';
 import FileEntityModel from '@entities/file-entity';
 import FileEntityRepository from '@repositories/file-entity';
 
@@ -24,13 +30,13 @@ class FileEntity implements EntitySubscriberInterface<FileEntityModel> {
   /**
    * 1. Trigger create event
    */
-  afterInsert({ entity }: InsertEvent<FileEntityModel>): void {
-    void this.refreshOrderColumn(entity.entityId);
+  async afterInsert({ entity, manager }: InsertEvent<FileEntityModel>): Promise<void> {
+    await this.refreshOrderColumn(manager, entity.entityId);
     void Microservice.eventPublish(Event.FileEntityCreate, { entity });
   }
 
   /**
-   * 1. Trigger create event
+   * 1. Trigger update event
    */
   afterUpdate({ databaseEntity }: UpdateEvent<FileEntityModel>): void {
     void Microservice.eventPublish(Event.FileEntityUpdate, { entity: databaseEntity });
@@ -39,8 +45,8 @@ class FileEntity implements EntitySubscriberInterface<FileEntityModel> {
   /**
    * 1. Trigger remove event
    */
-  afterRemove({ databaseEntity }: RemoveEvent<FileEntityModel>): void {
-    void this.refreshOrderColumn(databaseEntity.entityId);
+  async afterRemove({ databaseEntity, manager }: RemoveEvent<FileEntityModel>): Promise<void> {
+    await this.refreshOrderColumn(manager, databaseEntity.entityId);
     void Microservice.eventPublish(Event.FileEntityRemove, { entity: databaseEntity });
   }
 
@@ -48,8 +54,8 @@ class FileEntity implements EntitySubscriberInterface<FileEntityModel> {
    * Resort file entities
    * @protected
    */
-  protected refreshOrderColumn(entityId: string): Promise<void> {
-    return getCustomRepository(FileEntityRepository).refreshOrder(entityId);
+  protected refreshOrderColumn(manager: EntityManager, entityId: string): Promise<void> {
+    return getCustomRepository(FileEntityRepository).refreshOrder(entityId, manager);
   }
 }
 
