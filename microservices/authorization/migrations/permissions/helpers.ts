@@ -7,7 +7,6 @@ import Method from '@entities/method';
 import MethodFilter from '@entities/method-filter';
 import Model from '@entities/model';
 import Role from '@entities/role';
-import UserRole from '@entities/user-role';
 
 const DUMP_PATH_ROOT = `${__dirname}/list`;
 const DUMP_PATH_MODELS = `${DUMP_PATH_ROOT}/models`;
@@ -57,18 +56,27 @@ const importEntityPermissions = async (
   repository: Repository<any>,
   filename: string | any[],
   onlyCleanup: boolean,
+  updateBy?: string,
 ): Promise<void> => {
-  await repository.delete({});
+  if (!updateBy) {
+    await repository.delete({});
+  }
 
   if (onlyCleanup) {
     return;
   }
 
-  const records =
+  const records: Record<string, any>[] =
     typeof filename === 'string' ? getDumpEntities(filename, DUMP_PATH_ROOT) : filename;
 
-  for (const entity of records) {
-    await repository.save(repository.create(entity as Record<string, any>));
+  for (const fields of records) {
+    const updated = updateBy
+      ? await repository.update({ [updateBy]: fields[updateBy] }, fields)
+      : false;
+
+    if (!updated) {
+      await repository.save(repository.create(fields as Record<string, any>));
+    }
   }
 };
 
@@ -147,15 +155,13 @@ const importPermissions = async (onlyCleanup = false) => {
     const filtersRepo = manager.getRepository(Filter);
     const methodFilterRepo = manager.getRepository(MethodFilter);
     const rolesRepo = manager.getRepository(Role);
-    const userRolesRepo = manager.getRepository(UserRole);
 
     if (!isReImport && (await rolesRepo.find({ take: 1 })).length) {
       return;
     }
 
     const entities = [
-      { repository: rolesRepo, file: 'roles' },
-      { repository: userRolesRepo, file: 'user-roles' },
+      { repository: rolesRepo, file: 'roles', updateBy: 'alias' },
       { repository: filtersRepo, file: 'filters' },
       { repository: conditionRepo, file: 'conditions' },
       { repository: modelRepo, file: getDumpEntitiesInFiles(DUMP_PATH_MODELS) },
@@ -181,9 +187,9 @@ const importPermissions = async (onlyCleanup = false) => {
         continue;
       }
 
-      const { repository, file } = data;
+      const { repository, file, updateBy } = data;
 
-      await importEntityPermissions(repository, file, onlyCleanup);
+      await importEntityPermissions(repository, file, onlyCleanup, updateBy);
     }
 
     console.log('Permissions imported.');

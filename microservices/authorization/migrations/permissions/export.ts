@@ -6,7 +6,6 @@ import Method from '@entities/method';
 import MethodFilter from '@entities/method-filter';
 import Model from '@entities/model';
 import Role from '@entities/role';
-import UserRole from '@entities/user-role';
 import {
   DUMP_PATH_ROOT,
   DUMP_PATH_MODELS,
@@ -25,18 +24,6 @@ const createOrUpdateRoles = (roles: Role[]): void => {
   const values = _.values(merged).map((f) => _.omit(f, ['updatedAt']));
 
   saveDump(values, 'roles', DUMP_PATH_ROOT);
-};
-
-/**
- * Create or update user roles
- */
-const createOrUpdateUserRoles = (userRoles: UserRole[]): void => {
-  const dumpFilters = getDumpEntities('user-roles', DUMP_PATH_ROOT);
-  const keepActual = _.intersectionBy(dumpFilters, userRoles, 'userId');
-  const merged = _.merge(_.keyBy(keepActual, 'userId'), _.keyBy(userRoles, 'userId'));
-  const values = _.values(merged).map((f) => _.omit(f, ['updatedAt']));
-
-  saveDump(values, 'user-roles', DUMP_PATH_ROOT);
 };
 
 /**
@@ -123,20 +110,17 @@ const exportPermissions = async () => {
   const modelRepo = connection.getRepository(Model);
   const filtersRepo = connection.getRepository(Filter);
   const rolesRepo = connection.getRepository(Role);
-  const userRolesRepo = connection.getRepository(UserRole);
   const conditionRepo = connection.getRepository(Condition);
 
   const filters = await filtersRepo.find();
   const roles = await rolesRepo.find();
   const condition = await conditionRepo.find();
-  const userRoles = await userRolesRepo.find();
   const models = await modelRepo.find();
   const methods = await methodRepo.find({
     relations: ['modelOut', 'modelIn', 'methodFilters', 'methodFilters.filter', 'condition'],
   });
 
   createOrUpdateRoles(roles);
-  createOrUpdateUserRoles(userRoles);
   createOrUpdateFilters(filters);
   createOrUpdateConditions(condition);
   createOrUpdateModels(models);
