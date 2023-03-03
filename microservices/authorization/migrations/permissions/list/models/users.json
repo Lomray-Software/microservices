@@ -25,7 +25,7 @@
         "out": {
           "guest": "allow",
           "user": {
-            "template": "<%= value === current.userId ? value : undefined %>"
+            "template": "<%= entity.userId === current.userId ? value : undefined %>"
           },
           "admin": "allow"
         }
@@ -38,7 +38,7 @@
         "out": {
           "guest": "allow",
           "user": {
-            "template": "<%= value === current.userId ? value : undefined %>"
+            "template": "<%= entity.userId === current.userId ? value : undefined %>"
           },
           "admin": "allow"
         }
@@ -63,7 +63,7 @@
             "out": {
               "guest": "allow",
               "user": {
-                "template": "<%= value === current.userId ? value : undefined %>"
+                "template": "<%= entity.userId === current.userId ? value : undefined %>"
               },
               "admin": "allow"
             }
@@ -75,7 +75,7 @@
             "out": {
               "guest": "allow",
               "user": {
-                "template": "<%= value === current.userId ? value : undefined %>"
+                "template": "<%= entity.userId === current.userId ? value : undefined %>"
               },
               "admin": "allow"
             }
@@ -265,7 +265,7 @@
         "out": {
           "guest": "allow",
           "user": {
-            "template": "<%= value === current.userId ? value : undefined %>"
+            "template": "<%= entity.userId === current.userId ? value : undefined %>"
           },
           "admin": "allow"
         }
@@ -277,7 +277,7 @@
         "out": {
           "guest": "allow",
           "user": {
-            "template": "<%= value === current.userId ? value : undefined %>"
+            "template": "<%= entity.userId === current.userId ? value : undefined %>"
           },
           "admin": "allow"
         }

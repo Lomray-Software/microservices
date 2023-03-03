@@ -219,10 +219,11 @@ describe('services/fields-filter', () => {
     expect(await service.filter(FilterType.IN, model, input)).to.deep.equal({});
   });
 
-  it('should correctly filter field: field empty template', async () => {
+  it('should correctly filter field', async () => {
     const input = {
       userId: 'user-100',
       someField: '',
+      testField: 'test-field',
     };
     const templateOptions = { payload: { it: 'payload' } };
     const model = modelRepository.create({
@@ -237,6 +238,21 @@ describe('services/fields-filter', () => {
             },
           },
           out: { guests: FieldPolicy.allow },
+        },
+        testField: {
+          in: {
+            guests: FieldPolicy.deny,
+            users: {
+              // allow only if userId from entity equal userId from authentication microservice
+              template: '<%= entity.userId === current.userId ? value : "undefined" %>',
+            },
+          },
+          out: {
+            users: {
+              // allow only if userId from entity equal userId from authentication microservice
+              template: '<%= entity.userId === current.userId ? value : "undefined" %>',
+            },
+          },
         },
         someField: {
           in: { users: { template: "<%= _.get(params, 'payload.it', 'undefined') %>" } },
@@ -253,6 +269,7 @@ describe('services/fields-filter', () => {
     expect(await service.filter(FilterType.IN, model, input)).to.deep.equal({});
     expect(await srv.filter(FilterType.IN, model, input)).to.deep.equal({
       userId: input.userId,
+      testField: input.testField,
       someField: templateOptions.payload.it,
     });
     expect(await service.filter(FilterType.OUT, model, input)).to.deep.equal({

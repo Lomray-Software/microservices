@@ -144,7 +144,7 @@ class FieldsFilter {
         newValue = await this.filterBySchema(policy.object, type, value);
       } else if (type in policy) {
         // simple field
-        newValue = this.checkField(policy[type] as IRolePermissions, value);
+        newValue = this.checkField(policy[type] as IRolePermissions, value, fields);
       }
 
       if (newValue !== undefined) {
@@ -159,7 +159,7 @@ class FieldsFilter {
    * Validate field by role permissions
    * @private
    */
-  private checkField(permissions: IRolePermissions, value: any): any {
+  private checkField(permissions: IRolePermissions, value: any, fields?: Record<string, any>): any {
     for (const role of [...(this.userId ? [this.userId] : []), ...this.userRoles]) {
       const permission = permissions[role];
 
@@ -176,7 +176,7 @@ class FieldsFilter {
       }
 
       if (permission.template) {
-        const newValue = this.templateValue(permission.template, value);
+        const newValue = this.templateValue(permission.template, value, fields);
 
         if (newValue === 'undefined') {
           return undefined;
@@ -194,9 +194,10 @@ class FieldsFilter {
    * Template value
    * @private
    */
-  private templateValue(template: string, value?: any): string {
+  private templateValue(template: string, value?: any, fields: Record<string, any> = {}): string {
     return Templater.compile(template, {
       value,
+      entity: fields,
       params: this.templateOptions,
       current: {
         userId: this.userId,
