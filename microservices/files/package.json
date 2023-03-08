@@ -39,7 +39,7 @@
 		"start:prod": "node --require ./lib/tracer.js ./lib/index.js"
 	},
 	"dependencies": {
-		"@lomray/microservice-helpers": "^2.2.7",
+		"@lomray/microservice-helpers": "^2.3.3",
 		"@lomray/microservices-client-api": "^2.7.2",
 		"aws-sdk": "^2.1327.0",
 		"class-transformer": "0.4.1",
