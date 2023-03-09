@@ -12,6 +12,14 @@
           "admin": "allow"
         }
       },
+      "noticeId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "type": {
         "in": {
           "admin": "allow"

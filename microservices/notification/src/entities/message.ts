@@ -1,5 +1,5 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, IsEnum, IsObject, Length } from 'class-validator';
+import { Allow, IsEnum, IsObject, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Entity, Column, CreateDateColumn, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import NotifyType from '@constants/notify-type';
@@ -10,6 +10,10 @@ class Message {
   @PrimaryGeneratedColumn('uuid')
   @Allow()
   id: string;
+
+  @Column()
+  @IsString()
+  noticeId: string;
 
   @Column({
     type: 'enum',
