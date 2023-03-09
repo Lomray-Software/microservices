@@ -265,7 +265,7 @@
         "out": {
           "guest": "allow",
           "user": {
-            "template": "<%= entity.userId === current.userId ? value : undefined %>"
+            "template": "<%= entity.id === current.userId ? value : undefined %>"
           },
           "admin": "allow"
         }
@@ -277,7 +277,7 @@
         "out": {
           "guest": "allow",
           "user": {
-            "template": "<%= entity.userId === current.userId ? value : undefined %>"
+            "template": "<%= entity.id === current.userId ? value : undefined %>"
           },
           "admin": "allow"
         }
