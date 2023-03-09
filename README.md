@@ -8,14 +8,14 @@ Staging: [![Build staging](https://github.com/Lomray-Software/microservices/acti
 Prod: [![Build prod](https://github.com/Lomray-Software/microservices/actions/workflows/build.yml/badge.svg?branch=prod)](https://github.com/Lomray-Software/microservices/actions/workflows/build.yml)
 
 ## Microservices list:
- - [Gateway](microservices/gateway)
- - [Configuration](microservices/configuration)
  - [Authentication](microservices/authentication)
  - [Authorization](microservices/authorization)
+ - [Configuration](microservices/configuration)
+ - [Cron](microservices/cron)
+ - [Files](microservices/files)
+ - [Gateway](microservices/gateway)
  - [Notification](microservices/notification)
  - [Users](microservices/users)
- - [Files](microservices/files)
- - [Cron](microservices/cron)
  
 ## Use [CLI](https://github.com/Lomray-Software/microservices-cli) to start your own art.
 

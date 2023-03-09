@@ -1,13 +1,14 @@
 # NodeJS Microservices based on [microservice-nodejs-lib](https://github.com/Lomray-Software/microservice-nodejs-lib)
 
 ## Microservices list:
- - [Gateway](https://github.com/Lomray-Software/microservices/gateway)
- - [Configuration](https://github.com/Lomray-Software/microservices/configuration)
- - [Authentication](https://github.com/Lomray-Software/microservices/authentication)
- - [Authorization](https://github.com/Lomray-Software/microservices/authorization)
- - [Notification](https://github.com/Lomray-Software/microservices/notification)
- - [Users](https://github.com/Lomray-Software/microservices/users)
- - [Files](https://github.com/Lomray-Software/microservices/files)
+ - [Authentication](https://github.com/Lomray-Software/microservices/tree/staging/microservices/authentication)
+ - [Authorization](https://github.com/Lomray-Software/microservices/tree/staging/microservices/authorization)
+ - [Configuration](https://github.com/Lomray-Software/microservices/tree/staging/microservices/configuration)
+ - [Cron](https://github.com/Lomray-Software/microservices/tree/staging/microservices/cron)
+ - [Files](https://github.com/Lomray-Software/microservices/tree/staging/microservices/files)
+ - [Gateway](https://github.com/Lomray-Software/microservices/tree/staging/microservices/gateway)
+ - [Notification](https://github.com/Lomray-Software/microservices/tree/staging/microservices/notification)
+ - [Users](https://github.com/Lomray-Software/microservices/tree/staging/microservices/users)
  
 Use `microservices create your-ms-name` for create new microservice from template.
 
