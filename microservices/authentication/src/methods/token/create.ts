@@ -18,7 +18,8 @@ const create = Endpoint.custom(
     description: 'Create authentication token',
   }),
   async (params) => {
-    const jwtOptions = await getJwtOptions();
+    const origin = params.payload?.headers?.origin as string;
+    const jwtOptions = await getJwtOptions([origin]);
     const service = new CreateAuthToken(getRepository(Token), jwtOptions);
 
     return service.create(params);

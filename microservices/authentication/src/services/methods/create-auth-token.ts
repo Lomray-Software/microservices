@@ -115,6 +115,7 @@ class CreateAuthToken extends BaseAuthToken {
   ): Promise<{ access: string; refresh: string }> {
     const { userId, expirationAt, params, jwtPayload } = options;
 
+    const jwtService = await this.getJwtService();
     const dbToken = await this.repository.save(
       this.repository.create({
         type: TokenType.jwt,
@@ -126,7 +127,6 @@ class CreateAuthToken extends BaseAuthToken {
         jwtPayload,
       }),
     );
-    const jwtService = await this.getJwtService();
     const { access, refresh } = jwtService.create(dbToken.id, { ...(jwtPayload ?? {}), userId });
     const { exp } = jwtService.decode(refresh);
 

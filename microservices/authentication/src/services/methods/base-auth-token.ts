@@ -45,6 +45,7 @@ abstract class BaseAuthToken {
    */
   private async getCookieAuth(headers?: Record<string, any>): Promise<string | undefined> {
     const cookies: string | undefined = headers?.cookie;
+    const origin: string | undefined = headers?.origin;
 
     if (!cookies) {
       return undefined;
@@ -57,11 +58,7 @@ abstract class BaseAuthToken {
     if (tokens.length > 1) {
       const service = await this.getJwtService();
 
-      for (const token of tokens) {
-        if (service.checkAudience(token)) {
-          return token;
-        }
-      }
+      return service.findMostSuitableToken(tokens, origin);
     }
 
     return tokens[0];

@@ -125,9 +125,30 @@ class Jwt {
   }
 
   /**
+   * Try to find most suitable token by audience and request origin
+   */
+  public findMostSuitableToken(tokens: string[], origin = 'unknown'): string {
+    let resultToken;
+
+    for (const token of tokens) {
+      const audRes = this.checkAudience(token, origin);
+
+      // full match by audience and origin
+      if (audRes === 2) {
+        return token;
+      } else if (audRes === 1) {
+        // match by audience
+        resultToken = token;
+      }
+    }
+
+    return resultToken ?? tokens[0];
+  }
+
+  /**
    * Compare service audience with token audience
    */
-  public checkAudience(token: string): boolean {
+  protected checkAudience(token: string, origin: string): number {
     const { audience: serviceAud } = Jwt.getAudience([], this.options);
     const { aud } = this.decode(token);
 
@@ -137,11 +158,19 @@ class Jwt {
     )[];
     const target = (Array.isArray(aud) ? aud : [aud]).filter(Boolean) as string[];
 
-    return target.some((targetAudience) =>
+    const isMatch = target.some((targetAudience) =>
       audiences.some((audience) =>
         audience instanceof RegExp ? audience.test(targetAudience) : audience === targetAudience,
       ),
     );
+
+    if (isMatch && aud?.includes(origin)) {
+      return 2;
+    } else if (isMatch) {
+      return 1;
+    }
+
+    return 0;
   }
 }
 

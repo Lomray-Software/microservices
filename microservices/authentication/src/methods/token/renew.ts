@@ -18,7 +18,8 @@ const renew = Endpoint.custom(
     description: 'Renew authentication token',
   }),
   async ({ payload, ...params }) => {
-    const jwtOptions = await getJwtOptions();
+    const origin = payload?.headers?.origin as string;
+    const jwtOptions = await getJwtOptions([origin]);
     const service = new RenewAuthToken(getRepository(Token), jwtOptions);
 
     return service.renew(params, payload?.headers);

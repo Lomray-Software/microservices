@@ -12,10 +12,19 @@ const jwtOptions = { ...CONST.MS_JWT_PARAMS, secretKey: CONST.MS_JWT_SECRET_KEY 
 /**
  * Get JWT options
  */
-const jwt = async (): Promise<IJwtConfig> => {
+const jwt = async (audience: string[] = []): Promise<IJwtConfig> => {
   const remoteConfig = await RemoteConfig.get<IRemoteConfig>('config');
 
-  return { ...jwtOptions, ...(remoteConfig?.jwtOptions ?? {}) };
+  const result: IJwtConfig = { ...jwtOptions, ...(remoteConfig?.jwtOptions ?? {}) };
+
+  if (audience.length) {
+    result.options = {
+      ...(result.options ?? {}),
+      audience: [...(result.options?.audience ?? []), ...audience],
+    };
+  }
+
+  return result;
 };
 
 export default jwt;

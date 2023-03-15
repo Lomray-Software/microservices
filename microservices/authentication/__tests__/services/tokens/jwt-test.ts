@@ -134,4 +134,20 @@ describe('services/tokens/jwt', () => {
       jwtService.validate(access, { ignoreExpiration: true, audience: ['unknown'] }),
     ).to.throw('Unauthorized');
   });
+
+  it('should correctly find most suitable token by audience and origin', () => {
+    const tokenId1 = 'id-origin-1';
+    const tokenId2 = 'id-2';
+    const origin = 'test-origin';
+    const jwtServiceOrig = new Jwt(secretKey, {
+      options: { audience: ['test-aud', origin] },
+    });
+    const jwtService = new Jwt(secretKey, { options: { audience: ['test-aud'] } });
+    const { access } = jwtServiceOrig.create(tokenId1);
+    const { access: access2 } = jwtService.create(tokenId2);
+
+    const token = jwtService.findMostSuitableToken([access2, access], origin);
+
+    expect(token).to.equal(access);
+  });
 });
