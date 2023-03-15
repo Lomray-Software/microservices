@@ -74,7 +74,7 @@ const importEntityPermissions = async (
       ? await repository.update({ [updateBy]: fields[updateBy] }, fields)
       : false;
 
-    if (!updated) {
+    if (!updated || !updated.affected) {
       await repository.save(repository.create(fields as Record<string, any>));
     }
   }
