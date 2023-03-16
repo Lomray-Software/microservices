@@ -46,9 +46,9 @@
 		"permissions:sync:prod": "node lib/migrations/permissions/sync.js"
 	},
 	"dependencies": {
-		"@lomray/microservice-helpers": "^2.3.3",
+		"@lomray/microservice-helpers": "^2.4.4",
 		"axios": "^0.27.2",
-		"class-transformer": "0.4.1",
+		"class-transformer": "^0.5.1",
 		"class-validator": "^0.14.0",
 		"class-validator-jsonschema": "^5.0.0",
 		"lodash": "^4.17.21",

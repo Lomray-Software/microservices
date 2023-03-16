@@ -40,10 +40,10 @@
 		"start:prod": "node --require ./lib/tracer.js ./lib/index.js"
 	},
 	"dependencies": {
-		"@lomray/microservice-helpers": "^2.3.3",
+		"@lomray/microservice-helpers": "^2.4.4",
 		"@lomray/microservices-client-api": "^2.5.0",
 		"bcrypt": "^5.1.0",
-		"class-transformer": "0.4.1",
+		"class-transformer": "^0.5.1",
 		"class-validator": "^0.14.0",
 		"class-validator-jsonschema": "^5.0.0",
 		"firebase-admin": "^11.5.0",

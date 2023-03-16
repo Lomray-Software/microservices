@@ -195,7 +195,7 @@
     "senderMethod": "token.remove",
     "type": "response",
     "order": 10,
-    "description": "Remove JWT auth tokens after successful sign out.",
+    "description": "Remove JWT auth token after successful sign out.",
     "params": {
       "type": "response",
       "isRequired": true,
@@ -204,7 +204,7 @@
         {
           "key": "rolesResp",
           "method": "authentication.cookies.remove",
-          "params": {}
+          "condition": "<%= _.get(task, \"params.payload.headers.authType\", \"cookies\") === \"cookies\" %>"
         }
       ],
       "convertParams": {
