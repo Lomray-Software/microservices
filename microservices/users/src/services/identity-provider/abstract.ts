@@ -81,6 +81,8 @@ abstract class Abstract {
         validate(entity, {
           whitelist: true,
           forbidNonWhitelisted: true,
+          groups: ['create', 'sign-in-social', entity?.constructor?.name],
+          always: true,
           validationError: { target: false },
         }),
       ),

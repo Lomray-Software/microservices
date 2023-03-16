@@ -52,6 +52,8 @@ class SignUp {
     const errors = await validate(entity, {
       whitelist: true,
       forbidNonWhitelisted: true,
+      groups: ['create', 'sign-up', this.repository.metadata.name],
+      always: true,
       validationError: { target: false },
     });
 
