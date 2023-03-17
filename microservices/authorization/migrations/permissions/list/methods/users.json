@@ -227,7 +227,14 @@
     "createdAt": "2022-04-14T05:34:31.363Z",
     "modelIn": "RestoreRequestParams",
     "modelOut": "users.RestoreOutputParams.0affa0885c45ae77e6f8e2bc65a94ec7",
-    "methodFilters": []
+    "methodFilters": [
+      {
+        "filterTitle": "By user id: ignore admin",
+        "operator": "and",
+        "roleAlias": "guest",
+        "createdAt": "2022-03-15T06:16:55.264Z"
+      }
+    ]
   },
   {
     "microservice": "users",
@@ -279,7 +286,14 @@
     "createdAt": "2022-04-14T05:34:31.363Z",
     "modelIn": "RemoveRequestParams",
     "modelOut": "users.RemoveOutputParams.42e0a89b6cfe7ecc53acfed3adca0ed1",
-    "methodFilters": []
+    "methodFilters": [
+      {
+        "filterTitle": "By user id: ignore admin",
+        "operator": "and",
+        "roleAlias": "guest",
+        "createdAt": "2022-03-15T06:16:55.264Z"
+      }
+    ]
   },
   {
     "microservice": "users",
