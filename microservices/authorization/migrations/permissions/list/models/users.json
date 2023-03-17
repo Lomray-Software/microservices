@@ -7,7 +7,7 @@
       "userId": {
         "in": {
           "user": {
-            "template": "<%= value === current.userId ? value : undefined %>"
+            "condition": "<%= value === current.userId %>"
           },
           "admin": "allow"
         },
@@ -25,7 +25,7 @@
         "out": {
           "guest": "allow",
           "user": {
-            "template": "<%= entity.userId === current.userId ? value : undefined %>"
+            "condition": "<%= entity.userId === current.userId %>"
           },
           "admin": "allow"
         }
@@ -38,7 +38,7 @@
         "out": {
           "guest": "allow",
           "user": {
-            "template": "<%= entity.userId === current.userId ? value : undefined %>"
+            "condition": "<%= entity.userId === current.userId %>"
           },
           "admin": "allow"
         }
@@ -63,7 +63,7 @@
             "out": {
               "guest": "allow",
               "user": {
-                "template": "<%= entity.userId === current.userId ? value : undefined %>"
+                "condition": "<%= entity.userId === current.userId %>"
               },
               "admin": "allow"
             }
@@ -75,17 +75,11 @@
             "out": {
               "guest": "allow",
               "user": {
-                "template": "<%= entity.userId === current.userId ? value : undefined %>"
+                "condition": "<%= entity.userId === current.userId %>"
               },
               "admin": "allow"
             }
           }
-        },
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
         }
       },
       "updatedAt": {
@@ -204,7 +198,7 @@
       "id": {
         "in": {
           "user": {
-            "template": "<%= value === current.userId ? value : undefined %>"
+            "condition": "<%= value === current.userId %>"
           },
           "admin": "allow"
         },
@@ -265,7 +259,7 @@
         "out": {
           "guest": "allow",
           "user": {
-            "template": "<%= entity.id === current.userId ? value : undefined %>"
+            "condition": "<%= entity.id === current.userId %>"
           },
           "admin": "allow"
         }
@@ -277,7 +271,7 @@
         "out": {
           "guest": "allow",
           "user": {
-            "template": "<%= entity.id === current.userId ? value : undefined %>"
+            "condition": "<%= entity.id === current.userId %>"
           },
           "admin": "allow"
         }
@@ -315,7 +309,14 @@
         }
       },
       "profile": "users.Profile",
-      "identityProviders": "users.IdentityProvider"
+      "identityProviders": {
+        "object": "users.IdentityProvider",
+        "out": {
+          "user": {
+            "condition": "<%= entity.id === _.get(value, '0.userId') %>"
+          }
+        }
+      }
     },
     "createdAt": "2022-04-14T05:34:31.363Z"
   },

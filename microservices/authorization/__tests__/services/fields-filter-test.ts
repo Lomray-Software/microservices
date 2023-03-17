@@ -166,7 +166,7 @@ describe('services/fields-filter', () => {
           object: 'nestedModel',
           in: {
             guests: {
-              condition: '<%= "true" %>',
+              condition: "<%= _.get(value, '0.test') === 1 %>",
             },
           },
         },
