@@ -312,8 +312,9 @@
       "identityProviders": {
         "object": "users.IdentityProvider",
         "out": {
+          "admin": "allow",
           "user": {
-            "condition": "<%= entity.id === _.get(value, '0.userId') %>"
+            "condition": "<%= current.userId === _.get(value, '0.userId') %>"
           }
         }
       }
