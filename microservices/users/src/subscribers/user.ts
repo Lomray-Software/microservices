@@ -1,3 +1,5 @@
+import { Microservice } from '@lomray/microservice-nodejs-lib';
+import UsersEvents from '@lomray/microservices-client-api/constants/events/users';
 import type { InsertEvent, UpdateEvent } from 'typeorm';
 import { EntitySubscriberInterface, EventSubscriber, UpdateResult } from 'typeorm';
 import IdentityProvider from '@entities/identity-provider';
@@ -38,20 +40,24 @@ class User implements EntitySubscriberInterface<UserEntity> {
    * Also soft delete or restore user profile
    * @inheritDoc
    */
-  public afterUpdate(event: UpdateEvent<UserEntity>): Promise<UpdateResult[]> | void {
+  public async afterUpdate(event: UpdateEvent<UserEntity>): Promise<void> {
     const profileRepository = event.manager.getRepository(Profile);
     const idProviderRepository = event.manager.getRepository(IdentityProvider);
 
     if (User.isRecovered(event)) {
-      return Promise.all([
+      await Promise.all([
         profileRepository.restore({ userId: event.databaseEntity.id }),
         idProviderRepository.restore({ userId: event.databaseEntity.id }),
       ]);
+
+      void Microservice.eventPublish(UsersEvents.UserRestore, { entity: event.entity });
     } else if (User.isSoftRemoved(event)) {
-      return Promise.all([
+      await Promise.all([
         profileRepository.softDelete({ userId: event.databaseEntity.id }),
         idProviderRepository.softDelete({ userId: event.databaseEntity.id }),
       ]);
+
+      void Microservice.eventPublish(UsersEvents.UserRemove, { entity: event.entity });
     }
   }
 
