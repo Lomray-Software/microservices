@@ -214,5 +214,32 @@
         "payload.cookies": "$rolesResp.payload.cookies"
       }
     }
+  },
+  {
+    "target": "users",
+    "targetMethod": "user.remove",
+    "sender": "authentication",
+    "senderMethod": "token.remove",
+    "type": "response",
+    "order": 10,
+    "description": "Remove JWT auth tokens after successful sign out.",
+    "params": {
+      "type": "response",
+      "isRequired": true,
+      "strategy": "transform",
+      "extraRequests": [
+        {
+          "key": "rolesResp",
+          "method": "authentication.cookies.remove",
+          "condition": "<%= _.get(task, \"params.payload.headers.authType\", \"cookies\") === \"cookies\" %>"
+        }
+      ],
+      "convertParams": {
+        "query.where.userId": "$task.params.payload.authentication.userId"
+      },
+      "convertResult": {
+        "payload.cookies": "$rolesResp.payload.cookies"
+      }
+    }
   }
 ]
