@@ -120,6 +120,16 @@ describe('services/fields-filter', () => {
         part1: 'hi',
         part2: 'world',
       },
+      nestedModel: {
+        hello: 'model',
+      },
+      nestedPerm1: {
+        should: 'not-empty',
+      },
+      nestedPerm2: {
+        should: 'empty',
+      },
+      nestedPerm3: [{ test: 1 }, { test: 2 }],
     };
     const model = modelRepository.create({
       alias: 'inputTest',
@@ -133,14 +143,58 @@ describe('services/fields-filter', () => {
             part2: {}, // skip = deny
           },
         },
+        nestedModel: {
+          object: 'nestedModel',
+        },
+        nestedPerm1: {
+          object: 'nestedModel',
+          in: {
+            guests: {
+              condition: '<%= entity.nestedAllow.nested === false %>',
+            },
+          },
+        },
+        nestedPerm2: {
+          object: 'nestedModel',
+          in: {
+            guests: {
+              condition: '<%= value.should === "" %>',
+            },
+          },
+        },
+        nestedPerm3: {
+          object: 'nestedModel',
+          in: {
+            guests: {
+              condition: '<%= "true" %>',
+            },
+          },
+        },
       },
     });
+
+    // resolve nestedModel schema on first call
+    TypeormMock.entityManager.findOne.resolves(allowAllModel);
 
     expect(await service.filter(FilterType.IN, model, input)).to.deep.equal({
       nestedAllow: input.nestedAllow,
       nestedPartial: {
         part1: 'hi',
       },
+      nestedModel: {
+        hello: 'model',
+      },
+      nestedPerm1: {
+        should: 'not-empty',
+      },
+      nestedPerm3: [
+        {
+          test: 1,
+        },
+        {
+          test: 2,
+        },
+      ],
     });
   });
 
@@ -216,7 +270,7 @@ describe('services/fields-filter', () => {
       },
     });
 
-    expect(await service.filter(FilterType.IN, model, input)).to.deep.equal({});
+    expect(await service.filter(FilterType.IN, model, input)).to.deep.equal({ userId: '' });
   });
 
   it('should correctly filter field', async () => {

@@ -131,6 +131,7 @@ class FieldsFilter {
 
         newValue = await this.filterBySchema(nestedSchema, type, value);
       } else if ('case' in policy) {
+        // dynamic schema (like switch - case)
         const caseValue = this.templateValue(policy.case.template, value);
         const dynamicSchema = { [field]: policy.object[caseValue] } as IModelSchema;
 
@@ -141,7 +142,32 @@ class FieldsFilter {
         }
       } else if ('object' in policy) {
         // nested schema
-        newValue = await this.filterBySchema(policy.object, type, value);
+        let nestedValue = value;
+
+        // check object permissions
+        if (type in policy) {
+          nestedValue = this.checkField(policy[type] as IRolePermissions, value, fields);
+
+          if (!nestedValue) {
+            continue;
+          }
+        }
+
+        if (typeof policy.object === 'string') {
+          // alias to nested schema
+          newValue = (
+            await this.filterBySchema(
+              {
+                [field]: policy.object,
+              } as IModelSchema,
+              type,
+              { [field]: nestedValue },
+            )
+          )?.[field];
+        } else {
+          // plain object
+          newValue = await this.filterBySchema(policy.object, type, nestedValue);
+        }
       } else if (type in policy) {
         // simple field
         newValue = this.checkField(policy[type] as IRolePermissions, value, fields);
@@ -175,7 +201,13 @@ class FieldsFilter {
         return undefined;
       }
 
-      if (permission.template) {
+      if ('condition' in permission) {
+        const result = this.templateValue(permission.condition, value, fields);
+
+        return result === 'true' ? value : undefined;
+      }
+
+      if ('template' in permission) {
         const newValue = this.templateValue(permission.template, value, fields);
 
         if (newValue === 'undefined') {

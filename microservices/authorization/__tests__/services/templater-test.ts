@@ -75,6 +75,22 @@ describe('services/templater', () => {
     });
   });
 
+  it('should template null return type', () => {
+    const result = Templater.compile({
+      test: {
+        field: '$null:<%= `null` %>',
+        hello: 'world',
+      },
+    });
+
+    expect(result).to.deep.equal({
+      test: {
+        field: null,
+        hello: 'world',
+      },
+    });
+  });
+
   it('should throw error: invalid json parse', () => {
     const result = () =>
       Templater.compile({

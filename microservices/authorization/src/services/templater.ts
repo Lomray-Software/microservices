@@ -45,7 +45,7 @@ class Templater {
     // return array
     value = value.replace(/"\$array:<%(.+?)%>"/g, '[<%$1%>]');
     // return object, number, boolean
-    value = value.replace(/"\$(object|number|boolean):<%(.+?)%>"/g, '<%$2%>');
+    value = value.replace(/"\$(object|number|boolean|null):<%(.+?)%>"/g, '<%$2%>');
 
     return value;
   }

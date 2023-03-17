@@ -11,29 +11,35 @@ import {
 } from 'typeorm';
 import FieldPolicy from '@constants/field-policy';
 
-interface IFieldCondition {
-  template: string; // lodash template
-}
+export type IFieldCondition =
+  | {
+      template: string; // lodash template
+    }
+  | {
+      condition: string; // lodash template, should return 'true' for pass
+    };
 
 export interface IRolePermissions {
   [roleAliasOrUserId: string]: FieldPolicy | IFieldCondition;
+}
+
+export interface IFieldPermission {
+  in?: IRolePermissions;
+  out?: IRolePermissions;
+  isCustom?: boolean;
 }
 
 export interface IModelSchema {
   '*': FieldPolicy;
   [fieldName: string]:
     | string // related model alias
-    | { object: IModelSchema; isCustom?: boolean }
+    | ({ object: IModelSchema | string } & IFieldPermission) // can be is object or related model alias
     | {
-        case: IFieldCondition;
+        case: { template: string };
         object: { [key: string]: string | IModelSchema };
         isCustom?: boolean;
       }
-    | {
-        in?: IRolePermissions;
-        out?: IRolePermissions;
-        isCustom?: boolean;
-      };
+    | IFieldPermission;
 }
 
 @Entity()
