@@ -5,6 +5,9 @@ import BankAccountAdd from '@methods/bank-account/add';
 import CrudBankAccount from '@methods/bank-account/crud';
 import CardAdd from '@methods/card/add';
 import CrudCard from '@methods/card/crud';
+import CustomerCreate from '@methods/customer/create';
+import CrudCustomer from '@methods/customer/crud';
+import CreateSetupIntent from '@methods/setup-intent/create';
 import CrudTransaction from '@methods/transaction/crud';
 
 /**
@@ -21,6 +24,13 @@ export default (ms: Microservice): void => {
       add: BankAccountAdd,
     },
     transaction: CrudTransaction,
+    customer: {
+      ...CrudCustomer,
+      create: CustomerCreate,
+    },
+    setupIntent: {
+      create: CreateSetupIntent,
+    },
   };
 
   /**

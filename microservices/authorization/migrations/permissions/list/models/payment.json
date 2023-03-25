@@ -1,0 +1,131 @@
+[
+  {
+    "microservice": "payment",
+    "alias": "payment.Customer",
+    "title": "Customer",
+    "schema": {
+      "customerId": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "user": {
+            "condition": "<%= value === current.userId %>"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "user": {
+            "condition": "<%= value === current.userId %>"
+          },
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-03-25T21:32:28.128Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.ListOutputParams.9ab1b5ead60adbc64ac3edf088918ea5",
+    "title": "List Output Params",
+    "schema": {
+      "list": "payment.Customer",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-03-25T21:32:28.128Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.ViewOutputParams.b1d097cd23e411dc8f5dde074a276503",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "payment.Customer"
+    },
+    "createdAt": "2023-03-25T21:32:28.128Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.UpdateRequestParams.4f3c8cc105ab4fed359329c47e0f8224",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "payment.Customer",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-03-25T21:32:28.128Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.UpdateOutputParams.b1d097cd23e411dc8f5dde074a276503",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "payment.Customer"
+    },
+    "createdAt": "2023-03-25T21:32:28.128Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.RemoveOutputParams.87d10388e62bc5cd27e433c97b2b7ea5",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "payment.Customer",
+      "entities": "payment.Customer"
+    },
+    "createdAt": "2023-03-25T21:32:28.128Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.CustomerCreateInput",
+    "title": "Customer Create Input",
+    "schema": {},
+    "createdAt": "2023-03-25T21:32:28.128Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.CustomerCreateOutput",
+    "title": "Customer Create Output",
+    "schema": {
+      "entity": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-03-25T21:32:28.128Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.CreateSetupIntentInput",
+    "title": "Create Setup Intent Input",
+    "schema": {},
+    "createdAt": "2023-03-25T21:32:28.128Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.CreateSetupIntentOutput",
+    "title": "Create Setup Intent Output",
+    "schema": {},
+    "createdAt": "2023-03-25T21:32:28.128Z"
+  }
+]

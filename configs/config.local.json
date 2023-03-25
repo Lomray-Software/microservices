@@ -103,5 +103,19 @@
         "isWebp": true
       }
     }
+  },
+  {
+    "microservice": "payment",
+    "type": "config",
+    "params": {
+      "paymentOptions": {
+        "methods": ["bancontact", "card"],
+        "apiKey": "your test key from stripe or other service",
+        "config": {
+          "apiVersion": "2022-11-15"
+        }
+      },
+      "paymentProvider": "stripe"
+    }
   }
 ]

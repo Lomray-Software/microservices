@@ -1,0 +1,137 @@
+[
+  {
+    "microservice": "payment",
+    "method": "config-reset",
+    "description": "Reset RemoteConfig cache",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-03-25T21:32:28.128Z",
+    "modelOut": "RemoteConfigOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "customer.count",
+    "description": "Returns count of Customer by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-03-25T21:32:28.128Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "customer.list",
+    "description": "Returns list of Customer by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-03-25T21:32:28.128Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "payment.ListOutputParams.9ab1b5ead60adbc64ac3edf088918ea5",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "customer.view",
+    "description": "Returns Customer by given condition",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-03-25T21:32:28.128Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "payment.ViewOutputParams.b1d097cd23e411dc8f5dde074a276503",
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "and",
+        "roleAlias": "guest",
+        "createdAt": "2022-03-15T06:17:23.698Z"
+      }
+    ]
+  },
+  {
+    "microservice": "payment",
+    "method": "customer.update",
+    "description": "Update Customer by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-03-25T21:32:28.128Z",
+    "modelIn": "payment.UpdateRequestParams.4f3c8cc105ab4fed359329c47e0f8224",
+    "modelOut": "payment.UpdateOutputParams.b1d097cd23e411dc8f5dde074a276503",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "customer.remove",
+    "description": "Remove Customer by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-03-25T21:32:28.128Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "payment.RemoveOutputParams.87d10388e62bc5cd27e433c97b2b7ea5",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "customer.create",
+    "description": "Create new customer",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-03-25T21:32:28.128Z",
+    "modelIn": "payment.CustomerCreateInput",
+    "modelOut": "payment.CustomerCreateOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "setupIntent.create",
+    "description": "Creates setup intent and return client secret key",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-03-25T21:32:28.128Z",
+    "modelIn": "payment.CreateSetupIntentInput",
+    "modelOut": "payment.CreateSetupIntentOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "meta",
+    "description": "Get microservice metadata",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-03-25T21:32:28.128Z",
+    "modelOut": "MicroserviceMetaOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "middleware-register",
+    "description": "Register remote middleware on this microservice",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-03-25T21:32:28.128Z",
+    "modelIn": "ClientRegisterMiddlewareInput",
+    "modelOut": "ClientRegisterMiddlewareOutput",
+    "methodFilters": []
+  }
+]
