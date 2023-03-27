@@ -98,7 +98,7 @@
   },
   {
     "microservice": "payment",
-    "method": "setupIntent.create",
+    "method": "stripe.setup-intent",
     "description": "Creates setup intent and return client secret key",
     "allowGroup": [
       "user"

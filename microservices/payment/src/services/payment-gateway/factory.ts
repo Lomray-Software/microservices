@@ -21,6 +21,7 @@ class Factory {
         }
 
         return new Stripe(manager, paymentProvider, paymentOptions);
+
       default:
         throw new Error(`Unknown gateway provider: ${paymentProvider!}`);
     }

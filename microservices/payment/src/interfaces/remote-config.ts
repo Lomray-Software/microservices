@@ -1,5 +1,5 @@
-import PaymentProvider from '@constants/payment-provider';
-import TPaymentOptions from '@interfaces/payment-options';
+import type PaymentProvider from '@constants/payment-provider';
+import type TPaymentOptions from '@interfaces/payment-options';
 
 /**
  * Microservice remote config

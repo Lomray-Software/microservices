@@ -1,5 +1,6 @@
 import StripeSdk from 'stripe';
-import { EntityManager } from 'typeorm';
+import type { EntityManager } from 'typeorm';
+import type PaymentProvider from '@constants/payment-provider';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Customer from '@entities/customer';
@@ -23,7 +24,7 @@ class Stripe extends Abstract {
 
   constructor(
     manager: EntityManager,
-    paymentProvider: Abstract['paymentProvider'],
+    paymentProvider: PaymentProvider.STRIPE,
     paymentOptions: TPaymentOptions,
   ) {
     super(paymentProvider, manager);
@@ -68,6 +69,10 @@ class Stripe extends Abstract {
    * Create Customer entity
    */
   public async createCustomer(userId: string): Promise<Customer> {
+    if (await this.customerRepository.findOne(userId)) {
+      throw new Error('Customer for this user already exists');
+    }
+
     const stripeCustomer: StripeSdk.Customer = await this.paymentEntity.customers.create();
 
     const customer = this.customerRepository.create({

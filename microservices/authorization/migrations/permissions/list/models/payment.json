@@ -116,15 +116,15 @@
   },
   {
     "microservice": "payment",
-    "alias": "payment.CreateSetupIntentInput",
-    "title": "Create Setup Intent Input",
+    "alias": "payment.SetupIntentInput",
+    "title": "Setup Intent Input",
     "schema": {},
     "createdAt": "2023-03-25T21:32:28.128Z"
   },
   {
     "microservice": "payment",
-    "alias": "payment.CreateSetupIntentOutput",
-    "title": "Create Setup Intent Output",
+    "alias": "payment.SetupIntentOutput",
+    "title": "Setup Intent Output",
     "schema": {},
     "createdAt": "2023-03-25T21:32:28.128Z"
   }

@@ -29,7 +29,7 @@ export default (ms: Microservice): void => {
       create: CustomerCreate,
     },
     stripe: {
-      setupIntent: SetupIntent,
+      'setup-intent': SetupIntent,
     },
   };
 
