@@ -3,10 +3,9 @@ import { Type } from 'class-transformer';
 import { IsObject } from 'class-validator';
 import { getManager } from 'typeorm';
 import Customer from '@entities/customer';
-import { ICustomerParams } from '@services/payment-gateway/abstract';
 import Factory from '@services/payment-gateway/factory';
 
-class CustomerCreateInput implements ICustomerParams {
+class CustomerCreateInput {
   userId: string;
 }
 

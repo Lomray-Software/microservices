@@ -1,5 +1,5 @@
-import IStripePaymentOptions from '@interfaces/stripe-payment-options';
+import IStripeOptions from '@interfaces/stripe-options';
 
-type TPaymentOptions = IStripePaymentOptions;
+type TPaymentOptions = IStripeOptions;
 
 export default TPaymentOptions;

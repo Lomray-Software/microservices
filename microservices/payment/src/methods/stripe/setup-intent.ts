@@ -1,32 +1,32 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { getManager } from 'typeorm';
-import { ISetupIntentParams } from '@services/payment-gateway/abstract';
 import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
-class CreateSetupIntentInput implements ISetupIntentParams {
+class SetupIntentInput {
   userId: string;
 }
 
-class CreateSetupIntentOutput {
+class SetupIntentOutput {
   clientSecretToken: string | null;
 }
 
 /**
  * Create setupIntent and return client token to get access to adding payment method
  */
-const createSetupIntent = Endpoint.custom(
+const setupIntent = Endpoint.custom(
   () => ({
-    input: CreateSetupIntentInput,
-    output: CreateSetupIntentOutput,
+    input: SetupIntentInput,
+    output: SetupIntentOutput,
     description: 'Creates setup intent and return client secret key',
   }),
   async ({ userId }) => {
-    const service = await Factory.create(getManager());
+    const service = (await Factory.create(getManager())) as Stripe;
 
     return {
-      clientSecretToken: await service.createSetupIntent(userId),
+      clientSecretToken: await service.setupIntent(userId),
     };
   },
 );
 
-export default createSetupIntent;
+export default setupIntent;

@@ -1,13 +1,35 @@
-import StripeEntity from 'stripe';
+import StripeSdk from 'stripe';
+import { EntityManager } from 'typeorm';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Customer from '@entities/customer';
+import type TPaymentOptions from '@interfaces/payment-options';
 import Abstract from './abstract';
 
 /**
  * Stripe payment provider
  */
 class Stripe extends Abstract {
+  /**
+   * @protected
+   */
+  protected readonly paymentOptions: TPaymentOptions;
+
+  /**
+   * @protected
+   */
+  protected readonly paymentEntity: StripeSdk;
+
+  constructor(
+    manager: EntityManager,
+    paymentProvider: Abstract['paymentProvider'],
+    paymentOptions: TPaymentOptions,
+  ) {
+    super(paymentProvider, manager);
+
+    this.paymentOptions = paymentOptions;
+    this.paymentEntity = new StripeSdk(paymentOptions.apiKey, paymentOptions.config);
+  }
   /**
    * Add new card
    */
@@ -25,7 +47,7 @@ class Stripe extends Abstract {
   /**
    * Create SetupIntent and get back client secret
    */
-  async createSetupIntent(userId: string): Promise<string | null> {
+  public async setupIntent(userId: string): Promise<string | null> {
     let customer = await this.customerRepository.findOne({ userId });
 
     if (!customer) {
@@ -44,8 +66,8 @@ class Stripe extends Abstract {
   /**
    * Create Customer entity
    */
-  async createCustomer(userId: string): Promise<Customer> {
-    const stripeCustomer: StripeEntity.Customer = await this.paymentEntity.customers.create();
+  public async createCustomer(userId: string): Promise<Customer> {
+    const stripeCustomer: StripeSdk.Customer = await this.paymentEntity.customers.create();
 
     const customer = this.customerRepository.create({
       customerId: stripeCustomer.id,

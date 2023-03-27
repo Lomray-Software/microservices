@@ -1,9 +1,8 @@
-import Stripe from 'stripe';
-import { EntityManager } from 'typeorm';
+import type { EntityManager } from 'typeorm';
 import remoteConfig from '@config/remote';
 import PaymentProvider from '@constants/payment-provider';
 import Abstract from './abstract';
-import StripeEntity from './stripe';
+import Stripe from './stripe';
 
 /**
  * Payment gateway factory
@@ -17,14 +16,11 @@ class Factory {
 
     switch (paymentProvider) {
       case PaymentProvider.STRIPE:
-        if (paymentOptions) {
-          const stripe = new Stripe(paymentOptions.apiKey, paymentOptions.config);
-
-          return new StripeEntity(paymentProvider, stripe, manager, paymentOptions);
+        if (!paymentOptions) {
+          throw new Error(`Payment options for stripe are not provided`);
         }
 
-        throw new Error(`Payment options for stripe are not provided`);
-
+        return new Stripe(manager, paymentProvider, paymentOptions);
       default:
         throw new Error(`Unknown gateway provider: ${paymentProvider!}`);
     }
