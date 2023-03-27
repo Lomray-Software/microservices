@@ -1,11 +1,12 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
-import { IsObject } from 'class-validator';
+import { IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import Customer from '@entities/customer';
 import Factory from '@services/payment-gateway/factory';
 
 class CustomerCreateInput {
+  @IsString()
   userId: string;
 }
 

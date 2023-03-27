@@ -4,6 +4,7 @@ import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Customer from '@entities/customer';
 import type TPaymentOptions from '@interfaces/payment-options';
+import IStripeOptions from '@interfaces/stripe-options';
 import Abstract from './abstract';
 
 /**
@@ -13,7 +14,7 @@ class Stripe extends Abstract {
   /**
    * @protected
    */
-  protected readonly paymentOptions: TPaymentOptions;
+  protected readonly paymentOptions: IStripeOptions;
 
   /**
    * @protected
