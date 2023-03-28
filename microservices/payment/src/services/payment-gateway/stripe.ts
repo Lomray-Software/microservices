@@ -1,24 +1,74 @@
+import StripeSdk from 'stripe';
+import type { EntityManager } from 'typeorm';
+import type PaymentProvider from '@constants/payment-provider';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
+import Customer from '@entities/customer';
+import type IStripeOptions from '@interfaces/stripe-options';
 import Abstract from './abstract';
-import type { IBankAccountParams, ICardParams } from './abstract';
 
 /**
  * Stripe payment provider
  */
 class Stripe extends Abstract {
   /**
+   * @protected
+   */
+  protected readonly paymentEntity: StripeSdk;
+
+  /**
+   * @protected
+   */
+  protected readonly paymentOptions: IStripeOptions;
+
+  /**
+   * @constructor
+   */
+  constructor(
+    manager: EntityManager,
+    paymentProvider: PaymentProvider.STRIPE,
+    paymentOptions: IStripeOptions,
+  ) {
+    super(paymentProvider, paymentOptions, manager);
+
+    this.paymentEntity = new StripeSdk(paymentOptions.apiKey, paymentOptions.config);
+  }
+  /**
    * Add new card
    */
-  addCard(params: ICardParams): Promise<Card> {
+  addCard(): Promise<Card> {
     return Promise.resolve(new Card());
   }
 
   /**
    * Add bank account
    */
-  addBankAccount(params: IBankAccountParams): Promise<BankAccount> {
+  addBankAccount(): Promise<BankAccount> {
     return Promise.resolve(new BankAccount());
+  }
+
+  /**
+   * Create SetupIntent and get back client secret
+   */
+  public async setupIntent(userId: string): Promise<string | null> {
+    const customer = await super.getCustomer(userId);
+
+    const { client_secret: clientSecret } = await this.paymentEntity.setupIntents.create({
+      customer: customer.customerId,
+      // eslint-disable-next-line camelcase
+      payment_method_types: this.paymentOptions.methods,
+    });
+
+    return clientSecret;
+  }
+
+  /**
+   * Create Customer entity
+   */
+  public async createCustomer(userId: string): Promise<Customer> {
+    const stripeCustomer: StripeSdk.Customer = await this.paymentEntity.customers.create();
+
+    return super.createCustomer(userId, stripeCustomer.id);
   }
 }
 

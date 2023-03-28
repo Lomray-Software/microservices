@@ -1,33 +1,33 @@
 {
   "name": "@lomray/microservice-payment",
-	"version": "1.0.0",
-	"description": "Payment microservice based on NodeJS & inverted json.",
+  "version": "1.0.0",
+  "description": "Payment microservice based on NodeJS & inverted json.",
   "main": "index.js",
   "types": "index.d.ts",
-	"keywords": [
-		"node",
-		"js",
-		"microservice",
-		"inverted",
-		"json",
-		"worker",
-		"typescript",
+  "keywords": [
+    "node",
+    "js",
+    "microservice",
+    "inverted",
+    "json",
+    "worker",
+    "typescript",
     "payment"
-	],
+  ],
   "publishConfig": {
     "access": "public"
   },
   "repository": {
-		"type": "git",
+    "type": "git",
     "url": "https://github.com/Lomray-Software/microservices.git"
-	},
-	"bugs": {
+  },
+  "bugs": {
     "url": "https://github.com/Lomray-Software/microservices/issues"
-	},
-	"homepage": "https://github.com/Lomray-Software/microservices",
-	"author": "Mikhail Yarmaliuk",
-	"license": "Apache-2.0",
-	"scripts": {
+  },
+  "homepage": "https://github.com/Lomray-Software/microservices",
+  "author": "Mikhail Yarmaliuk",
+  "license": "Apache-2.0",
+  "scripts": {
     "test": "cross-env NODE_ENV=tests TS_NODE_COMPILER_OPTIONS={\\\"target\\\":\\\"es6\\\"} mocha --harmony --no-warnings  __tests__ --require ts-node/register --recursive --unhandled-rejections=strict --exit",
     "lint:check": "eslint --ext \".ts,.tsx\" \"src/**/*.{ts,tsx,*.ts,*tsx}\"",
     "lint:format": "eslint --fix --ext \".ts,.tsx\" \"src/**/*.{ts,tsx,*.ts,*tsx}\"",
@@ -37,13 +37,14 @@
     "typeorm:prod": "node node_modules/typeorm/cli.js",
     "start:dev": "node --require ts-node/register src/index.ts",
     "start:prod": "node --require ./lib/tracer.js ./lib/index.js"
-	},
-	"dependencies": {
+  },
+  "dependencies": {
     "@lomray/microservice-helpers": "^2.5.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "class-validator-jsonschema": "^5.0.0",
-    "typeorm": "0.2.41"
-  },
-	"devDependencies": {}
+    "stripe": "^11.16.0",
+    "typeorm": "0.2.41",
+    "uuidv4": "^6.2.13"
+  }
 }

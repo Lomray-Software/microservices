@@ -1,6 +1,7 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
 import { IsObject } from 'class-validator';
+import { getManager } from 'typeorm';
 import Card from '@entities/card';
 import type { ICardParams } from '@services/payment-gateway/abstract';
 import Factory from '@services/payment-gateway/factory';
@@ -21,7 +22,7 @@ class CardAddOutput {
 const add = Endpoint.custom(
   () => ({ input: CardAddInput, output: CardAddOutput, description: 'Add new card' }),
   async (params) => {
-    const service = await Factory.create();
+    const service = await Factory.create(getManager());
 
     return {
       entity: await service.addCard(params),

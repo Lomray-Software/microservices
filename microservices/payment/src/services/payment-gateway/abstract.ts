@@ -1,6 +1,10 @@
+import { EntityManager, Repository } from 'typeorm';
+import { uuid } from 'uuidv4';
 import PaymentProvider from '@constants/payment-provider';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
+import Customer from '@entities/customer';
+import type TPaymentOptions from '@interfaces/payment-options';
 
 export interface ICardParams {
   test: boolean;
@@ -22,17 +26,24 @@ abstract class Abstract {
   /**
    * @protected
    */
-  protected readonly paymentOptions: Record<string, any>;
+  protected readonly customerRepository: Repository<Customer>;
+
+  /**
+   * @protected
+   */
+  protected readonly paymentOptions: TPaymentOptions;
 
   /**
    * @constructor
    */
   public constructor(
     paymentProvider: Abstract['paymentProvider'],
-    paymentOptions: Abstract['paymentOptions'] = {},
+    paymentOptions: TPaymentOptions,
+    manager: EntityManager,
   ) {
     this.paymentProvider = paymentProvider;
     this.paymentOptions = paymentOptions;
+    this.customerRepository = manager.getRepository(Customer);
   }
 
   /**
@@ -44,6 +55,33 @@ abstract class Abstract {
    * Add new bank account
    */
   public abstract addBankAccount(params: IBankAccountParams): Promise<BankAccount>;
+
+  /**
+   * Get the customer
+   */
+  protected async getCustomer(userId: string) {
+    const customer = await this.customerRepository.findOne(userId);
+
+    if (customer) {
+      return customer;
+    }
+
+    return this.createCustomer(userId);
+  }
+
+  /**
+   * Create new customer
+   */
+  public async createCustomer(userId: string, customerId: string = uuid()) {
+    const customer = this.customerRepository.create({
+      customerId,
+      userId,
+    });
+
+    await this.customerRepository.save(customer);
+
+    return customer;
+  }
 }
 
 export default Abstract;
