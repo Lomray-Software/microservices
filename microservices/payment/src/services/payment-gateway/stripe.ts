@@ -4,8 +4,7 @@ import type PaymentProvider from '@constants/payment-provider';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Customer from '@entities/customer';
-import type TPaymentOptions from '@interfaces/payment-options';
-import IStripeOptions from '@interfaces/stripe-options';
+import type IStripeOptions from '@interfaces/stripe-options';
 import Abstract from './abstract';
 
 /**
@@ -15,21 +14,23 @@ class Stripe extends Abstract {
   /**
    * @protected
    */
-  protected readonly paymentOptions: IStripeOptions;
+  protected readonly paymentEntity: StripeSdk;
 
   /**
    * @protected
    */
-  protected readonly paymentEntity: StripeSdk;
+  protected readonly paymentOptions: IStripeOptions;
 
+  /**
+   * @constructor
+   */
   constructor(
     manager: EntityManager,
     paymentProvider: PaymentProvider.STRIPE,
-    paymentOptions: TPaymentOptions,
+    paymentOptions: IStripeOptions,
   ) {
-    super(paymentProvider, manager);
+    super(paymentProvider, paymentOptions, manager);
 
-    this.paymentOptions = paymentOptions;
     this.paymentEntity = new StripeSdk(paymentOptions.apiKey, paymentOptions.config);
   }
   /**
@@ -50,11 +51,7 @@ class Stripe extends Abstract {
    * Create SetupIntent and get back client secret
    */
   public async setupIntent(userId: string): Promise<string | null> {
-    let customer = await this.customerRepository.findOne({ userId });
-
-    if (!customer) {
-      customer = await this.createCustomer(userId);
-    }
+    const customer = await super.getCustomer(userId);
 
     const { client_secret: clientSecret } = await this.paymentEntity.setupIntents.create({
       customer: customer.customerId,
@@ -69,18 +66,9 @@ class Stripe extends Abstract {
    * Create Customer entity
    */
   public async createCustomer(userId: string): Promise<Customer> {
-    if (await this.customerRepository.findOne(userId)) {
-      throw new Error('Customer for this user already exists');
-    }
-
     const stripeCustomer: StripeSdk.Customer = await this.paymentEntity.customers.create();
 
-    const customer = this.customerRepository.create({
-      customerId: stripeCustomer.id,
-      userId,
-    });
-
-    return this.customerRepository.save(customer);
+    return super.createCustomer(userId, stripeCustomer.id);
   }
 }
 
