@@ -5,7 +5,6 @@ import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Customer from '@entities/customer';
 import type TPaymentOptions from '@interfaces/payment-options';
-import type IStripeOptions from '@interfaces/stripe-options';
 
 export interface ICardParams {
   test: boolean;
@@ -32,7 +31,7 @@ abstract class Abstract {
   /**
    * @protected
    */
-  protected readonly paymentOptions: IStripeOptions;
+  protected readonly paymentOptions: TPaymentOptions;
 
   /**
    * @constructor
