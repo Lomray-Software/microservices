@@ -100,6 +100,17 @@ describe('services/sign-up', () => {
     expect(await waitResult(service.signIn({ isDenyRegister: true }))).to.throw('User not found.');
   });
 
+  it('should registration throw error: disabled multi registration', async () => {
+    FirebaseSdkStub.resolves(
+      firebaseMock({ user: { email: 'some@email.com', emailVerified: true } }),
+    );
+    TypeormMock.queryBuilder.getOne.resolves(mockUser);
+
+    expect(await waitResult(service.signIn({ isDenyAuthViaRegister: true }))).to.throw(
+      'User already exists.',
+    );
+  });
+
   it('should register new user', async () => {
     const email = 'demo@email.com';
 
