@@ -17,10 +17,12 @@ class Firebase extends Abstract {
   /**
    * @inheritDoc
    */
-  public async signIn({ isDenyRegister }: TSingInParams = {}): Promise<ISingInReturn> {
+  public async signIn({
+    isDenyRegister,
+    isDenyAuthViaRegister,
+  }: TSingInParams = {}): Promise<ISingInReturn> {
     const [firebaseUser, providerType] = await this.getFirebaseUser();
-    let user = await this.userRepository.findUserByIdentifier(this.provider, firebaseUser.uid);
-    let isNew = false;
+    const user = await this.userRepository.findUserByIdentifier(this.provider, firebaseUser.uid);
 
     if (!user) {
       if (isDenyRegister) {
@@ -30,11 +32,22 @@ class Firebase extends Abstract {
         });
       }
 
-      user = await this.register(firebaseUser, providerType);
-      isNew = true;
+      const userResult = await this.register(firebaseUser, providerType);
+
+      return { user: userResult, isNew: true };
     }
 
-    return { user, isNew };
+    if (isDenyAuthViaRegister) {
+      /**
+       * If user registered - error
+       */
+      throw new BaseException({
+        status: 500,
+        message: 'User already exists.',
+      });
+    }
+
+    return { user, isNew: false };
   }
 
   /**
