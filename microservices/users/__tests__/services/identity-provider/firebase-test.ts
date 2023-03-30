@@ -100,7 +100,7 @@ describe('services/sign-up', () => {
     expect(await waitResult(service.signIn({ isDenyRegister: true }))).to.throw('User not found.');
   });
 
-  it('should registration throw error: disabled multi registration', async () => {
+  it('should registration throw error: user exist (split sign up/sign in)', async () => {
     FirebaseSdkStub.resolves(
       firebaseMock({ user: { email: 'some@email.com', emailVerified: true } }),
     );
