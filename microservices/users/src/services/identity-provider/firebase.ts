@@ -17,24 +17,43 @@ class Firebase extends Abstract {
   /**
    * @inheritDoc
    */
-  public async signIn({ isDenyRegister }: TSingInParams = {}): Promise<ISingInReturn> {
+  public async signIn({
+    isDenyRegister,
+    isDenyAuthViaRegister,
+  }: TSingInParams = {}): Promise<ISingInReturn> {
     const [firebaseUser, providerType] = await this.getFirebaseUser();
     let user = await this.userRepository.findUserByIdentifier(this.provider, firebaseUser.uid);
-    let isNew = false;
 
-    if (!user) {
-      if (isDenyRegister) {
+    if (user) {
+      if (isDenyAuthViaRegister) {
+        /**
+         * If user registered - error
+         */
         throw new BaseException({
           status: 500,
-          message: 'User not found.',
+          message: 'User already exists.',
         });
       }
 
-      user = await this.register(firebaseUser, providerType);
-      isNew = true;
+      return { user, isNew: false };
     }
 
-    return { user, isNew };
+    /**
+     * If user don't exist flow
+     */
+    if (isDenyRegister) {
+      /**
+       * If user isn't registered - error
+       */
+      throw new BaseException({
+        status: 500,
+        message: 'User not found.',
+      });
+    }
+
+    user = await this.register(firebaseUser, providerType);
+
+    return { user, isNew: true };
   }
 
   /**

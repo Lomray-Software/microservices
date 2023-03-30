@@ -12,7 +12,14 @@ export interface ISingInReturn {
   isNew: boolean;
 }
 
-export type TSingInParams = { isDenyRegister?: boolean } & Record<string, any>;
+/**
+ * isDenyRegister - error on auth if users dont exists
+ * isDenyAuthViaRegister - error on register if user exists
+ */
+export type TSingInParams = { isDenyRegister?: boolean; isDenyAuthViaRegister?: boolean } & Record<
+  string,
+  any
+>;
 
 /**
  * Abstract class for identity providers
