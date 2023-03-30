@@ -14,7 +14,7 @@ export interface ISingInReturn {
 
 /**
  * isDenyRegister - prevent sign in if user exist
- * isDenyAuthViaRegister - error on register if user exists
+ * isDenyAuthViaRegister - prevent sign in if user exist (split sign up/sign in)
  */
 export type TSingInParams = { isDenyRegister?: boolean; isDenyAuthViaRegister?: boolean } & Record<
   string,
