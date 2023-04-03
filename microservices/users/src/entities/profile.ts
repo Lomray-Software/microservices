@@ -40,7 +40,7 @@ class Profile {
   @IsISO8601() // date yyyy-mm-dd
   @IsNullable()
   @IsUndefinable()
-  birthDay: string | null;
+  birthDay: null | string;
 
   @Column({ type: 'varchar', length: 3000, default: null })
   @Length(1, 3000)
