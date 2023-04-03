@@ -40,7 +40,7 @@ describe('Check users microservice permissions', () => {
     for (const request of requests) {
       const response = await request({}, { authToken });
 
-      expect(response.error, response.error?.message).to.undefined;
+      expect(response.error?.status).to.equal(404);
     }
   });
 });

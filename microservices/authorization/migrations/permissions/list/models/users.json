@@ -7,7 +7,7 @@
       "userId": {
         "in": {
           "user": {
-            "condition": "<%= value === current.userId %>"
+            "condition": "Fields: user owner"
           },
           "admin": "allow"
         },
@@ -25,7 +25,7 @@
         "out": {
           "guest": "allow",
           "user": {
-            "condition": "<%= entity.userId === current.userId %>"
+            "condition": "Fields: user owner"
           },
           "admin": "allow"
         }
@@ -38,7 +38,7 @@
         "out": {
           "guest": "allow",
           "user": {
-            "condition": "<%= entity.userId === current.userId %>"
+            "condition": "Fields: user owner"
           },
           "admin": "allow"
         }
@@ -63,7 +63,7 @@
             "out": {
               "guest": "allow",
               "user": {
-                "condition": "<%= entity.userId === current.userId %>"
+                "condition": "Fields: user owner"
               },
               "admin": "allow"
             }
@@ -75,7 +75,7 @@
             "out": {
               "guest": "allow",
               "user": {
-                "condition": "<%= entity.userId === current.userId %>"
+                "condition": "Fields: user owner"
               },
               "admin": "allow"
             }
@@ -198,7 +198,7 @@
       "id": {
         "in": {
           "user": {
-            "condition": "<%= value === current.userId %>"
+            "condition": "Fields: user entity owner"
           },
           "admin": "allow"
         },
@@ -259,7 +259,7 @@
         "out": {
           "guest": "allow",
           "user": {
-            "condition": "<%= entity.id === current.userId %>"
+            "condition": "Fields: user entity owner"
           },
           "admin": "allow"
         }
@@ -271,7 +271,7 @@
         "out": {
           "guest": "allow",
           "user": {
-            "condition": "<%= entity.id === current.userId %>"
+            "condition": "Fields: user entity owner"
           },
           "admin": "allow"
         }
@@ -314,7 +314,7 @@
         "out": {
           "admin": "allow",
           "user": {
-            "condition": "<%= current.userId === _.get(value, '0.userId') %>"
+            "condition": "Fields: user entity owner"
           }
         }
       }
@@ -645,7 +645,7 @@
       "userId": {
         "in": {
           "user": {
-            "template": "<%= value === current.userId ? value : undefined %>"
+            "condition": "Fields: user owner"
           },
           "admin": "allow"
         },
@@ -690,7 +690,7 @@
       "userId": {
         "in": {
           "user": {
-            "template": "<%= value === current.userId ? value : undefined %>"
+            "condition": "Fields: user owner"
           },
           "admin": "allow"
         },
@@ -783,7 +783,7 @@
       "userId": {
         "in": {
           "user": {
-            "template": "<%= value === current.userId ? value : undefined %>"
+            "condition": "Fields: user owner"
           },
           "admin": "allow"
         },
@@ -964,7 +964,7 @@
       "userId": {
         "in": {
           "user": {
-            "template": "<%= value === current.userId ? value : undefined %>"
+            "condition": "Fields: user owner"
           },
           "admin": "allow"
         },

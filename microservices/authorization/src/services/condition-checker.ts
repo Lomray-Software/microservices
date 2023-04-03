@@ -165,8 +165,12 @@ class ConditionChecker {
   /**
    * Parse conditions and exec
    */
-  public async execConditions(conditions: IConditions): Promise<boolean> {
+  public async execConditions(conditions?: IConditions): Promise<boolean> {
     let isAllow = false;
+
+    if (!conditions) {
+      return isAllow;
+    }
 
     for (const [operator, condition] of Object.entries(conditions)) {
       switch (operator) {

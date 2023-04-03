@@ -172,7 +172,7 @@ describe('services/endpoint-handler', () => {
         return fieldsFilterService;
       });
 
-      await service.filterFields(type, fields);
+      await service.filterFields(type, Microservice.getInstance(), fields);
 
       const { userId: filterUserId, userRoles, modelRepository } = fieldsFilterParams ?? {};
 

@@ -57,7 +57,7 @@ describe('methods/endpoint/filter', () => {
 
       const res = await Filter({ type, filterInput, method, userId }, endpointOptions);
 
-      const [resType, resInput] = endpointHandlerSpy?.firstCall.args ?? [];
+      const [resType, , resInput] = endpointHandlerSpy?.firstCall.args ?? [];
 
       const {
         userId: filterUserId,
