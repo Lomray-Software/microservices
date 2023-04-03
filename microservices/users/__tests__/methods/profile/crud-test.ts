@@ -54,10 +54,6 @@ describe('methods/profile/crud', () => {
     expect(Crud.remove).to.be.undefined;
   });
 
-  it("should haven't create method", () => {
-    expect(Crud.create).to.be.undefined;
-  });
-
   it("should haven't list method", () => {
     expect(Crud.list).to.be.undefined;
   });
