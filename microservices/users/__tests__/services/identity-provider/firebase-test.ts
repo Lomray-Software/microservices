@@ -117,7 +117,6 @@ describe('services/sign-up', () => {
     FirebaseSdkStub.resolves(firebaseMock({ user: { email, emailVerified: true } }));
     TypeormMock.queryBuilder.getOne.resolves(undefined);
 
-    // mock transaction
     TypeormMock.entityManager.findOne.resolves(mockProfile());
     TypeormMock.entityManager.save.resolves(mockUser);
 
