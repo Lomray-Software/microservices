@@ -20,9 +20,12 @@ class Firebase extends Abstract {
   public async signIn({
     isDenyRegister,
     isDenyAuthViaRegister,
+    isShouldAttachUserPhoto = true,
   }: TSingInParams = {}): Promise<ISingInReturn> {
     const [firebaseUser, providerType] = await this.getFirebaseUser();
     const user = await this.userRepository.findUserByIdentifier(this.provider, firebaseUser.uid);
+
+    this.setIsShouldAttachUserPhoto(isShouldAttachUserPhoto);
 
     if (!user) {
       if (isDenyRegister) {
@@ -102,6 +105,19 @@ class Firebase extends Abstract {
   }
 
   /**
+   * Returns user photo if it should be attached
+   * NOTE: Uses while user on split sign up want to upload own photo,
+   * in this case we don't need to set photo from user provider result
+   */
+  protected getUserPhoto(firebaseUser: UserRecord) {
+    if (!this.isShouldAttachUserPhoto) {
+      return null;
+    }
+
+    return Firebase.getUserPhoto(firebaseUser) ?? null;
+  }
+
+  /**
    * Make or update user profile
    * @protected
    */
@@ -109,7 +125,7 @@ class Firebase extends Abstract {
     const updatedProfile = profile ?? this.profileRepository.create({ params: {} });
 
     if (!updatedProfile.photo) {
-      updatedProfile.photo = Firebase.getUserPhoto(firebaseUser) ?? null;
+      updatedProfile.photo = this.getUserPhoto(firebaseUser);
     }
 
     updatedProfile.params.isEmailVerified = firebaseUser.emailVerified;
