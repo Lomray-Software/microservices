@@ -25,7 +25,7 @@ class Firebase extends Abstract {
     const [firebaseUser, providerType] = await this.getFirebaseUser();
     const user = await this.userRepository.findUserByIdentifier(this.provider, firebaseUser.uid);
 
-    this.setIsShouldAttachUserPhoto(isShouldAttachUserPhoto);
+    this.isShouldAttachUserPhoto = isShouldAttachUserPhoto;
 
     if (!user) {
       if (isDenyRegister) {

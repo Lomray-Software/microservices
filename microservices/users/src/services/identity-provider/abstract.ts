@@ -84,13 +84,6 @@ abstract class Abstract {
   public abstract attachProvider(userId: string, params?: Record<string, any>): Promise<User>;
 
   /**
-   * Set is should attach user photo
-   */
-  protected setIsShouldAttachUserPhoto(isShouldAttachUserPhoto: boolean) {
-    this.isShouldAttachUserPhoto = isShouldAttachUserPhoto;
-  }
-
-  /**
    * Validate entities
    * @private
    */
