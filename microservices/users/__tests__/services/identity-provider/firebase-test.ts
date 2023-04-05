@@ -111,6 +111,38 @@ describe('services/sign-up', () => {
     );
   });
 
+  it('should register new user without the photo', async () => {
+    FirebaseSdkStub.resolves(
+      firebaseMock({ user: { email: mockUser.email, emailVerified: true } }),
+    );
+    TypeormMock.queryBuilder.getOne.resolves(undefined);
+
+    TypeormMock.entityManager.findOne.resolves(mockProfile());
+    TypeormMock.entityManager.save.resolves(mockUser);
+
+    await service.signIn({ isShouldAttachUserPhoto: false });
+
+    const [, profile] = TypeormMock.entityManager.save.thirdCall.args;
+
+    expect(profile?.photo).to.be.null;
+  });
+
+  it('should register new user with the photo', async () => {
+    FirebaseSdkStub.resolves(
+      firebaseMock({ user: { email: mockUser.email, emailVerified: true } }),
+    );
+    TypeormMock.queryBuilder.getOne.resolves(undefined);
+
+    TypeormMock.entityManager.findOne.resolves(mockProfile());
+    TypeormMock.entityManager.save.resolves(mockUser);
+
+    await service.signIn();
+
+    const [, profile] = TypeormMock.entityManager.save.thirdCall.args;
+
+    expect(profile?.photo).to.be.equal(providerGoogle.photoURL);
+  });
+
   it('should register new user', async () => {
     const email = 'demo@email.com';
 

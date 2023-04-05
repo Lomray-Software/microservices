@@ -16,15 +16,21 @@ export interface ISingInReturn {
  * isDenyRegister - prevent sign in if user exist
  * isDenyAuthViaRegister - prevent sign in if user exist (split sign up/sign in)
  */
-export type TSingInParams = { isDenyRegister?: boolean; isDenyAuthViaRegister?: boolean } & Record<
-  string,
-  any
->;
+export type TSingInParams = {
+  isDenyRegister?: boolean;
+  isDenyAuthViaRegister?: boolean;
+  isShouldAttachUserPhoto?: boolean;
+} & Record<string, any>;
 
 /**
  * Abstract class for identity providers
  */
 abstract class Abstract {
+  /**
+   * Is should attach user photo
+   */
+  protected isShouldAttachUserPhoto = true;
+
   /**
    * @protected
    */
