@@ -109,7 +109,7 @@ class Firebase extends Abstract {
    * NOTE: Uses while user on split sign up want to upload own photo,
    * in this case we don't need to set photo from user provider result
    */
-  protected getUserPhoto(firebaseUser: UserRecord) {
+  protected getUserPhoto(firebaseUser: UserRecord): string | null {
     if (!this.isShouldAttachUserPhoto) {
       return null;
     }
