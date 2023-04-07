@@ -3,6 +3,7 @@ import type { EntityManager } from 'typeorm';
 import type PaymentProvider from '@constants/payment-provider';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
+import ConnectAccount from '@entities/connect-account';
 import Customer from '@entities/customer';
 import type IStripeOptions from '@interfaces/stripe-options';
 import Abstract from './abstract';
@@ -69,6 +70,19 @@ class Stripe extends Abstract {
     const stripeCustomer: StripeSdk.Customer = await this.paymentEntity.customers.create();
 
     return super.createCustomer(userId, stripeCustomer.id);
+  }
+
+  /**
+   * Create ConnectAccount entity
+   */
+  public async createConnectAccount(userId: string): Promise<ConnectAccount> {
+    const stripeConnectAccount: StripeSdk.Account = await this.paymentEntity.accounts.create({
+      type: 'standard',
+      country: 'US',
+      email: '',
+    });
+
+    return super.createConnectAccount(userId, stripeConnectAccount.id);
   }
 }
 
