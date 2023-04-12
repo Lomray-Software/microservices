@@ -39,6 +39,8 @@ class Firebase extends Abstract {
 
       const userResult = await this.register(firebaseUser, providerType);
 
+      console.log('1', userResult);
+
       return { user: userResult, isNew: true };
     }
 
@@ -92,7 +94,7 @@ class Firebase extends Abstract {
    * NOTE: type - (google or facebook)
    * @protected
    */
-  protected async register(firebaseUser: UserRecord, type: string): Promise<User> {
+  protected register(firebaseUser: UserRecord, type: string): Promise<User> {
     const [firstName, lastName, middleName] = firebaseUser.displayName?.split(' ') ?? [];
     const user = this.userRepository.create({
       firstName,
@@ -107,7 +109,7 @@ class Firebase extends Abstract {
     /**
      * Approve non-trusted identity provider
      */
-    void (await this.approveFirebaseUserProvider(firebaseUser));
+    void this.approveFirebaseUserProvider(firebaseUser);
 
     return this.createUser(user, identityProvider, profile);
   }
