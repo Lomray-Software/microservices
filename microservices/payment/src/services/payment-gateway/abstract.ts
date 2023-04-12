@@ -4,6 +4,8 @@ import PaymentProvider from '@constants/payment-provider';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Customer from '@entities/customer';
+import Price from '@entities/price';
+import Product from '@entities/product';
 import type TPaymentOptions from '@interfaces/payment-options';
 
 export interface ICardParams {
@@ -12,6 +14,18 @@ export interface ICardParams {
 
 export interface IBankAccountParams {
   test: boolean;
+}
+
+export interface IPriceParams {
+  productId: string;
+  userId: string;
+  currency: string;
+  unitAmount: number;
+}
+
+export interface IProductParams {
+  entityId: string;
+  userId: string;
 }
 
 /**
@@ -31,6 +45,16 @@ abstract class Abstract {
   /**
    * @protected
    */
+  protected readonly productRepository: Repository<Product>;
+
+  /**
+   * @protected
+   */
+  protected readonly priceRepository: Repository<Price>;
+
+  /**
+   * @protected
+   */
   protected readonly paymentOptions: TPaymentOptions;
 
   /**
@@ -44,6 +68,8 @@ abstract class Abstract {
     this.paymentProvider = paymentProvider;
     this.paymentOptions = paymentOptions;
     this.customerRepository = manager.getRepository(Customer);
+    this.productRepository = manager.getRepository(Product);
+    this.priceRepository = manager.getRepository(Price);
   }
 
   /**
@@ -81,6 +107,42 @@ abstract class Abstract {
     await this.customerRepository.save(customer);
 
     return customer;
+  }
+
+  /**
+   * Create new product
+   */
+  public async createProduct(params: IProductParams, productId: string = uuid()) {
+    const { entityId, userId } = params;
+
+    const product = this.productRepository.create({
+      entityId,
+      userId,
+      productId,
+    });
+
+    await this.productRepository.save(product);
+
+    return product;
+  }
+
+  /**
+   * Create new price
+   */
+  public async createPrice(params: IPriceParams, priceId: string = uuid()) {
+    const { productId, currency, unitAmount, userId } = params;
+
+    const price = this.priceRepository.create({
+      priceId,
+      productId,
+      userId,
+      currency,
+      unitAmount,
+    });
+
+    await this.priceRepository.save(price);
+
+    return price;
   }
 }
 
