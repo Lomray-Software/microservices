@@ -21,11 +21,13 @@ class Firebase extends Abstract {
     isDenyRegister,
     isDenyAuthViaRegister,
     isShouldAttachUserPhoto = true,
+    isShouldApproveProvider = false,
   }: TSingInParams = {}): Promise<ISingInReturn> {
     const [firebaseUser, providerType] = await this.getFirebaseUser();
     const user = await this.userRepository.findUserByIdentifier(this.provider, firebaseUser.uid);
 
     this.isShouldAttachUserPhoto = isShouldAttachUserPhoto;
+    this.isShouldApproveProvider = isShouldApproveProvider;
 
     if (!user) {
       if (isDenyRegister) {
@@ -121,7 +123,7 @@ class Firebase extends Abstract {
     /**
      * If email verified by default true for trusted provider
      */
-    if (firebaseUser.emailVerified) {
+    if (firebaseUser.emailVerified || !this.isShouldApproveProvider) {
       return;
     }
 
