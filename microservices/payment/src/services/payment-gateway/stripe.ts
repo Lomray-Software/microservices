@@ -1,11 +1,20 @@
 import StripeSdk from 'stripe';
 import type { EntityManager } from 'typeorm';
+import { Repository } from 'typeorm';
 import type PaymentProvider from '@constants/payment-provider';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Customer from '@entities/customer';
+import Price from '@entities/price';
+import Product from '@entities/product';
 import type IStripeOptions from '@interfaces/stripe-options';
-import Abstract from './abstract';
+import Abstract, { IPriceParams, IProductParams } from './abstract';
+
+export interface IStripeProductParams extends IProductParams {
+  name: string;
+  description?: string;
+  images?: string[];
+}
 
 /**
  * Stripe payment provider
@@ -22,6 +31,16 @@ class Stripe extends Abstract {
   protected readonly paymentOptions: IStripeOptions;
 
   /**
+   * @protected
+   */
+  protected readonly productRepository: Repository<Product>;
+
+  /**
+   * @protected
+   */
+  protected readonly priceRepository: Repository<Price>;
+
+  /**
    * @constructor
    */
   constructor(
@@ -32,6 +51,8 @@ class Stripe extends Abstract {
     super(paymentProvider, paymentOptions, manager);
 
     this.paymentEntity = new StripeSdk(paymentOptions.apiKey, paymentOptions.config);
+    this.productRepository = manager.getRepository(Product);
+    this.priceRepository = manager.getRepository(Price);
   }
   /**
    * Add new card
@@ -69,6 +90,47 @@ class Stripe extends Abstract {
     const stripeCustomer: StripeSdk.Customer = await this.paymentEntity.customers.create();
 
     return super.createCustomer(userId, stripeCustomer.id);
+  }
+
+  /**
+   * Create Product entity
+   */
+  public async createProduct(params: IStripeProductParams): Promise<Product> {
+    const { entityId, name, description, images, userId } = params;
+
+    const { id }: StripeSdk.Product = await this.paymentEntity.products.create({
+      name,
+      description,
+      images,
+    });
+
+    return this.productRepository.create({
+      entityId,
+      userId,
+      productId: id,
+    });
+  }
+
+  /**
+   * Create Price entity
+   */
+  public async createPrice(params: IPriceParams): Promise<Price> {
+    const { currency, unitAmount, productId, userId } = params;
+
+    const { id }: StripeSdk.Price = await this.paymentEntity.prices.create({
+      currency,
+      product: productId,
+      // eslint-disable-next-line camelcase
+      unit_amount: unitAmount,
+    });
+
+    return this.priceRepository.create({
+      priceId: id,
+      userId,
+      productId,
+      currency,
+      unitAmount,
+    });
   }
 }
 
