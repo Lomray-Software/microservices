@@ -1,15 +1,21 @@
 import _ from 'lodash';
 import type { Repository } from 'typeorm';
 import FieldPolicy from '@constants/field-policy';
-import { FilterType } from '@constants/filter';
-import Model, { IModelSchema, IRolePermissions } from '@entities/model';
+import type { FilterType } from '@constants/filter';
+import type Condition from '@entities/condition';
+import type Model from '@entities/model';
+import type { IModelSchema, IRolePermissions } from '@entities/model';
+import type ConditionChecker from '@services/condition-checker';
+import type { IConditions } from '@services/condition-checker';
 import Templater from '@services/templater';
 
 export interface IFieldsFilter {
   userId?: string | null;
   userRoles: string[];
-  templateOptions?: Record<string, any>;
+  conditionChecker: ConditionChecker;
   modelRepository: Repository<Model>;
+  conditionRepository: Repository<Condition>;
+  templateOptions?: Record<string, any>;
 }
 
 /**
@@ -34,10 +40,25 @@ class FieldsFilter {
   /**
    * @private
    */
+  private conditionRepository: IFieldsFilter['conditionRepository'];
+
+  /**
+   * @private
+   */
+  private readonly conditionChecker: IFieldsFilter['conditionChecker'];
+
+  /**
+   * @private
+   */
   private cachedSchemas: { [schemaAlias: string]: IModelSchema } = {
     denyAll: { '*': FieldPolicy.deny },
     allowAll: { '*': FieldPolicy.allow },
   };
+
+  /**
+   * @private
+   */
+  private cachedConditions: { [conditionTitle: string]: IConditions | undefined } = {};
 
   /**
    * @private
@@ -48,10 +69,19 @@ class FieldsFilter {
    * @protected
    * @constructor
    */
-  protected constructor({ userId, userRoles, templateOptions, modelRepository }: IFieldsFilter) {
+  protected constructor({
+    userId,
+    userRoles,
+    modelRepository,
+    conditionRepository,
+    conditionChecker,
+    templateOptions,
+  }: IFieldsFilter) {
     this.userId = userId;
     this.userRoles = userRoles;
     this.modelRepository = modelRepository;
+    this.conditionRepository = conditionRepository;
+    this.conditionChecker = conditionChecker;
 
     Object.assign(this.templateOptions, templateOptions);
   }
@@ -59,7 +89,7 @@ class FieldsFilter {
   /**
    * Init fields filter
    */
-  static init(params: IFieldsFilter): FieldsFilter {
+  public static init(params: IFieldsFilter): FieldsFilter {
     return new FieldsFilter(params);
   }
 
@@ -84,16 +114,16 @@ class FieldsFilter {
       this.templateOptions.fields = fields;
     }
 
-    return (await this.filterBySchema(schema, type, fields)) || {};
+    return (await this.filterBySchema(schema, type, alias, fields)) || {};
   }
 
   /**
    * Filter fields by schema
-   * @private
    */
   private async filterBySchema<TFields = Record<string, any>>(
     schema: IModelSchema,
     type: FilterType,
+    schemaAlias: string,
     fields?: TFields,
   ): Promise<Partial<TFields> | undefined> {
     // general check for model
@@ -104,7 +134,7 @@ class FieldsFilter {
     }
 
     if (Array.isArray(fields)) {
-      return this.filterArray(schema, type, fields);
+      return this.filterArray(schema, type, schemaAlias, fields);
     }
 
     const fieldsEntries = Object.entries(fields || {});
@@ -129,13 +159,15 @@ class FieldsFilter {
       if (typeof policy === 'string') {
         const nestedSchema = await this.getSchemaByAlias(policy);
 
-        newValue = await this.filterBySchema(nestedSchema, type, value);
+        newValue = await this.filterBySchema(nestedSchema, type, policy, value);
       } else if ('case' in policy) {
         // dynamic schema (like switch - case)
-        const caseValue = this.templateValue(policy.case.template, value);
+        const caseValue = this.templateValue(policy.case.template, type, field, schemaAlias, value);
         const dynamicSchema = { [field]: policy.object[caseValue] } as IModelSchema;
 
-        newValue = (await this.filterBySchema(dynamicSchema, type, { [field]: value }))?.[field];
+        newValue = (
+          await this.filterBySchema(dynamicSchema, type, schemaAlias, { [field]: value })
+        )?.[field];
 
         if (_.isEmpty(newValue)) {
           newValue = undefined;
@@ -146,7 +178,14 @@ class FieldsFilter {
 
         // check object permissions
         if (type in policy) {
-          nestedValue = this.checkField(policy[type] as IRolePermissions, value, fields);
+          nestedValue = await this.checkField(
+            policy[type] as IRolePermissions,
+            type,
+            field,
+            schemaAlias,
+            value,
+            fields,
+          );
 
           if (!nestedValue) {
             continue;
@@ -161,16 +200,24 @@ class FieldsFilter {
                 [field]: policy.object,
               } as IModelSchema,
               type,
+              schemaAlias,
               { [field]: nestedValue },
             )
           )?.[field];
         } else {
           // plain object
-          newValue = await this.filterBySchema(policy.object, type, nestedValue);
+          newValue = await this.filterBySchema(policy.object, type, schemaAlias, nestedValue);
         }
       } else if (type in policy) {
         // simple field
-        newValue = this.checkField(policy[type] as IRolePermissions, value, fields);
+        newValue = await this.checkField(
+          policy[type] as IRolePermissions,
+          type,
+          field,
+          schemaAlias,
+          value,
+          fields,
+        );
       }
 
       if (newValue !== undefined) {
@@ -183,9 +230,15 @@ class FieldsFilter {
 
   /**
    * Validate field by role permissions
-   * @private
    */
-  private checkField(permissions: IRolePermissions, value: any, fields?: Record<string, any>): any {
+  private async checkField(
+    permissions: IRolePermissions,
+    type: FilterType,
+    fieldName: string,
+    schemaAlias: string,
+    value: any,
+    fields?: Record<string, any>,
+  ): Promise<any> {
     for (const role of [...(this.userId ? [this.userId] : []), ...this.userRoles]) {
       const permission = permissions[role];
 
@@ -202,13 +255,25 @@ class FieldsFilter {
       }
 
       if ('condition' in permission) {
-        const result = this.templateValue(permission.condition, value, fields);
+        this.conditionChecker.addTemplateParams(
+          this.getTemplateParams(type, fieldName, schemaAlias, value, fields),
+        );
 
-        return result === 'true' ? value : undefined;
+        const condition = await this.getCondition(permission.condition);
+        const isAllow = await this.conditionChecker.execConditions(condition);
+
+        return isAllow ? value : undefined;
       }
 
       if ('template' in permission) {
-        const newValue = this.templateValue(permission.template, value, fields);
+        const newValue = this.templateValue(
+          permission.template,
+          type,
+          fieldName,
+          schemaAlias,
+          value,
+          fields,
+        );
 
         if (newValue === 'undefined') {
           return undefined;
@@ -223,34 +288,72 @@ class FieldsFilter {
   }
 
   /**
-   * Template value
-   * @private
+   * Get condition
    */
-  private templateValue(template: string, value?: any, fields: Record<string, any> = {}): string {
-    return Templater.compile(template, {
+  private async getCondition(title: string): Promise<IConditions | undefined> {
+    if (!this.cachedConditions[title]) {
+      this.cachedConditions[title] = (
+        await this.conditionRepository.findOne({ title })
+      )?.conditions;
+    }
+
+    return this.cachedConditions[title];
+  }
+
+  /**
+   * Get template params
+   */
+  private getTemplateParams(
+    type: FilterType,
+    field: string,
+    schemaAlias?: string,
+    value?: any,
+    fields: Record<string, any> = {},
+  ): Record<string, any> {
+    return {
+      field,
       value,
+      schemaAlias,
       entity: fields,
       params: this.templateOptions,
       current: {
+        type,
         userId: this.userId,
         roles: this.userRoles,
       },
-    });
+    };
+  }
+
+  /**
+   * Template value
+   */
+  private templateValue(
+    template: string,
+    type: FilterType,
+    field: string,
+    schemaAlias: string,
+    value?: any,
+    fields: Record<string, any> = {},
+  ): string {
+    return Templater.compile(
+      template,
+      this.getTemplateParams(type, field, schemaAlias, value, fields),
+    );
   }
 
   /**
    * Filter fields in array
-   * @private
    */
   private async filterArray<TFields extends Record<string, any>[]>(
     schema: IModelSchema,
     type: FilterType,
+    schemaAlias: string,
     fields: TFields,
   ): Promise<TFields> {
     const result = [];
 
     for (const entity of fields) {
-      result.push(await this.filterBySchema(schema, type, entity));
+      result.push(await this.filterBySchema(schema, type, schemaAlias, entity));
     }
 
     return result as TFields;
@@ -258,7 +361,6 @@ class FieldsFilter {
 
   /**
    * Get schema by alias
-   * @private
    */
   private async getSchemaByAlias(alias: string): Promise<IModelSchema> {
     if (this.cachedSchemas[alias]) {
@@ -277,7 +379,6 @@ class FieldsFilter {
 
   /**
    * Cache schema by alias
-   * @private
    */
   private cacheSchema(alias: string, schema: IModelSchema): void {
     if (this.cachedSchemas[alias]) {

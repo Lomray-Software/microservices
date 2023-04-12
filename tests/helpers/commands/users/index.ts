@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import TokenCreateReturnType from '@lomray/microservices-client-api/constants/token-return-type';
 import TokenType from '@lomray/microservices-client-api/constants/token-type';
 import IUser from '@lomray/microservices-client-api/interfaces/users/entities/user';
+import _ from 'lodash';
 import type Endpoints from '@helpers/api/endpoints';
 
 /**
@@ -28,7 +29,7 @@ class UsersCommands {
    */
   public createUser = async (
     userFields: Record<string, any>,
-    { roleAlias = 'user', isOnlyToken = true } = {},
+    { roleAlias = 'user', isOnlyToken = true, withIdentityProvider = false } = {},
   ): Promise<{ user: IUser; token: string }> => {
     let userResponse;
 
@@ -51,6 +52,21 @@ class UsersCommands {
     }
 
     const { entity } = userResponse.result!;
+
+    if (withIdentityProvider) {
+      await this.endpoints.usersExtra.identityProvider.create(
+        {
+          fields: {
+            userId: entity.id,
+            provider: 'firebase',
+            identifier: randomUUID(),
+          },
+        },
+        {
+          isDirectReq: true,
+        },
+      );
+    }
 
     /**
      * Create personal token
@@ -97,6 +113,14 @@ class UsersCommands {
       token,
     };
   };
+
+  /**
+   * Get user random fields
+   */
+  public getRandomFields = (): Partial<IUser> => ({
+    email: `${randomUUID()}@email.com`,
+    phone: `+37529${_.random(1111111, 9999999)}`,
+  });
 }
 
 export default UsersCommands;
