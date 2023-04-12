@@ -1,6 +1,7 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
+import { UpdateRequest } from 'firebase-admin/lib/auth/auth-config';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
 import IdProvider from '@constants/id-provider';
@@ -39,6 +40,13 @@ describe('services/sign-up', () => {
         // eslint-disable-next-line camelcase
         firebase: { sign_in_provider: providerGoogle.providerId },
         ...token,
+      }),
+      updateUser: (params: UpdateRequest) => ({
+        uid: firebaseUid,
+        displayName: 'First Last Middle',
+        photoUrl: 'http://example',
+        ...user,
+        ...params,
       }),
     }),
   });
@@ -229,6 +237,59 @@ describe('services/sign-up', () => {
       userId: mockUser.id,
       photo: `${providerFacebook.photoURL}?type=large`,
       params: { isEmailVerified: undefined, isPhoneVerified: true },
+    });
+  });
+
+  it('should update user account: approve for non-trusted provider email', async () => {
+    const email = 'demo@gmail.com';
+
+    const firebase = firebaseMock({
+      user: {
+        email,
+        emailVerified: false,
+        providerData: [providerFacebook],
+      },
+      // eslint-disable-next-line camelcase
+      token: { firebase: { sign_in_provider: providerFacebook.providerId } },
+    });
+
+    FirebaseSdkStub.resolves(firebase);
+    TypeormMock.queryBuilder.getOne.resolves(undefined);
+
+    TypeormMock.entityManager.findOne.resolves(mockProfile());
+    TypeormMock.entityManager.save.resolves(mockUser);
+
+    const res = await service.signIn();
+
+    const [, entityUser] = TypeormMock.entityManager.save.firstCall.args;
+    const [, identityProvider] = TypeormMock.entityManager.save.secondCall.args;
+    const [, profile] = TypeormMock.entityManager.save.thirdCall.args;
+
+    const firebaseUserResultGet = firebase.auth().getUser();
+    const firebaseUserResultUpdate = firebase.auth().updateUser({ emailVerified: true });
+
+    expect(res).to.deep.equal({ user: mockUser, isNew: true });
+    expect(entityUser).to.deep.equal({
+      firstName: 'First',
+      lastName: 'Last',
+      middleName: 'Middle',
+      email,
+    });
+    expect(identityProvider).to.deep.equal({
+      provider: 'firebase',
+      identifier: firebaseUid,
+      type: providerFacebook.providerId,
+      params: { uid: providerFacebook.uid },
+      userId: mockUser.id,
+    });
+    expect(profile).to.deep.equal({
+      userId: mockUser.id,
+      photo: `${providerFacebook.photoURL}?type=large`,
+      params: { isEmailVerified: false, isPhoneVerified: false },
+    });
+    expect(firebaseUserResultUpdate).to.deep.equal({
+      ...firebaseUserResultGet,
+      emailVerified: true,
     });
   });
 });
