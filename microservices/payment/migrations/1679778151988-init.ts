@@ -9,10 +9,10 @@ export default class init1679778151988 implements MigrationInterface {
     );
     await queryRunner.query(`CREATE INDEX "IDX_payment_userId" ON "customer" ("userId") `);
     await queryRunner.query(
-      `CREATE TABLE "product" ("productId" character varying(18) NOT NULL, "entityId" character varying(36) NOT NULL, "userId" character varying(36), CONSTRAINT "product(pk):productId_entityId" PRIMARY KEY ("productId", "entityId"))`,
+      `CREATE TABLE "product" ("productId" character varying(19) NOT NULL, "entityId" character varying(36) NOT NULL, "userId" character varying(36), CONSTRAINT "product(pk):productId_entityId" PRIMARY KEY ("productId", "entityId"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "price" ("priceId" character varying(30) NOT NULL, "productId" character varying(36) NOT NULL, "userId" character varying(36), "currency" character varying(10) NOT NULL, "unitAmount" integer NOT NULL, CONSTRAINT "price(rel):productId" UNIQUE ("productId"), CONSTRAINT "price(pk):priceId" PRIMARY KEY ("priceId"))`,
+      `CREATE TABLE "price" ("priceId" character varying(30) NOT NULL, "productId" character varying(19) NOT NULL, "userId" character varying(36), "currency" character varying(10) NOT NULL, "unitAmount" integer NOT NULL, CONSTRAINT "price(rel):productId" UNIQUE ("productId"), CONSTRAINT "price(pk):priceId" PRIMARY KEY ("priceId"))`,
     );
     await queryRunner.query(
       `ALTER TABLE "price" ADD CONSTRAINT "price(fk):productId_productId" FOREIGN KEY ("productId") REFERENCES "product"("productId") ON DELETE NO ACTION ON UPDATE NO ACTION`,

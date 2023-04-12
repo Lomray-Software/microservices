@@ -11,7 +11,7 @@ import Price from '@entities/price';
 })
 @Entity()
 class Product {
-  @PrimaryColumn({ type: 'varchar', length: 18 })
+  @PrimaryColumn({ type: 'varchar', length: 19 })
   @Allow()
   productId: string;
 

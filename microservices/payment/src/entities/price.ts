@@ -15,7 +15,7 @@ class Price {
   @Allow()
   priceId: string;
 
-  @Column({ type: 'varchar', length: 36 })
+  @Column({ type: 'varchar', length: 19 })
   @Allow()
   productId: string;
 

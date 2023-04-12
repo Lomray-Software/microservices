@@ -98,10 +98,13 @@
     "schema": {
       "userId": {
         "in": {
+          "user": {
+            "condition": "<%= value === current.userId %>"
+          },
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -130,10 +133,13 @@
     "schema": {
       "userId": {
         "in": {
+          "user": {
+            "condition": "<%= value === current.userId %>"
+          },
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -149,7 +155,7 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
