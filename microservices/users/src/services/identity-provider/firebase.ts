@@ -39,8 +39,6 @@ class Firebase extends Abstract {
 
       const userResult = await this.register(firebaseUser, providerType);
 
-      console.log('1', userResult);
-
       return { user: userResult, isNew: true };
     }
 
