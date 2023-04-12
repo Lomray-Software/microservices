@@ -38,7 +38,7 @@ const create = Endpoint.custom(
     const service = await Factory.create(getManager());
 
     return {
-      entity: await service.createPrice(params),
+      entity: await service.createPriceEntity(params),
     };
   },
 );

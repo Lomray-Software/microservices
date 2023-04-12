@@ -92,13 +92,13 @@ abstract class Abstract {
       return customer;
     }
 
-    return this.createCustomer(userId);
+    return this.createCustomerEntity(userId);
   }
 
   /**
    * Create new customer
    */
-  public async createCustomer(userId: string, customerId: string = uuid()) {
+  public async createCustomerEntity(userId: string, customerId: string = uuid()) {
     const customer = this.customerRepository.create({
       customerId,
       userId,
@@ -112,13 +112,13 @@ abstract class Abstract {
   /**
    * Create new product
    */
-  public async createProduct(params: IProductParams) {
+  public async createProductEntity(params: IProductParams, productId: string = uuid()) {
     const { entityId, userId } = params;
 
     const product = this.productRepository.create({
       entityId,
       userId,
-      productId: uuid(),
+      productId,
     });
 
     await this.productRepository.save(product);
@@ -129,7 +129,7 @@ abstract class Abstract {
   /**
    * Create new price
    */
-  public async createPrice(params: IPriceParams, priceId: string = uuid()) {
+  public async createPriceEntity(params: IPriceParams, priceId: string = uuid()) {
     const { productId, currency, unitAmount, userId } = params;
 
     const price = this.priceRepository.create({

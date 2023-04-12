@@ -5,16 +5,23 @@ import { Column, Entity, Index, OneToOne, PrimaryColumn } from 'typeorm';
 import Price from '@entities/price';
 
 @JSONSchema({
+  description: 'Entity for binding application entity with the according payment service entity',
   properties: {
     price: { $ref: '#/definitions/Price' },
   },
 })
 @Entity()
 class Product {
+  @JSONSchema({
+    description: 'Field for storing id of according product entity created on payment service side',
+  })
   @PrimaryColumn({ type: 'varchar', length: 19 })
   @Allow()
   productId: string;
 
+  @JSONSchema({
+    description: 'Field for storing id of selling entity from application',
+  })
   @PrimaryColumn({ type: 'varchar', length: 36 })
   @Length(1, 36)
   entityId: string;
