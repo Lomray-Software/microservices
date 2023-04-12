@@ -87,9 +87,10 @@ class Firebase extends Abstract {
 
   /**
    * Sign up user
+   * NOTE: type - (google or facebook)
    * @protected
    */
-  protected register(firebaseUser: UserRecord, type: string): Promise<User> {
+  protected async register(firebaseUser: UserRecord, type: string): Promise<User> {
     const [firstName, lastName, middleName] = firebaseUser.displayName?.split(' ') ?? [];
     const user = this.userRepository.create({
       firstName,
@@ -101,7 +102,32 @@ class Firebase extends Abstract {
     const profile = this.getProfile(firebaseUser);
     const identityProvider = this.getIdentityProvider(firebaseUser, type);
 
+    /**
+     * Approve non-trusted identity provider
+     */
+    void (await this.approveFirebaseUserProvider(firebaseUser));
+
     return this.createUser(user, identityProvider, profile);
+  }
+
+  /**
+   * Approve firebase user identity
+   * NOTE: Set emailVerified to true for preventing override
+   * non-trusted providers
+   */
+  protected async approveFirebaseUserProvider(firebaseUser: UserRecord): Promise<void> {
+    const firebase = await FirebaseSdk();
+
+    /**
+     * If email verified by default true for trusted provider
+     */
+    if (firebaseUser.emailVerified) {
+      return;
+    }
+
+    await firebase.auth().updateUser(firebaseUser.uid, {
+      emailVerified: true,
+    });
   }
 
   /**
