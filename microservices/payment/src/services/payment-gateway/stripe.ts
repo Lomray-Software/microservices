@@ -73,16 +73,16 @@ class Stripe extends Abstract {
   /**
    * Create Customer entity
    */
-  public async createCustomerEntity(userId: string): Promise<Customer> {
+  public async createCustomer(userId: string): Promise<Customer> {
     const { id }: StripeSdk.Customer = await this.paymentEntity.customers.create();
 
-    return super.createCustomerEntity(userId, id);
+    return super.createCustomer(userId, id);
   }
 
   /**
    * Create Product entity
    */
-  public async createProductEntity(params: IStripeProductParams): Promise<Product> {
+  public async createProduct(params: IStripeProductParams): Promise<Product> {
     const { entityId, name, description, images, userId } = params;
 
     const { id }: StripeSdk.Product = await this.paymentEntity.products.create({
@@ -91,7 +91,7 @@ class Stripe extends Abstract {
       images,
     });
 
-    return super.createProductEntity(
+    return super.createProduct(
       {
         entityId,
         userId,
@@ -103,7 +103,7 @@ class Stripe extends Abstract {
   /**
    * Create Price entity
    */
-  public async createPriceEntity(params: IPriceParams): Promise<Price> {
+  public async createPrice(params: IPriceParams): Promise<Price> {
     const { currency, unitAmount, productId, userId } = params;
 
     const { id }: StripeSdk.Price = await this.paymentEntity.prices.create({
@@ -113,7 +113,7 @@ class Stripe extends Abstract {
       unit_amount: unitAmount,
     });
 
-    return super.createPriceEntity(
+    return super.createPrice(
       {
         userId,
         productId,
