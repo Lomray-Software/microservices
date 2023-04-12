@@ -41,8 +41,8 @@ describe('services/sign-up', () => {
         firebase: { sign_in_provider: providerGoogle.providerId },
         ...token,
       }),
-      updateUser: (params: UpdateRequest) => ({
-        uid: firebaseUid,
+      updateUser: (uid: string, params: UpdateRequest) => ({
+        uid,
         displayName: 'First Last Middle',
         photoUrl: 'http://example',
         ...user,
@@ -266,7 +266,9 @@ describe('services/sign-up', () => {
     const [, profile] = TypeormMock.entityManager.save.thirdCall.args;
 
     const firebaseUserResultGet = firebase.auth().getUser();
-    const firebaseUserResultUpdate = firebase.auth().updateUser({ emailVerified: true });
+    const firebaseUserResultUpdate = firebase
+      .auth()
+      .updateUser(firebaseUserResultGet.uid, { emailVerified: true });
 
     expect(res).to.deep.equal({ user: mockUser, isNew: true });
     expect(entityUser).to.deep.equal({
