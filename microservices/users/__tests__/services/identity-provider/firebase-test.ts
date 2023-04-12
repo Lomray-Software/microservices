@@ -259,7 +259,7 @@ describe('services/sign-up', () => {
     TypeormMock.entityManager.findOne.resolves(mockProfile());
     TypeormMock.entityManager.save.resolves(mockUser);
 
-    const res = await service.signIn();
+    const res = await service.signIn({ isShouldApproveProvider: true });
 
     const [, entityUser] = TypeormMock.entityManager.save.firstCall.args;
     const [, identityProvider] = TypeormMock.entityManager.save.secondCall.args;
