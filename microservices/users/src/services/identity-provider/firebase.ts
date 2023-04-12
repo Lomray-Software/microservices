@@ -120,6 +120,9 @@ class Firebase extends Abstract {
   protected async approveFirebaseUserProvider(firebaseUser: UserRecord): Promise<void> {
     const firebase = await FirebaseSdk();
 
+    console.log('this.isShouldApproveProvider', this.isShouldApproveProvider);
+    console.log('firebaseUser.emailVerified', firebaseUser.emailVerified);
+
     /**
      * If email verified by default true for trusted provider
      */
@@ -127,6 +130,9 @@ class Firebase extends Abstract {
       return;
     }
 
+    console.log('called with args:', firebaseUser.uid, {
+      emailVerified: true,
+    });
     await firebase.auth().updateUser(firebaseUser.uid, {
       emailVerified: true,
     });
