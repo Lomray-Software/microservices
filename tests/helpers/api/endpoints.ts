@@ -17,6 +17,15 @@ class Endpoints extends EndpointsDefault<Endpoints> {
   static create(client?: ApiClient): Endpoints {
     return new this((client ?? new ApiClient()) as unknown as ApiClientDefault);
   }
+
+  /**
+   * Users extra
+   */
+  usersExtra = {
+    identityProvider: {
+      create: this.createHandler('users.identity-provider.create'),
+    },
+  };
 }
 
 export default Endpoints;

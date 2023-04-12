@@ -6,7 +6,6 @@ import Profile from '@entities/profile';
  * CRUD controller for profile entity
  */
 const crud = Endpoint.controller(() => getRepository(Profile), {
-  create: false,
   remove: false,
   restore: false,
   list: false,

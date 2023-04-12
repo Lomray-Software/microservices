@@ -108,5 +108,36 @@
       ]
     },
     "createdAt": "2022-06-20T09:41:44.183Z"
+  },
+  {
+    "title": "Fields: user owner",
+    "conditions": {
+      "or": [
+        {
+          "template": "<%= current.type === 'out' && entity.userId === current.userId %>"
+        },
+        {
+          "template": "<%= current.type === 'in' && field === 'userId' && value === current.userId %>"
+        }
+      ]
+    },
+    "createdAt": "2023-03-31T09:41:44.183Z"
+  },
+  {
+    "title": "Fields: user entity owner",
+    "conditions": {
+      "or": [
+        {
+          "template": "<%= current.type === 'out' && entity.id === current.userId %>"
+        },
+        {
+          "template": "<%= current.type === 'in' && field === 'id' && value === current.userId %>"
+        },
+        {
+          "template": "<%= current.userId === _.get(value, '0.userId') %>"
+        }
+      ]
+    },
+    "createdAt": "2023-03-31T09:41:44.183Z"
   }
 ]
