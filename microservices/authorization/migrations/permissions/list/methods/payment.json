@@ -296,5 +296,18 @@
     "modelIn": "payment.PriceCreateInput",
     "modelOut": "payment.PriceCreateOutput",
     "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "stripe.create-checkout",
+    "description": "Setup intent and return client secret key",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-19T09:58:19.118Z",
+    "modelIn": "payment.CreateCheckoutSessionInput",
+    "modelOut": "payment.CreateCheckoutSessionOutput",
+    "methodFilters": []
   }
 ]

@@ -11,6 +11,7 @@ import PriceCreate from '@methods/price/create';
 import CrudPrice from '@methods/price/crud';
 import ProductCreate from '@methods/product/create';
 import CrudProduct from '@methods/product/crud';
+import CreateCheckoutSession from '@methods/stripe/create-checkout-session';
 import SetupIntent from '@methods/stripe/setup-intent';
 import CrudTransaction from '@methods/transaction/crud';
 
@@ -34,6 +35,7 @@ export default (ms: Microservice): void => {
     },
     stripe: {
       'setup-intent': SetupIntent,
+      'create-checkout': CreateCheckoutSession,
     },
     product: {
       ...CrudProduct,

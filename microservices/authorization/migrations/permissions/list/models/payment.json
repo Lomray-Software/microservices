@@ -498,5 +498,53 @@
       "entities": "payment.Price"
     },
     "createdAt": "2023-04-12T08:43:40.553Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.CreateCheckoutSessionInput",
+    "title": "Create Checkout Session Input",
+    "schema": {
+      "priceId": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "successUrl": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "cancelUrl": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-04-19T09:58:19.118Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.CreateCheckoutSessionOutput",
+    "title": "Create Checkout Session Output",
+    "schema": {
+      "redirectUrl": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-04-19T09:58:19.118Z"
   }
 ]

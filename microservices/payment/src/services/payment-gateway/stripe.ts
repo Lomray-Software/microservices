@@ -15,6 +15,12 @@ export interface IStripeProductParams extends IProductParams {
   images?: string[];
 }
 
+interface ICheckoutParams {
+  priceId: string;
+  successUrl: string;
+  cancelUrl: string;
+}
+
 /**
  * Stripe payment provider
  */
@@ -122,6 +128,29 @@ class Stripe extends Abstract {
       },
       id,
     );
+  }
+
+  /**
+   * Create checkout session and return url to redirect user for payment
+   */
+  public async createCheckoutSession(params: ICheckoutParams): Promise<string | null> {
+    const { priceId, successUrl, cancelUrl } = params;
+
+    /* eslint-disable camelcase */
+    const session = await this.paymentEntity.checkout.sessions.create({
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+    });
+    /* eslint-enable camelcase */
+
+    return session.url;
   }
 }
 
