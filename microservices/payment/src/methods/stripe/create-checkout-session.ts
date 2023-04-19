@@ -22,7 +22,7 @@ class CreateCheckoutSessionOutput {
 }
 
 /**
- * Setup intent and return client token to get access to adding payment method
+ * Creates checkout session and return redirect url to stripe checkout
  */
 const createCheckoutSession = Endpoint.custom(
   () => ({
