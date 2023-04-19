@@ -9,8 +9,10 @@ import Stripe from '@services/payment-gateway/stripe';
 class CreateCheckoutSessionInput {
   @IsString()
   priceId: string;
+
   @IsString()
   successUrl: string;
+
   @IsString()
   cancelUrl: string;
 }
