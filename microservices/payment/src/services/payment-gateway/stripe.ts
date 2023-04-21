@@ -133,7 +133,7 @@ class Stripe extends Abstract {
   /**
    * Create checkout session and return url to redirect user for payment
    */
-  public async createCheckoutSession(params: ICheckoutParams): Promise<string | null> {
+  public async createCheckout(params: ICheckoutParams): Promise<string | null> {
     const { priceId, successUrl, cancelUrl } = params;
 
     /* eslint-disable camelcase */

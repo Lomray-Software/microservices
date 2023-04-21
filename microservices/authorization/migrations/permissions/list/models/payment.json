@@ -501,8 +501,8 @@
   },
   {
     "microservice": "payment",
-    "alias": "payment.CreateCheckoutSessionInput",
-    "title": "Create Checkout Session Input",
+    "alias": "payment.CreateCheckoutInput",
+    "title": "Create Checkout Input",
     "schema": {
       "priceId": {
         "in": {
@@ -533,8 +533,8 @@
   },
   {
     "microservice": "payment",
-    "alias": "payment.CreateCheckoutSessionOutput",
-    "title": "Create Checkout Session Output",
+    "alias": "payment.CreateCheckoutOutput",
+    "title": "Create Checkout Output",
     "schema": {
       "redirectUrl": {
         "in": {

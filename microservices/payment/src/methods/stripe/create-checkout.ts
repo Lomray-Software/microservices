@@ -6,7 +6,7 @@ import PaymentProvider from '@constants/payment-provider';
 import Factory from '@services/payment-gateway/factory';
 import Stripe from '@services/payment-gateway/stripe';
 
-class CreateCheckoutSessionInput {
+class CreateCheckoutInput {
   @IsString()
   priceId: string;
 
@@ -17,7 +17,7 @@ class CreateCheckoutSessionInput {
   cancelUrl: string;
 }
 
-class CreateCheckoutSessionOutput {
+class CreateCheckoutOutput {
   @IsNullable()
   @IsString()
   redirectUrl: string | null;
@@ -26,10 +26,10 @@ class CreateCheckoutSessionOutput {
 /**
  * Creates checkout session and return redirect url to stripe checkout
  */
-const createCheckoutSession = Endpoint.custom(
+const createCheckout = Endpoint.custom(
   () => ({
-    input: CreateCheckoutSessionInput,
-    output: CreateCheckoutSessionOutput,
+    input: CreateCheckoutInput,
+    output: CreateCheckoutOutput,
     description: 'Setup intent and return client secret key',
   }),
   async ({ priceId, successUrl, cancelUrl }) => {
@@ -42,9 +42,9 @@ const createCheckoutSession = Endpoint.custom(
     const service = (await Factory.create(getManager())) as Stripe;
 
     return {
-      redirectUrl: await service.createCheckoutSession({ priceId, successUrl, cancelUrl }),
+      redirectUrl: await service.createCheckout({ priceId, successUrl, cancelUrl }),
     };
   },
 );
 
-export default createCheckoutSession;
+export default createCheckout;

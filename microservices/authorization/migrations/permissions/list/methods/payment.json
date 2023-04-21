@@ -306,8 +306,8 @@
     ],
     "denyGroup": [],
     "createdAt": "2023-04-19T09:58:19.118Z",
-    "modelIn": "payment.CreateCheckoutSessionInput",
-    "modelOut": "payment.CreateCheckoutSessionOutput",
+    "modelIn": "payment.CreateCheckoutInput",
+    "modelOut": "payment.CreateCheckoutOutput",
     "methodFilters": []
   }
 ]
