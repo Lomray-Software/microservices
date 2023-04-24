@@ -7,8 +7,6 @@ import CardAdd from '@methods/card/add';
 import CrudCard from '@methods/card/crud';
 import CustomerCreate from '@methods/customer/create';
 import CrudCustomer from '@methods/customer/crud';
-import ConnectAccountCreate from '@methods/stripe/connect-account/create';
-import CrudConnectAccount from '@methods/stripe/connect-account/crud';
 import SetupIntent from '@methods/stripe/setup-intent';
 import CrudTransaction from '@methods/transaction/crud';
 
@@ -29,10 +27,6 @@ export default (ms: Microservice): void => {
     customer: {
       ...CrudCustomer,
       create: CustomerCreate,
-    },
-    connectAccount: {
-      ...CrudConnectAccount,
-      create: ConnectAccountCreate,
     },
     stripe: {
       'setup-intent': SetupIntent,
