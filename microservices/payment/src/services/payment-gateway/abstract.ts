@@ -3,7 +3,6 @@ import { uuid } from 'uuidv4';
 import PaymentProvider from '@constants/payment-provider';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
-import ConnectAccount from '@entities/connect-account';
 import Customer from '@entities/customer';
 import type TPaymentOptions from '@interfaces/payment-options';
 
@@ -33,11 +32,6 @@ abstract class Abstract {
    * @protected
    */
   protected readonly paymentOptions: TPaymentOptions;
-
-  /**
-   * @protected
-   */
-  protected readonly connectAccountRepository: Repository<ConnectAccount>;
 
   /**
    * @constructor
@@ -87,33 +81,6 @@ abstract class Abstract {
     await this.customerRepository.save(customer);
 
     return customer;
-  }
-
-  /**
-   * Get connect account
-   */
-  protected async getConnectAccount(userId: string) {
-    const connectAccount = await this.connectAccountRepository.findOne(userId);
-
-    if (connectAccount) {
-      return connectAccount;
-    }
-
-    return this.createConnectAccount(userId);
-  }
-
-  /**
-   * Create new connect account
-   */
-  public async createConnectAccount(userId: string, connectAccountId: string = uuid()) {
-    const connectAccount = this.connectAccountRepository.create({
-      connectAccountId,
-      userId,
-    });
-
-    await this.customerRepository.save(connectAccount);
-
-    return connectAccount;
   }
 }
 

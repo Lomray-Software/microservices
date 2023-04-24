@@ -1,5 +1,9 @@
-import { Allow, Length } from 'class-validator';
+import { Allow, Length, IsObject } from 'class-validator';
 import { Entity, Index, PrimaryColumn } from 'typeorm';
+
+export interface ICustomerParams {
+  accountId?: string;
+}
 
 @Entity()
 class Customer {
@@ -11,6 +15,10 @@ class Customer {
   @PrimaryColumn({ type: 'varchar', length: 36 })
   @Length(1, 36)
   userId: string;
+
+  @IsObject()
+  @Allow()
+  params: ICustomerParams;
 }
 
 export default Customer;
