@@ -6,6 +6,7 @@ import Card from '@entities/card';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
+import Transaction from '@entities/transaction';
 import type IStripeOptions from '@interfaces/stripe-options';
 import Abstract, { IPriceParams, IProductParams } from './abstract';
 
@@ -17,8 +18,19 @@ export interface IStripeProductParams extends IProductParams {
 
 interface ICheckoutParams {
   priceId: string;
+  userId: string;
   successUrl: string;
   cancelUrl: string;
+}
+
+interface ICheckoutEvent {
+  id: string;
+  currency: string;
+  amount_total: number;
+  customer: string;
+  mode: string;
+  payment_status: string;
+  status: string;
 }
 
 /**
@@ -134,7 +146,9 @@ class Stripe extends Abstract {
    * Create checkout session and return url to redirect user for payment
    */
   public async createCheckout(params: ICheckoutParams): Promise<string | null> {
-    const { priceId, successUrl, cancelUrl } = params;
+    const { priceId, userId, successUrl, cancelUrl } = params;
+
+    const customer = await super.getCustomer(userId);
 
     /* eslint-disable camelcase */
     const session = await this.paymentEntity.checkout.sessions.create({
@@ -145,12 +159,51 @@ class Stripe extends Abstract {
         },
       ],
       mode: 'payment',
+      customer: customer.customerId,
       success_url: successUrl,
       cancel_url: cancelUrl,
     });
     /* eslint-enable camelcase */
 
     return session.url;
+  }
+
+  /**
+   * Get the webhook from stripe and handle deciding on type of event
+   */
+  public handleWebhookEvent(payload: StripeSdk.Event): void {
+    try {
+      // TODO: implement security for getting webhooks from stripe using signature and webhook key
+      // const event = this.paymentEntity.webhooks.constructEvent(payload, signature, webhookKey);
+
+      switch (payload.type) {
+        case 'checkout.session.completed':
+          void this.handleTransactionCompleted(payload);
+          break;
+      }
+    } catch (err) {
+      console.log('error', err);
+    }
+  }
+
+  /**
+   * Handles completing of transaction inside stripe payment process
+   */
+  public handleTransactionCompleted(event: StripeSdk.Event): Promise<Transaction> {
+    /* eslint-disable camelcase */
+    const { id, amount_total, currency, customer, mode, payment_status, status } = event.data
+      .object as ICheckoutEvent;
+
+    return this.createTransaction({
+      transactionId: id,
+      amount: amount_total,
+      currency,
+      customerId: customer,
+      mode,
+      paymentStatus: payment_status,
+      transactionStatus: status,
+    });
+    /* eslint-enable camelcase */
   }
 }
 

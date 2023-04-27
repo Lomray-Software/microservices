@@ -1,7 +1,7 @@
 import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { Column, Entity, Index, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import Product from '@entities/product';
 
 @JSONSchema({
@@ -34,8 +34,8 @@ class Price {
   @Allow()
   unitAmount: number;
 
-  @OneToOne('Product', 'price')
-  @JoinColumn()
+  @ManyToOne('Product', 'price')
+  @JoinColumn({ name: 'productId' })
   product: Product;
 }
 

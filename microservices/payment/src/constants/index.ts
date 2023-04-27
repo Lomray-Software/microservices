@@ -9,6 +9,7 @@ const constants = {
   ...GetConstants({ msNameDefault, version, isBuild, packageName: name, withDb: true }),
   PAYMENT_PROVIDER: process.env.PAYMENT_PROVIDER ?? PaymentProvider.STRIPE,
   PAYMENT_OPTIONS: process.env.PAYMENT_OPTIONS ?? '{}',
+  PAYMENT_WEBHOOK_KEY: process.env.PAYMENT_WEBHOOK_KEY ?? '',
 };
 
 export default constants;

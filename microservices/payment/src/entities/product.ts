@@ -1,7 +1,7 @@
 import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { Column, Entity, Index, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
 import Price from '@entities/price';
 
 @JSONSchema({
@@ -22,7 +22,7 @@ class Product {
   @JSONSchema({
     description: 'Field for storing id of selling entity from application',
   })
-  @PrimaryColumn({ type: 'varchar', length: 36 })
+  @Column({ type: 'varchar', length: 36 })
   @Length(1, 36)
   entityId: string;
 
@@ -33,7 +33,7 @@ class Product {
   @IsUndefinable()
   userId: string | null;
 
-  @OneToOne('Price', 'product')
+  @OneToMany('Price', 'product')
   price: Price;
 }
 

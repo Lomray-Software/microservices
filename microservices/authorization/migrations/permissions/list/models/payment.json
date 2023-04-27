@@ -25,7 +25,8 @@
           },
           "admin": "allow"
         }
-      }
+      },
+      "transactions": "payment.Transactions"
     },
     "createdAt": "2023-03-25T21:32:28.128Z"
   },
@@ -512,6 +513,17 @@
           "user": "allow"
         }
       },
+      "userId": {
+        "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
       "successUrl": {
         "in": {
           "user": "allow"
@@ -546,5 +558,134 @@
       }
     },
     "createdAt": "2023-04-19T09:58:19.118Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.Transactions",
+    "title": "Transactions",
+    "schema": {},
+    "createdAt": "2023-04-25T14:18:01.068Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.Transaction",
+    "title": "Transaction",
+    "schema": {
+      "transactionId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "customerId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "currency": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "amount": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "mode": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "paymentStatus": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "transactionStatus": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "customer": "payment.Customer"
+    },
+    "createdAt": "2023-04-25T14:18:01.068Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.ListOutputParams.ab8bbade2b229df1cce267b8a3de985f",
+    "title": "List Output Params",
+    "schema": {
+      "list": "payment.Transaction",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-04-25T14:18:01.068Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.ViewOutputParams.6dee9dddb2a4fce8a6c8ac5fc7881f25",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "payment.Transaction"
+    },
+    "createdAt": "2023-04-25T14:18:01.068Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.WebhookInput",
+    "title": "Webhook Input",
+    "schema": {
+      "payload": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "headers": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-04-25T14:18:01.068Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.WebhookOutput",
+    "title": "Webhook Output",
+    "schema": {},
+    "createdAt": "2023-04-25T14:18:01.068Z"
   }
 ]

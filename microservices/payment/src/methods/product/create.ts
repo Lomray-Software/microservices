@@ -1,4 +1,4 @@
-import { Endpoint } from '@lomray/microservice-helpers';
+import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
 import { IsArray, IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
@@ -16,9 +16,11 @@ class ProductCreateInput {
   userId: string;
 
   @IsString()
+  @IsUndefinable()
   description?: string;
 
   @IsArray()
+  @IsUndefinable()
   images?: string[];
 }
 

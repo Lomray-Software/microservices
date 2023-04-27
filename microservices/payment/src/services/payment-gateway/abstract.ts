@@ -6,6 +6,7 @@ import Card from '@entities/card';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
+import Transaction from '@entities/transaction';
 import type TPaymentOptions from '@interfaces/payment-options';
 
 export interface ICardParams {
@@ -21,6 +22,16 @@ export interface IPriceParams {
   userId: string;
   currency: string;
   unitAmount: number;
+}
+
+export interface ITransactionParams {
+  transactionId: string;
+  currency: string;
+  amount: number;
+  customerId: string;
+  mode: string;
+  paymentStatus: string;
+  transactionStatus: string;
 }
 
 export interface IProductParams {
@@ -55,6 +66,11 @@ abstract class Abstract {
   /**
    * @protected
    */
+  protected readonly transactionRepository: Repository<Transaction>;
+
+  /**
+   * @protected
+   */
   protected readonly paymentOptions: TPaymentOptions;
 
   /**
@@ -70,6 +86,7 @@ abstract class Abstract {
     this.customerRepository = manager.getRepository(Customer);
     this.productRepository = manager.getRepository(Product);
     this.priceRepository = manager.getRepository(Price);
+    this.transactionRepository = manager.getRepository(Transaction);
   }
 
   /**
@@ -81,6 +98,28 @@ abstract class Abstract {
    * Add new bank account
    */
   public abstract addBankAccount(params: IBankAccountParams): Promise<BankAccount>;
+
+  /**
+   * Create new transaction
+   */
+  public async createTransaction(params: ITransactionParams) {
+    const { transactionId, currency, amount, transactionStatus, paymentStatus, mode, customerId } =
+      params;
+
+    const transaction = this.transactionRepository.create({
+      transactionId,
+      transactionStatus,
+      paymentStatus,
+      currency,
+      amount,
+      customerId,
+      mode,
+    });
+
+    await this.transactionRepository.save(transaction);
+
+    return transaction;
+  }
 
   /**
    * Get the customer

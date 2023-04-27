@@ -3,6 +3,7 @@ import type { IGatewayOptions, IGatewayParams } from '@lomray/microservice-nodej
 import CONST from '@constants/index';
 import cors from '@middlewares/cors';
 import userInfo from '@middlewares/user-info';
+import webhook from '@middlewares/webhook';
 
 /**
  * Microservice options
@@ -18,7 +19,7 @@ const msOptions: Partial<IGatewayOptions> = {
   },
 };
 
-const msMiddlewares = [cors, userInfo];
+const msMiddlewares = [webhook, cors, userInfo];
 
 /**
  * Microservice params

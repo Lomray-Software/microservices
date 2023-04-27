@@ -309,5 +309,57 @@
     "modelIn": "payment.CreateCheckoutInput",
     "modelOut": "payment.CreateCheckoutOutput",
     "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "transaction.count",
+    "description": "Returns count of Transaction by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-25T14:18:01.068Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "transaction.list",
+    "description": "Returns list of Transaction by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-25T14:18:01.068Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "payment.ListOutputParams.ab8bbade2b229df1cce267b8a3de985f",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "transaction.view",
+    "description": "Returns Transaction by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-25T14:18:01.068Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "payment.ViewOutputParams.6dee9dddb2a4fce8a6c8ac5fc7881f25",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "stripe.webhook",
+    "description": "Get stripe webhooks handler",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-25T14:18:01.068Z",
+    "modelIn": "payment.WebhookInput",
+    "modelOut": "payment.WebhookOutput",
+    "methodFilters": []
   }
 ]
