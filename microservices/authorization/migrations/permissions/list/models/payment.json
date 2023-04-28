@@ -579,7 +579,15 @@
     "alias": "payment.Transaction",
     "title": "Transaction",
     "schema": {
-      "transactionId": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "title": {
         "in": {
           "admin": "allow"
         },
@@ -595,12 +603,28 @@
           "admin": "allow"
         }
       },
-      "currency": {
+      "bankAccountId": {
         "in": {
           "admin": "allow"
         },
         "out": {
-          "user": "allow"
+          "admin": "allow"
+        }
+      },
+      "cardId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "entityId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
         }
       },
       "amount": {
@@ -611,7 +635,7 @@
           "user": "allow"
         }
       },
-      "mode": {
+      "type": {
         "in": {
           "admin": "allow"
         },
@@ -619,7 +643,7 @@
           "user": "allow"
         }
       },
-      "paymentStatus": {
+      "status": {
         "in": {
           "admin": "allow"
         },

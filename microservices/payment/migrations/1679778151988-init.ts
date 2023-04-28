@@ -5,7 +5,7 @@ export default class init1679778151988 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "customer" ("customerId" character varying(18) NOT NULL, "userId" character varying(36) NOT NULL, "params" json NOT NULL DEFAULT '{}', CONSTRAINT "customer(pk):customerId" PRIMARY KEY ("customerId"))`,
+      `CREATE TABLE "customer" ("customerId" character varying(18) NOT NULL, "userId" character varying(36) NOT NULL, "params" json NOT NULL DEFAULT '{}', CONSTRAINT "customer(pk):customerId_userId" PRIMARY KEY ("customerId", "userId"))`,
     );
     await queryRunner.query(`CREATE INDEX "IDX_payment_userId" ON "customer" ("userId") `);
     await queryRunner.query(
@@ -15,13 +15,13 @@ export default class init1679778151988 implements MigrationInterface {
       `CREATE TABLE "price" ("priceId" character varying(30) NOT NULL, "productId" character varying(19) NOT NULL, "userId" character varying(36), "currency" character varying(10) NOT NULL, "unitAmount" integer NOT NULL, CONSTRAINT "price(rel):productId" UNIQUE ("productId"), CONSTRAINT "price(pk):priceId" PRIMARY KEY ("priceId"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "transaction" ("transactionId" character varying(66) NOT NULL, "customerId" character varying(18) NOT NULL, "currency" character varying(10) NOT NULL, "amount" integer NOT NULL, "mode" character varying(18) NOT NULL, "paymentStatus" character varying(18) NOT NULL, "transactionStatus" character varying(18) NOT NULL, CONSTRAINT "transaction(pk):transactionId" PRIMARY KEY ("transactionId"))`,
+      `CREATE TABLE "transaction" ("id" character varying(66) NOT NULL, "title" character varying(66) NOT NULL, "customerId" character varying(18) NOT NULL, "bankAccountId" character varying(66) NOT NULL, "cardId" character varying(66) NOT NULL, "entityId" character varying(66) NOT NULL "amount" integer NOT NULL, "status" character varying(18) NOT NULL, "type" character varying(10) NOT NULL, "transactionStatus" character varying(18) NOT NULL, CONSTRAINT "transaction(pk):transactionId" PRIMARY KEY ("transactionId"))`,
     );
     await queryRunner.query(
       `ALTER TABLE "price" ADD CONSTRAINT "price(fk):productId_productId" FOREIGN KEY ("productId") REFERENCES "product"("productId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "transaction" ADD CONSTRAINT "transaction(fk):customerId_userId" FOREIGN KEY ("customerId") REFERENCES "customer"("customerId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "transaction" ADD CONSTRAINT "transaction(fk):customerId_userId" FOREIGN KEY ("customerId", "userId") REFERENCES "customer"("customerId", "userId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
 
     await queryRunner.query(`CREATE INDEX "IDX_product_userId" ON "product" ("userId") `);

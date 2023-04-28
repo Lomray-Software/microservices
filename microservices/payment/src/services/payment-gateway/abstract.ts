@@ -25,12 +25,15 @@ export interface IPriceParams {
 }
 
 export interface ITransactionParams {
-  transactionId: string;
-  currency: string;
+  id: string;
+  title?: string;
   amount: number;
   customerId: string;
-  mode: string;
-  paymentStatus: string;
+  bankAccountId?: string;
+  cardId?: string;
+  entityId?: string;
+  type?: string;
+  status: string;
   transactionStatus: string;
 }
 
@@ -103,17 +106,30 @@ abstract class Abstract {
    * Create new transaction
    */
   public async createTransaction(params: ITransactionParams) {
-    const { transactionId, currency, amount, transactionStatus, paymentStatus, mode, customerId } =
-      params;
+    const {
+      id,
+      title,
+      amount,
+      bankAccountId,
+      cardId,
+      entityId,
+      transactionStatus,
+      status,
+      type,
+      customerId,
+    } = params;
 
     const transaction = this.transactionRepository.create({
-      transactionId,
+      id,
+      title,
       transactionStatus,
-      paymentStatus,
-      currency,
+      status,
+      type,
+      bankAccountId,
+      cardId,
+      entityId,
       amount,
       customerId,
-      mode,
     });
 
     await this.transactionRepository.save(transaction);

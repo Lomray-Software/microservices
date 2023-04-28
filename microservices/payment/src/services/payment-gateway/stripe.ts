@@ -227,16 +227,14 @@ class Stripe extends Abstract {
    */
   public handleTransactionCompleted(event: StripeSdk.Event): Promise<Transaction> {
     /* eslint-disable camelcase */
-    const { id, amount_total, currency, customer, mode, payment_status, status } = event.data
+    const { id, amount_total, customer, payment_status, status } = event.data
       .object as ICheckoutEvent;
 
     return this.createTransaction({
-      transactionId: id,
+      id,
       amount: amount_total,
-      currency,
       customerId: customer,
-      mode,
-      paymentStatus: payment_status,
+      status: payment_status,
       transactionStatus: status,
     });
     /* eslint-enable camelcase */

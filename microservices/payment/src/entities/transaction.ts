@@ -13,30 +13,42 @@ import Customer from '@entities/customer';
 class Transaction {
   @PrimaryColumn({ type: 'varchar', length: 66 })
   @Allow()
-  transactionId: string;
+  id: string;
+
+  @Column({ type: 'varchar', length: 100 })
+  @IsUndefinable()
+  title: string;
 
   @Column({ type: 'varchar', length: 18 })
   @Allow()
   customerId: string;
 
-  @Column({ type: 'varchar', length: 10 })
-  @Allow()
-  currency: string;
+  @Column({ type: 'varchar', length: 66 })
+  @IsUndefinable()
+  bankAccountId: string;
+
+  @Column({ type: 'varchar', length: 66 })
+  @IsUndefinable()
+  cardId: string;
+
+  @Column({ type: 'varchar', length: 32 })
+  @IsUndefinable()
+  entityId: string;
 
   @Column({ type: 'int' })
   @Allow()
   amount: number;
 
-  @Column({ type: 'varchar', length: 18 })
+  @Column({ type: 'varchar', length: 10 })
   @IsUndefinable()
-  mode: string;
+  type: string;
 
   @JSONSchema({
     description: 'Field for storing status of payment by the card or any other source',
   })
   @Column({ type: 'varchar', length: 18 })
   @IsUndefinable()
-  paymentStatus: string;
+  status: string;
 
   @JSONSchema({
     description:

@@ -20,7 +20,7 @@ class Customer {
   customerId: string;
 
   @Index('IDX_payment_userId', ['userId'])
-  @Column({ type: 'varchar', length: 36 })
+  @PrimaryColumn({ type: 'varchar', length: 36 })
   @Length(1, 36)
   userId: string;
 
