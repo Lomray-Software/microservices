@@ -11,6 +11,7 @@ import PriceCreate from '@methods/price/create';
 import CrudPrice from '@methods/price/crud';
 import ProductCreate from '@methods/product/create';
 import CrudProduct from '@methods/product/crud';
+import ConnectAccount from '@methods/stripe/connect-account';
 import CreateCheckout from '@methods/stripe/create-checkout';
 import SetupIntent from '@methods/stripe/setup-intent';
 import WebhookHandler from '@methods/stripe/webhook';
@@ -37,6 +38,7 @@ export default (ms: Microservice): void => {
     stripe: {
       'setup-intent': SetupIntent,
       'create-checkout': CreateCheckout,
+      'connect-account': ConnectAccount,
       webhook: WebhookHandler,
     },
     product: {
