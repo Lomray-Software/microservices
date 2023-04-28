@@ -1,6 +1,5 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { IsObject, IsString } from 'class-validator';
-import StripeSdk from 'stripe';
 import { getManager } from 'typeorm';
 import remoteConfig from '@config/remote';
 import PaymentProvider from '@constants/payment-provider';
@@ -9,7 +8,7 @@ import Stripe from '@services/payment-gateway/stripe';
 
 class WebhookInput {
   @IsString()
-  payload: StripeSdk.Event;
+  body: string;
 
   @IsObject()
   headers: Record<string, string>;
@@ -28,7 +27,7 @@ const webhook = Endpoint.custom(
     output: WebhookOutput,
     description: 'Get stripe webhooks handler',
   }),
-  async ({ payload, headers }) => {
+  async ({ body, headers }) => {
     const { paymentProvider, paymentWebhookKey } = await remoteConfig();
 
     if (paymentProvider !== PaymentProvider.STRIPE) {
@@ -37,7 +36,7 @@ const webhook = Endpoint.custom(
 
     const service = (await Factory.create(getManager())) as Stripe;
 
-    service.handleWebhookEvent(payload, headers['stripe-signature'], paymentWebhookKey);
+    service.handleWebhookEvent(body, headers['stripe-signature'], paymentWebhookKey);
 
     return { isHandled: true };
   },

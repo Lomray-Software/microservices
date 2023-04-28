@@ -171,18 +171,17 @@ class Stripe extends Abstract {
   /**
    * Get the webhook from stripe and handle deciding on type of event
    */
-  public handleWebhookEvent(payload: StripeSdk.Event): void {
+  public handleWebhookEvent(payload: string, signature: string, webhookKey: string): void {
     try {
-      // TODO: implement security for getting webhooks from stripe using signature and webhook key
-      // const event = this.paymentEntity.webhooks.constructEvent(payload, signature, webhookKey);
+      const event = this.paymentEntity.webhooks.constructEvent(payload, signature, webhookKey);
 
-      switch (payload.type) {
+      switch (event.type) {
         case 'checkout.session.completed':
-          void this.handleTransactionCompleted(payload);
+          void this.handleTransactionCompleted(event);
           break;
       }
     } catch (err) {
-      console.log('error', err);
+      console.log('Handling webhook ended with the error', err);
     }
   }
 

@@ -1,7 +1,8 @@
 import { Log } from '@lomray/microservice-helpers';
-import { Microservice } from '@lomray/microservice-nodejs-lib';
+import { Gateway } from '@lomray/microservice-nodejs-lib';
 import { Response } from 'express';
 import type { RequestHandler } from 'express-serve-static-core';
+import remoteConfig from '@config/remote';
 
 /**
  * Handles webhooks from other services
@@ -9,17 +10,23 @@ import type { RequestHandler } from 'express-serve-static-core';
 const webhook =
   (): RequestHandler =>
   async (req, res, next): Promise<Response | void> => {
-    const { body, headers, url } = req;
+    // @ts-ignore
+    const { headers, url, rawBody } = req;
+    const { webhookOptions } = await remoteConfig();
 
-    const hasWebhook = url.startsWith('/webhook/');
-    const [, path] = url.split('/webhook/');
-
-    // TODO: try to find another way to get microservice. The getInstance method didnt work, Microservice.sendRequest too.
-    const ms = Microservice.create();
+    const hasWebhook = url.startsWith(webhookOptions.url);
+    const [, method] = url.split(webhookOptions.url);
 
     if (hasWebhook) {
       try {
-        await ms.sendRequest(path, { headers, payload: body });
+        const response = await Gateway.getInstance().sendRequest(method, {
+          headers,
+          body: rawBody,
+        });
+
+        if (response.getError()) {
+          return res.status(500).json({ error: response.getError() });
+        }
 
         return res.sendStatus(200);
       } catch (e) {
