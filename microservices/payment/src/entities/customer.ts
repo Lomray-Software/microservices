@@ -1,5 +1,11 @@
-import { Allow, Length } from 'class-validator';
-import { Entity, Index, PrimaryColumn } from 'typeorm';
+import { IsUndefinable } from '@lomray/microservice-helpers';
+import { Allow, Length, IsObject } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
+import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
+
+export interface ICustomerParams {
+  accountId?: string;
+}
 
 @Entity()
 class Customer {
@@ -11,6 +17,15 @@ class Customer {
   @PrimaryColumn({ type: 'varchar', length: 36 })
   @Length(1, 36)
   userId: string;
+
+  @JSONSchema({
+    description: 'Store data about stripe connected account and etc.',
+  })
+  @Column({ type: 'json', default: {} })
+  @Allow()
+  @IsObject()
+  @IsUndefinable()
+  params: ICustomerParams;
 }
 
 export default Customer;

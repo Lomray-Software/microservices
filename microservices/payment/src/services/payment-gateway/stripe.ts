@@ -1,6 +1,7 @@
 import StripeSdk from 'stripe';
 import type { EntityManager } from 'typeorm';
 import type PaymentProvider from '@constants/payment-provider';
+import StripeAccountTypes from '@constants/stripe-acoount-types';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Customer from '@entities/customer';
@@ -151,6 +152,42 @@ class Stripe extends Abstract {
     /* eslint-enable camelcase */
 
     return session.url;
+  }
+
+  /**
+   * Create ConnectAccount make redirect to account link and save stripeConnectAccount in customer
+   */
+  public async connectAccount(
+    userId: string,
+    email: string,
+    accountType: StripeAccountTypes,
+    refreshUrl: string,
+    returnUrl: string,
+  ): Promise<StripeSdk.AccountLink> {
+    let customer = await super.getCustomer(userId);
+
+    if (!customer.params.accountId) {
+      const stripeConnectAccount: StripeSdk.Account = await this.paymentEntity.accounts.create({
+        type: accountType,
+        country: 'US',
+        email,
+      });
+
+      await this.customerRepository.update(userId, {
+        params: { accountId: stripeConnectAccount.id },
+      });
+
+      customer = { ...customer, params: { accountId: stripeConnectAccount.id } };
+    }
+
+    return this.paymentEntity.accountLinks.create({
+      account: customer.params.accountId as string,
+      type: 'account_onboarding',
+      // eslint-disable-next-line camelcase
+      refresh_url: refreshUrl,
+      // eslint-disable-next-line camelcase
+      return_url: returnUrl,
+    });
   }
 }
 

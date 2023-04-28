@@ -309,5 +309,18 @@
     "modelIn": "payment.CreateCheckoutInput",
     "modelOut": "payment.CreateCheckoutOutput",
     "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "stripe.connect-account",
+    "description": "Create new connected account with link",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-28T00:46:02.060Z",
+    "modelIn": "payment.ConnectAccountInput",
+    "modelOut": "payment.ConnectAccountOutput",
+    "methodFilters": []
   }
 ]
