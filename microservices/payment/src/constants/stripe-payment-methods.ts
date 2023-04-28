@@ -1,3 +1,6 @@
+/**
+ * Enum for storing stripe payment methods
+ */
 enum StripePaymentMethods {
   CARD = 'card',
   BANKCONTACT = 'bancontact',

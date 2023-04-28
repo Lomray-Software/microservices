@@ -1,3 +1,6 @@
+/**
+ * Payment provider
+ */
 enum PaymentProvider {
   STRIPE = 'stripe',
 }
