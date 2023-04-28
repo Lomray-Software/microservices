@@ -19,7 +19,7 @@ class Customer {
   userId: string;
 
   @JSONSchema({
-    description: 'Here is store data about stripe connected account and etc.',
+    description: 'Store data about stripe connected account and etc.',
   })
   @Column({ type: 'json', default: {} })
   @Allow()
