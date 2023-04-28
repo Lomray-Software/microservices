@@ -28,7 +28,6 @@ class Transaction {
   amount: number;
 
   @Column({ type: 'varchar', length: 18 })
-  @Allow()
   @IsUndefinable()
   mode: string;
 
@@ -36,7 +35,6 @@ class Transaction {
     description: 'Field for storing status of payment by the card or any other source',
   })
   @Column({ type: 'varchar', length: 18 })
-  @Allow()
   @IsUndefinable()
   paymentStatus: string;
 
@@ -45,7 +43,6 @@ class Transaction {
       'Field for storing status of process of transaction itself. E.g. checkout session is completed or in process',
   })
   @Column({ type: 'varchar', length: 18 })
-  @Allow()
   @IsUndefinable()
   transactionStatus: string;
 

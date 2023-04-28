@@ -78,10 +78,10 @@ class Stripe extends Abstract {
    * Create SetupIntent and get back client secret
    */
   public async setupIntent(userId: string): Promise<string | null> {
-    const customer = await super.getCustomer(userId);
+    const { customerId } = await super.getCustomer(userId);
 
     const { client_secret: clientSecret } = await this.paymentEntity.setupIntents.create({
-      customer: customer.customerId,
+      customer: customerId,
       // eslint-disable-next-line camelcase
       payment_method_types: this.paymentOptions.methods,
     });
@@ -149,7 +149,7 @@ class Stripe extends Abstract {
   public async createCheckout(params: ICheckoutParams): Promise<string | null> {
     const { priceId, userId, successUrl, cancelUrl } = params;
 
-    const customer = await super.getCustomer(userId);
+    const { customerId } = await super.getCustomer(userId);
 
     /* eslint-disable camelcase */
     const session = await this.paymentEntity.checkout.sessions.create({
@@ -160,7 +160,7 @@ class Stripe extends Abstract {
         },
       ],
       mode: 'payment',
-      customer: customer.customerId,
+      customer: customerId,
       success_url: successUrl,
       cancel_url: cancelUrl,
     });
