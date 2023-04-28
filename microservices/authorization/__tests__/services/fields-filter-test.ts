@@ -1,18 +1,27 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
+import { Microservice } from '@lomray/microservice-nodejs-lib';
 import { expect } from 'chai';
+import sinon from 'sinon';
 import FieldPolicy from '@constants/field-policy';
 import { FilterType } from '@constants/filter';
+import Condition from '@entities/condition';
 import Model from '@entities/model';
+import ConditionChecker from '@services/condition-checker';
 import FieldsFilter from '@services/fields-filter';
 
 describe('services/fields-filter', () => {
+  const sandbox = sinon.createSandbox();
   const userId = 'user-id-1';
   const userRoles = ['users', 'guests']; // order matters
   const modelRepository = TypeormMock.entityManager.getRepository(Model);
+  const conditionRepository = TypeormMock.entityManager.getRepository(Condition);
+  const conditionChecker = new ConditionChecker(Microservice.getInstance());
   const service = FieldsFilter.init({
     userId,
     userRoles,
     modelRepository,
+    conditionRepository,
+    conditionChecker,
   });
   const inputFields = { hello: 'world' };
 
@@ -31,6 +40,7 @@ describe('services/fields-filter', () => {
 
   afterEach(() => {
     TypeormMock.sandbox.reset();
+    sandbox.restore();
   });
 
   it('should allow all fields', async () => {
@@ -104,6 +114,8 @@ describe('services/fields-filter', () => {
         userId: testCase.userId,
         userRoles: testCase.userRoles as string[],
         modelRepository,
+        conditionRepository,
+        conditionChecker,
       });
 
       expect(await srv.filter(testCase.type, model, input)).to.deep.equal(testCase.result);
@@ -150,7 +162,7 @@ describe('services/fields-filter', () => {
           object: 'nestedModel',
           in: {
             guests: {
-              condition: '<%= entity.nestedAllow.nested === false %>',
+              condition: 'Condition title 1',
             },
           },
         },
@@ -158,7 +170,16 @@ describe('services/fields-filter', () => {
           object: 'nestedModel',
           in: {
             guests: {
-              condition: '<%= value.should === "" %>',
+              condition: 'Condition title 2',
+            },
+          },
+        },
+        // test cached condition
+        nestedPerm2Duplicate: {
+          object: 'nestedModel',
+          in: {
+            guests: {
+              condition: 'Condition title 2',
             },
           },
         },
@@ -166,12 +187,43 @@ describe('services/fields-filter', () => {
           object: 'nestedModel',
           in: {
             guests: {
-              condition: "<%= _.get(value, '0.test') === 1 %>",
+              condition: 'Condition title 3',
+            },
+          },
+        },
+        // test unknown condition
+        nestedPerm4: {
+          object: 'nestedModel',
+          in: {
+            guests: {
+              condition: 'Unknown condition',
             },
           },
         },
       },
     });
+
+    // find conditions mock
+    sandbox
+      .stub(conditionRepository, 'findOne')
+      .onCall(0)
+      // Condition title 1
+      .resolves({
+        conditions: { template: '<%= entity.nestedAllow.nested === false %>' },
+      } as Condition)
+      .onCall(1)
+      // Condition title 2
+      .resolves({
+        conditions: { template: '<%= value.should === "" %>' },
+      } as Condition)
+      .onCall(2)
+      // Condition title 3
+      .resolves({
+        conditions: { template: "<%= _.get(value, '0.test') === 1 %>" },
+      } as Condition)
+      // Unknown condition
+      .onCall(3)
+      .resolves(undefined);
 
     // resolve nestedModel schema on first call
     TypeormMock.entityManager.findOne.resolves(allowAllModel);
@@ -317,6 +369,8 @@ describe('services/fields-filter', () => {
       userId: input.userId,
       userRoles,
       modelRepository,
+      conditionRepository,
+      conditionChecker,
       templateOptions,
     });
 

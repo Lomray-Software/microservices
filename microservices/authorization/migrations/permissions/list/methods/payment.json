@@ -99,14 +99,14 @@
   {
     "microservice": "payment",
     "method": "stripe.setup-intent",
-    "description": "Creates setup intent and return client secret key",
+    "description": "Setup intent and return client secret key",
     "allowGroup": [
       "user"
     ],
     "denyGroup": [],
     "createdAt": "2023-03-25T21:32:28.128Z",
-    "modelIn": "payment.CreateSetupIntentInput",
-    "modelOut": "payment.CreateSetupIntentOutput",
+    "modelIn": "payment.SetupIntentInput",
+    "modelOut": "payment.SetupIntentOutput",
     "methodFilters": []
   },
   {
@@ -132,6 +132,182 @@
     "createdAt": "2023-03-25T21:32:28.128Z",
     "modelIn": "ClientRegisterMiddlewareInput",
     "modelOut": "ClientRegisterMiddlewareOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "product.count",
+    "description": "Returns count of Product by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-11T22:46:39.989Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "product.list",
+    "description": "Returns list of Product by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-11T22:46:39.989Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "payment.ListOutputParams.303da06f1a333ac1f38154b06d358190",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "product.view",
+    "description": "Returns Product by given condition",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-11T22:46:39.989Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "payment.ViewOutputParams.266356321330cf8ce992459b7c5b3928",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "product.update",
+    "description": "Update Product by given condition",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-11T22:46:39.989Z",
+    "modelIn": "payment.UpdateRequestParams.27959bbe8159d0d82e5c6ffb23a81e54",
+    "modelOut": "payment.UpdateOutputParams.266356321330cf8ce992459b7c5b3928",
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "and",
+        "roleAlias": "guest",
+        "createdAt": "2022-03-15T06:17:23.698Z"
+      }
+    ]
+  },
+  {
+    "microservice": "payment",
+    "method": "product.remove",
+    "description": "Remove Product by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-11T22:46:39.989Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "payment.RemoveOutputParams.a150411c4aa64f4b732916d98cee05f6",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "product.create",
+    "description": "Create new product",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-11T22:46:39.989Z",
+    "modelIn": "payment.ProductCreateInput",
+    "modelOut": "payment.ProductCreateOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "price.count",
+    "description": "Returns count of Price by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-11T22:46:39.989Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "price.list",
+    "description": "Returns list of Price by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-11T22:46:39.989Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "payment.ListOutputParams.0b740ee3b21ec023df99be0542e31f3e",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "price.view",
+    "description": "Returns Price by given condition",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-11T22:46:39.989Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "payment.ViewOutputParams.35d659b8a4662f112b893310b15fd907",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "price.update",
+    "description": "Update Price by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-11T22:46:39.989Z",
+    "modelIn": "payment.UpdateRequestParams.6c63bdcc30bd5fa302069e1922a1ace6",
+    "modelOut": "payment.UpdateOutputParams.35d659b8a4662f112b893310b15fd907",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "price.remove",
+    "description": "Remove Price by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-11T22:46:39.989Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "payment.RemoveOutputParams.9acd7ab2a60538cf116cf454460cee13",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "price.create",
+    "description": "Create new price",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-11T22:46:39.989Z",
+    "modelIn": "payment.PriceCreateInput",
+    "modelOut": "payment.PriceCreateOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "stripe.create-checkout",
+    "description": "Setup intent and return client secret key",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-04-19T09:58:19.118Z",
+    "modelIn": "payment.CreateCheckoutInput",
+    "modelOut": "payment.CreateCheckoutOutput",
     "methodFilters": []
   }
 ]

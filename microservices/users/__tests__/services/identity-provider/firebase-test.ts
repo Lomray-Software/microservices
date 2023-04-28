@@ -100,6 +100,49 @@ describe('services/sign-up', () => {
     expect(await waitResult(service.signIn({ isDenyRegister: true }))).to.throw('User not found.');
   });
 
+  it('should registration throw error: user exist (split sign up/sign in)', async () => {
+    FirebaseSdkStub.resolves(
+      firebaseMock({ user: { email: 'some@email.com', emailVerified: true } }),
+    );
+    TypeormMock.queryBuilder.getOne.resolves(mockUser);
+
+    expect(await waitResult(service.signIn({ isDenyAuthViaRegister: true }))).to.throw(
+      'User already exists.',
+    );
+  });
+
+  it('should register new user without the photo', async () => {
+    FirebaseSdkStub.resolves(
+      firebaseMock({ user: { email: mockUser.email, emailVerified: true } }),
+    );
+    TypeormMock.queryBuilder.getOne.resolves(undefined);
+
+    TypeormMock.entityManager.findOne.resolves(mockProfile());
+    TypeormMock.entityManager.save.resolves(mockUser);
+
+    await service.signIn({ isShouldAttachUserPhoto: false });
+
+    const [, profile] = TypeormMock.entityManager.save.thirdCall.args;
+
+    expect(profile?.photo).to.be.null;
+  });
+
+  it('should register new user with the photo', async () => {
+    FirebaseSdkStub.resolves(
+      firebaseMock({ user: { email: mockUser.email, emailVerified: true } }),
+    );
+    TypeormMock.queryBuilder.getOne.resolves(undefined);
+
+    TypeormMock.entityManager.findOne.resolves(mockProfile());
+    TypeormMock.entityManager.save.resolves(mockUser);
+
+    await service.signIn();
+
+    const [, profile] = TypeormMock.entityManager.save.thirdCall.args;
+
+    expect(profile?.photo).to.be.equal(providerGoogle.photoURL);
+  });
+
   it('should register new user', async () => {
     const email = 'demo@email.com';
 

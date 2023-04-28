@@ -1,6 +1,7 @@
 import type { AbstractMicroservice } from '@lomray/microservice-nodejs-lib';
 import { getRepository } from 'typeorm';
 import { FilterType } from '@constants/filter';
+import Condition from '@entities/condition';
 import type Filter from '@entities/filter';
 import Method from '@entities/method';
 import Model from '@entities/model';
@@ -92,6 +93,7 @@ class EndpointHandler {
    */
   public async filterFields(
     type: FilterType,
+    ms: AbstractMicroservice,
     fields?: Record<string, any>,
     templateOptions?: Record<string, any>,
   ): Promise<Record<string, any> | undefined> {
@@ -105,6 +107,8 @@ class EndpointHandler {
       userRoles: roles,
       templateOptions,
       modelRepository: getRepository(Model),
+      conditionRepository: getRepository(Condition),
+      conditionChecker: new ConditionChecker(ms, templateOptions),
     }).filter(type, type === FilterType.IN ? method?.modelIn : method?.modelOut, fields);
   }
 

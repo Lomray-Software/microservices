@@ -1,4 +1,5 @@
 import type Endpoints from '@helpers/api/endpoints';
+import AuthorizationCommands from '@helpers/commands/authorization';
 import UsersCommands from '@helpers/commands/users';
 
 class Commands {
@@ -14,11 +15,18 @@ class Commands {
   public readonly users: UsersCommands;
 
   /**
+   * Users commands
+   * @private
+   */
+  public readonly authorization: AuthorizationCommands;
+
+  /**
    * @constructor
    */
   private constructor(endpoints: Endpoints) {
     this.endpoints = endpoints;
     this.users = new UsersCommands(endpoints);
+    this.authorization = new AuthorizationCommands(endpoints);
   }
 
   /**
