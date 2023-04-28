@@ -25,6 +25,14 @@
           },
           "admin": "allow"
         }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
       }
     },
     "createdAt": "2023-03-25T21:32:28.128Z"
@@ -546,5 +554,64 @@
       }
     },
     "createdAt": "2023-04-19T09:58:19.118Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.ConnectAccountInput",
+    "title": "Connect Account Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "email": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "refreshUrl": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "returnUrl": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-04-28T00:46:02.060Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.ConnectAccountOutput",
+    "title": "Connect Account Output",
+    "schema": {
+      "accountLink": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-04-28T00:46:02.060Z"
   }
 ]
