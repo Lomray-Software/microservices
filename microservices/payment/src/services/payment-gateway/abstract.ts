@@ -33,6 +33,8 @@ export interface ITransactionParams {
   cardId?: string;
   entityId?: string;
   type?: string;
+  tax?: number;
+  fee?: number;
   status: string;
   transactionStatus: string;
 }
@@ -115,6 +117,8 @@ abstract class Abstract {
       entityId,
       transactionStatus,
       status,
+      tax,
+      fee,
       type,
       customerId,
     } = params;
@@ -129,6 +133,8 @@ abstract class Abstract {
       cardId,
       entityId,
       amount,
+      tax,
+      fee,
       customerId,
     });
 

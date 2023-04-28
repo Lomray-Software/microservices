@@ -43,6 +43,14 @@ class Transaction {
   @IsUndefinable()
   type: string;
 
+  @Column({ type: 'int' })
+  @IsUndefinable()
+  tax: number;
+
+  @Column({ type: 'int' })
+  @IsUndefinable()
+  fee: number;
+
   @JSONSchema({
     description: 'Field for storing status of payment by the card or any other source',
   })

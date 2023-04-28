@@ -635,6 +635,22 @@
           "user": "allow"
         }
       },
+      "fee": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "tax": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
       "type": {
         "in": {
           "admin": "allow"
