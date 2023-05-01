@@ -4,7 +4,6 @@ import type { IRemoteConfig } from '@interfaces/remote-config';
 
 const defaultConfig: IRemoteConfig = {
   corsOptions: CONST.MS_CORS_CONFIG,
-  webhookOptions: { url: CONST.MS_WEBHOOK_URL },
 };
 
 /**
