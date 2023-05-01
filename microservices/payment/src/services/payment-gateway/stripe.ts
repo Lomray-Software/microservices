@@ -1,5 +1,7 @@
+import { Log } from '@lomray/microservice-helpers';
 import StripeSdk from 'stripe';
 import type { EntityManager } from 'typeorm';
+import PaymentIntentStatus from '@constants/payment-intent-status';
 import type PaymentProvider from '@constants/payment-provider';
 import StripeAccountTypes from '@constants/stripe-acoount-types';
 import BankAccount from '@entities/bank-account';
@@ -218,7 +220,7 @@ class Stripe extends Abstract {
           break;
       }
     } catch (err) {
-      console.log('Handling webhook ended with the error', err);
+      Log.error(`Webhook handler has following error ${err as string}`);
     }
   }
 
@@ -230,13 +232,15 @@ class Stripe extends Abstract {
     const { id, amount_total, customer, payment_status, status } = event.data
       .object as ICheckoutEvent;
 
-    return this.createTransaction({
+    return this.createTransaction(
+      {
+        amount: amount_total,
+        customerId: customer,
+        status: payment_status as PaymentIntentStatus,
+        transactionStatus: status,
+      },
       id,
-      amount: amount_total,
-      customerId: customer,
-      status: payment_status,
-      transactionStatus: status,
-    });
+    );
     /* eslint-enable camelcase */
   }
 }

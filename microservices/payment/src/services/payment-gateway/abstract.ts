@@ -1,6 +1,8 @@
 import { EntityManager, Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
+import PaymentIntentStatus from '@constants/payment-intent-status';
 import PaymentProvider from '@constants/payment-provider';
+import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Customer from '@entities/customer';
@@ -25,17 +27,16 @@ export interface IPriceParams {
 }
 
 export interface ITransactionParams {
-  id: string;
   title?: string;
   amount: number;
   customerId: string;
   bankAccountId?: string;
   cardId?: string;
   entityId?: string;
-  type?: string;
+  type?: TransactionType;
   tax?: number;
   fee?: number;
-  status: string;
+  status: PaymentIntentStatus;
   transactionStatus: string;
 }
 
@@ -107,36 +108,8 @@ abstract class Abstract {
   /**
    * Create new transaction
    */
-  public async createTransaction(params: ITransactionParams) {
-    const {
-      id,
-      title,
-      amount,
-      bankAccountId,
-      cardId,
-      entityId,
-      transactionStatus,
-      status,
-      tax,
-      fee,
-      type,
-      customerId,
-    } = params;
-
-    const transaction = this.transactionRepository.create({
-      id,
-      title,
-      transactionStatus,
-      status,
-      type,
-      bankAccountId,
-      cardId,
-      entityId,
-      amount,
-      tax,
-      fee,
-      customerId,
-    });
+  public async createTransaction(params: ITransactionParams, transactionId = uuid()) {
+    const transaction = this.transactionRepository.create({ ...params, transactionId });
 
     await this.transactionRepository.save(transaction);
 

@@ -587,6 +587,14 @@
           "admin": "allow"
         }
       },
+      "transactionId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "title": {
         "in": {
           "admin": "allow"
@@ -710,7 +718,7 @@
     "alias": "payment.WebhookInput",
     "title": "Webhook Input",
     "schema": {
-      "payload": {
+      "body": {
         "in": {
           "admin": "allow"
         },
