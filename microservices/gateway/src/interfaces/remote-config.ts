@@ -5,4 +5,5 @@ import type { CorsOptions } from 'cors';
  */
 export interface IRemoteConfig {
   corsOptions?: CorsOptions;
+  webhookOptions?: { url: string };
 }
