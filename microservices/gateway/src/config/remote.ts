@@ -6,7 +6,7 @@ const defaultConfig: IRemoteConfig = {
   corsOptions: CONST.MS_CORS_CONFIG,
   webhookOptions: {
     url: CONST.MS_WEBHOOK_URL,
-    allowMethods: JSON.parse(CONST.MS_WEBHOOK_ALLOW_METHODS),
+    allowMethods: CONST.MS_WEBHOOK_ALLOW_METHODS,
   },
 };
 

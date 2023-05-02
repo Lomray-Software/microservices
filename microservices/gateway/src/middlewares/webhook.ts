@@ -12,12 +12,14 @@ const webhook =
   async (req, res, next): Promise<Response | void> => {
     // @ts-ignore
     const { headers, url, rawBody } = req;
-    const { webhookOptions } = await remoteConfig();
+    const {
+      webhookOptions: { url: webhookUrl, allowMethods },
+    } = await remoteConfig();
 
-    const hasWebhook = url.startsWith(webhookOptions.url);
-    const [, method] = url.split(webhookOptions.url);
+    const hasWebhook = url.startsWith(webhookUrl);
+    const [, method] = url.split(webhookUrl);
 
-    if (hasWebhook && webhookOptions.allowMethods.includes(method)) {
+    if (hasWebhook && allowMethods.includes(method)) {
       try {
         const response = await Gateway.getInstance().sendRequest(method, {
           headers,
