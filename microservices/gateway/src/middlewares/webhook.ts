@@ -17,7 +17,7 @@ const webhook =
     const hasWebhook = url.startsWith(webhookOptions.url);
     const [, method] = url.split(webhookOptions.url);
 
-    if (hasWebhook) {
+    if (hasWebhook && webhookOptions.allowMethods.includes(method)) {
       try {
         const response = await Gateway.getInstance().sendRequest(method, {
           headers,
