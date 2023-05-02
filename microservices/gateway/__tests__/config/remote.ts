@@ -13,7 +13,10 @@ describe('config/remote', () => {
   it('should correctly return cookies config: with remote', async () => {
     expect(await remoteConfig()).to.deep.equal({
       corsOptions: CONST.MS_CORS_CONFIG,
-      webhookOptions: { url: CONST.MS_WEBHOOK_URL, allowMethods: CONST.MS_WEBHOOK_ALLOW_METHODS },
+      webhookOptions: {
+        url: CONST.MS_WEBHOOK_URL,
+        allowMethods: JSON.parse(CONST.MS_WEBHOOK_ALLOW_METHODS),
+      },
     });
   });
 });
