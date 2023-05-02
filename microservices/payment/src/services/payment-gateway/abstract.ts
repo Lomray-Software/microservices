@@ -1,7 +1,7 @@
 import { EntityManager, Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
-import PaymentIntentStatus from '@constants/payment-intent-status';
 import PaymentProvider from '@constants/payment-provider';
+import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
@@ -29,14 +29,15 @@ export interface IPriceParams {
 export interface ITransactionParams {
   title?: string;
   amount: number;
-  customerId: string;
+  userId: string;
   bankAccountId?: string;
   cardId?: string;
   entityId?: string;
   type?: TransactionType;
   tax?: number;
   fee?: number;
-  status: PaymentIntentStatus;
+  errorMessage?: string;
+  status: TransactionStatus;
   transactionStatus: string;
 }
 
@@ -120,7 +121,7 @@ abstract class Abstract {
    * Get the customer
    */
   protected async getCustomer(userId: string) {
-    const customer = await this.customerRepository.findOne(userId);
+    const customer = await this.customerRepository.findOne({ userId });
 
     if (customer) {
       return customer;

@@ -1,10 +1,11 @@
 /**
- * Enum for storing payment intent status
+ * Enum for storing transaction status
  */
-enum PaymentIntentStatus {
+enum TransactionStatus {
   SUCCEDED = 'succeded',
   REQUIRES_ACTION = 'requires_action',
   REQUIRES_PAYMENT_METHOD = 'requires_payment_method',
+  ERROR = 'error',
 }
 
-export default PaymentIntentStatus;
+export default TransactionStatus;

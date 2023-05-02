@@ -603,7 +603,7 @@
           "admin": "allow"
         }
       },
-      "customerId": {
+      "userId": {
         "in": {
           "admin": "allow"
         },
@@ -676,6 +676,14 @@
         }
       },
       "transactionStatus": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "errorMesage": {
         "in": {
           "admin": "allow"
         },

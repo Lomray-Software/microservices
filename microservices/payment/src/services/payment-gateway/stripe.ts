@@ -1,9 +1,9 @@
 import { Log } from '@lomray/microservice-helpers';
 import StripeSdk from 'stripe';
 import type { EntityManager } from 'typeorm';
-import PaymentIntentStatus from '@constants/payment-intent-status';
 import type PaymentProvider from '@constants/payment-provider';
 import StripeAccountTypes from '@constants/stripe-acoount-types';
+import TransactionStatus from '@constants/transaction-status';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Customer from '@entities/customer';
@@ -227,16 +227,24 @@ class Stripe extends Abstract {
   /**
    * Handles completing of transaction inside stripe payment process
    */
-  public handleTransactionCompleted(event: StripeSdk.Event): Promise<Transaction> {
+  public async handleTransactionCompleted(event: StripeSdk.Event): Promise<Transaction | void> {
     /* eslint-disable camelcase */
     const { id, amount_total, customer, payment_status, status } = event.data
       .object as ICheckoutEvent;
 
+    const customerEntity = await this.customerRepository.findOne({ customerId: customer });
+
+    if (!customerEntity) {
+      Log.error(`Could not find any existing customer with such customerId: ${customer}`);
+
+      return;
+    }
+
     return this.createTransaction(
       {
         amount: amount_total,
-        customerId: customer,
-        status: payment_status as PaymentIntentStatus,
+        userId: customerEntity?.userId,
+        status: payment_status as TransactionStatus,
         transactionStatus: status,
       },
       id,

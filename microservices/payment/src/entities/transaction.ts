@@ -1,15 +1,8 @@
 import { IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsEnum } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
-import PaymentIntentStatus from '@constants/payment-intent-status';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import Customer from '@entities/customer';
 
@@ -24,7 +17,7 @@ class Transaction {
   @Allow()
   id: string;
 
-  @PrimaryColumn({ type: 'varchar', length: 66 })
+  @Column({ type: 'varchar', length: 66 })
   @Allow()
   transactionId: string;
 
@@ -32,9 +25,9 @@ class Transaction {
   @IsUndefinable()
   title: string;
 
-  @Column({ type: 'varchar', length: 18 })
+  @Column({ type: 'varchar', length: 36 })
   @Allow()
-  customerId: string;
+  userId: string;
 
   @Column({ type: 'varchar', length: 66 })
   @IsUndefinable()
@@ -68,10 +61,10 @@ class Transaction {
   @JSONSchema({
     description: 'Field for storing status of payment by the card or any other source',
   })
-  @Column({ type: 'enum', enum: PaymentIntentStatus })
-  @IsEnum(PaymentIntentStatus)
+  @Column({ type: 'enum', enum: TransactionStatus })
+  @IsEnum(TransactionStatus)
   @IsUndefinable()
-  status: PaymentIntentStatus;
+  status: TransactionStatus;
 
   @JSONSchema({
     description:
@@ -81,8 +74,12 @@ class Transaction {
   @IsUndefinable()
   transactionStatus: string;
 
+  @Column({ type: 'varchar', length: 150 })
+  @IsUndefinable()
+  errorMessage: string;
+
   @ManyToOne('Customer', 'transactions')
-  @JoinColumn({ name: 'customerId' })
+  @JoinColumn({ name: 'userId' })
   customer: Customer;
 }
 
