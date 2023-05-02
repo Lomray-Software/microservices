@@ -569,13 +569,6 @@
   },
   {
     "microservice": "payment",
-    "alias": "payment.Transactions",
-    "title": "Transactions",
-    "schema": {},
-    "createdAt": "2023-04-25T14:18:01.068Z"
-  },
-  {
-    "microservice": "payment",
     "alias": "payment.Transaction",
     "title": "Transaction",
     "schema": {
@@ -675,7 +668,7 @@
           "admin": "allow"
         }
       },
-      "transactionStatus": {
+      "paymentStatus": {
         "in": {
           "admin": "allow"
         },
@@ -749,7 +742,16 @@
     "microservice": "payment",
     "alias": "payment.WebhookOutput",
     "title": "Webhook Output",
-    "schema": {},
+    "schema": {
+      "isHandled": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
     "createdAt": "2023-04-25T14:18:01.068Z"
   },
   {

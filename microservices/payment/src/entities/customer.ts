@@ -1,5 +1,5 @@
 import { IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, Length, IsObject } from 'class-validator';
+import { Length, IsObject, IsString } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, Entity, Index, OneToMany, PrimaryColumn, Unique } from 'typeorm';
 import Transaction from '@entities/transaction';
@@ -14,14 +14,16 @@ export interface ICustomerParams {
   },
 })
 @Entity()
-@Unique(['userId'])
 class Customer {
   @PrimaryColumn({ type: 'varchar', length: 18 })
-  @Allow()
+  @IsString()
+  @Length(1, 18)
   customerId: string;
 
   @Index('IDX_payment_userId', ['userId'])
   @Column({ type: 'varchar', length: 36 })
+  @IsString()
+  @Unique(['userId'])
   @Length(1, 36)
   userId: string;
 
@@ -29,7 +31,6 @@ class Customer {
     description: 'Store data about stripe connected account and etc.',
   })
   @Column({ type: 'json', default: {} })
-  @Allow()
   @IsObject()
   @IsUndefinable()
   params: ICustomerParams;

@@ -245,7 +245,7 @@ class Stripe extends Abstract {
         amount: amount_total,
         userId: customerEntity?.userId,
         status: payment_status as TransactionStatus,
-        transactionStatus: status,
+        paymentStatus: status,
       },
       id,
     );

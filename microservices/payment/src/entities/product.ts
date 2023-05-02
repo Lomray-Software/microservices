@@ -1,5 +1,5 @@
 import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, Length } from 'class-validator';
+import { IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
 import Price from '@entities/price';
@@ -16,13 +16,15 @@ class Product {
     description: 'Field for storing id of according product entity created on payment service side',
   })
   @PrimaryColumn({ type: 'varchar', length: 19 })
-  @Allow()
+  @IsString()
+  @Length(1, 19)
   productId: string;
 
   @JSONSchema({
     description: 'Field for storing id of selling entity from application',
   })
   @Column({ type: 'varchar', length: 36 })
+  @IsString()
   @Length(1, 36)
   entityId: string;
 

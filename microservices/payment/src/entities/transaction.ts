@@ -1,5 +1,5 @@
 import { IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, IsEnum } from 'class-validator';
+import { Allow, IsEnum, IsNumber, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import TransactionStatus from '@constants/transaction-status';
@@ -18,31 +18,41 @@ class Transaction {
   id: string;
 
   @Column({ type: 'varchar', length: 66 })
-  @Allow()
+  @IsString()
+  @Length(1, 66)
   transactionId: string;
 
   @Column({ type: 'varchar', length: 100 })
   @IsUndefinable()
+  @IsString()
+  @Length(1, 100)
   title: string;
 
   @Column({ type: 'varchar', length: 36 })
-  @Allow()
+  @IsString()
+  @Length(1, 36)
   userId: string;
 
   @Column({ type: 'varchar', length: 66 })
   @IsUndefinable()
+  @IsString()
+  @Length(1, 66)
   bankAccountId: string;
 
   @Column({ type: 'varchar', length: 66 })
   @IsUndefinable()
+  @IsString()
+  @Length(1, 66)
   cardId: string;
 
   @Column({ type: 'varchar', length: 32 })
   @IsUndefinable()
+  @IsString()
+  @Length(1, 32)
   entityId: string;
 
   @Column({ type: 'int' })
-  @Allow()
+  @IsNumber()
   amount: number;
 
   @Column({ type: 'enum', enum: TransactionType })
@@ -52,10 +62,12 @@ class Transaction {
 
   @Column({ type: 'int' })
   @IsUndefinable()
+  @IsNumber()
   tax: number;
 
   @Column({ type: 'int' })
   @IsUndefinable()
+  @IsNumber()
   fee: number;
 
   @JSONSchema({
@@ -72,10 +84,14 @@ class Transaction {
   })
   @Column({ type: 'varchar', length: 18 })
   @IsUndefinable()
-  transactionStatus: string;
+  @IsString()
+  @Length(1, 18)
+  paymentStatus: string;
 
   @Column({ type: 'varchar', length: 150 })
   @IsUndefinable()
+  @IsString()
+  @Length(1, 150)
   errorMessage: string;
 
   @ManyToOne('Customer', 'transactions')

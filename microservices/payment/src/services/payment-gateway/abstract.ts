@@ -38,7 +38,7 @@ export interface ITransactionParams {
   fee?: number;
   errorMessage?: string;
   status: TransactionStatus;
-  transactionStatus: string;
+  paymentStatus: string;
 }
 
 export interface IProductParams {
@@ -109,7 +109,10 @@ abstract class Abstract {
   /**
    * Create new transaction
    */
-  public async createTransaction(params: ITransactionParams, transactionId = uuid()) {
+  public async createTransaction(
+    params: ITransactionParams,
+    transactionId = uuid(),
+  ): Promise<Transaction> {
     const transaction = this.transactionRepository.create({ ...params, transactionId });
 
     await this.transactionRepository.save(transaction);
@@ -120,7 +123,7 @@ abstract class Abstract {
   /**
    * Get the customer
    */
-  protected async getCustomer(userId: string) {
+  protected async getCustomer(userId: string): Promise<Customer> {
     const customer = await this.customerRepository.findOne({ userId });
 
     if (customer) {
@@ -133,7 +136,7 @@ abstract class Abstract {
   /**
    * Create new customer
    */
-  public async createCustomer(userId: string, customerId: string = uuid()) {
+  public async createCustomer(userId: string, customerId: string = uuid()): Promise<Customer> {
     const customer = this.customerRepository.create({
       customerId,
       userId,
@@ -147,7 +150,7 @@ abstract class Abstract {
   /**
    * Create new product
    */
-  public async createProduct(params: IProductParams, productId: string = uuid()) {
+  public async createProduct(params: IProductParams, productId: string = uuid()): Promise<Product> {
     const { entityId, userId } = params;
 
     const product = this.productRepository.create({
@@ -164,7 +167,7 @@ abstract class Abstract {
   /**
    * Create new price
    */
-  public async createPrice(params: IPriceParams, priceId: string = uuid()) {
+  public async createPrice(params: IPriceParams, priceId: string = uuid()): Promise<Price> {
     const { productId, currency, unitAmount, userId } = params;
 
     const price = this.priceRepository.create({
