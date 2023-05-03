@@ -16,10 +16,16 @@ const webhook =
       webhookOptions: { url: webhookUrl, allowMethods },
     } = await remoteConfig();
 
+    if (!webhookUrl) {
+      Log.error(`Webhook url is not provided`);
+
+      return res.status(500).json({ error: 'Webhook url is not provided' });
+    }
+
     const hasWebhook = url.startsWith(webhookUrl);
     const [, method] = url.split(webhookUrl);
 
-    if (hasWebhook && allowMethods.includes(method)) {
+    if (hasWebhook && allowMethods?.includes(method)) {
       try {
         const response = await Gateway.getInstance().sendRequest(method, {
           headers,
