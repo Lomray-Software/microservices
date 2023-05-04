@@ -1,12 +1,17 @@
+import { Log } from '@lomray/microservice-helpers';
 import StripeSdk from 'stripe';
 import type { EntityManager } from 'typeorm';
 import type PaymentProvider from '@constants/payment-provider';
 import StripeAccountTypes from '@constants/stripe-acoount-types';
+import StripeCheckoutStatus from '@constants/stripe-checkout-status';
+import StripeTransactionStatus from '@constants/stripe-transaction-status';
+import TransactionStatus from '@constants/transaction-status';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
+import Transaction from '@entities/transaction';
 import type IStripeOptions from '@interfaces/stripe-options';
 import Abstract, { IPriceParams, IProductParams } from './abstract';
 
@@ -18,8 +23,19 @@ export interface IStripeProductParams extends IProductParams {
 
 interface ICheckoutParams {
   priceId: string;
+  userId: string;
   successUrl: string;
   cancelUrl: string;
+}
+
+interface ICheckoutEvent {
+  id: string;
+  currency: string;
+  amount_total: number;
+  customer: string;
+  mode: string;
+  payment_status: string;
+  status: string;
 }
 
 /**
@@ -66,10 +82,10 @@ class Stripe extends Abstract {
    * Create SetupIntent and get back client secret
    */
   public async setupIntent(userId: string): Promise<string | null> {
-    const customer = await super.getCustomer(userId);
+    const { customerId } = await super.getCustomer(userId);
 
     const { client_secret: clientSecret } = await this.paymentEntity.setupIntents.create({
-      customer: customer.customerId,
+      customer: customerId,
       // eslint-disable-next-line camelcase
       payment_method_types: this.paymentOptions.methods,
     });
@@ -84,6 +100,22 @@ class Stripe extends Abstract {
     const { id }: StripeSdk.Customer = await this.paymentEntity.customers.create();
 
     return super.createCustomer(userId, id);
+  }
+
+  /**
+   * Get unified transaction status
+   */
+  public getStatus(stripeStatus: StripeTransactionStatus): TransactionStatus {
+    switch (stripeStatus) {
+      case StripeTransactionStatus.PAID:
+        return TransactionStatus.SUCCESS;
+      case StripeTransactionStatus.UNPAID:
+        return TransactionStatus.REQUIRED_PAYMENT;
+      case StripeTransactionStatus.ERROR:
+        return TransactionStatus.ERROR;
+      case StripeTransactionStatus.NO_PAYMENT_REQUIRED:
+        return TransactionStatus.IN_PROCESS;
+    }
   }
 
   /**
@@ -135,7 +167,9 @@ class Stripe extends Abstract {
    * Create checkout session and return url to redirect user for payment
    */
   public async createCheckout(params: ICheckoutParams): Promise<string | null> {
-    const { priceId, successUrl, cancelUrl } = params;
+    const { priceId, userId, successUrl, cancelUrl } = params;
+
+    const { customerId } = await super.getCustomer(userId);
 
     /* eslint-disable camelcase */
     const session = await this.paymentEntity.checkout.sessions.create({
@@ -146,6 +180,7 @@ class Stripe extends Abstract {
         },
       ],
       mode: 'payment',
+      customer: customerId,
       success_url: successUrl,
       cancel_url: cancelUrl,
     });
@@ -188,6 +223,54 @@ class Stripe extends Abstract {
       // eslint-disable-next-line camelcase
       return_url: returnUrl,
     });
+  }
+
+  /**
+   * Get the webhook from stripe and handle deciding on type of event
+   */
+  public handleWebhookEvent(payload: string, signature: string, webhookKey: string): void {
+    try {
+      const event = this.paymentEntity.webhooks.constructEvent(payload, signature, webhookKey);
+
+      switch (event.type) {
+        case 'checkout.session.completed':
+          void this.handleTransactionCompleted(event);
+          break;
+      }
+    } catch (err) {
+      Log.error(`Webhook handler has following error ${err as string}`);
+    }
+  }
+
+  /**
+   * Handles completing of transaction inside stripe payment process
+   */
+  public async handleTransactionCompleted(event: StripeSdk.Event): Promise<Transaction | void> {
+    /* eslint-disable camelcase */
+    const { id, amount_total, customer, payment_status, status } = event.data
+      .object as ICheckoutEvent;
+
+    const customerEntity = await this.customerRepository.findOne({ customerId: customer });
+
+    if (!customerEntity) {
+      Log.error(`Could not find any existing customer with such customerId: ${customer}`);
+
+      return;
+    }
+
+    return this.createTransaction(
+      {
+        amount: amount_total,
+        userId: customerEntity?.userId,
+        status: this.getStatus(payment_status as StripeTransactionStatus),
+        params: {
+          checkoutStatus: status as StripeCheckoutStatus,
+          paymentStatus: payment_status as StripeTransactionStatus,
+        },
+      },
+      id,
+    );
+    /* eslint-enable camelcase */
   }
 }
 

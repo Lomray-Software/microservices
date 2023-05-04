@@ -1,11 +1,11 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { getRepository } from 'typeorm';
-import Card from '@entities/card';
+import Transaction from '@entities/transaction';
 
 /**
- * CRUD controller for Card entity
+ * CRUD controller for Transaction entity
  */
-const crud = Endpoint.controller(() => getRepository(Card), {
+const crud = Endpoint.controller(() => getRepository(Transaction), {
   restore: false,
   remove: false,
   create: false,

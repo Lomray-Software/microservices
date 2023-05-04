@@ -1,7 +1,7 @@
 import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, Length } from 'class-validator';
+import { IsNumber, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { Column, Entity, Index, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import Product from '@entities/product';
 
 @JSONSchema({
@@ -12,30 +12,30 @@ import Product from '@entities/product';
 @Entity()
 class Price {
   @PrimaryColumn({ type: 'varchar', length: 30 })
-  @Allow()
+  @Length(1, 30)
   priceId: string;
 
   @Column({ type: 'varchar', length: 19 })
-  @Allow()
+  @Length(1, 19)
   productId: string;
 
   @Index('IDX_price_userId', ['userId'])
   @Column({ type: 'varchar', length: 36, default: null })
-  @Length(1, 36)
   @IsNullable()
   @IsUndefinable()
+  @Length(1, 36)
   userId: string | null;
 
   @Column({ type: 'varchar', length: 10 })
-  @Allow()
+  @Length(1, 10)
   currency: string;
 
   @Column({ type: 'int' })
-  @Allow()
+  @IsNumber()
   unitAmount: number;
 
-  @OneToOne('Product', 'price')
-  @JoinColumn()
+  @ManyToOne('Product', 'price')
+  @JoinColumn({ name: 'productId' })
   product: Product;
 }
 

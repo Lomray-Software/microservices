@@ -11,6 +11,9 @@ class CreateCheckoutInput {
   priceId: string;
 
   @IsString()
+  userId: string;
+
+  @IsString()
   successUrl: string;
 
   @IsString()
@@ -32,7 +35,7 @@ const createCheckout = Endpoint.custom(
     output: CreateCheckoutOutput,
     description: 'Setup intent and return client secret key',
   }),
-  async ({ priceId, successUrl, cancelUrl }) => {
+  async ({ priceId, successUrl, cancelUrl, userId }) => {
     const { paymentProvider } = await remoteConfig();
 
     if (paymentProvider !== PaymentProvider.STRIPE) {
@@ -42,7 +45,7 @@ const createCheckout = Endpoint.custom(
     const service = (await Factory.create(getManager())) as Stripe;
 
     return {
-      redirectUrl: await service.createCheckout({ priceId, successUrl, cancelUrl }),
+      redirectUrl: await service.createCheckout({ priceId, userId, successUrl, cancelUrl }),
     };
   },
 );

@@ -1,11 +1,14 @@
 import { EntityManager, Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
 import PaymentProvider from '@constants/payment-provider';
+import TransactionStatus from '@constants/transaction-status';
+import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
+import Transaction, { ITransactionParams as ITransactionEntityParams } from '@entities/transaction';
 import type TPaymentOptions from '@interfaces/payment-options';
 
 export interface ICardParams {
@@ -21,6 +24,20 @@ export interface IPriceParams {
   userId: string;
   currency: string;
   unitAmount: number;
+}
+
+export interface ITransactionParams {
+  title?: string;
+  amount: number;
+  userId: string;
+  bankAccountId?: string;
+  cardId?: string;
+  entityId?: string;
+  type?: TransactionType;
+  tax?: number;
+  fee?: number;
+  status: TransactionStatus;
+  params: ITransactionEntityParams;
 }
 
 export interface IProductParams {
@@ -55,6 +72,11 @@ abstract class Abstract {
   /**
    * @protected
    */
+  protected readonly transactionRepository: Repository<Transaction>;
+
+  /**
+   * @protected
+   */
   protected readonly paymentOptions: TPaymentOptions;
 
   /**
@@ -70,6 +92,7 @@ abstract class Abstract {
     this.customerRepository = manager.getRepository(Customer);
     this.productRepository = manager.getRepository(Product);
     this.priceRepository = manager.getRepository(Price);
+    this.transactionRepository = manager.getRepository(Transaction);
   }
 
   /**
@@ -83,10 +106,24 @@ abstract class Abstract {
   public abstract addBankAccount(params: IBankAccountParams): Promise<BankAccount>;
 
   /**
+   * Create new transaction
+   */
+  public async createTransaction(
+    params: ITransactionParams,
+    transactionId = uuid(),
+  ): Promise<Transaction> {
+    const transaction = this.transactionRepository.create({ ...params, transactionId });
+
+    await this.transactionRepository.save(transaction);
+
+    return transaction;
+  }
+
+  /**
    * Get the customer
    */
-  protected async getCustomer(userId: string) {
-    const customer = await this.customerRepository.findOne(userId);
+  protected async getCustomer(userId: string): Promise<Customer> {
+    const customer = await this.customerRepository.findOne({ userId });
 
     if (customer) {
       return customer;
@@ -98,7 +135,7 @@ abstract class Abstract {
   /**
    * Create new customer
    */
-  public async createCustomer(userId: string, customerId: string = uuid()) {
+  public async createCustomer(userId: string, customerId: string = uuid()): Promise<Customer> {
     const customer = this.customerRepository.create({
       customerId,
       userId,
@@ -112,7 +149,7 @@ abstract class Abstract {
   /**
    * Create new product
    */
-  public async createProduct(params: IProductParams, productId: string = uuid()) {
+  public async createProduct(params: IProductParams, productId: string = uuid()): Promise<Product> {
     const { entityId, userId } = params;
 
     const product = this.productRepository.create({
@@ -129,7 +166,7 @@ abstract class Abstract {
   /**
    * Create new price
    */
-  public async createPrice(params: IPriceParams, priceId: string = uuid()) {
+  public async createPrice(params: IPriceParams, priceId: string = uuid()): Promise<Price> {
     const { productId, currency, unitAmount, userId } = params;
 
     const price = this.priceRepository.create({
