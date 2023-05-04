@@ -2,9 +2,11 @@
  * Enum for storing transaction status
  */
 enum TransactionStatus {
-  SUCCEDED = 'succeded',
-  REQUIRES_ACTION = 'requires_action',
-  REQUIRES_PAYMENT_METHOD = 'requires_payment_method',
+  SUCCESS = 'success',
+  IN_PROCESS = 'inProcess',
+  REQUIRED_PAYMENT = 'requiredPayment',
+  INITIAL = 'initial',
+  EXPIRED = 'expired',
   ERROR = 'error',
 }
 

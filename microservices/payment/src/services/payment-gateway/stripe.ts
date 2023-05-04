@@ -3,6 +3,8 @@ import StripeSdk from 'stripe';
 import type { EntityManager } from 'typeorm';
 import type PaymentProvider from '@constants/payment-provider';
 import StripeAccountTypes from '@constants/stripe-acoount-types';
+import StripeCheckoutStatus from '@constants/stripe-checkout-status';
+import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionStatus from '@constants/transaction-status';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
@@ -98,6 +100,22 @@ class Stripe extends Abstract {
     const { id }: StripeSdk.Customer = await this.paymentEntity.customers.create();
 
     return super.createCustomer(userId, id);
+  }
+
+  /**
+   * Get unified transaction status
+   */
+  public getStatus(stripeStatus: StripeTransactionStatus): TransactionStatus {
+    switch (stripeStatus) {
+      case StripeTransactionStatus.PAID:
+        return TransactionStatus.SUCCESS;
+      case StripeTransactionStatus.UNPAID:
+        return TransactionStatus.REQUIRED_PAYMENT;
+      case StripeTransactionStatus.ERROR:
+        return TransactionStatus.ERROR;
+      case StripeTransactionStatus.NO_PAYMENT_REQUIRED:
+        return TransactionStatus.IN_PROCESS;
+    }
   }
 
   /**
@@ -244,8 +262,11 @@ class Stripe extends Abstract {
       {
         amount: amount_total,
         userId: customerEntity?.userId,
-        status: payment_status as TransactionStatus,
-        paymentStatus: status,
+        status: this.getStatus(payment_status as StripeTransactionStatus),
+        params: {
+          checkoutStatus: status as StripeCheckoutStatus,
+          paymentStatus: payment_status as StripeTransactionStatus,
+        },
       },
       id,
     );

@@ -1,10 +1,18 @@
 import { IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, IsEnum, IsNumber, Length } from 'class-validator';
+import { Allow, IsEnum, IsNumber, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import StripeCheckoutStatus from '@constants/stripe-checkout-status';
+import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import Customer from '@entities/customer';
+
+export interface ITransactionParams {
+  paymentStatus?: StripeTransactionStatus;
+  checkoutStatus?: StripeCheckoutStatus;
+  errorMessage?: string;
+}
 
 @JSONSchema({
   properties: {
@@ -73,18 +81,12 @@ class Transaction {
   status: TransactionStatus;
 
   @JSONSchema({
-    description:
-      'Field for storing status of process of transaction itself. E.g. checkout session is completed or in process',
+    description: 'Store data about payment connected account and etc.',
   })
-  @Column({ type: 'varchar', length: 18 })
+  @Column({ type: 'json', default: {} })
+  @IsObject()
   @IsUndefinable()
-  @Length(1, 18)
-  paymentStatus: string;
-
-  @Column({ type: 'varchar', length: 150 })
-  @IsUndefinable()
-  @Length(1, 150)
-  errorMessage: string;
+  params: ITransactionParams;
 
   @ManyToOne('Customer', 'transactions')
   @JoinColumn({ name: 'userId' })

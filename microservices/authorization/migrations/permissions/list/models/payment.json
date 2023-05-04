@@ -668,15 +668,7 @@
           "admin": "allow"
         }
       },
-      "paymentStatus": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
-      "errorMesage": {
+      "params": {
         "in": {
           "admin": "allow"
         },
