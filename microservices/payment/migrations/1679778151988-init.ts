@@ -18,7 +18,7 @@ export default class init1679778151988 implements MigrationInterface {
       `CREATE TYPE "public"."transaction_type_enum" AS ENUM('credit', 'debit')`,
     );
     await queryRunner.query(
-      `CREATE TYPE "public"."transaction_status_enum" AS ENUM('succeded', 'requires_action', 'requires_payment_method', 'error')`,
+      `CREATE TYPE "public"."transaction_status_enum" AS ENUM('success', 'inProcess', 'requiredPayment', 'initial', expired, 'error')`,
     );
     await queryRunner.query(
       `ALTER TABLE "customer" ADD CONSTRAINT "customer(uq):userId" UNIQUE ("userId")`,
