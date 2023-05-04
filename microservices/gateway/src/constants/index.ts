@@ -14,6 +14,8 @@ const constants = {
   MS_CORS_CONFIG: JSON.parse(
     process.env.MS_CORS_CONFIG || '{"origin":["http://localhost:3000"],"credentials":true}',
   ),
+  MS_WEBHOOK_URL: process.env.MS_WEBHOOK_URL || '/webhook/',
+  MS_WEBHOOK_ALLOW_METHODS: JSON.parse(process.env.MS_WEBHOOK_ALLOW_METHODS || '[]'),
 };
 
 export default constants;
