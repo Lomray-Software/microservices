@@ -8,4 +8,5 @@ export interface IRemoteConfig {
   paymentProvider?: PaymentProvider;
   paymentOptions?: TPaymentOptions;
   paymentWebhookKey: string;
+  payoutCoeff: number;
 }

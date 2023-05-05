@@ -254,7 +254,8 @@
           "user": "allow"
         }
       },
-      "price": "payment.Price"
+      "price": "payment.Price",
+      "transactions": "payment.Transactions"
     },
     "createdAt": "2023-04-11T22:46:39.989Z"
   },
@@ -588,6 +589,14 @@
           "admin": "allow"
         }
       },
+      "productId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "title": {
         "in": {
           "admin": "allow"
@@ -676,7 +685,8 @@
           "admin": "allow"
         }
       },
-      "customer": "payment.Customer"
+      "customer": "payment.Customer",
+      "product": "payment.Product"
     },
     "createdAt": "2023-04-25T14:18:01.068Z"
   },
@@ -812,5 +822,37 @@
       }
     },
     "createdAt": "2023-04-28T00:46:02.060Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.PayoutInput",
+    "title": "Payout Input",
+    "schema": {
+      "entities": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-05T16:43:42.509Z"
+  },
+  {
+    "microservice": "payment",
+    "alias": "payment.PayoutOutput",
+    "title": "Payout Output",
+    "schema": {
+      "isHandled": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-05T16:43:42.509Z"
   }
 ]

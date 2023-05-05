@@ -1,11 +1,13 @@
 import { Log } from '@lomray/microservice-helpers';
 import StripeSdk from 'stripe';
 import type { EntityManager } from 'typeorm';
+import remoteConfig from '@config/remote';
 import type PaymentProvider from '@constants/payment-provider';
 import StripeAccountTypes from '@constants/stripe-acoount-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionStatus from '@constants/transaction-status';
+import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Customer from '@entities/customer';
@@ -170,9 +172,16 @@ class Stripe extends Abstract {
     const { priceId, userId, successUrl, cancelUrl } = params;
 
     const { customerId } = await super.getCustomer(userId);
+    const price = await this.priceRepository.findOne({ priceId });
+
+    if (!price) {
+      Log.error(`There is no price related to this priceId: ${priceId}`);
+
+      return null;
+    }
 
     /* eslint-disable camelcase */
-    const session = await this.paymentEntity.checkout.sessions.create({
+    const { id, url } = await this.paymentEntity.checkout.sessions.create({
       line_items: [
         {
           price: priceId,
@@ -186,7 +195,18 @@ class Stripe extends Abstract {
     });
     /* eslint-enable camelcase */
 
-    return session.url;
+    await this.createTransaction(
+      {
+        type: TransactionType.CREDIT,
+        amount: price.unitAmount,
+        userId,
+        productId: price.productId,
+        status: TransactionStatus.INITIAL,
+      },
+      id,
+    );
+
+    return url;
   }
 
   /**
@@ -247,30 +267,99 @@ class Stripe extends Abstract {
    */
   public async handleTransactionCompleted(event: StripeSdk.Event): Promise<Transaction | void> {
     /* eslint-disable camelcase */
-    const { id, amount_total, customer, payment_status, status } = event.data
-      .object as ICheckoutEvent;
+    const { id, payment_status, status } = event.data.object as ICheckoutEvent;
 
-    const customerEntity = await this.customerRepository.findOne({ customerId: customer });
-
-    if (!customerEntity) {
-      Log.error(`Could not find any existing customer with such customerId: ${customer}`);
-
-      return;
-    }
-
-    return this.createTransaction(
+    await this.transactionRepository.update(
+      { transactionId: id },
       {
-        amount: amount_total,
-        userId: customerEntity?.userId,
         status: this.getStatus(payment_status as StripeTransactionStatus),
         params: {
           checkoutStatus: status as StripeCheckoutStatus,
           paymentStatus: payment_status as StripeTransactionStatus,
         },
       },
-      id,
     );
     /* eslint-enable camelcase */
+  }
+
+  /**
+   * Get and calculate transfer information
+   * @protected
+   */
+  protected async getTransfer(
+    entityId: string,
+    userId: string,
+  ): Promise<{ amount: number; destinationUser: string; userId: string } | undefined> {
+    const transactions = await this.transactionRepository.find({
+      select: ['amount', 'userId'],
+      where: { entityId, status: TransactionStatus.SUCCESS },
+    });
+
+    const destinationUser = await this.customerRepository.findOne({
+      userId,
+    });
+
+    if (!destinationUser?.params.accountId) {
+      Log.error(
+        'Destination user who is being used for transfer doesnt have the connected account id',
+      );
+
+      return;
+    }
+
+    return transactions.reduce(
+      (previousValue, transaction) => ({
+        ...previousValue,
+        amount: previousValue.amount + transaction.amount,
+      }),
+      {
+        amount: 0,
+        destinationUser: destinationUser.params.accountId,
+        userId: transactions[0].userId,
+      },
+    );
+  }
+
+  /**
+   * Create transfer for connected account
+   */
+  public async createTransfer(entityId: string, userId: string) {
+    const { payoutCoeff } = await remoteConfig();
+    const transfer = await this.getTransfer(entityId, userId);
+
+    if (!transfer) {
+      Log.error(`There is no actual transfers for entity with following id: ${entityId}`);
+
+      return;
+    }
+
+    const { id } = await this.paymentEntity.transfers.create({
+      amount: transfer.amount * payoutCoeff,
+      currency: 'usd',
+      destination: transfer.destinationUser,
+    });
+
+    const transaction = this.transactionRepository.create({
+      transactionId: id,
+      userId: transfer.userId,
+      entityId,
+      amount: transfer.amount,
+      type: TransactionType.DEBIT,
+      status: TransactionStatus.INITIAL,
+    });
+
+    await this.transactionRepository.save(transaction);
+  }
+
+  /**
+   * Creates payout transfers for given entities
+   */
+  public payout(entitiesId: { id: string; userId: string }[]) {
+    entitiesId.forEach(({ id, userId }) => {
+      void this.createTransfer(id, userId);
+    });
+
+    return true;
   }
 }
 

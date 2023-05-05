@@ -3,11 +3,13 @@ import { Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
 import Price from '@entities/price';
+import Transaction from '@entities/transaction';
 
 @JSONSchema({
   description: 'Entity for binding application entity with the according payment service entity',
   properties: {
     price: { $ref: '#/definitions/Price' },
+    transactions: { $ref: '#/definitions/Transactions', type: 'array' },
   },
 })
 @Entity()
@@ -35,6 +37,9 @@ class Product {
 
   @OneToMany('Price', 'product')
   price: Price;
+
+  @OneToMany('Transaction', 'product')
+  transactions: Transaction[];
 }
 
 export default Product;
