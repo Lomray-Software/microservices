@@ -34,6 +34,10 @@ const webhook = Endpoint.custom(
       throw new Error('Webhooks only suitable for the stripe payment provider');
     }
 
+    if (!paymentWebhookKey) {
+      throw new Error('Webhook key is not provided');
+    }
+
     const service = (await Factory.create(getManager())) as Stripe;
 
     service.handleWebhookEvent(body, headers['stripe-signature'], paymentWebhookKey);

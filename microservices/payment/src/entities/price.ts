@@ -1,4 +1,3 @@
-import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsNumber, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
@@ -21,10 +20,8 @@ class Price {
 
   @Index('IDX_price_userId', ['userId'])
   @Column({ type: 'varchar', length: 36, default: null })
-  @IsNullable()
-  @IsUndefinable()
   @Length(1, 36)
-  userId: string | null;
+  userId: string;
 
   @Column({ type: 'varchar', length: 10 })
   @Length(1, 10)

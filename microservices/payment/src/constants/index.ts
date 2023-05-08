@@ -10,6 +10,7 @@ const constants = {
   PAYMENT_PROVIDER: process.env.PAYMENT_PROVIDER ?? PaymentProvider.STRIPE,
   PAYMENT_OPTIONS: process.env.PAYMENT_OPTIONS ?? '{}',
   PAYMENT_WEBHOOK_KEY: process.env.PAYMENT_WEBHOOK_KEY ?? '',
+  PAYOUT_COEFF: Number(process.env.PAYOUT_COEFF) ?? 0.3,
 };
 
 export default constants;

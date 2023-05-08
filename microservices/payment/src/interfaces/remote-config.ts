@@ -7,5 +7,6 @@ import type TPaymentOptions from '@interfaces/payment-options';
 export interface IRemoteConfig {
   paymentProvider?: PaymentProvider;
   paymentOptions?: TPaymentOptions;
-  paymentWebhookKey: string;
+  paymentWebhookKey?: string;
+  payoutCoeff?: number;
 }

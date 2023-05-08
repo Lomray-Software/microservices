@@ -7,6 +7,7 @@ import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import Customer from '@entities/customer';
+import Product from '@entities/product';
 
 export interface ITransactionParams {
   paymentStatus?: StripeTransactionStatus;
@@ -17,6 +18,7 @@ export interface ITransactionParams {
 @JSONSchema({
   properties: {
     customer: { $ref: '#/definitions/Customer' },
+    product: { $ref: '#/definitions/Product' },
   },
 })
 @Entity()
@@ -87,6 +89,10 @@ class Transaction {
   @IsObject()
   @IsUndefinable()
   params: ITransactionParams;
+
+  @ManyToOne('Product', 'transactions')
+  @JoinColumn({ name: 'productId' })
+  product: Product;
 
   @ManyToOne('Customer', 'transactions')
   @JoinColumn({ name: 'userId' })

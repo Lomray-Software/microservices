@@ -374,5 +374,18 @@
     "modelIn": "payment.ConnectAccountInput",
     "modelOut": "payment.ConnectAccountOutput",
     "methodFilters": []
+  },
+  {
+    "microservice": "payment",
+    "method": "stripe.payout",
+    "description": "Create payout for product owners",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-05-05T16:43:42.509Z",
+    "modelIn": "payment.PayoutInput",
+    "modelOut": "payment.PayoutOutput",
+    "methodFilters": []
   }
 ]

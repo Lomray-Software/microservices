@@ -31,13 +31,14 @@ export interface ITransactionParams {
   amount: number;
   userId: string;
   bankAccountId?: string;
+  productId?: string;
   cardId?: string;
   entityId?: string;
   type?: TransactionType;
   tax?: number;
   fee?: number;
   status: TransactionStatus;
-  params: ITransactionEntityParams;
+  params?: ITransactionEntityParams;
 }
 
 export interface IProductParams {
