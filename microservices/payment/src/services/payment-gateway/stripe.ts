@@ -364,7 +364,7 @@ class Stripe extends Abstract {
 
     // TODO: create mechanism to rearrange/mark payouts with errors to deal with them later
     if (!payoutCoeff) {
-      Log.error(`Payout coefficient is not provided`);
+      Log.error('Payout coefficient is not provided');
 
       return false;
     }
