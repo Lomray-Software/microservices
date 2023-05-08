@@ -40,6 +40,12 @@ interface ICheckoutEvent {
   status: string;
 }
 
+interface ITransferInfo {
+  amount: number;
+  destinationUser: string;
+  userId: string;
+}
+
 /**
  * Stripe payment provider
  */
@@ -286,10 +292,10 @@ class Stripe extends Abstract {
    * Get and calculate transfer information
    * @protected
    */
-  protected async getTransfer(
+  protected async getTransferInfo(
     entityId: string,
     userId: string,
-  ): Promise<{ amount: number; destinationUser: string; userId: string } | undefined> {
+  ): Promise<ITransferInfo | undefined> {
     const transactions = await this.transactionRepository.find({
       select: ['amount', 'userId'],
       where: { entityId, status: TransactionStatus.SUCCESS },
@@ -325,7 +331,7 @@ class Stripe extends Abstract {
    */
   public async createTransfer(entityId: string, userId: string) {
     const { payoutCoeff } = await remoteConfig();
-    const transfer = await this.getTransfer(entityId, userId);
+    const transfer = await this.getTransferInfo(entityId, userId);
 
     if (!transfer) {
       Log.error(`There is no actual transfers for entity with following id: ${entityId}`);
