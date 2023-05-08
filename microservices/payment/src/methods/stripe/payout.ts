@@ -13,7 +13,7 @@ class PayoutInput {
 
 class PayoutOutput {
   @IsBoolean()
-  isHandled: boolean;
+  isComplete: boolean;
 }
 
 /**
@@ -35,7 +35,7 @@ const payout = Endpoint.custom(
     const service = (await Factory.create(getManager())) as Stripe;
 
     return {
-      isHandled: service.payout(entities),
+      isComplete: await service.payout(entities),
     };
   },
 );

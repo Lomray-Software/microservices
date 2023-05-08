@@ -844,7 +844,7 @@
     "alias": "payment.PayoutOutput",
     "title": "Payout Output",
     "schema": {
-      "isHandled": {
+      "isComplete": {
         "in": {
           "admin": "allow"
         },

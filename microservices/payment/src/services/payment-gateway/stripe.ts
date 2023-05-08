@@ -329,8 +329,7 @@ class Stripe extends Abstract {
   /**
    * Create transfer for connected account
    */
-  public async createTransfer(entityId: string, userId: string) {
-    const { payoutCoeff } = await remoteConfig();
+  public async createTransfer(entityId: string, userId: string, payoutCoeff: number) {
     const transfer = await this.getTransferInfo(entityId, userId);
 
     if (!transfer) {
@@ -360,10 +359,19 @@ class Stripe extends Abstract {
   /**
    * Creates payout transfers for given entities
    */
-  public payout(entitiesId: { id: string; userId: string }[]) {
-    entitiesId.forEach(({ id, userId }) => {
-      void this.createTransfer(id, userId);
-    });
+  public async payout(entitiesIds: { id: string; userId: string }[]) {
+    const { payoutCoeff } = await remoteConfig();
+
+    // TODO: create mechanism to rearrange/mark payouts with errors to deal with them later
+    if (!payoutCoeff) {
+      Log.error(`Payout coefficient is not provided`);
+
+      return false;
+    }
+
+    await Promise.allSettled(
+      entitiesIds.map(({ id, userId }) => this.createTransfer(id, userId, payoutCoeff)),
+    );
 
     return true;
   }
