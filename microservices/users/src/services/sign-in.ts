@@ -56,6 +56,13 @@ class SignIn {
       { relations: ['profile'], select: EntityColumns(this.repository) },
     );
 
+    if (typeof user?.deletedAt?.toString() === 'string') {
+      throw new BaseException({
+        status: 400,
+        message: 'Account was removed.',
+      });
+    }
+
     if (!user || !this.repository.isValidPassword(user, this.password)) {
       throw new BaseException({
         code: ExceptionCode.LOGIN_PASSWORD_INCORRECT,
