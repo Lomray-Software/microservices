@@ -1,5 +1,6 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { waitResult } from '@lomray/microservice-helpers/test-helpers';
+import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import UserRepository from '@repositories/user';
@@ -9,6 +10,7 @@ describe('services/sign-out', () => {
   const sandbox = sinon.createSandbox();
   const repository = TypeormMock.entityManager.getCustomRepository(UserRepository);
   const correctPassword = 'example';
+  const mockEmail = 'test@email.com';
   const mockUser = repository.create({
     id: 'user-id',
     password: correctPassword,
@@ -43,7 +45,7 @@ describe('services/sign-out', () => {
   });
 
   it('should throw error: password incorrect', async () => {
-    const service = SignIn.init({ login: 'test@email.com', password: 'incorrect', repository });
+    const service = SignIn.init({ login: mockEmail, password: 'incorrect', repository });
 
     TypeormMock.entityManager.findOne.resolves(mockUser);
 
@@ -66,5 +68,22 @@ describe('services/sign-out', () => {
     TypeormMock.entityManager.findOne.resolves(mockUser);
 
     expect(await service.auth()).to.deep.equal(mockUser);
+  });
+
+  it('should throw error: account was removed', async () => {
+    const user = repository.create({
+      id: 'user-id',
+      password: correctPassword,
+      deletedAt: new Date(),
+    });
+
+    const service = SignIn.init({ login: mockEmail, password: 'incorrect', repository });
+
+    TypeormMock.entityManager.findOne.resolves(user);
+
+    expect(await waitResult(service.auth().catch((e) => e.message))).to.equal(
+      'Account was removed.',
+    );
+    expect(await waitResult(service.auth())).to.throw(BaseException);
   });
 });
