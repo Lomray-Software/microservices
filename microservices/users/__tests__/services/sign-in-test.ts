@@ -81,7 +81,7 @@ describe('services/sign-out', () => {
 
     TypeormMock.entityManager.findOne.resolves(user);
 
-    expect(await waitResult(service.auth().catch((e) => e.message))).to.equal(
+    expect(await waitResult(service.auth().catch(({ message }) => message))).to.equal(
       'Account was removed.',
     );
     expect(await waitResult(service.auth())).to.throw(BaseException);
