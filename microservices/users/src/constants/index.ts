@@ -14,6 +14,8 @@ const constants = {
     withFirebase: true,
   }),
   MS_USER_PASSWORD_SALT_ROUNDS: Number(process.env.MS_USER_PASSWORD_SALT_ROUNDS) || 10,
+  MS_USER_REMOVE_ACCOUNT_RESTORE_TIME_IN_DAYS:
+    Number(process.env.MS_USER_REMOVE_ACCOUNT_RESTORE_TIME_IN_DAYS) || 0,
 };
 
 export default constants;
