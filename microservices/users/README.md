@@ -26,6 +26,7 @@ This microservice provides mechanism for store/manage user data.
 
 ### <a id="environments"></a>ENVIRONMENTS:
 - `MS_USER_PASSWORD_SALT_ROUNDS` - Bcrypt salt rounds. Default: `10`
+- `MS_USER_REMOVE_ACCOUNT_RESTORE_TIME` - Account restore time in hours. Default: `0`
 - [See full list `COMMON ENVIRONMENTS`](https://github.com/Lomray-Software/microservice-helpers#common-environments)
 
 ### <a id="how-to-run"></a>HOW TO RUN:

@@ -3,4 +3,5 @@
  */
 export interface IRemoteConfig {
   passwordSaltRounds?: number;
+  removedAccountRestoreTime?: number;
 }

@@ -115,6 +115,15 @@ describe('services/sign-up', () => {
     );
   });
 
+  it('should sign-in throw error: account was removed', async () => {
+    FirebaseSdkStub.resolves(firebaseMock({ user: { email, emailVerified: true } }));
+    TypeormMock.queryBuilder.getOne.resolves({ ...mockUser, deletedAt: new Date() });
+
+    expect(await waitResult(service.signIn({ isDenyAuthViaRegister: true }))).to.throw(
+      'Account was removed.',
+    );
+  });
+
   it('should register new user without the photo', async () => {
     FirebaseSdkStub.resolves(
       firebaseMock({ user: { email: mockUser.email, emailVerified: true } }),
