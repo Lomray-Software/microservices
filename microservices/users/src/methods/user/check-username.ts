@@ -26,7 +26,7 @@ const checkUsername = Endpoint.custom(
   async ({ username }) => {
     const userRepository = getCustomRepository(UserRepository);
 
-    const user = await userRepository.findOne({ username }, { select: ['id'] });
+    const user = await userRepository.findOne({ username }, { select: ['id'], withDeleted: true });
 
     return {
       isUnique: !user,
