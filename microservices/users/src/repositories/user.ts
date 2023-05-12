@@ -2,6 +2,7 @@ import { BaseException } from '@lomray/microservice-nodejs-lib';
 import bcrypt from 'bcrypt';
 import { EntityRepository, Repository } from 'typeorm';
 import remoteConfig from '@config/remote';
+import ExceptionCode from '@constants/exception-code';
 import IdProvider from '@constants/id-provider';
 import Profile from '@entities/profile';
 import UserEntity from '@entities/user';
@@ -93,6 +94,7 @@ class User extends Repository<UserEntity> {
     }
 
     throw new BaseException({
+      code: ExceptionCode.ACCOUNT_REMOVED,
       message: 'Account was removed.',
       status: 403,
     });
