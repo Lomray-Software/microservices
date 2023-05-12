@@ -26,6 +26,11 @@ class Firebase extends Abstract {
     const [firebaseUser, providerType] = await this.getFirebaseUser();
     const user = await this.userRepository.findUserByIdentifier(this.provider, firebaseUser.uid);
 
+    /**
+     * Verify if the user was deleted and can he restore the account
+     */
+    await this.userRepository.verifyDeleteAt(user);
+
     this.isShouldAttachUserPhoto = isShouldAttachUserPhoto;
     this.isShouldApproveProvider = isShouldApproveProvider;
 
@@ -60,7 +65,10 @@ class Firebase extends Abstract {
    */
   public async attachProvider(userId: string): Promise<User> {
     const [firebaseUser, providerType] = await this.getFirebaseUser();
-    const user = await this.userRepository.findOne({ id: userId }, { relations: ['profile'] });
+    const user = await this.userRepository.findOne(
+      { id: userId },
+      { relations: ['profile'], withDeleted: true },
+    );
 
     if (!user) {
       throw new BaseException({
