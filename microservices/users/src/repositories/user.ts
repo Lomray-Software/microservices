@@ -58,7 +58,7 @@ class User extends Repository<UserEntity> {
     updateParams?: Partial<Profile['params']>,
   ): Promise<UserEntity> {
     const repository = this.manager.getRepository(Profile);
-    const profile = (await repository.findOne({ userId: user.id }))!;
+    const profile = (await repository.findOne({ userId: user.id }, { withDeleted: true }))!;
 
     if (updateParams) {
       profile.params = { ...profile.params, ...updateParams };
