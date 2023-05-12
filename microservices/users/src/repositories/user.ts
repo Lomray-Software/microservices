@@ -75,7 +75,7 @@ class User extends Repository<UserEntity> {
    * Verify if restore account time is exceeded
    */
   public async verifyDeleteAt(user?: UserEntity): Promise<void> {
-    const { removedAccountRestoreTimeInDays } = await remoteConfig();
+    const { removedAccountRestoreTime } = await remoteConfig();
 
     /**
      * If account wasn't removed
@@ -85,14 +85,17 @@ class User extends Repository<UserEntity> {
     }
 
     const restoreTimeAllowance = new Date(
-      user.deletedAt?.getTime() + removedAccountRestoreTimeInDays * 24 * 60 * 60 * 1000,
+      user.deletedAt?.getTime() + removedAccountRestoreTime * 60 * 60 * 1000,
     );
 
     if (new Date() < restoreTimeAllowance) {
       return;
     }
 
-    throw new BaseException({ status: 500, message: 'Account was removed.' });
+    throw new BaseException({
+      message: 'Account was removed.',
+      status: 403,
+    });
   }
 }
 
