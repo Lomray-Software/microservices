@@ -65,10 +65,7 @@ class Firebase extends Abstract {
    */
   public async attachProvider(userId: string): Promise<User> {
     const [firebaseUser, providerType] = await this.getFirebaseUser();
-    const user = await this.userRepository.findOne(
-      { id: userId },
-      { relations: ['profile'], withDeleted: true },
-    );
+    const user = await this.userRepository.findOne({ id: userId }, { relations: ['profile'] });
 
     if (!user) {
       throw new BaseException({
