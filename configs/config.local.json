@@ -34,7 +34,7 @@
     "microservice": "users",
     "type": "config",
     "params": {
-      "removedAccountRestoreTimeInDays": 90
+      "removedAccountRestoreTimeInHours": 0
     }
   },
   {
