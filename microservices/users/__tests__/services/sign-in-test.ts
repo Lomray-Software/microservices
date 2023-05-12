@@ -3,6 +3,7 @@ import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { expect } from 'chai';
 import sinon from 'sinon';
+import * as remoteConfig from '@config/remote';
 import UserRepository from '@repositories/user';
 import SignIn from '@services/sign-in';
 
@@ -77,7 +78,9 @@ describe('services/sign-out', () => {
       deletedAt: new Date(),
     });
 
-    const service = SignIn.init({ login: mockEmail, password: 'incorrect', repository });
+    await repository.encryptPassword(user);
+
+    const service = SignIn.init({ login: mockEmail, password: correctPassword, repository });
 
     TypeormMock.entityManager.findOne.resolves(user);
 
@@ -85,5 +88,29 @@ describe('services/sign-out', () => {
       'Account was removed.',
     );
     expect(await waitResult(service.auth())).to.throw(BaseException);
+  });
+
+  it("should return user: account was removed but restore time isn't exceeded", async () => {
+    const user = repository.create({
+      id: 'user-id',
+      password: correctPassword,
+      deletedAt: new Date(),
+    });
+
+    await repository.encryptPassword(user);
+
+    const remoteConfigStub = sinon.stub().resolves({
+      removedAccountRestoreTime: 24,
+    });
+
+    sinon.replace(remoteConfig, 'default', remoteConfigStub);
+
+    const service = SignIn.init({ login: mockEmail, password: correctPassword, repository });
+
+    TypeormMock.entityManager.findOne.resolves(user);
+
+    const res = await service.auth();
+
+    expect(res).to.deep.equal(user);
   });
 });
