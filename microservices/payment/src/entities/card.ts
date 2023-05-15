@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
   CreateDateColumn,
   Column,
-  Unique,
+  Index,
   PrimaryColumn,
 } from 'typeorm';
 import type Customer from '@entities/customer';
@@ -33,8 +33,8 @@ class Card {
   @Length(1, 29)
   cardId: string;
 
+  @Index('IDX_card_userId', ['userId'])
   @Column({ type: 'varchar', length: 36 })
-  @Unique(['userId'])
   @Length(1, 36)
   userId: string;
 
