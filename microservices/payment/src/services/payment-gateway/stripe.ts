@@ -358,7 +358,6 @@ class Stripe extends Abstract {
       userId: customer.userId,
       expired: toExpirationDate(exp_month, exp_year),
       isDefault: isCardsExist === 0,
-      holderName: 'Unknown',
     });
   }
 

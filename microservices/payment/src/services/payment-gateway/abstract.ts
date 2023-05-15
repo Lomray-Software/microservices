@@ -15,9 +15,9 @@ export interface ICardParams {
   cardId: string;
   lastDigits: string;
   expired: string;
-  holderName: string;
   type: string;
   userId: string;
+  holderName?: string;
   isDefault?: boolean;
 }
 
