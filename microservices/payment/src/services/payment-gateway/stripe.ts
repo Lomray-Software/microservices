@@ -79,15 +79,15 @@ class Stripe extends Abstract {
   /**
    * Add bank account
    */
-  addCard(): Promise<Card> {
-    return Promise.resolve(new Card());
+  addBankAccount(): Promise<BankAccount> {
+    return Promise.resolve(new BankAccount());
   }
 
   /**
-   * Add bank account
+   * Add new card
    */
-  addBankAccount(): Promise<BankAccount> {
-    return Promise.resolve(new BankAccount());
+  addCard(): Promise<Card> {
+    return Promise.resolve(new Card());
   }
 
   /**
