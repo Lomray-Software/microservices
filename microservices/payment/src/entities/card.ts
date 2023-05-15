@@ -1,5 +1,5 @@
 import { IsTypeormDate } from '@lomray/microservice-helpers';
-import { IsCreditCard, IsEnum, IsString, Length } from 'class-validator';
+import { IsBoolean, IsCreditCard, IsEnum, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Entity,
@@ -66,6 +66,13 @@ class Card {
   @Column({ type: 'enum', enum: CardType })
   @IsEnum(CardType)
   type: CardType;
+
+  @JSONSchema({
+    description: "If it's the first attached user card it should be default",
+  })
+  @Column({ type: 'boolean', default: false })
+  @IsBoolean()
+  isDefault: boolean;
 
   @IsTypeormDate()
   @CreateDateColumn()
