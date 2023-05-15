@@ -266,6 +266,7 @@ class Stripe extends Abstract {
         case 'checkout.session.completed':
           void this.handleTransactionCompleted(event);
           break;
+
         case 'setup_intent.succeeded':
           void this.handleSetupIntent(event);
           break;
