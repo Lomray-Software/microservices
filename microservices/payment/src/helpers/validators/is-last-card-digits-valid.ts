@@ -1,7 +1,7 @@
 import { registerDecorator, ValidationOptions, ValidationArguments } from 'class-validator';
 
 /**
- * Validate last card digits
+ * Validates card last digits
  */
 const IsLastDigitsValid =
   (validationOptions?: ValidationOptions) => (object: object, propertyName: string) => {
