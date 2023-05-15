@@ -341,9 +341,9 @@ class Stripe extends Abstract {
     }
 
     /**
-     * Check if card already was registered
+     * Check user have added other cards
      */
-    const isCardsExist = await this.cardRepository.count({ userId: customer.userId });
+    const isFirstAddedCard = (await this.cardRepository.count({ userId: customer.userId })) === 0;
 
     const {
       id: cardId,
@@ -357,7 +357,7 @@ class Stripe extends Abstract {
       type,
       userId: customer.userId,
       expired: toExpirationDate(exp_month, exp_year),
-      isDefault: isCardsExist === 0,
+      isDefault: isFirstAddedCard,
     });
   }
 
