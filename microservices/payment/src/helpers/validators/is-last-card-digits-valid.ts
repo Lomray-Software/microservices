@@ -6,7 +6,7 @@ import { registerDecorator, ValidationOptions, ValidationArguments } from 'class
 const IsLastDigitsValid =
   (validationOptions?: ValidationOptions) => (object: object, propertyName: string) => {
     registerDecorator({
-      name: 'isLast4Digits',
+      name: 'isLastDigitsValid',
       target: object.constructor,
       propertyName,
       options: validationOptions,
