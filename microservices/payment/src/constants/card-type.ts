@@ -1,5 +1,6 @@
 /**
  * Card types
+ * @TODO: integrate into card
  */
 enum CardType {
   VISA = 'visa',
@@ -11,6 +12,7 @@ enum CardType {
   JCB = 'JCB',
   CARTES_BANCAIRES = 'cartesBancaires',
   EFTPOS = 'eftpos',
+  AMEX = 'amex',
 }
 
 export default CardType;

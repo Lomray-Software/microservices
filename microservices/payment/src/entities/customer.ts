@@ -17,6 +17,9 @@ export interface ICustomerParams {
 })
 @Entity()
 class Customer {
+  @JSONSchema({
+    example: 'cus_NZYV9mFrODGqkf',
+  })
   @PrimaryColumn({ type: 'varchar', length: 18 })
   @Length(1, 18)
   customerId: string;

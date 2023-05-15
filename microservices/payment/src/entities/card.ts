@@ -1,5 +1,5 @@
 import { IsTypeormDate } from '@lomray/microservice-helpers';
-import { IsBoolean, IsEnum, IsString, Length } from 'class-validator';
+import { IsBoolean, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Entity,
@@ -12,7 +12,6 @@ import {
   Unique,
   PrimaryColumn,
 } from 'typeorm';
-import CardType from '@constants/card-type';
 import type Customer from '@entities/customer';
 import IsCardExpirationValid from '@helpers/validators/is-card-expiration-valid';
 import IsLastCardDititsValid from '@helpers/validators/is-last-card-digits-valid';
@@ -45,7 +44,7 @@ class Card {
     description: 'Last 4 card digits',
     example: '4242',
   })
-  @Column({ type: 'string' })
+  @Column({ type: 'varchar' })
   @IsLastCardDititsValid()
   @IsString()
   lastDigits: string;
@@ -53,21 +52,20 @@ class Card {
   @JSONSchema({
     example: '01/27',
   })
-  @Column({ type: 'string' })
+  @Column({ type: 'varchar', length: 5 })
   @IsCardExpirationValid()
-  @IsString()
+  @Length(5, 5)
   expired: string;
 
-  @Column({ type: 'string', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   @Length(1, 255)
   holderName: string;
 
   @JSONSchema({
     example: 'visa',
   })
-  @Column({ type: 'enum', enum: CardType })
-  @IsEnum(CardType)
-  type: CardType;
+  @Column({ type: 'varchar', length: 20 })
+  type: string;
 
   @JSONSchema({
     description: "If it's the first attached user card it should be default",

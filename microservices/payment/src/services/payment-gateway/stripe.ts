@@ -5,15 +5,19 @@ import remoteConfig from '@config/remote';
 import type PaymentProvider from '@constants/payment-provider';
 import StripeAccountTypes from '@constants/stripe-acoount-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
+import StripePaymentMethods from '@constants/stripe-payment-methods';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
+import Card from '@entities/card';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
 import Transaction from '@entities/transaction';
+import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import type IStripeOptions from '@interfaces/stripe-options';
+import ISetupIntent from '@interfaces/stripe/setup-intents';
 import Abstract, { IPriceParams, IProductParams } from './abstract';
 
 export interface IStripeProductParams extends IProductParams {
@@ -70,6 +74,13 @@ class Stripe extends Abstract {
     super(paymentProvider, paymentOptions, manager);
 
     this.paymentEntity = new StripeSdk(paymentOptions.apiKey, paymentOptions.config);
+  }
+
+  /**
+   * Add bank account
+   */
+  addCard(): Promise<Card> {
+    return Promise.resolve(new Card());
   }
 
   /**
@@ -255,6 +266,9 @@ class Stripe extends Abstract {
         case 'checkout.session.completed':
           void this.handleTransactionCompleted(event);
           break;
+        case 'setup_intent.succeeded':
+          void this.handleSetupIntent(event);
+          break;
       }
     } catch (err) {
       Log.error(`Webhook handler has following error ${err as string}`);
@@ -279,6 +293,73 @@ class Stripe extends Abstract {
       },
     );
     /* eslint-enable camelcase */
+  }
+
+  /**
+   * Handles setup intent succeed
+   * NOTE: Should be called by webhook
+   */
+  public async handleSetupIntent(event: StripeSdk.Event): Promise<Transaction | void> {
+    /* eslint-disable camelcase */
+    const { payment_method } = event.data.object as ISetupIntent;
+
+    if (!payment_method) {
+      Log.error("The SetupIntent payment method doesn't exist");
+
+      return;
+    }
+
+    /**
+     * Get payment method data
+     */
+    const paymentMethod = await this.paymentEntity.paymentMethods.retrieve(payment_method, {
+      expand: [StripePaymentMethods.CARD],
+    });
+
+    if (!paymentMethod?.card || !paymentMethod?.customer) {
+      Log.error('The payment method card data is invalid');
+
+      return;
+    }
+
+    /**
+     * Get customer
+     */
+    const customerId =
+      typeof paymentMethod.customer === 'string'
+        ? paymentMethod.customer
+        : paymentMethod.customer.id;
+
+    const customer = await super.customerRepository.findOne({
+      customerId,
+    });
+
+    if (!customer) {
+      Log.error("Customer doesn't exist");
+
+      return;
+    }
+
+    /**
+     * Check if card already was registered
+     */
+    const isCardsExist = await this.cardRepository.count({ userId: customer.userId });
+
+    const {
+      id: cardId,
+      card: { brand: type, last4: lastDigits, exp_month, exp_year },
+    } = paymentMethod;
+
+    /* eslint-enable camelcase */
+    await super.createCard({
+      cardId,
+      lastDigits,
+      type,
+      userId: customer.userId,
+      expired: toExpirationDate(exp_month, exp_year),
+      isDefault: isCardsExist === 0,
+      holderName: 'Unknown',
+    });
   }
 
   /**

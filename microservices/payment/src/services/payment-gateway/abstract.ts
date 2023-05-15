@@ -1,6 +1,5 @@
 import { EntityManager, Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
-import CardType from '@constants/card-type';
 import PaymentProvider from '@constants/payment-provider';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
@@ -14,10 +13,10 @@ import type TPaymentOptions from '@interfaces/payment-options';
 
 export interface ICardParams {
   cardId: string;
-  number: string;
+  lastDigits: string;
   expired: string;
   holderName: string;
-  type: CardType;
+  type: string;
   userId: string;
   isDefault?: boolean;
 }
@@ -117,16 +116,7 @@ abstract class Abstract {
   /**
    * Add new card
    */
-  public async addCard(params: ICardParams, cardId: string = uuid()): Promise<Card> {
-    const card = this.cardRepository.create({
-      ...params,
-      cardId: params?.cardId || cardId,
-    });
-
-    await this.cardRepository.save(card);
-
-    return card;
-  }
+  public abstract addCard(params: ICardParams): Promise<Card>;
 
   /**
    * Create new transaction
@@ -140,6 +130,17 @@ abstract class Abstract {
     await this.transactionRepository.save(transaction);
 
     return transaction;
+  }
+
+  /**
+   * Create new card
+   */
+  public async createCard(params: ICardParams): Promise<Card> {
+    const card = this.cardRepository.create(params);
+
+    await this.cardRepository.save(card);
+
+    return card;
   }
 
   /**

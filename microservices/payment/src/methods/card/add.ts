@@ -8,9 +8,6 @@ import Factory from '@services/payment-gateway/factory';
 
 class CardAddInput {
   @IsString()
-  cardId: string;
-
-  @IsString()
   userId: string;
 
   @IsString()
@@ -20,10 +17,13 @@ class CardAddInput {
   holderName: string;
 
   @IsString()
-  number: string;
+  lastDigits: string;
 
   @IsEnum(CardType)
   type: CardType;
+
+  @IsString()
+  cardId: string;
 
   @IsBoolean()
   @IsUndefinable()
