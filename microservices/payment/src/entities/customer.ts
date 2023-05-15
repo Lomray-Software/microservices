@@ -2,7 +2,8 @@ import { IsUndefinable } from '@lomray/microservice-helpers';
 import { Length, IsObject } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, Entity, Index, OneToMany, PrimaryColumn, Unique } from 'typeorm';
-import Transaction from '@entities/transaction';
+import type Card from '@entities/card';
+import type Transaction from '@entities/transaction';
 
 export interface ICustomerParams {
   accountId?: string;
@@ -10,7 +11,8 @@ export interface ICustomerParams {
 
 @JSONSchema({
   properties: {
-    transactions: { $ref: '#/definitions/Transactions', type: 'array' },
+    transactions: { $ref: '#/definitions/Transaction', type: 'array' },
+    cards: { $ref: '#/definitions/Card', type: 'array' },
   },
 })
 @Entity()
@@ -35,6 +37,9 @@ class Customer {
 
   @OneToMany('Transaction', 'customer')
   transactions: Transaction[];
+
+  @OneToMany('Card', 'customer')
+  cards: Card[];
 }
 
 export default Customer;
