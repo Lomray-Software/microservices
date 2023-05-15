@@ -39,22 +39,20 @@
 		"start:prod": "node --require ./lib/tracer.js ./lib/index.js"
 	},
 	"dependencies": {
-		"@lomray/microservice-helpers": "^2.5.2",
-		"@lomray/microservices-client-api": "^2.7.2",
-		"aws-sdk": "^2.1327.0",
+		"@lomray/microservice-helpers": "^2.5.4",
+		"@lomray/microservices-client-api": "^2.15.1",
+		"aws-sdk": "^2.1377.0",
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.14.0",
 		"class-validator-jsonschema": "^5.0.0",
 		"mime": "^3.0.0",
-		"sharp": "^0.31.3",
-		"tslib": "^2.5.0",
+		"sharp": "^0.32.1",
 		"typeorm": "0.2.41",
 		"uuid": "^9.0.0"
 	},
 	"devDependencies": {
 		"@types/mime": "^3.0.1",
-		"@types/node": "^18.11.18",
-		"@types/sharp": "^0.31.1",
-		"@types/uuid": "^9.0.0"
+		"@types/node": "^18.13.0",
+		"@types/uuid": "^9.0.1"
 	}
 }

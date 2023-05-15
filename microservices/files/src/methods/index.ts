@@ -1,9 +1,6 @@
 import MetaEndpoint from '@lomray/microservice-helpers/methods/meta';
 import type { Microservice, IEndpointHandler } from '@lomray/microservice-nodejs-lib';
 import CONST from '@constants/index';
-import CrudFileEntity from '@methods/file-entity/crud';
-import FileEntityList from '@methods/file-entity/list';
-import FileEntityView from '@methods/file-entity/view';
 import FileCount from '@methods/file/count';
 import FileCreate from '@methods/file/create';
 import FileCreateEmpty from '@methods/file/create-empty';
@@ -11,6 +8,9 @@ import FileList from '@methods/file/list';
 import FileRemove from '@methods/file/remove';
 import FileUpdate from '@methods/file/update';
 import FileView from '@methods/file/view';
+import CrudFileEntity from '@methods/file-entity/crud';
+import FileEntityList from '@methods/file-entity/list';
+import FileEntityView from '@methods/file-entity/view';
 import CrudFolder from '@methods/folder/crud';
 
 /**

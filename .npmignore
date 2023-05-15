@@ -11,6 +11,7 @@ coverage
 .eslintignore
 .eslintrc.js
 .lintstagedrc.js
+.nvmrc
 commitlint.config.js
 nyc.config.js
 rollup.config.js
