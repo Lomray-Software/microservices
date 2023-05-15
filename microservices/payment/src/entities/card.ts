@@ -14,7 +14,7 @@ import {
 } from 'typeorm';
 import type Customer from '@entities/customer';
 import IsCardExpirationValid from '@helpers/validators/is-card-expiration-valid';
-import IsLastCardDititsValid from '@helpers/validators/is-last-card-digits-valid';
+import IsLastCardDigitsValid from '@helpers/validators/is-last-card-digits-valid';
 
 /**
  * Card entity
@@ -45,7 +45,7 @@ class Card {
     example: '4242',
   })
   @Column({ type: 'varchar' })
-  @IsLastCardDititsValid()
+  @IsLastCardDigitsValid()
   @IsString()
   lastDigits: string;
 
