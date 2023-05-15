@@ -318,7 +318,7 @@ class Stripe extends Abstract {
     });
 
     if (!paymentMethod?.card || !paymentMethod?.customer) {
-      Log.error('The payment method card data is invalid');
+      Log.error('The payment method card or customer data is invalid');
 
       return;
     }
