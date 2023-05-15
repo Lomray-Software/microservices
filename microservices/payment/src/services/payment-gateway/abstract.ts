@@ -109,14 +109,14 @@ abstract class Abstract {
   }
 
   /**
-   * Add new bank account
-   */
-  public abstract addBankAccount(params: IBankAccountParams): Promise<BankAccount>;
-
-  /**
    * Add new card
    */
   public abstract addCard(params: ICardParams): Promise<Card>;
+
+  /**
+   * Add new bank account
+   */
+  public abstract addBankAccount(params: IBankAccountParams): Promise<BankAccount>;
 
   /**
    * Create new transaction
