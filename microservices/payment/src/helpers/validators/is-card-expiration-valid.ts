@@ -5,6 +5,9 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
+/**
+ * Card expiration date validator
+ */
 @ValidatorConstraint({ name: 'isCardExpirationValid', async: false })
 class IsCardExpirationValidConstraint implements ValidatorConstraintInterface {
   validate(value: string) {
@@ -23,9 +26,11 @@ class IsCardExpirationValidConstraint implements ValidatorConstraintInterface {
   }
 }
 
+/**
+ * Validate card expiration date
+ */
 const IsCardExpirationValid =
-  (validationOptions?: ValidationOptions) =>
-  (object: Record<string, any>, propertyName: string) => {
+  (validationOptions?: ValidationOptions) => (object: object, propertyName: string) => {
     registerDecorator({
       name: 'isCardExpirationValid',
       target: object.constructor,
