@@ -9,7 +9,6 @@ import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
-import Card from '@entities/card';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
@@ -71,12 +70,6 @@ class Stripe extends Abstract {
     super(paymentProvider, paymentOptions, manager);
 
     this.paymentEntity = new StripeSdk(paymentOptions.apiKey, paymentOptions.config);
-  }
-  /**
-   * Add new card
-   */
-  addCard(): Promise<Card> {
-    return Promise.resolve(new Card());
   }
 
   /**

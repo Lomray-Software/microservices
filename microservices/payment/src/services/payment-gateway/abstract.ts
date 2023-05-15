@@ -1,5 +1,6 @@
 import { EntityManager, Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
+import CardType from '@constants/card-type';
 import PaymentProvider from '@constants/payment-provider';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
@@ -12,7 +13,13 @@ import Transaction, { ITransactionParams as ITransactionEntityParams } from '@en
 import type TPaymentOptions from '@interfaces/payment-options';
 
 export interface ICardParams {
-  test: boolean;
+  cardId: string;
+  number: string;
+  expired: string;
+  holderName: string;
+  type: CardType;
+  userId: string;
+  isDefault?: boolean;
 }
 
 export interface IBankAccountParams {
@@ -27,9 +34,10 @@ export interface IPriceParams {
 }
 
 export interface ITransactionParams {
-  title?: string;
+  status: TransactionStatus;
   amount: number;
   userId: string;
+  title?: string;
   bankAccountId?: string;
   productId?: string;
   cardId?: string;
@@ -37,7 +45,6 @@ export interface ITransactionParams {
   type?: TransactionType;
   tax?: number;
   fee?: number;
-  status: TransactionStatus;
   params?: ITransactionEntityParams;
 }
 
@@ -68,6 +75,11 @@ abstract class Abstract {
   /**
    * @protected
    */
+  protected readonly cardRepository: Repository<Card>;
+
+  /**
+   * @protected
+   */
   protected readonly priceRepository: Repository<Price>;
 
   /**
@@ -94,17 +106,27 @@ abstract class Abstract {
     this.productRepository = manager.getRepository(Product);
     this.priceRepository = manager.getRepository(Price);
     this.transactionRepository = manager.getRepository(Transaction);
+    this.cardRepository = manager.getRepository(Card);
   }
-
-  /**
-   * Add new card
-   */
-  public abstract addCard(params: ICardParams): Promise<Card>;
 
   /**
    * Add new bank account
    */
   public abstract addBankAccount(params: IBankAccountParams): Promise<BankAccount>;
+
+  /**
+   * Add new card
+   */
+  public async addCard(params: ICardParams, cardId: string = uuid()): Promise<Card> {
+    const card = this.cardRepository.create({
+      ...params,
+      cardId: params?.cardId || cardId,
+    });
+
+    await this.cardRepository.save(card);
+
+    return card;
+  }
 
   /**
    * Create new transaction

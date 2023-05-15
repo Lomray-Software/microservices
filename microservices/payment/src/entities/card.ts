@@ -1,5 +1,5 @@
 import { IsTypeormDate } from '@lomray/microservice-helpers';
-import { IsBoolean, IsCreditCard, IsEnum, IsString, Length } from 'class-validator';
+import { IsBoolean, IsEnum, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Entity,
@@ -15,6 +15,7 @@ import {
 import CardType from '@constants/card-type';
 import type Customer from '@entities/customer';
 import IsCardExpirationValid from '@helpers/validators/is-card-expiration-valid';
+import IsLastCardDititsValid from '@helpers/validators/is-last-card-digits-valid';
 
 /**
  * Card entity
@@ -41,12 +42,13 @@ class Card {
   userId: string;
 
   @JSONSchema({
-    example: '4242424242424242',
+    description: 'Last 4 card digits',
+    example: '4242',
   })
   @Column({ type: 'string' })
-  @IsCreditCard()
+  @IsLastCardDititsValid()
   @IsString()
-  number: string;
+  lastDigits: string;
 
   @JSONSchema({
     example: '01/27',

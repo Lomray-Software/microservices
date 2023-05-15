@@ -1,13 +1,33 @@
-import { Endpoint } from '@lomray/microservice-helpers';
+import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
-import { IsObject } from 'class-validator';
+import { IsBoolean, IsEnum, IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
+import CardType from '@constants/card-type';
 import Card from '@entities/card';
-import type { ICardParams } from '@services/payment-gateway/abstract';
 import Factory from '@services/payment-gateway/factory';
 
-class CardAddInput implements ICardParams {
-  test: boolean;
+class CardAddInput {
+  @IsString()
+  cardId: string;
+
+  @IsString()
+  userId: string;
+
+  @IsString()
+  expired: string;
+
+  @IsString()
+  holderName: string;
+
+  @IsString()
+  number: string;
+
+  @IsEnum(CardType)
+  type: CardType;
+
+  @IsBoolean()
+  @IsUndefinable()
+  isDefault?: boolean;
 }
 
 class CardAddOutput {
