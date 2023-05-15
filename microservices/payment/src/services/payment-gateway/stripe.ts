@@ -17,7 +17,7 @@ import Product from '@entities/product';
 import Transaction from '@entities/transaction';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import type IStripeOptions from '@interfaces/stripe-options';
-import ISetupIntent from '@interfaces/stripe/setup-intents';
+import ISetupIntent from '@interfaces/stripe/setup-intent';
 import Abstract, { IPriceParams, IProductParams } from './abstract';
 
 export interface IStripeProductParams extends IProductParams {
