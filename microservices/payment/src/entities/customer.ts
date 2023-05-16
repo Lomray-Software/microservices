@@ -37,6 +37,10 @@ class Customer {
 
   @JSONSchema({
     description: 'Store data about stripe connected account and etc.',
+    example: {
+      accountId: 'acct_1LO435FpQjUWTpHe',
+      isVerified: true,
+    },
   })
   @Column({ type: 'json', default: {} })
   @IsObject()
