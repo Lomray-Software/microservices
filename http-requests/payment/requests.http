@@ -1,4 +1,5 @@
-### Create customer
+### Full account setup flow
+### Step 1. Create customer
 POST http://127.0.0.1:8001/ms/payment
 Accept: application/json
 Content-Type: application/json
@@ -11,7 +12,7 @@ Content-Type: application/json
   }
 }
 
-### Stripe setup intent
+### Step 2. Stripe setup intent
 POST http://127.0.0.1:8001/ms/payment
 Accept: application/json
 Content-Type: application/json
