@@ -5,8 +5,13 @@ import { Column, Entity, Index, OneToMany, PrimaryColumn, Unique } from 'typeorm
 import type Card from '@entities/card';
 import type Transaction from '@entities/transaction';
 
+/**
+ * accountId - Payment service account id
+ * isVerified - Is user setup and verify payment data for accept payments
+ */
 export interface ICustomerParams {
   accountId?: string;
+  isVerified?: boolean;
 }
 
 @JSONSchema({

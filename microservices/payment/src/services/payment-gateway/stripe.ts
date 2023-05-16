@@ -109,6 +109,9 @@ class Stripe extends Abstract {
    * Create Customer entity
    */
   public async createCustomer(userId: string): Promise<Customer> {
+    /**
+     * @TODO: get users name, email and pass it into customer
+     */
     const { id }: StripeSdk.Customer = await this.paymentEntity.customers.create();
 
     return super.createCustomer(userId, id);
@@ -298,7 +301,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles setup intent succeed
-   * NOTE: Should be called by webhook
+   * NOTE: Should be called when webhook triggers
    */
   public async handleSetupIntent(event: StripeSdk.Event): Promise<Transaction | void> {
     /* eslint-disable camelcase */
