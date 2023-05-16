@@ -1,4 +1,5 @@
 import { Log } from '@lomray/microservice-helpers';
+import { BaseException } from '@lomray/microservice-nodejs-lib';
 import StripeSdk from 'stripe';
 import type { EntityManager } from 'typeorm';
 import remoteConfig from '@config/remote';
@@ -262,20 +263,16 @@ class Stripe extends Abstract {
    * Get the webhook from stripe and handle deciding on type of event
    */
   public handleWebhookEvent(payload: string, signature: string, webhookKey: string): void {
-    try {
-      const event = this.paymentEntity.webhooks.constructEvent(payload, signature, webhookKey);
+    const event = this.paymentEntity.webhooks.constructEvent(payload, signature, webhookKey);
 
-      switch (event.type) {
-        case 'checkout.session.completed':
-          void this.handleTransactionCompleted(event);
-          break;
+    switch (event.type) {
+      case 'checkout.session.completed':
+        void this.handleTransactionCompleted(event);
+        break;
 
-        case 'setup_intent.succeeded':
-          void this.handleSetupIntent(event);
-          break;
-      }
-    } catch (err) {
-      Log.error(`Webhook handler has following error ${err as string}`);
+      case 'setup_intent.succeeded':
+        void this.handleSetupIntent(event);
+        break;
     }
   }
 
@@ -308,9 +305,10 @@ class Stripe extends Abstract {
     const { payment_method } = event.data.object as ISetupIntent;
 
     if (!payment_method) {
-      Log.error("The SetupIntent payment method doesn't exist");
-
-      return;
+      throw new BaseException({
+        status: 500,
+        message: "The SetupIntent payment method doesn't exist",
+      });
     }
 
     /**
@@ -321,9 +319,10 @@ class Stripe extends Abstract {
     });
 
     if (!paymentMethod?.card || !paymentMethod?.customer) {
-      Log.error('The payment method card or customer data is invalid');
-
-      return;
+      throw new BaseException({
+        status: 500,
+        message: 'The payment method card or customer data is invalid',
+      });
     }
 
     /**
@@ -339,9 +338,10 @@ class Stripe extends Abstract {
     });
 
     if (!customer) {
-      Log.error("Customer doesn't exist");
-
-      return;
+      throw new BaseException({
+        status: 500,
+        message: "Customer doesn't exist",
+      });
     }
 
     /**
