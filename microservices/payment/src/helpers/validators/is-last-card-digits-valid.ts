@@ -3,10 +3,10 @@ import { registerDecorator, ValidationOptions, ValidationArguments } from 'class
 /**
  * Validates card last digits
  */
-const IsLastDigitsValid =
+const IsLastCardDigitsValid =
   (validationOptions?: ValidationOptions) => (object: object, propertyName: string) => {
     registerDecorator({
-      name: 'isLastDigitsValid',
+      name: 'isLastCardDigitsValid',
       target: object.constructor,
       propertyName,
       options: validationOptions,
@@ -25,4 +25,4 @@ const IsLastDigitsValid =
     });
   };
 
-export default IsLastDigitsValid;
+export default IsLastCardDigitsValid;

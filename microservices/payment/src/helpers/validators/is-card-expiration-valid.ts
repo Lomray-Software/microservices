@@ -4,6 +4,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
+import isCardExpirationDateValid from '@helpers/is-card-expiration-date-valid';
 
 /**
  * Card expiration date validator
@@ -11,18 +12,7 @@ import {
 @ValidatorConstraint({ name: 'isCardExpirationValid', async: false })
 class IsCardExpirationValidConstraint implements ValidatorConstraintInterface {
   validate(value: string) {
-    const currentDate = new Date();
-    const [expirationMonth, expirationYear] = value.split('/');
-
-    if (!expirationMonth || !expirationYear) {
-      return false;
-    }
-
-    const expirationDate = new Date(Number(expirationYear), Number(expirationMonth) - 1, 1);
-
-    expirationDate.setHours(0, 0, 0, 0);
-
-    return expirationDate >= currentDate;
+    return isCardExpirationDateValid(value);
   }
 }
 
