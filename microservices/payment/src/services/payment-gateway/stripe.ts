@@ -392,7 +392,7 @@ class Stripe extends Abstract {
     }
 
     /**
-     * If charges are transfer in pending (on account init) or disabled on update
+     * If charges and transfer in pending (on account init) or inactive on update
      */
     if (!this.isCustomerCanAcceptPayments(connectAccount)) {
       customer.params.isVerified = false;
