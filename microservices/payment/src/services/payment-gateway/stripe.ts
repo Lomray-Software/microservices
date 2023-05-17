@@ -1,4 +1,5 @@
 import { Log } from '@lomray/microservice-helpers';
+import { BaseException } from '@lomray/microservice-nodejs-lib';
 import StripeSdk from 'stripe';
 import type { EntityManager } from 'typeorm';
 import remoteConfig from '@config/remote';
@@ -7,6 +8,7 @@ import StripeAccountTypes from '@constants/stripe-acoount-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
+import AccountCapabilityStatus from '@constants/stripe/account-capability-status';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
@@ -17,6 +19,7 @@ import Product from '@entities/product';
 import Transaction from '@entities/transaction';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import type IStripeOptions from '@interfaces/stripe-options';
+import IAccount from '@interfaces/stripe/account';
 import ISetupIntent from '@interfaces/stripe/setup-intent';
 import Abstract, { IPriceParams, IProductParams } from './abstract';
 
@@ -109,6 +112,9 @@ class Stripe extends Abstract {
    * Create Customer entity
    */
   public async createCustomer(userId: string): Promise<Customer> {
+    /**
+     * @TODO: get users name, email and pass it into customer
+     */
     const { id }: StripeSdk.Customer = await this.paymentEntity.customers.create();
 
     return super.createCustomer(userId, id);
@@ -259,20 +265,20 @@ class Stripe extends Abstract {
    * Get the webhook from stripe and handle deciding on type of event
    */
   public handleWebhookEvent(payload: string, signature: string, webhookKey: string): void {
-    try {
-      const event = this.paymentEntity.webhooks.constructEvent(payload, signature, webhookKey);
+    const event = this.paymentEntity.webhooks.constructEvent(payload, signature, webhookKey);
 
-      switch (event.type) {
-        case 'checkout.session.completed':
-          void this.handleTransactionCompleted(event);
-          break;
+    switch (event.type) {
+      case 'checkout.session.completed':
+        void this.handleTransactionCompleted(event);
+        break;
 
-        case 'setup_intent.succeeded':
-          void this.handleSetupIntent(event);
-          break;
-      }
-    } catch (err) {
-      Log.error(`Webhook handler has following error ${err as string}`);
+      case 'setup_intent.succeeded':
+        void this.handleSetupIntent(event);
+        break;
+
+      case 'account.update':
+        void this.handleConnectAccountUpdate(event);
+        break;
     }
   }
 
@@ -298,16 +304,17 @@ class Stripe extends Abstract {
 
   /**
    * Handles setup intent succeed
-   * NOTE: Should be called by webhook
+   * NOTE: Should be called when webhook triggers
    */
-  public async handleSetupIntent(event: StripeSdk.Event): Promise<Transaction | void> {
+  public async handleSetupIntent(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
     const { payment_method } = event.data.object as ISetupIntent;
 
     if (!payment_method) {
-      Log.error("The SetupIntent payment method doesn't exist");
-
-      return;
+      throw new BaseException({
+        status: 500,
+        message: "The SetupIntent payment method doesn't exist",
+      });
     }
 
     /**
@@ -318,9 +325,10 @@ class Stripe extends Abstract {
     });
 
     if (!paymentMethod?.card || !paymentMethod?.customer) {
-      Log.error('The payment method card or customer data is invalid');
-
-      return;
+      throw new BaseException({
+        status: 500,
+        message: 'The payment method card or customer data is invalid',
+      });
     }
 
     /**
@@ -336,9 +344,10 @@ class Stripe extends Abstract {
     });
 
     if (!customer) {
-      Log.error("Customer doesn't exist");
-
-      return;
+      throw new BaseException({
+        status: 500,
+        message: "Customer doesn't exist",
+      });
     }
 
     /**
@@ -363,41 +372,39 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Get and calculate transfer information
-   * @protected
+   * Handles connect account update
+   * NOTE: Should be called when webhook triggers
    */
-  protected async getTransferInfo(
-    entityId: string,
-    userId: string,
-  ): Promise<ITransferInfo | undefined> {
-    const transactions = await this.transactionRepository.find({
-      select: ['amount', 'userId'],
-      where: { entityId, status: TransactionStatus.SUCCESS },
-    });
+  public async handleConnectAccountUpdate(event: StripeSdk.Event): Promise<void> {
+    /* eslint-disable camelcase */
+    const connectAccount = event.data.object as IAccount;
 
-    const destinationUser = await this.customerRepository.findOne({
-      userId,
+    const customer = await super.customerRepository.findOne({
+      params: { accountId: connectAccount.id },
     });
+    /* eslint-enable camelcase */
 
-    if (!destinationUser?.params.accountId) {
-      Log.error(
-        'Destination user who is being used for transfer doesnt have the connected account id',
-      );
+    if (!customer) {
+      throw new BaseException({
+        status: 500,
+        message: 'Customer with the received account id not found',
+      });
+    }
+
+    /**
+     * If charges and transfer in pending (on account init) or inactive on update
+     */
+    if (!this.isCustomerCanAcceptPayments(connectAccount)) {
+      customer.params.isVerified = false;
+
+      await super.customerRepository.save(customer);
 
       return;
     }
 
-    return transactions.reduce(
-      (previousValue, transaction) => ({
-        ...previousValue,
-        amount: previousValue.amount + transaction.amount,
-      }),
-      {
-        amount: 0,
-        destinationUser: destinationUser.params.accountId,
-        userId: transactions[0].userId,
-      },
-    );
+    customer.params.isVerified = true;
+
+    await super.customerRepository.save(customer);
   }
 
   /**
@@ -448,6 +455,55 @@ class Stripe extends Abstract {
     );
 
     return true;
+  }
+
+  /**
+   * Get and calculate transfer information
+   * @protected
+   */
+  protected async getTransferInfo(
+    entityId: string,
+    userId: string,
+  ): Promise<ITransferInfo | undefined> {
+    const transactions = await this.transactionRepository.find({
+      select: ['amount', 'userId'],
+      where: { entityId, status: TransactionStatus.SUCCESS },
+    });
+
+    const destinationUser = await this.customerRepository.findOne({
+      userId,
+    });
+
+    if (!destinationUser?.params.accountId) {
+      Log.error(
+        'Destination user who is being used for transfer doesnt have the connected account id',
+      );
+
+      return;
+    }
+
+    return transactions.reduce(
+      (previousValue, transaction) => ({
+        ...previousValue,
+        amount: previousValue.amount + transaction.amount,
+      }),
+      {
+        amount: 0,
+        destinationUser: destinationUser.params.accountId,
+        userId: transactions[0].userId,
+      },
+    );
+  }
+
+  /**
+   * Check if customer can accept payment
+   * NOTE: Check if user correctly and verify setup connect account
+   */
+  private isCustomerCanAcceptPayments({
+    charges_enabled: isChargesEnabled,
+    capabilities: { transfers },
+  }: IAccount) {
+    return isChargesEnabled && transfers === AccountCapabilityStatus.ACTIVE;
   }
 }
 

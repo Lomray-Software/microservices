@@ -5,13 +5,12 @@
 enum CardType {
   VISA = 'visa',
   MASTERCARD = 'mastercard',
-  AMERICAN_EXPRESS = 'americanExpress',
+  AMERICAN_EXPRESS = 'american_express',
   DISCOVER = 'discover',
-  DINNERS = 'dinners',
-  UNION_PAY = 'UnionPay',
-  JCB = 'JCB',
-  CARTES_BANCAIRES = 'cartesBancaires',
-  EFTPOS = 'eftpos',
+  DINNERS = 'diners',
+  UNION_PAY = 'unionpay',
+  JCB = 'jcb',
+  CARTES_BANCAIRES = 'cartes_bancaires',
   AMEX = 'amex',
 }
 
