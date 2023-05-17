@@ -2,6 +2,21 @@ content
 -------------------
 
 RPC 2.0 Microservice.
+This microservice provides static pages construction mechanism.
+
+![npm (scoped)](https://img.shields.io/npm/v/@lomray/microservice-content)  
+![Docker](https://img.shields.io/npm/v/@lomray/microservice-content?label=docker)  
+![Docker prod](https://img.shields.io/badge/Docker%20prod-%3Alatest-blue)  
+![Docker staging](https://img.shields.io/badge/Docker%20staging-%3Alatest--staging-orange)  
+![GitHub](https://img.shields.io/github/license/Lomray-Software/microservices)
+![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=microservice-content&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=microservice-content)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-content&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=microservice-content)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-content&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=microservice-content)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=microservice-content&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=microservice-content)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=microservice-content&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=microservice-content)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=microservice-content&metric=coverage)](https://sonarcloud.io/summary/new_code?id=microservice-content)
 
 ## Navigation
 - [ENVIRONMENTS](#environments)
