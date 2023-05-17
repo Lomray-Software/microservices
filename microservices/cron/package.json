@@ -51,5 +51,8 @@
 	"devDependencies": {
 		"@types/lodash": "^4.14.194",
 		"@types/node-schedule": "^2.1.0"
-	}
+	},
+  "peerDependencies": {
+    "tslib": "^2.5.0"
+  }
 }

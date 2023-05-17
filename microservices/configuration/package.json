@@ -47,5 +47,8 @@
 	},
 	"devDependencies": {
 		"@types/lodash": "^4.14.194"
-	}
+	},
+  "peerDependencies": {
+    "tslib": "^2.5.0"
+  }
 }

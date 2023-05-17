@@ -51,5 +51,8 @@
 	},
 	"devDependencies": {
 		"@types/bcrypt": "^5.0.0"
-	}
+	},
+  "peerDependencies": {
+    "tslib": "^2.5.0"
+  }
 }

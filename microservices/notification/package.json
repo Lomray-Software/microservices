@@ -49,5 +49,8 @@
   },
 	"devDependencies": {
 		"@types/nodemailer": "^6.4.7"
-	}
+	},
+  "peerDependencies": {
+    "tslib": "^2.5.0"
+  }
 }
