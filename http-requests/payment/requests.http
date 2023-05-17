@@ -1,0 +1,26 @@
+### Full account setup flow
+### Step 1. Create customer
+POST http://127.0.0.1:8001/ms/payment
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "customer.create",
+  "params": {
+    "userId": "81c760f9-c229-4a7b-b6a5-201bf1d1dee6"
+  }
+}
+
+### Step 2. Stripe setup intent
+POST http://127.0.0.1:8001/ms/payment
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.setup-intent",
+  "params": {
+    "userId": "81c760f9-c229-4a7b-b6a5-201bf1d1dee6"
+  }
+}

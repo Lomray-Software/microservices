@@ -12,7 +12,13 @@ import Transaction, { ITransactionParams as ITransactionEntityParams } from '@en
 import type TPaymentOptions from '@interfaces/payment-options';
 
 export interface ICardParams {
-  test: boolean;
+  cardId: string;
+  lastDigits: string;
+  expired: string;
+  type: string;
+  userId: string;
+  holderName?: string;
+  isDefault?: boolean;
 }
 
 export interface IBankAccountParams {
@@ -27,9 +33,10 @@ export interface IPriceParams {
 }
 
 export interface ITransactionParams {
-  title?: string;
+  status: TransactionStatus;
   amount: number;
   userId: string;
+  title?: string;
   bankAccountId?: string;
   productId?: string;
   cardId?: string;
@@ -37,7 +44,6 @@ export interface ITransactionParams {
   type?: TransactionType;
   tax?: number;
   fee?: number;
-  status: TransactionStatus;
   params?: ITransactionEntityParams;
 }
 
@@ -68,6 +74,11 @@ abstract class Abstract {
   /**
    * @protected
    */
+  protected readonly cardRepository: Repository<Card>;
+
+  /**
+   * @protected
+   */
   protected readonly priceRepository: Repository<Price>;
 
   /**
@@ -94,6 +105,7 @@ abstract class Abstract {
     this.productRepository = manager.getRepository(Product);
     this.priceRepository = manager.getRepository(Price);
     this.transactionRepository = manager.getRepository(Transaction);
+    this.cardRepository = manager.getRepository(Card);
   }
 
   /**
@@ -118,6 +130,17 @@ abstract class Abstract {
     await this.transactionRepository.save(transaction);
 
     return transaction;
+  }
+
+  /**
+   * Create new card
+   */
+  public async createCard(params: ICardParams): Promise<Card> {
+    const card = this.cardRepository.create(params);
+
+    await this.cardRepository.save(card);
+
+    return card;
   }
 
   /**
