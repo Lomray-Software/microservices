@@ -8,7 +8,6 @@ import StripeAccountTypes from '@constants/stripe-acoount-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
-import AccountCapabilityStatus from '@constants/stripe/account-capability-status';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
@@ -19,8 +18,6 @@ import Product from '@entities/product';
 import Transaction from '@entities/transaction';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import type IStripeOptions from '@interfaces/stripe-options';
-import IAccount from '@interfaces/stripe/account';
-import ISetupIntent from '@interfaces/stripe/setup-intent';
 import Abstract, { IPriceParams, IProductParams } from './abstract';
 
 export interface IStripeProductParams extends IProductParams {
@@ -308,7 +305,7 @@ class Stripe extends Abstract {
    */
   public async handleSetupIntent(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
-    const { payment_method } = event.data.object as ISetupIntent;
+    const { payment_method } = event.data.object as StripeSdk.SetupIntent;
 
     if (!payment_method) {
       throw new BaseException({
@@ -317,10 +314,12 @@ class Stripe extends Abstract {
       });
     }
 
+    const paymentMethodId = typeof payment_method === 'string' ? payment_method : payment_method.id;
+
     /**
      * Get payment method data
      */
-    const paymentMethod = await this.paymentEntity.paymentMethods.retrieve(payment_method, {
+    const paymentMethod = await this.paymentEntity.paymentMethods.retrieve(paymentMethodId, {
       expand: [StripePaymentMethods.CARD],
     });
 
@@ -377,7 +376,7 @@ class Stripe extends Abstract {
    */
   public async handleConnectAccountUpdate(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
-    const connectAccount = event.data.object as IAccount;
+    const connectAccount = event.data.object as StripeSdk.Account;
 
     const customer = await super.customerRepository.findOne({
       params: { accountId: connectAccount.id },
@@ -501,9 +500,9 @@ class Stripe extends Abstract {
    */
   private isCustomerCanAcceptPayments({
     charges_enabled: isChargesEnabled,
-    capabilities: { transfers },
-  }: IAccount) {
-    return isChargesEnabled && transfers === AccountCapabilityStatus.ACTIVE;
+    capabilities,
+  }: StripeSdk.Account) {
+    return isChargesEnabled && capabilities?.transfers === 'active';
   }
 }
 
