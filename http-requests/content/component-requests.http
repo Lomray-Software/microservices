@@ -1,0 +1,252 @@
+### Create realation component (should validation failed response)
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "component.create",
+  "params": {
+    "fields": {
+      "alias": "userBlog",
+      "title": "User blog",
+      "schema": [
+        {
+          "name": "blogPostCountries",
+          "title": "Blog post about countries",
+          "type": "text"
+        },
+        {
+          "name": "populationNumber",
+          "title": "Countries count",
+          "type": "number"
+        },
+        {
+          "name": "users",
+          "type": "relation",
+          "entity": "user"
+        }
+      ]
+    }
+  }
+}
+
+### Create custom component
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "component.create",
+  "params": {
+    "fields": {
+      "children": [
+        {
+          "id": "9a18e53f-2ac9-494a-9831-dc7d5724c069"
+        }
+      ],
+      "alias": "customComponentWithText",
+      "title": "Custom component with text",
+      "schema": [
+        {
+          "id": "9a18e53f-2ac9-494a-9831-dc7d5724c069",
+          "name": "customComponent",
+          "type": "component",
+          "hasMany": false
+        }
+      ]
+    }
+  }
+}
+
+### Create relation component (example 1)
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "component.create",
+  "params": {
+    "fields": {
+      "alias": "userBlog",
+      "title": "User blog",
+      "schema": [
+        {
+          "name": "influencers",
+          "type": "relation",
+          "relation": {
+            "microservice": "users",
+            "entity": "user",
+            "hasMany": false
+          }
+        }
+      ]
+    }
+  }
+}
+
+### Create relation component (example 2)
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "component.create",
+  "params": {
+    "fields": {
+      "alias": "adminBlog",
+      "title": "Admins",
+      "schema": [
+        {
+          "name": "admins",
+          "type": "relation",
+          "relation": {
+            "microservice": "users",
+            "entity": "user",
+            "hasMany": false
+          }
+        }
+      ]
+    }
+  }
+}
+
+### Create default component (example 1)
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "component.create",
+  "params": {
+    "fields": {
+      "alias": "artBlogHeadlineContent",
+      "title": "Art blog headline content",
+      "schema": [
+        {
+          "name": "blogPostText",
+          "title": "Blog post text",
+          "type": "text"
+        },
+        {
+          "name": "numberOfUsers",
+          "title": "Number of users",
+          "type": "number"
+        }
+      ]
+    }
+  }
+}
+
+### Create default component (example 2)
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "component.create",
+  "params": {
+    "fields": {
+      "alias": "artBlogMainContent",
+      "title": "Art blog main content",
+      "schema": [
+        {
+          "name": "blogPostIsActual",
+          "title": "Blog post is actual",
+          "type": "boolean"
+        },
+        {
+          "name": "blogPostRichText",
+          "title": "Blog post rich text",
+          "type": "richText"
+        },
+        {
+          "name": "blogPostDate",
+          "title": "Blog post date",
+          "type": "date"
+        },
+        {
+          "name": "blogPostEmail",
+          "title": "Blog post email",
+          "type": "email"
+        },
+        {
+          "name": "blogPostPassword",
+          "title": "Blog post password",
+          "type": "password"
+        },
+        {
+          "name": "blogPostEnum",
+          "title": "Blog post enum",
+          "type": "enum"
+        },
+        {
+          "name": "blogPostJson",
+          "title": "Blog post json",
+          "type": "json"
+        }
+      ]
+    }
+  }
+}
+
+### Create default component (example 3)
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "component.create",
+  "params": {
+    "fields": {
+      "alias": "justText",
+      "title": "Just text title",
+      "schema": [
+        {
+          "name": "justTextInputName",
+          "title": "Text input name ",
+          "type": "richText"
+        }
+      ]
+    }
+  }
+}
+
+### With authorization
+### Create simple single-type
+POST http://127.0.0.1:3000
+Accept: application/json
+Content-Type: application/json
+# User token
+Authorization: Bearer usertokenbloooooooooooooooooooom
+# Admin token
+#Authorization: Bearer admintokenblooooooooooooooooooom
+
+{
+  "id": "1",
+  "method": "content.component.create",
+  "params": {
+    "fields": {
+      "alias": "artBlogBlog",
+      "title": "Art blog",
+      "schema": [
+        {
+          "name": "blogPostPost",
+          "title": "Blog post about countries",
+          "type": "text"
+        },
+        {
+          "name": "numberOfUsersUsers",
+          "title": "Countries count",
+          "type": "number"
+        }
+      ]
+    }
+  }
+}
