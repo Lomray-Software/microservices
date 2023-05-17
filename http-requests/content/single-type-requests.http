@@ -1,0 +1,206 @@
+### Create single-type
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.create",
+  "params": {
+    "fields": {
+      "components": [
+        {
+          "id": "48d88696-5ac1-472c-90f4-9df1290a5ee7"
+        },
+        {
+          "id": "0efc116b-b159-425c-94ac-e8598acd0988"
+        },
+        {
+          "id": "f8cbb4aa-90ae-48b8-a4dc-cda73485cf9c"
+        }
+      ],
+      "title": "Lomray blog single type",
+      "alias": "lomrayBlogSingleType",
+      "value": {
+        "artBlogHeadlineContent": {
+          "id": "48d88696-5ac1-472c-90f4-9df1290a5ee7",
+          "data": {
+            "blogPostText": "Hello it's new blog post text..",
+            "numberOfUsers": 1000000,
+            "adminBlog": {
+              "id": "f8cbb4aa-90ae-48b8-a4dc-cda73485cf9c",
+              "data": {
+                "admins": ["445072e0-39ba-433a-9563-31ca57fad15f", "6a3572f3-aefa-42bd-8083-6c1af529a8fb"]
+              }
+            },
+            "userBlog": {
+              "id": "0efc116b-b159-425c-94ac-e8598acd0988",
+              "data": {
+                  "influencers": ["5baa1616-021a-47b4-a19b-a30630c3efec", "5f6fe925-4e88-4b25-9683-76f038fb719c"]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+### Create single-type
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.create",
+  "params": {
+    "fields": {
+      "components": [
+        {
+          "id": "ae9584f1-f36c-40af-a29a-f459266f6bfd"
+        }
+      ],
+      "title": "Single type",
+      "alias": "lomrayBlogWithCustomComponent",
+      "value": {
+        "customComponentWithText": {
+          "id": "ae9584f1-f36c-40af-a29a-f459266f6bfd",
+          "data": {
+            "customComponent": {
+              "id": "9a18e53f-2ac9-494a-9831-dc7d5724c069",
+              "data": {
+                "justText": {
+                  "id": "9a18e53f-2ac9-494a-9831-dc7d5724c069",
+                  "data": {
+                    "justTextInputName": "Green Lamborghini"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+### Create single-type (example 3)
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.create",
+  "params": {
+    "fields": {
+      "components": [
+        {
+          "id": "ae9584f1-f36c-40af-a29a-f459266f6bfd"
+        }
+      ],
+      "title": "Single type",
+      "alias": "stTest000",
+      "value": {
+        "justText": {
+          "id": "9a18e53f-2ac9-494a-9831-dc7d5724c069",
+          "data": {
+            "justTextInputName": "single type test 000"
+          }
+        }
+      }
+    }
+  }
+}
+
+### List of single-types
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.list",
+  "params": {
+    "query": {
+      "relations": ["components"]
+    }
+  }
+}
+
+### View signle type (example 1)
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.view",
+  "params": {
+    "query": {
+      "where": {
+        "id": "01f162cb-c70e-46c8-9e1c-098ec76d94f9"
+      }
+    },
+    "payload": {
+      "expand": [
+        "artBlogHeadlineContent.userBlog.influencers",
+        "artBlogHeadlineContent.adminBlog.admins"
+      ]
+    }
+  }
+}
+
+### View signle type (example 2)
+POST http://127.0.0.1:3000
+Accept: application/json
+Content-Type: application/json
+# User token
+Authorization: Bearer usertokenooooooooooooooooooooooo
+# Admin token
+#Authorization: Bearer admintokenoooooooooooooooooooooo
+
+{
+  "id": "1",
+  "method": "content.single-type.view",
+  "params": {
+    "query": {
+      "where": {
+        "alias": "st888"
+      }
+    },
+    "payload": {}
+  }
+}
+
+### View signle type
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.view",
+  "params": {
+    "query": {
+      "where": {
+        "alias": "testAliasItIsSingleType"
+      }
+    }
+  }
+}
+
+### View content microservice meta
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "meta",
+  "params": {
+    "payload": {
+      "isInternal": true
+    }
+  }
+}
