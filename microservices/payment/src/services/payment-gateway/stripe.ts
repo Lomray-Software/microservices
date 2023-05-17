@@ -276,6 +276,9 @@ class Stripe extends Abstract {
       case 'account.update':
         void this.handleConnectAccountUpdate(event);
         break;
+
+      case 'account.external_account.created':
+        void this.handleExternalAccountCreate(event);
     }
   }
 
@@ -407,6 +410,20 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Handle external account create
+   * NOTE: Register only bank accounts as external account
+   */
+  public handleExternalAccountCreate(event: StripeSdk.Event) {
+    /* eslint-disable camelcase */
+    const externalAccount = event.data.object as StripeSdk.Card;
+
+    if (!this.isExternalAccountIsBankAccount(externalAccount)) {
+      return;
+    }
+    /* eslint-enable camelcase */
+  }
+
+  /**
    * Create transfer for connected account
    */
   public async createTransfer(entityId: string, userId: string, payoutCoeff: number) {
@@ -503,6 +520,15 @@ class Stripe extends Abstract {
     capabilities,
   }: StripeSdk.Account) {
     return isChargesEnabled && capabilities?.transfers === 'active';
+  }
+
+  /**
+   * Check if external account is bank account
+   */
+  private isExternalAccountIsBankAccount(
+    externalAccount: StripeSdk.BankAccount | StripeSdk.Card,
+  ): externalAccount is StripeSdk.BankAccount {
+    return externalAccount.object.startsWith('ba');
   }
 }
 
