@@ -18,12 +18,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Lomray-Software/microservices"
+    "url": "https://github.com/Lomray-Software/microservices.git"
   },
   "bugs": {
     "url": "https://github.com/Lomray-Software/microservices/issues"
   },
-  "homepage": "https://github.com/Lomray-Software/microservices",
+  "homepage": "https://github.com/Lomray-Software/microservices/content",
   "author": "Mikhail Yarmaliuk",
   "license": "Apache-2.0",
   "scripts": {
