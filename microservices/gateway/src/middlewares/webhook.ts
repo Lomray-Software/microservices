@@ -10,26 +10,31 @@ import remoteConfig from '@config/remote';
 const webhook =
   (): RequestHandler =>
   async (req, res, next): Promise<Response | void> => {
-    // @ts-ignore
-    const { headers, url, rawBody } = req;
+    const { headers, url, method } = req;
     const {
       webhookOptions: { url: webhookUrl, allowMethods },
     } = await remoteConfig();
 
+    if (!['post', 'get'].includes(method.toLowerCase())) {
+      Log.error('Method not allowed.');
+
+      return res.status(405).json({ error: 'Method not allowed.' });
+    }
+
     if (!webhookUrl) {
-      Log.error(`Webhook url is not provided`);
+      Log.error('Webhook url is not provided');
 
       return res.status(500).json({ error: 'Webhook url is not provided' });
     }
 
     const hasWebhook = url.startsWith(webhookUrl);
-    const [, method] = url.split(webhookUrl);
+    const [, msMethod] = url.split(webhookUrl);
 
-    if (hasWebhook && allowMethods?.includes(method)) {
+    if (hasWebhook && allowMethods?.includes(msMethod)) {
       try {
-        const response = await Gateway.getInstance().sendRequest(method, {
+        const response = await Gateway.getInstance().sendRequest(msMethod, {
           headers,
-          body: rawBody,
+          body: req['rawBody'],
         });
 
         if (response.getError()) {
