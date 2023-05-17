@@ -19,7 +19,7 @@ const adminsMock = [
     firstName: 'Oleg',
     lastName: 'Do',
     middleName: '',
-    email: 'oleg.do@bloom.com',
+    email: 'oleg.do@gmail.com',
     phone: null,
     createdAt: '2023-02-08T14:01:34.429Z',
     updatedAt: '2023-02-08T14:01:34.429Z',

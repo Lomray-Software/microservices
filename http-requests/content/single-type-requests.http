@@ -19,8 +19,8 @@ Content-Type: application/json
           "id": "f8cbb4aa-90ae-48b8-a4dc-cda73485cf9c"
         }
       ],
-      "title": "Bloom blog single type",
-      "alias": "bloomBlogSingleType",
+      "title": "Lomray blog single type",
+      "alias": "lomrayBlogSingleType",
       "value": {
         "artBlogHeadlineContent": {
           "id": "48d88696-5ac1-472c-90f4-9df1290a5ee7",
@@ -62,7 +62,7 @@ Content-Type: application/json
         }
       ],
       "title": "Single type",
-      "alias": "bloomBlogWithCustomComponent",
+      "alias": "lomrayBlogWithCustomComponent",
       "value": {
         "customComponentWithText": {
           "id": "ae9584f1-f36c-40af-a29a-f459266f6bfd",

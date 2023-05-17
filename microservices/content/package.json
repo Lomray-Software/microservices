@@ -1,5 +1,5 @@
 {
-  "name": "@bloom-go-live/microservice-content",
+  "name": "@lomray/microservice-content",
   "version": "1.0.0",
   "description": "Microservice based on NodeJS & inverted json.",
   "main": "index.js",
@@ -18,12 +18,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Bloom-Go-Live/bloom-api"
+    "url": "https://github.com/Lomray-Software/microservices"
   },
   "bugs": {
-    "url": "https://github.com/Bloom-Go-Live/bloom-api/issues"
+    "url": "https://github.com/Lomray-Software/microservices/issues"
   },
-  "homepage": "https://github.com/Bloom-Go-Live/bloom-api",
+  "homepage": "https://github.com/Lomray-Software/microservices",
   "author": "Mikhail Yarmaliuk",
   "license": "Apache-2.0",
   "scripts": {
