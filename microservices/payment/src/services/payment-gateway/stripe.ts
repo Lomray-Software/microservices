@@ -396,12 +396,14 @@ class Stripe extends Abstract {
      */
     if (!this.isCustomerCanAcceptPayments(connectAccount)) {
       customer.params.isVerified = false;
+
       await super.customerRepository.save(customer);
 
       return;
     }
 
     customer.params.isVerified = true;
+
     await super.customerRepository.save(customer);
   }
 
