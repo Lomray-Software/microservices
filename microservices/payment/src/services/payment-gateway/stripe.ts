@@ -271,7 +271,7 @@ class Stripe extends Abstract {
         break;
 
       /**
-       * @TODO: Handle if needed setup_intent.created and setup_intent.canceled
+       * @TODO: Handle if needed and setup_intent.canceled
        * Will be called when intent will be approved
        */
       case 'setup_intent.succeeded':
