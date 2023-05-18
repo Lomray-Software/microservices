@@ -2,7 +2,7 @@ import CardType from '@constants/card-type';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 
 const cardMock = {
-  cardId: 'card-id',
+  id: 'card-id',
   userId: 'user-id',
   lastDigits: '4242',
   type: CardType.VISA,
