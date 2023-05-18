@@ -307,14 +307,15 @@ class Stripe extends Abstract {
       });
     }
 
-    const paymentMethodId = typeof payment_method === 'string' ? payment_method : payment_method.id;
-
     /**
      * Get payment method data
      */
-    const paymentMethod = await this.paymentEntity.paymentMethods.retrieve(paymentMethodId, {
-      expand: [StripePaymentMethods.CARD],
-    });
+    const paymentMethod = await this.paymentEntity.paymentMethods.retrieve(
+      this.extractId(payment_method),
+      {
+        expand: [StripePaymentMethods.CARD],
+      },
+    );
 
     if (!paymentMethod?.card || !paymentMethod?.customer) {
       throw new BaseException({
@@ -323,16 +324,8 @@ class Stripe extends Abstract {
       });
     }
 
-    /**
-     * Get customer
-     */
-    const customerId =
-      typeof paymentMethod.customer === 'string'
-        ? paymentMethod.customer
-        : paymentMethod.customer.id;
-
     const customer = await super.customerRepository.findOne({
-      customerId,
+      customerId: this.extractId(paymentMethod.customer),
     });
 
     if (!customer) {
@@ -375,16 +368,8 @@ class Stripe extends Abstract {
       });
     }
 
-    /**
-     * Get customer
-     */
-    const customerId =
-      typeof externalAccount.customer === 'string'
-        ? externalAccount.customer
-        : externalAccount.customer.id;
-
     const customer = await super.customerRepository.findOne({
-      customerId,
+      customerId: this.extractId(externalAccount.customer),
     });
 
     if (!customer) {
@@ -583,6 +568,13 @@ class Stripe extends Abstract {
     externalAccount: StripeSdk.BankAccount | StripeSdk.Card,
   ): externalAccount is StripeSdk.BankAccount {
     return externalAccount.object.startsWith('ba');
+  }
+
+  /**
+   * Returns id or extracted id from data
+   */
+  private extractId<T extends { id: string }>(data: string | T): string {
+    return typeof data === 'string' ? data : data.id;
   }
 }
 
