@@ -7,7 +7,11 @@ import type { IBankAccountParams } from '@services/payment-gateway/abstract';
 import Factory from '@services/payment-gateway/factory';
 
 class BankAccountAddInput implements IBankAccountParams {
-  test: boolean;
+  userId: string;
+  lastDigits: string;
+  holderName?: string | null;
+  bankName?: string | null;
+  bankAccountId?: string;
 }
 
 class BankAccountAddOutput {
