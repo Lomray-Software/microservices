@@ -349,7 +349,7 @@ class Stripe extends Abstract {
       isDefault,
       userId,
       expired: toExpirationDate(exp_month, exp_year),
-      params: { isApproved: false },
+      params: { isApproved: true },
     });
   }
 
