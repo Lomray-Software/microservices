@@ -5,7 +5,6 @@
 enum CardType {
   VISA = 'visa',
   MASTERCARD = 'mastercard',
-  AMERICAN_EXPRESS = 'american_express',
   DISCOVER = 'discover',
   DINNERS = 'diners',
   UNION_PAY = 'unionpay',

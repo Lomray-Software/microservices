@@ -1,5 +1,5 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsBoolean, Length } from 'class-validator';
+import { Allow, IsBoolean, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Entity,
@@ -9,14 +9,28 @@ import {
   CreateDateColumn,
   Column,
   Index,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import type Customer from '@entities/customer';
 import IsCardExpirationValid from '@helpers/validators/is-card-expiration-valid';
 import IsLastCardDigitsValid from '@helpers/validators/is-last-card-digits-valid';
 
 /**
+ * In case of stipe:
+ * cardId - only have cards from connected account and
+ * cards related to SetupIntent doesn't have own id
+ * isExternalConnect - if card setup in connect account as external account
+ * isApproved - is approved by payment provider
+ */
+export interface IParams {
+  cardId?: string;
+  isApproved?: boolean;
+  isExternalConnect?: boolean;
+}
+
+/**
  * Card entity
+ * NOTE: Stipe - should store both cards from connect account and from SetupIntent
  */
 @JSONSchema({
   properties: {
@@ -25,13 +39,9 @@ import IsLastCardDigitsValid from '@helpers/validators/is-last-card-digits-valid
 })
 @Entity()
 class Card {
-  @JSONSchema({
-    description: 'Field for storing id of according card entity',
-    example: 'card_1N7zzsFpQjUWTpHeCrYKrCkR',
-  })
-  @PrimaryColumn({ type: 'varchar', length: 29 })
-  @Length(1, 29)
-  cardId: string;
+  @PrimaryGeneratedColumn('uuid')
+  @Allow()
+  id: string;
 
   @Index('IDX_card_userId', ['userId'])
   @Column({ type: 'varchar', length: 36 })
@@ -39,7 +49,7 @@ class Card {
   userId: string;
 
   @JSONSchema({
-    description: 'Last 4 card digits',
+    description: 'Last 4 digits',
     example: '4242',
   })
   @Column({ type: 'varchar', length: 4 })
@@ -55,10 +65,10 @@ class Card {
   @Length(1, 5)
   expired: string;
 
-  @Column({ type: 'varchar', length: 100, default: '' })
+  @Column({ type: 'varchar', length: 100, default: null })
   @IsUndefinable()
   @Length(1, 100)
-  holderName: string;
+  holderName: string | null;
 
   @JSONSchema({
     example: 'visa',
@@ -66,6 +76,11 @@ class Card {
   @Column({ type: 'varchar', length: 20 })
   @Length(1, 20)
   type: string;
+
+  @Column({ type: 'json', default: {} })
+  @IsObject()
+  @IsUndefinable()
+  params: IParams;
 
   @JSONSchema({
     description: "If it's the first attached user card it should be default",

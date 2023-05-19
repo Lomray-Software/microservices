@@ -36,11 +36,11 @@ describe('methods/card/crud', () => {
   });
 
   it('should correctly entity view', async () => {
-    const entity = { cardId: 'card-id' };
+    const entity = { id: 'card-id' };
 
     TypeormMock.queryBuilder.getMany.returns([entity]);
 
-    const res = await Crud.view?.({ query: { where: { cardId: entity.cardId } } }, endpointOptions);
+    const res = await Crud.view?.({ query: { where: { id: entity.id } } }, endpointOptions);
 
     expect(res).to.deep.equal(viewResult(entity));
   });
@@ -60,7 +60,7 @@ describe('methods/card/crud', () => {
     TypeormMock.entityManager.save.resolves(fields);
 
     const res = await Crud.update?.(
-      { fields, query: { where: { cardId: cardMock.cardId } } },
+      { fields, query: { where: { id: cardMock.id } } },
       endpointOptions,
     );
 
@@ -68,14 +68,11 @@ describe('methods/card/crud', () => {
   });
 
   it('should correctly entity remove', async () => {
-    const entity = { cardId: 'card-id' };
+    const entity = { id: 'card-id' };
 
     TypeormMock.queryBuilder.getMany.returns([entity]);
 
-    const res = await Crud.remove?.(
-      { query: { where: { cardId: entity.cardId } } },
-      endpointOptions,
-    );
+    const res = await Crud.remove?.({ query: { where: { id: entity.id } } }, endpointOptions);
 
     expect(res).to.deep.equal({ deleted: [entity] });
   });

@@ -12,17 +12,21 @@ import Transaction, { ITransactionParams as ITransactionEntityParams } from '@en
 import type TPaymentOptions from '@interfaces/payment-options';
 
 export interface ICardParams {
-  cardId: string;
   lastDigits: string;
   expired: string;
   type: string;
   userId: string;
+  cardId?: string;
   holderName?: string;
   isDefault?: boolean;
 }
 
 export interface IBankAccountParams {
-  test: boolean;
+  userId: string;
+  lastDigits: string;
+  holderName?: string | null;
+  bankName?: string | null;
+  bankAccountId?: string;
 }
 
 export interface IPriceParams {
@@ -79,6 +83,11 @@ abstract class Abstract {
   /**
    * @protected
    */
+  protected readonly bankAccountRepository: Repository<BankAccount>;
+
+  /**
+   * @protected
+   */
   protected readonly priceRepository: Repository<Price>;
 
   /**
@@ -106,6 +115,7 @@ abstract class Abstract {
     this.priceRepository = manager.getRepository(Price);
     this.transactionRepository = manager.getRepository(Transaction);
     this.cardRepository = manager.getRepository(Card);
+    this.bankAccountRepository = manager.getRepository(BankAccount);
   }
 
   /**
@@ -136,7 +146,8 @@ abstract class Abstract {
    * Create new card
    */
   public async createCard(params: ICardParams): Promise<Card> {
-    const card = this.cardRepository.create(params);
+    const { cardId, ...restValues } = params;
+    const card = this.cardRepository.create({ ...restValues, params: { cardId } });
 
     await this.cardRepository.save(card);
 
@@ -144,16 +155,18 @@ abstract class Abstract {
   }
 
   /**
-   * Get the customer
+   * Create new bank account
    */
-  protected async getCustomer(userId: string): Promise<Customer> {
-    const customer = await this.customerRepository.findOne({ userId });
+  public async createBankAccount(params: IBankAccountParams): Promise<BankAccount> {
+    const { bankAccountId, ...restValues } = params;
+    const bankAccount = this.bankAccountRepository.create({
+      ...restValues,
+      params: { bankAccountId },
+    });
 
-    if (customer) {
-      return customer;
-    }
+    await this.bankAccountRepository.save(bankAccount);
 
-    return this.createCustomer(userId);
+    return bankAccount;
   }
 
   /**
@@ -204,6 +217,19 @@ abstract class Abstract {
     await this.priceRepository.save(price);
 
     return price;
+  }
+
+  /**
+   * Get the customer
+   */
+  protected async getCustomer(userId: string): Promise<Customer> {
+    const customer = await this.customerRepository.findOne({ userId });
+
+    if (customer) {
+      return customer;
+    }
+
+    return this.createCustomer(userId);
   }
 }
 

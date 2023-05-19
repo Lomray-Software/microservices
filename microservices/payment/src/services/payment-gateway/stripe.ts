@@ -8,7 +8,6 @@ import StripeAccountTypes from '@constants/stripe-acoount-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
-import AccountCapabilityStatus from '@constants/stripe/account-capability-status';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
@@ -18,9 +17,8 @@ import Price from '@entities/price';
 import Product from '@entities/product';
 import Transaction from '@entities/transaction';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
+import messages from '@helpers/validators/messages';
 import type IStripeOptions from '@interfaces/stripe-options';
-import IAccount from '@interfaces/stripe/account';
-import ISetupIntent from '@interfaces/stripe/setup-intent';
 import Abstract, { IPriceParams, IProductParams } from './abstract';
 
 export interface IStripeProductParams extends IProductParams {
@@ -272,14 +270,180 @@ class Stripe extends Abstract {
         void this.handleTransactionCompleted(event);
         break;
 
+      /**
+       * @TODO: Handle if needed and setup_intent.canceled
+       * Will be called when intent will be approved
+       */
       case 'setup_intent.succeeded':
-        void this.handleSetupIntent(event);
+        void this.handleSetupIntentSucceed(event);
         break;
 
-      case 'account.update':
-        void this.handleConnectAccountUpdate(event);
+      /**
+       * @TODO: Handle if needed account.external_account.updated and account.external_account.deleted
+       * Will be called when customer setup connect account with card or bank account
+       */
+      case 'account.external_account.created':
+        void this.handleExternalAccountCreate(event);
+        break;
+
+      case 'customer.update':
+        void this.handleCustomerUpdate(event);
         break;
     }
+  }
+
+  /**
+   * Handles setup intent succeed
+   * NOTE: Should be called when webhook triggers
+   */
+  public async handleSetupIntentSucceed(event: StripeSdk.Event): Promise<void> {
+    /* eslint-disable camelcase */
+    const { payment_method } = event.data.object as StripeSdk.SetupIntent;
+
+    if (!payment_method) {
+      throw new BaseException({
+        status: 500,
+        message: "The SetupIntent payment method doesn't exist",
+      });
+    }
+
+    /**
+     * Get payment method data
+     */
+    const paymentMethod = await this.paymentEntity.paymentMethods.retrieve(
+      this.extractId(payment_method),
+      {
+        expand: [StripePaymentMethods.CARD],
+      },
+    );
+
+    if (!paymentMethod?.card || !paymentMethod?.customer) {
+      throw new BaseException({
+        status: 500,
+        message: 'The payment method card or customer data is invalid',
+      });
+    }
+
+    const customer = await super.customerRepository.findOne({
+      customerId: this.extractId(paymentMethod.customer),
+    });
+
+    if (!customer) {
+      throw new BaseException({
+        status: 500,
+        message: messages.customerNotFound,
+      });
+    }
+
+    const {
+      card: { brand: type, last4: lastDigits, exp_month, exp_year },
+    } = paymentMethod;
+
+    const { userId } = customer;
+    const isDefault = await this.isFirstAddedCard(userId);
+
+    /* eslint-enable camelcase */
+    await super.cardRepository.save({
+      lastDigits,
+      type,
+      isDefault,
+      userId,
+      expired: toExpirationDate(exp_month, exp_year),
+      params: { isApproved: true },
+    });
+  }
+
+  /**
+   * Handles connect account update
+   * NOTE: Should be called when webhook triggers
+   */
+  public async handleExternalAccountCreate(event: StripeSdk.Event): Promise<void> {
+    /* eslint-disable camelcase */
+    const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
+
+    if (!externalAccount.customer) {
+      throw new BaseException({
+        status: 500,
+        message: 'The external account card or customer data is invalid',
+      });
+    }
+
+    const customer = await super.customerRepository.findOne({
+      customerId: this.extractId(externalAccount.customer),
+    });
+
+    if (!customer) {
+      throw new BaseException({
+        status: 500,
+        message: messages.customerNotFound,
+      });
+    }
+
+    const { userId } = customer;
+
+    if (!this.isExternalAccountIsBankAccount(externalAccount)) {
+      const { id: cardId, last4: lastDigits, brand: type, exp_year, exp_month } = externalAccount;
+
+      const isDefault = await this.isFirstAddedCard(userId);
+
+      await super.cardRepository.save({
+        lastDigits,
+        type,
+        userId,
+        isDefault,
+        expired: toExpirationDate(exp_month, exp_year),
+        params: { cardId, isExternalConnect: true },
+      });
+
+      return;
+    }
+
+    const {
+      id: bankAccountId,
+      last4: lastDigits,
+      account_holder_name: holderName,
+      bank_name: bankName,
+    } = externalAccount as StripeSdk.BankAccount;
+
+    await super.bankAccountRepository.save({
+      bankAccountId,
+      lastDigits,
+      userId,
+      holderName,
+      bankName,
+      params: { bankAccountId, isExternalConnect: true },
+    });
+    /* eslint-enable camelcase */
+  }
+
+  /**
+   * Handles customer update
+   */
+  public async handleCustomerUpdate(event: StripeSdk.Event) {
+    /* eslint-disable camelcase */
+    const {
+      id,
+      charges_enabled: isChargesEnabled,
+      capabilities,
+    } = event.data.object as StripeSdk.Account;
+
+    const customer = await super.customerRepository.findOne({ params: { accountId: id } });
+
+    if (!customer) {
+      throw new BaseException({
+        status: 500,
+        message: messages.customerNotFound,
+      });
+    }
+
+    /**
+     * Check if customer can accept payment
+     * NOTE: Check if user correctly and verify setup connect account
+     */
+    customer.params.isVerified = isChargesEnabled && capabilities?.transfers === 'active';
+
+    await super.customerRepository.save(customer);
+    /* eslint-enable camelcase */
   }
 
   /**
@@ -300,111 +464,6 @@ class Stripe extends Abstract {
       },
     );
     /* eslint-enable camelcase */
-  }
-
-  /**
-   * Handles setup intent succeed
-   * NOTE: Should be called when webhook triggers
-   */
-  public async handleSetupIntent(event: StripeSdk.Event): Promise<void> {
-    /* eslint-disable camelcase */
-    const { payment_method } = event.data.object as ISetupIntent;
-
-    if (!payment_method) {
-      throw new BaseException({
-        status: 500,
-        message: "The SetupIntent payment method doesn't exist",
-      });
-    }
-
-    /**
-     * Get payment method data
-     */
-    const paymentMethod = await this.paymentEntity.paymentMethods.retrieve(payment_method, {
-      expand: [StripePaymentMethods.CARD],
-    });
-
-    if (!paymentMethod?.card || !paymentMethod?.customer) {
-      throw new BaseException({
-        status: 500,
-        message: 'The payment method card or customer data is invalid',
-      });
-    }
-
-    /**
-     * Get customer
-     */
-    const customerId =
-      typeof paymentMethod.customer === 'string'
-        ? paymentMethod.customer
-        : paymentMethod.customer.id;
-
-    const customer = await super.customerRepository.findOne({
-      customerId,
-    });
-
-    if (!customer) {
-      throw new BaseException({
-        status: 500,
-        message: "Customer doesn't exist",
-      });
-    }
-
-    /**
-     * Check user have added other cards
-     */
-    const isFirstAddedCard = (await this.cardRepository.count({ userId: customer.userId })) === 0;
-
-    const {
-      id: cardId,
-      card: { brand: type, last4: lastDigits, exp_month, exp_year },
-    } = paymentMethod;
-
-    /* eslint-enable camelcase */
-    await super.createCard({
-      cardId,
-      lastDigits,
-      type,
-      userId: customer.userId,
-      expired: toExpirationDate(exp_month, exp_year),
-      isDefault: isFirstAddedCard,
-    });
-  }
-
-  /**
-   * Handles connect account update
-   * NOTE: Should be called when webhook triggers
-   */
-  public async handleConnectAccountUpdate(event: StripeSdk.Event): Promise<void> {
-    /* eslint-disable camelcase */
-    const connectAccount = event.data.object as IAccount;
-
-    const customer = await super.customerRepository.findOne({
-      params: { accountId: connectAccount.id },
-    });
-    /* eslint-enable camelcase */
-
-    if (!customer) {
-      throw new BaseException({
-        status: 500,
-        message: 'Customer with the received account id not found',
-      });
-    }
-
-    /**
-     * If charges and transfer in pending (on account init) or inactive on update
-     */
-    if (!this.isCustomerCanAcceptPayments(connectAccount)) {
-      customer.params.isVerified = false;
-
-      await super.customerRepository.save(customer);
-
-      return;
-    }
-
-    customer.params.isVerified = true;
-
-    await super.customerRepository.save(customer);
   }
 
   /**
@@ -496,14 +555,26 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Check if customer can accept payment
-   * NOTE: Check if user correctly and verify setup connect account
+   * Check is first added card
    */
-  private isCustomerCanAcceptPayments({
-    charges_enabled: isChargesEnabled,
-    capabilities: { transfers },
-  }: IAccount) {
-    return isChargesEnabled && transfers === AccountCapabilityStatus.ACTIVE;
+  private async isFirstAddedCard(userId: string): Promise<boolean> {
+    return (await this.cardRepository.count({ userId })) === 0;
+  }
+
+  /**
+   * Check if external account is bank account
+   */
+  private isExternalAccountIsBankAccount(
+    externalAccount: StripeSdk.BankAccount | StripeSdk.Card,
+  ): externalAccount is StripeSdk.BankAccount {
+    return externalAccount.object.startsWith('ba');
+  }
+
+  /**
+   * Returns id or extracted id from data
+   */
+  private extractId<T extends { id: string }>(data: string | T): string {
+    return typeof data === 'string' ? data : data.id;
   }
 }
 
