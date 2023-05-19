@@ -6,8 +6,8 @@ import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
-import Customer from '@entities/customer';
-import Product from '@entities/product';
+import type Customer from '@entities/customer';
+import type Product from '@entities/product';
 
 export interface ITransactionParams {
   paymentStatus?: StripeTransactionStatus;
