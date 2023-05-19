@@ -497,6 +497,41 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Create PaymentIntent with Capture
+   */
+  public async createPaymentIntentWithCapture(
+    userId: string,
+    allAmount: number,
+    usersAmount: number,
+    usersConnectedAccount: string,
+  ) {
+    const { customerId } = await this.getCustomer(userId);
+
+    /* eslint-disable camelcase */
+    const stripePaymentIntent: StripeSdk.PaymentIntent =
+      await this.paymentEntity.paymentIntents.create({
+        amount: allAmount,
+        currency: 'usd',
+        payment_method_types: ['card'],
+        capture_method: 'manual',
+        customer: customerId,
+        transfer_data: {
+          amount: usersAmount,
+          destination: usersConnectedAccount,
+        },
+      });
+
+    const stripeCapturePaymentIntent: StripeSdk.PaymentIntent =
+      await this.paymentEntity.paymentIntents.capture(stripePaymentIntent.id, {
+        // eslint-disable-next-line camelcase
+        amount_to_capture: allAmount,
+      });
+
+    return stripeCapturePaymentIntent;
+    /* eslint-enable camelcase */
+  }
+
+  /**
    * Creates payout transfers for given entities
    */
   public async payout(entitiesIds: { id: string; userId: string }[]) {
