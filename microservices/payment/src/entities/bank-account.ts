@@ -24,6 +24,7 @@ export interface IParams {
   bankAccountId?: string;
   isExternalConnect?: boolean;
 }
+
 @JSONSchema({
   properties: {
     customer: { $ref: '#/definitions/Customer' },
