@@ -5,7 +5,7 @@ export default class init1645794505492 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TYPE "public"."profile_gender_enum" AS ENUM('notKnown', 'male', 'female', 'notSpecified')`,
+      `CREATE TYPE "public"."profile_gender_enum" AS ENUM('notKnown', 'male', 'female', 'notSpecified', 'other')`,
     );
     await queryRunner.query(
       `CREATE TABLE "profile" ("userId" uuid NOT NULL, "gender" "public"."profile_gender_enum" NOT NULL DEFAULT 'notKnown', "birthDay" date, "photo" character varying(3000), "params" json NOT NULL DEFAULT '{}', "location" character varying(500), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "deletedAt" TIMESTAMP, CONSTRAINT "profile(pk):userId" PRIMARY KEY ("userId"))`,

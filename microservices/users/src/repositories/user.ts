@@ -1,6 +1,8 @@
+import { BaseException } from '@lomray/microservice-nodejs-lib';
 import bcrypt from 'bcrypt';
 import { EntityRepository, Repository } from 'typeorm';
 import remoteConfig from '@config/remote';
+import ExceptionCode from '@constants/exception-code';
 import IdProvider from '@constants/id-provider';
 import Profile from '@entities/profile';
 import UserEntity from '@entities/user';
@@ -39,6 +41,7 @@ class User extends Repository<UserEntity> {
     identifier: string,
   ): Promise<UserEntity | undefined> {
     return this.createQueryBuilder('u')
+      .withDeleted()
       .leftJoin('u.identityProviders', 'ip')
       .leftJoinAndSelect('u.profile', 'profile')
       .where('ip.provider = :provider AND identifier = :identifier', {
@@ -67,6 +70,34 @@ class User extends Repository<UserEntity> {
     user.profile = profile;
 
     return user;
+  }
+
+  /**
+   * Verify if restore account time is exceeded
+   */
+  public async verifyDeleteAt(user?: UserEntity): Promise<void> {
+    const { removedAccountRestoreTime } = await remoteConfig();
+
+    /**
+     * If account wasn't removed
+     */
+    if (typeof user?.deletedAt?.toString() !== 'string') {
+      return;
+    }
+
+    const restoreTimeAllowance = new Date(
+      user.deletedAt?.getTime() + removedAccountRestoreTime * 60 * 60 * 1000,
+    );
+
+    if (new Date() < restoreTimeAllowance) {
+      return;
+    }
+
+    throw new BaseException({
+      code: ExceptionCode.ACCOUNT_REMOVED,
+      message: 'Account was removed.',
+      status: 403,
+    });
   }
 }
 

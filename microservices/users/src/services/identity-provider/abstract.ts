@@ -20,6 +20,7 @@ export type TSingInParams = {
   isDenyRegister?: boolean;
   isDenyAuthViaRegister?: boolean;
   isShouldAttachUserPhoto?: boolean;
+  isShouldApproveProvider?: boolean;
 } & Record<string, any>;
 
 /**
@@ -30,6 +31,11 @@ abstract class Abstract {
    * Is should attach user photo
    */
   protected isShouldAttachUserPhoto = true;
+
+  /**
+   * Is approve provider (prevent overriding for account)
+   */
+  protected isShouldApproveProvider = false;
 
   /**
    * @protected

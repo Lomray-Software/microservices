@@ -3,6 +3,7 @@ enum Gender {
   MALE = 'male',
   FEMALE = 'female',
   NOT_SPECIFIED = 'notSpecified',
+  OTHER = 'other',
 }
 
 export default Gender;

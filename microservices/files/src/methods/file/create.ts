@@ -4,8 +4,8 @@ import { IsObject, IsEnum, Length, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import FileType from '@constants/file-type';
 import File from '@entities/file';
-import FilePostProcess from '@services/file-post-process';
 import Factory from '@services/file/factory';
+import FilePostProcess from '@services/file-post-process';
 
 class FileCreateInput {
   @IsEnum(FileType)

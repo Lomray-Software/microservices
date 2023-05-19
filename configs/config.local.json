@@ -33,7 +33,9 @@
   {
     "microservice": "users",
     "type": "config",
-    "params": {}
+    "params": {
+      "removedAccountRestoreTime": 0
+    }
   },
   {
     "microservice": "notification",

@@ -1,0 +1,279 @@
+[
+  {
+    "microservice": "content",
+    "alias": "content.Component",
+    "title": "Component",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "alias": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "title": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "schema": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "parent": "content.Component",
+      "children": "content.Component",
+      "singleTypes": "content.SingleType"
+    },
+    "createdAt": "2023-02-03T12:10:27.123Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.ListOutputParams.d44b67c1da009477bd897ecb755a5671",
+    "title": "List Output Params",
+    "schema": {
+      "list": "content.Component",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-03T12:10:27.123Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.ViewOutputParams.35a85ece9e7750b786ee4571cd5dded2",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "content.Component"
+    },
+    "createdAt": "2023-02-03T12:10:27.123Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.CreateRequestParams.6b51920c098d35315e24bc71ff94614f",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "content.Component"
+    },
+    "createdAt": "2023-02-03T12:10:27.123Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.CreateOutputParams.35a85ece9e7750b786ee4571cd5dded2",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "content.Component"
+    },
+    "createdAt": "2023-02-03T12:10:27.123Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.UpdateRequestParams.6b51920c098d35315e24bc71ff94614f",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "content.Component",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-03T12:10:27.123Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.UpdateOutputParams.35a85ece9e7750b786ee4571cd5dded2",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "content.Component"
+    },
+    "createdAt": "2023-02-03T12:10:27.123Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.RemoveOutputParams.ec1b8e89681b9714083ed32c5beb175a",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "content.Component",
+      "entities": "content.Component"
+    },
+    "createdAt": "2023-02-03T12:10:27.123Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.SingleType",
+    "title": "Single Type",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "title": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "alias": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow",
+          "admin": "allow"
+        }
+      },
+      "value": {
+        "object": {},
+        "case": {
+          "template": "<%= _.get(params, 'fields.entity.alias', _.get(params, 'fields.alias', _.get(params, 'query.where.alias'))) %>"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "components": "content.Component"
+    },
+    "createdAt": "2023-02-06T15:56:09.019Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.ListOutputParams.03edb19ccbcd09815e2fde73c432a0a1",
+    "title": "List Output Params",
+    "schema": {
+      "list": "content.SingleType",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-06T15:56:09.019Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.CreateRequestParams.5966320b19da11c75a58b8f41f782824",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "content.SingleType"
+    },
+    "createdAt": "2023-02-06T15:56:09.019Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.CreateOutputParams.132ab7cb7432f0f41bf99e0ea11dc06d",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "content.SingleType"
+    },
+    "createdAt": "2023-02-06T15:56:09.019Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.UpdateRequestParams.5966320b19da11c75a58b8f41f782824",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "content.SingleType",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-02-06T15:56:09.019Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.UpdateOutputParams.132ab7cb7432f0f41bf99e0ea11dc06d",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "content.SingleType"
+    },
+    "createdAt": "2023-02-06T15:56:09.019Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.RemoveOutputParams.22e483e05e1c8b608257f4040a3593b2",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "content.SingleType",
+      "entities": "content.SingleType"
+    },
+    "createdAt": "2023-02-06T15:56:09.019Z"
+  },
+  {
+    "microservice": "content",
+    "alias": "content.ViewOutputParams.132ab7cb7432f0f41bf99e0ea11dc06d",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "content.SingleType"
+    },
+    "createdAt": "2023-02-06T15:56:09.019Z"
+  }
+]

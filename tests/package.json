@@ -34,12 +34,12 @@
 		"ts:check": "tsc --project ./tsconfig.json --skipLibCheck --noemit"
 	},
 	"dependencies": {
-		"@lomray/microservices-client-api": "^2.11.4",
-		"axios": "^0.27.2",
+		"@lomray/microservices-client-api": "^2.15.1",
+		"axios": "^1.4.0",
 		"lodash": "^4.17.21"
 	},
 	"devDependencies": {
-		"@types/lodash": "^4.14.182",
-		"tsconfig-paths": "^4.1.2"
+		"@types/lodash": "^4.14.194",
+		"tsconfig-paths": "^4.2.0"
 	}
 }

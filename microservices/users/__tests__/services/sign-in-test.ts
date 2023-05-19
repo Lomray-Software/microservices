@@ -1,7 +1,9 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { waitResult } from '@lomray/microservice-helpers/test-helpers';
+import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { expect } from 'chai';
 import sinon from 'sinon';
+import * as remoteConfig from '@config/remote';
 import UserRepository from '@repositories/user';
 import SignIn from '@services/sign-in';
 
@@ -9,6 +11,7 @@ describe('services/sign-out', () => {
   const sandbox = sinon.createSandbox();
   const repository = TypeormMock.entityManager.getCustomRepository(UserRepository);
   const correctPassword = 'example';
+  const mockEmail = 'test@email.com';
   const mockUser = repository.create({
     id: 'user-id',
     password: correctPassword,
@@ -43,7 +46,7 @@ describe('services/sign-out', () => {
   });
 
   it('should throw error: password incorrect', async () => {
-    const service = SignIn.init({ login: 'test@email.com', password: 'incorrect', repository });
+    const service = SignIn.init({ login: mockEmail, password: 'incorrect', repository });
 
     TypeormMock.entityManager.findOne.resolves(mockUser);
 
@@ -66,5 +69,48 @@ describe('services/sign-out', () => {
     TypeormMock.entityManager.findOne.resolves(mockUser);
 
     expect(await service.auth()).to.deep.equal(mockUser);
+  });
+
+  it('should throw error: account was removed', async () => {
+    const user = repository.create({
+      id: 'user-id',
+      password: correctPassword,
+      deletedAt: new Date(),
+    });
+
+    await repository.encryptPassword(user);
+
+    const service = SignIn.init({ login: mockEmail, password: correctPassword, repository });
+
+    TypeormMock.entityManager.findOne.resolves(user);
+
+    expect(await waitResult(service.auth().catch(({ message }) => message))).to.equal(
+      'Account was removed.',
+    );
+    expect(await waitResult(service.auth())).to.throw(BaseException);
+  });
+
+  it("should return user: account was removed but restore time isn't exceeded", async () => {
+    const user = repository.create({
+      id: 'user-id',
+      password: correctPassword,
+      deletedAt: new Date(),
+    });
+
+    await repository.encryptPassword(user);
+
+    const remoteConfigStub = sinon.stub().resolves({
+      removedAccountRestoreTime: 24,
+    });
+
+    sinon.replace(remoteConfig, 'default', remoteConfigStub);
+
+    const service = SignIn.init({ login: mockEmail, password: correctPassword, repository });
+
+    TypeormMock.entityManager.findOne.resolves(user);
+
+    const res = await service.auth();
+
+    expect(res).to.deep.equal(user);
   });
 });

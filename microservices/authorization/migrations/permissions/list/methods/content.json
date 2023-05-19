@@ -1,0 +1,182 @@
+[
+  {
+    "microservice": "content",
+    "method": "config-reset",
+    "description": "Reset RemoteConfig cache",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-01T15:11:04.335Z",
+    "modelOut": "RemoteConfigOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "content",
+    "method": "meta",
+    "description": "Get microservice metadata",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-01T15:11:04.335Z",
+    "modelOut": "MicroserviceMetaOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "content",
+    "method": "component.view",
+    "description": "Returns Component by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-03T12:10:27.123Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "content.ViewOutputParams.35a85ece9e7750b786ee4571cd5dded2",
+    "methodFilters": []
+  },
+  {
+    "microservice": "content",
+    "method": "component.count",
+    "description": "Returns count of Component by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-03T12:10:27.123Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "content",
+    "method": "component.list",
+    "description": "Returns list of Component by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-03T12:10:27.123Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "content.ListOutputParams.d44b67c1da009477bd897ecb755a5671",
+    "methodFilters": []
+  },
+  {
+    "microservice": "content",
+    "method": "component.remove",
+    "description": "Remove Component by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-03T12:10:27.123Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "content.RemoveOutputParams.ec1b8e89681b9714083ed32c5beb175a",
+    "methodFilters": []
+  },
+  {
+    "microservice": "content",
+    "method": "component.update",
+    "description": "Update Component by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-03T12:10:27.123Z",
+    "modelIn": "content.UpdateRequestParams.6b51920c098d35315e24bc71ff94614f",
+    "modelOut": "content.UpdateOutputParams.35a85ece9e7750b786ee4571cd5dded2",
+    "methodFilters": []
+  },
+  {
+    "microservice": "content",
+    "method": "component.create",
+    "description": "Create a new Component",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-03T12:10:27.123Z",
+    "modelIn": "content.CreateRequestParams.6b51920c098d35315e24bc71ff94614f",
+    "modelOut": "content.CreateOutputParams.35a85ece9e7750b786ee4571cd5dded2",
+    "methodFilters": []
+  },
+  {
+    "microservice": "content",
+    "method": "single-type.create",
+    "description": "Create a new SingleType",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-06T15:56:09.019Z",
+    "modelIn": "content.CreateRequestParams.5966320b19da11c75a58b8f41f782824",
+    "modelOut": "content.CreateOutputParams.132ab7cb7432f0f41bf99e0ea11dc06d",
+    "methodFilters": []
+  },
+  {
+    "microservice": "content",
+    "method": "single-type.list",
+    "description": "Returns list of SingleType by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-06T15:56:09.019Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "content.ListOutputParams.03edb19ccbcd09815e2fde73c432a0a1",
+    "methodFilters": []
+  },
+  {
+    "microservice": "content",
+    "method": "single-type.remove",
+    "description": "Remove SingleType by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-06T15:56:09.019Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "content.RemoveOutputParams.22e483e05e1c8b608257f4040a3593b2",
+    "methodFilters": []
+  },
+  {
+    "microservice": "content",
+    "method": "single-type.count",
+    "description": "Returns count of SingleType by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-06T15:56:09.019Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "content",
+    "method": "single-type.view",
+    "description": "Returns SingleType by given condition",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-06T15:56:09.019Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "content.ViewOutputParams.132ab7cb7432f0f41bf99e0ea11dc06d",
+    "methodFilters": []
+  },
+  {
+    "microservice": "content",
+    "method": "single-type.update",
+    "description": "Update SingleType by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-02-06T15:56:09.019Z",
+    "modelIn": "content.UpdateRequestParams.5966320b19da11c75a58b8f41f782824",
+    "modelOut": "content.UpdateOutputParams.132ab7cb7432f0f41bf99e0ea11dc06d",
+    "methodFilters": []
+  }
+]

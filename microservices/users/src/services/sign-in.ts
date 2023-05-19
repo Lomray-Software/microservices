@@ -53,8 +53,13 @@ class SignIn {
       {
         ...(this.isEmail() ? { email: this.login } : { phone: this.login }),
       },
-      { relations: ['profile'], select: EntityColumns(this.repository) },
+      { relations: ['profile'], select: EntityColumns(this.repository), withDeleted: true },
     );
+
+    /**
+     * Verify if the user was deleted and can he restore the account
+     */
+    await this.repository.verifyDeleteAt(user);
 
     if (!user || !this.repository.isValidPassword(user, this.password)) {
       throw new BaseException({

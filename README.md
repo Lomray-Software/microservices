@@ -16,6 +16,7 @@ Prod: [![Build prod](https://github.com/Lomray-Software/microservices/actions/wo
  - [Gateway](microservices/gateway)
  - [Notification](microservices/notification)
  - [Users](microservices/users)
+ - [Content](microservices/content)
  
 ## Use [CLI](https://github.com/Lomray-Software/microservices-cli) to start your own art.
 
@@ -54,7 +55,7 @@ curl -X POST http://127.0.0.1:3000
 
 see example requests in `http-requests` folder
 
-[Chek all available microservices](https://github.com/orgs/Lomray-Software/packages?repo_name=microservices)   
+[Check all available microservices](https://github.com/orgs/Lomray-Software/packages?repo_name=microservices)   
 
 Microservices also available like npm packages:   
 ```bash

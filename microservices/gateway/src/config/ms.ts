@@ -1,8 +1,10 @@
 import { GetMsOptions, GetMsParams } from '@lomray/microservice-helpers';
 import type { IGatewayOptions, IGatewayParams } from '@lomray/microservice-nodejs-lib';
 import CONST from '@constants/index';
+import rawBodySaver from '@helpers/raw-body-saver';
 import cors from '@middlewares/cors';
 import userInfo from '@middlewares/user-info';
+import webhook from '@middlewares/webhook';
 
 /**
  * Microservice options
@@ -15,10 +17,11 @@ const msOptions: Partial<IGatewayOptions> = {
   listener: `0.0.0.0:${CONST.MS_LISTENER_PORT}`,
   jsonParams: {
     limit: `${CONST.MS_JSON_LIMIT}mb`,
+    verify: rawBodySaver,
   },
 };
 
-const msMiddlewares = [cors, userInfo];
+const msMiddlewares = [webhook, cors, userInfo];
 
 /**
  * Microservice params

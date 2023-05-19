@@ -95,7 +95,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "location": {

@@ -4,8 +4,8 @@ import { Type } from 'class-transformer';
 import { IsObject, Length, IsString, IsNotEmpty } from 'class-validator';
 import { getManager } from 'typeorm';
 import File from '@entities/file';
-import FilePostProcess from '@services/file-post-process';
 import Factory from '@services/file/factory';
+import FilePostProcess from '@services/file-post-process';
 
 class FileUpdateInput {
   @IsString()
