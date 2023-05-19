@@ -24,3 +24,20 @@ Content-Type: application/json
     "userId": "81c760f9-c229-4a7b-b6a5-201bf1d1dee6"
   }
 }
+
+### Step 3. Connect accout (Setup bank account)
+POST http://127.0.0.1:8001/ms/payment
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.connect-account",
+  "params": {
+    "userId": "81c760f9-c229-4a7b-b6a5-201bf1d1dee6",
+    "email": "dghvnpvjqiy@internetkeno.com",
+    "accountType": "standard",
+    "refreshUrl": "https://example.com",
+    "returnUrl": "https://example.com"
+  }
+}
