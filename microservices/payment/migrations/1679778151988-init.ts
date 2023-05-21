@@ -33,7 +33,7 @@ export default class init1679778151988 implements MigrationInterface {
       `CREATE TABLE "bank_account" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" character varying(36) NOT NULL, "lastDigits" character varying(4) NOT NULL, "bankName" character varying(100), "holderName" character varying(100), "params" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "bank_account(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "card" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" character varying(36) NOT NULL, "lastDigits" character varying(4) NOT NULL, "expired" character varying(5) NOT NULL, "holderName" character varying(100) NOT NULL DEFAULT '', "type" character varying(20) NOT NULL, "isDefault" boolean NOT NULL DEFAULT false, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "card(pk):id" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "card" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" character varying(36) NOT NULL, "lastDigits" character varying(4) NOT NULL, "params" json NOT NULL DEFAULT '{}', "expired" character varying(5) NOT NULL, "holderName" character varying(100) NOT NULL DEFAULT '', "type" character varying(20) NOT NULL, "isDefault" boolean NOT NULL DEFAULT false, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "card(pk):id" PRIMARY KEY ("id"))`,
     );
 
     /**
@@ -43,10 +43,10 @@ export default class init1679778151988 implements MigrationInterface {
       `ALTER TABLE "customer" ADD CONSTRAINT "customer(uq):userId" UNIQUE ("userId")`,
     );
     await queryRunner.query(
-      `ALTER TABLE "card" ADD CONSTRAINT "card(fk):userId" FOREIGN KEY ("userId") REFERENCES "customer"("customerId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "card" ADD CONSTRAINT "card(fk):userId" FOREIGN KEY ("userId") REFERENCES "customer"("userId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "bank_account" ADD CONSTRAINT "bank_account(fk):userId" FOREIGN KEY ("userId") REFERENCES "customer"("customerId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "bank_account" ADD CONSTRAINT "bank_account(fk):userId" FOREIGN KEY ("userId") REFERENCES "customer"("userId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE "price" ADD CONSTRAINT "price(fk):productId_productId" FOREIGN KEY ("productId") REFERENCES "product"("productId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
