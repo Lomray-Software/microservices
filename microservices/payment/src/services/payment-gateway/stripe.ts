@@ -505,7 +505,14 @@ class Stripe extends Abstract {
     usersAmount: number,
     usersConnectedAccount: string,
   ) {
-    const { customerId } = await this.getCustomer(userId);
+    const customer = await this.customerRepository.findOne({ userId });
+
+    if (!customer) {
+      throw new BaseException({
+        status: 400,
+        message: messages.customerNotFound,
+      });
+    }
 
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent =
@@ -514,7 +521,7 @@ class Stripe extends Abstract {
         currency: 'usd',
         payment_method_types: ['card'],
         capture_method: 'manual',
-        customer: customerId,
+        customer: customer.customerId,
         transfer_data: {
           amount: usersAmount,
           destination: usersConnectedAccount,
