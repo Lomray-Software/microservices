@@ -19,6 +19,7 @@ export interface ICustomerParams {
   properties: {
     transactions: { $ref: '#/definitions/Transaction', type: 'array' },
     cards: { $ref: '#/definitions/Card', type: 'array' },
+    bankAccounts: { $ref: '#/definitions/BankAccount', type: 'array' },
   },
 })
 @Entity()

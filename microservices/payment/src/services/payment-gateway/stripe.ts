@@ -233,7 +233,7 @@ class Stripe extends Abstract {
     refreshUrl: string,
     returnUrl: string,
   ): Promise<StripeSdk.AccountLink> {
-    let customer = await super.getCustomer(userId);
+    const customer = await super.getCustomer(userId);
 
     if (!customer.params.accountId) {
       const stripeConnectAccount: StripeSdk.Account = await this.paymentEntity.accounts.create({
@@ -242,11 +242,9 @@ class Stripe extends Abstract {
         email,
       });
 
-      await this.customerRepository.update(userId, {
-        params: { accountId: stripeConnectAccount.id },
-      });
+      customer.params.accountId = stripeConnectAccount.id;
 
-      customer = { ...customer, params: { accountId: stripeConnectAccount.id } };
+      await this.customerRepository.save(customer);
     }
 
     return this.paymentEntity.accountLinks.create({
@@ -324,7 +322,7 @@ class Stripe extends Abstract {
       });
     }
 
-    const customer = await super.customerRepository.findOne({
+    const customer = await this.customerRepository.findOne({
       customerId: this.extractId(paymentMethod.customer),
     });
 
@@ -340,10 +338,11 @@ class Stripe extends Abstract {
     } = paymentMethod;
 
     const { userId } = customer;
+
     const isDefault = await this.isFirstAddedCard(userId);
 
     /* eslint-enable camelcase */
-    await super.cardRepository.save({
+    await this.cardRepository.save({
       lastDigits,
       type,
       isDefault,
@@ -361,16 +360,19 @@ class Stripe extends Abstract {
     /* eslint-disable camelcase */
     const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
 
-    if (!externalAccount.customer) {
+    if (!externalAccount?.account) {
       throw new BaseException({
         status: 500,
-        message: 'The external account card or customer data is invalid',
+        message: 'The connected account reference in external account data not found',
       });
     }
 
-    const customer = await super.customerRepository.findOne({
-      customerId: this.extractId(externalAccount.customer),
-    });
+    const { account } = externalAccount;
+
+    const customer = await this.customerRepository
+      .createQueryBuilder('customer')
+      .where("customer.params->>'accountId' = :value", { value: this.extractId(account) })
+      .getOne();
 
     if (!customer) {
       throw new BaseException({
@@ -405,7 +407,7 @@ class Stripe extends Abstract {
       bank_name: bankName,
     } = externalAccount as StripeSdk.BankAccount;
 
-    await super.bankAccountRepository.save({
+    await this.bankAccountRepository.save({
       bankAccountId,
       lastDigits,
       userId,
@@ -427,7 +429,7 @@ class Stripe extends Abstract {
       capabilities,
     } = event.data.object as StripeSdk.Account;
 
-    const customer = await super.customerRepository.findOne({ params: { accountId: id } });
+    const customer = await this.customerRepository.findOne({ params: { accountId: id } });
 
     if (!customer) {
       throw new BaseException({
@@ -442,7 +444,7 @@ class Stripe extends Abstract {
      */
     customer.params.isVerified = isChargesEnabled && capabilities?.transfers === 'active';
 
-    await super.customerRepository.save(customer);
+    await this.customerRepository.save(customer);
     /* eslint-enable camelcase */
   }
 
