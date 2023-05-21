@@ -487,6 +487,10 @@ class Stripe extends Abstract {
 
   /**
    * Create PaymentIntent with Capture
+   * NOTES:
+   * allAmount - Full amount that will be charged from card
+   * usersAmount - Amount that will receive end user
+   * usersConnectedAccount - End user connected account
    */
   public async createPaymentIntentWithCapture(
     userId: string,
