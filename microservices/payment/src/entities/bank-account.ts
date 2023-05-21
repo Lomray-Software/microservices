@@ -18,11 +18,9 @@ import IsLastCardDigitsValid from '@helpers/validators/is-last-card-digits-valid
  * In case of stipe:
  * bankAccountId - only have cards from connected account and
  * cards related to SetupIntent doesn't have own id
- * isExternalConnect - if card setup in connect account as external account
  */
 export interface IParams {
   bankAccountId?: string;
-  isExternalConnect?: boolean;
 }
 
 @JSONSchema({

@@ -334,6 +334,7 @@ class Stripe extends Abstract {
     }
 
     const {
+      id,
       card: { brand: type, last4: lastDigits, exp_month, exp_year },
     } = paymentMethod;
 
@@ -348,7 +349,7 @@ class Stripe extends Abstract {
       isDefault,
       userId,
       expired: toExpirationDate(exp_month, exp_year),
-      params: { isApproved: true },
+      params: { isApproved: true, paymentMethodId: id },
     });
   }
 
@@ -367,34 +368,20 @@ class Stripe extends Abstract {
       });
     }
 
-    const { account } = externalAccount;
-
-    const customer = await this.customerRepository
-      .createQueryBuilder('customer')
-      .where("customer.params->>'accountId' = :value", { value: this.extractId(account) })
-      .getOne();
-
-    if (!customer) {
-      throw new BaseException({
-        status: 500,
-        message: messages.customerNotFound,
-      });
-    }
-
-    const { userId } = customer;
+    const { userId } = await this.getCustomerByAccountId(this.extractId(externalAccount.account));
 
     if (!this.isExternalAccountIsBankAccount(externalAccount)) {
       const { id: cardId, last4: lastDigits, brand: type, exp_year, exp_month } = externalAccount;
 
       const isDefault = await this.isFirstAddedCard(userId);
 
-      await super.cardRepository.save({
+      await this.cardRepository.save({
         lastDigits,
         type,
         userId,
         isDefault,
         expired: toExpirationDate(exp_month, exp_year),
-        params: { cardId, isExternalConnect: true },
+        params: { cardId },
       });
 
       return;
@@ -413,7 +400,7 @@ class Stripe extends Abstract {
       userId,
       holderName,
       bankName,
-      params: { bankAccountId, isExternalConnect: true },
+      params: { bankAccountId },
     });
     /* eslint-enable camelcase */
   }
@@ -429,7 +416,7 @@ class Stripe extends Abstract {
       capabilities,
     } = event.data.object as StripeSdk.Account;
 
-    const customer = await this.customerRepository.findOne({ params: { accountId: id } });
+    const customer = await this.getCustomerByAccountId(id);
 
     if (!customer) {
       throw new BaseException({
@@ -506,6 +493,7 @@ class Stripe extends Abstract {
     allAmount: number,
     usersAmount: number,
     usersConnectedAccount: string,
+    cardId?: string,
   ) {
     const customer = await this.customerRepository.findOne({ userId });
 
@@ -516,12 +504,17 @@ class Stripe extends Abstract {
       });
     }
 
+    const {
+      params: { paymentMethodId },
+    } = await this.getChargingCard(cardId);
+
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent =
       await this.paymentEntity.paymentIntents.create({
         amount: allAmount,
         currency: 'usd',
         payment_method_types: ['card'],
+        payment_method: paymentMethodId,
         capture_method: 'manual',
         customer: customer.customerId,
         transfer_data: {
@@ -602,7 +595,11 @@ class Stripe extends Abstract {
    * Check is first added card
    */
   private async isFirstAddedCard(userId: string): Promise<boolean> {
-    return (await this.cardRepository.count({ userId })) === 0;
+    return (
+      (await this.cardRepository.count({
+        userId,
+      })) === 0
+    );
   }
 
   /**
@@ -619,6 +616,61 @@ class Stripe extends Abstract {
    */
   private extractId<T extends { id: string }>(data: string | T): string {
     return typeof data === 'string' ? data : data.id;
+  }
+
+  /**
+   * Returns card for charging payment
+   */
+  private async getChargingCard(cardId?: string): Promise<Card> {
+    let card: Card | undefined;
+
+    if (cardId) {
+      card = await this.cardRepository.findOne({ id: cardId });
+    } else {
+      card = await this.cardRepository.findOne({ where: { isDefault: true } });
+    }
+
+    if (!card) {
+      throw new BaseException({
+        status: 500,
+        message: messages.cardNotFound,
+      });
+    }
+
+    if (!card.params.paymentMethodId) {
+      throw new BaseException({
+        status: 400,
+        message: "Amount can't be charged from this card. Card isn't specified is payment method.",
+      });
+    }
+
+    if (card.params.cardId) {
+      throw new BaseException({
+        status: 400,
+        message: "Amount can't be charged from this card. Card is related to the connect account.",
+      });
+    }
+
+    return card;
+  }
+
+  /**
+   * Returns customer by account id
+   */
+  private async getCustomerByAccountId(accountId: string): Promise<Customer> {
+    const customer = await this.customerRepository
+      .createQueryBuilder('customer')
+      .where("customer.params->>'accountId' = :value", { value: accountId })
+      .getOne();
+
+    if (!customer) {
+      throw new BaseException({
+        status: 500,
+        message: messages.customerNotFound,
+      });
+    }
+
+    return customer;
   }
 }
 

@@ -143,33 +143,6 @@ abstract class Abstract {
   }
 
   /**
-   * Create new card
-   */
-  public async createCard(params: ICardParams): Promise<Card> {
-    const { cardId, ...restValues } = params;
-    const card = this.cardRepository.create({ ...restValues, params: { cardId } });
-
-    await this.cardRepository.save(card);
-
-    return card;
-  }
-
-  /**
-   * Create new bank account
-   */
-  public async createBankAccount(params: IBankAccountParams): Promise<BankAccount> {
-    const { bankAccountId, ...restValues } = params;
-    const bankAccount = this.bankAccountRepository.create({
-      ...restValues,
-      params: { bankAccountId },
-    });
-
-    await this.bankAccountRepository.save(bankAccount);
-
-    return bankAccount;
-  }
-
-  /**
    * Create new customer
    */
   public async createCustomer(userId: string, customerId: string = uuid()): Promise<Customer> {
