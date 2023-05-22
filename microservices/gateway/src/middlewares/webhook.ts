@@ -18,27 +18,34 @@ const webhook =
       return res.status(500).json({ error: 'Webhook url is not provided' });
     }
 
-    const hasWebhook = url.startsWith(webhookUrl);
-    const [, msMethod, accessToken] = url.split(webhookUrl);
+    if (!['post', 'get'].includes(method.toLowerCase())) {
+      Log.error('Method not allowed.');
 
-    if (hasWebhook) {
-      if (!['post', 'get'].includes(method.toLowerCase())) {
-        Log.error('Method not allowed.');
-
-        return res.status(405).json({ error: 'Method not allowed.' });
-      }
-
-      req.url = '/';
-      req.method = 'post';
-      headers.authorization = accessToken ? `Bearer ${accessToken}` : undefined;
-      req.body = {
-        method: msMethod,
-        params: {
-          body,
-          rawBody: req['rawBody'],
-        },
-      };
+      return res.status(405).json({ error: 'Method not allowed.' });
     }
+
+    const { groups } =
+      new RegExp(`${webhookUrl as string}(?<methodUrl>[^/]+)/?(?<authToken>[^/]+)?`).exec(url) ||
+      {};
+
+    if (!groups) {
+      next();
+
+      return;
+    }
+
+    const { methodUrl, authToken } = groups;
+
+    req.url = '/';
+    req.method = 'post';
+    headers.authorization = authToken ? `Bearer ${authToken}` : undefined;
+    req.body = {
+      method: methodUrl,
+      params: {
+        body,
+        rawBody: req['rawBody'],
+      },
+    };
 
     next();
   };
