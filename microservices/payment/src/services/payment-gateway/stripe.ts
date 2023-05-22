@@ -517,7 +517,7 @@ class Stripe extends Abstract {
       await this.paymentEntity.paymentIntents.create({
         amount: allAmount,
         currency: 'usd',
-        payment_method_types: ['card'],
+        payment_method_types: [StripePaymentMethods.CARD],
         payment_method: paymentMethodId,
         capture_method: 'manual',
         customer: customer.customerId,

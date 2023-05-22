@@ -9,7 +9,7 @@ import TransactionType from '@constants/transaction-type';
 import type Customer from '@entities/customer';
 import type Product from '@entities/product';
 
-export interface ITransactionParams {
+export interface IParams {
   paymentStatus?: StripeTransactionStatus;
   checkoutStatus?: StripeCheckoutStatus;
   errorMessage?: string;
@@ -88,7 +88,7 @@ class Transaction {
   @Column({ type: 'json', default: {} })
   @IsObject()
   @IsUndefinable()
-  params: ITransactionParams;
+  params: IParams;
 
   @ManyToOne('Product', 'transactions')
   @JoinColumn({ name: 'productId' })

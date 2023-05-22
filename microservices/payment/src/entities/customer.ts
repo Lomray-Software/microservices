@@ -6,12 +6,10 @@ import type BankAccount from '@entities/bank-account';
 import type Card from '@entities/card';
 import type Transaction from '@entities/transaction';
 
-/**
- * accountId - Payment service account id
- * isVerified - Is user setup and verify payment data for accept payments
- */
-export interface ICustomerParams {
+export interface IParams {
+  // Payment service account id
   accountId?: string;
+  // Is user setup and verify payment data for accept payments
   isVerified?: boolean;
 }
 
@@ -47,7 +45,7 @@ class Customer {
   @Column({ type: 'json', default: {} })
   @IsObject()
   @IsUndefinable()
-  params: ICustomerParams;
+  params: IParams;
 
   @OneToMany('Transaction', 'customer')
   transactions: Transaction[];
