@@ -494,9 +494,9 @@ class Stripe extends Abstract {
    */
   public async createPaymentIntentWithCapture(
     userId: string,
+    receiverConnectedAccount: string,
+    receiverAmount: number,
     allAmount: number,
-    usersAmount: number,
-    usersConnectedAccount: string,
     cardId?: string,
   ) {
     const customer = await this.customerRepository.findOne({ userId });
@@ -515,13 +515,13 @@ class Stripe extends Abstract {
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent =
       await this.paymentEntity.paymentIntents.create({
-        capture_method: 'manual',
         currency: 'usd',
+        capture_method: 'manual',
         payment_method_types: [StripePaymentMethods.CARD],
         payment_method: paymentMethodId,
         customer: customer.customerId,
         amount: this.toSmallestCurrencyUnit(allAmount),
-        ...this.buildTransferData(usersAmount, usersConnectedAccount),
+        ...this.buildPaymentIntentTransferData(receiverAmount, receiverConnectedAccount),
       });
 
     const stripeCapturePaymentIntent: StripeSdk.PaymentIntent =
@@ -531,6 +531,19 @@ class Stripe extends Abstract {
 
     return stripeCapturePaymentIntent;
     /* eslint-enable camelcase */
+  }
+
+  /**
+   * Refund payment intent
+   * @TODO: create refund and handle status via webhooks
+   */
+  public async refund(transactionId: string): Promise<void> {
+    const transaction = await this.getTransactionById(transactionId);
+
+    await this.paymentEntity.refunds.create({
+      // payment_intent: transaction.paymentId,
+      amount: transaction.amount,
+    });
   }
 
   /**
@@ -690,7 +703,7 @@ class Stripe extends Abstract {
   /**
    * Returns payment intent transfer data
    */
-  private buildTransferData(
+  private buildPaymentIntentTransferData(
     amount: number | string,
     destination: string,
   ): StripeSdk.PaymentIntent.TransferData {

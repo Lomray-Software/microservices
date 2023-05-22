@@ -1,3 +1,4 @@
+import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { EntityManager, Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
 import PaymentProvider from '@constants/payment-provider';
@@ -203,6 +204,22 @@ abstract class Abstract {
     }
 
     return this.createCustomer(userId);
+  }
+
+  /**
+   * Get transaction by transactionId
+   */
+  public async getTransactionById(transactionId: string): Promise<Transaction> {
+    const transaction = await this.transactionRepository.findOne({ id: transactionId });
+
+    if (!transaction) {
+      throw new BaseException({
+        status: 500,
+        message: 'Transaction not found',
+      });
+    }
+
+    return transaction;
   }
 }
 
