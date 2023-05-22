@@ -283,6 +283,9 @@ class Stripe extends Abstract {
       case 'account.external_account.created':
         void this.handleExternalAccountCreate(event);
         break;
+      case 'account.external_account.deleted':
+        void this.handleExternalAccountDeleted(event);
+        break;
 
       case 'customer.update':
         void this.handleCustomerUpdate(event);
@@ -373,13 +376,14 @@ class Stripe extends Abstract {
     if (!this.isExternalAccountIsBankAccount(externalAccount)) {
       const { id: cardId, last4: lastDigits, brand: type, exp_year, exp_month } = externalAccount;
 
-      const isDefault = await this.isFirstAddedCard(userId);
-
+      /**
+       * @TODO: check if connected account have default payment method
+       */
       await this.cardRepository.save({
         lastDigits,
         type,
         userId,
-        isDefault,
+        isDefault: false,
         expired: toExpirationDate(exp_month, exp_year),
         params: { cardId },
       });
@@ -403,6 +407,35 @@ class Stripe extends Abstract {
       params: { bankAccountId },
     });
     /* eslint-enable camelcase */
+  }
+
+  /**
+   * Handles connect account deleted
+   * NOTE: Should be called when webhook triggers
+   */
+  public async handleExternalAccountDeleted(event: StripeSdk.Event): Promise<void> {
+    const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
+
+    if (!externalAccount?.account) {
+      throw new BaseException({
+        status: 500,
+        message: 'The connected account reference in external account data not found',
+      });
+    }
+
+    const externalAccountId = this.extractId(externalAccount.account);
+
+    if (!this.isExternalAccountIsBankAccount(externalAccount)) {
+      const card = await this.getCardById(externalAccountId);
+
+      await this.cardRepository.remove(card);
+
+      return;
+    }
+
+    const bankAccount = await this.getBankAccountById(externalAccountId);
+
+    await this.bankAccountRepository.remove(bankAccount);
   }
 
   /**
@@ -568,7 +601,6 @@ class Stripe extends Abstract {
 
   /**
    * Get and calculate transfer information
-   * @protected
    */
   protected async getTransferInfo(
     entityId: string,
@@ -680,6 +712,46 @@ class Stripe extends Abstract {
       throw new BaseException({
         status: 500,
         message: messages.customerNotFound,
+      });
+    }
+
+    return customer;
+  }
+
+  /**
+   * Returns card by card id
+   * NOTE: Uses to search related connect account (external account) data
+   */
+  private async getCardById(cardId: string): Promise<Card> {
+    const customer = await this.cardRepository
+      .createQueryBuilder('card')
+      .where("card.params->>'cardId' = :value", { value: cardId })
+      .getOne();
+
+    if (!customer) {
+      throw new BaseException({
+        status: 500,
+        message: 'Card not found',
+      });
+    }
+
+    return customer;
+  }
+
+  /**
+   * Returns bank account by bank account id
+   * NOTE: Uses to search related connect account (external account) data
+   */
+  private async getBankAccountById(bankAccountId: string): Promise<BankAccount> {
+    const customer = await this.bankAccountRepository
+      .createQueryBuilder('bankAccount')
+      .where("bankAccount.params->>'bankAccountId' = :value", { value: bankAccountId })
+      .getOne();
+
+    if (!customer) {
+      throw new BaseException({
+        status: 500,
+        message: 'Bank account not found',
       });
     }
 
