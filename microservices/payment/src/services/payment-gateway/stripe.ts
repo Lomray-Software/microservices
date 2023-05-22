@@ -529,7 +529,6 @@ class Stripe extends Abstract {
 
     const stripeCapturePaymentIntent: StripeSdk.PaymentIntent =
       await this.paymentEntity.paymentIntents.capture(stripePaymentIntent.id, {
-        // eslint-disable-next-line camelcase
         amount_to_capture: allAmount,
       });
 
