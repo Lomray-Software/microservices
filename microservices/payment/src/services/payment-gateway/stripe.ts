@@ -27,6 +27,15 @@ export interface IStripeProductParams extends IProductParams {
   images?: string[];
 }
 
+interface IPaymentIntentParams {
+  userId: string;
+  totalAmount: number;
+  receiverConnectedAccountId: string;
+  cardId?: string;
+  title?: string;
+  applicationPaymentPercent?: number;
+}
+
 interface ICheckoutParams {
   priceId: string;
   userId: string;
@@ -594,14 +603,14 @@ class Stripe extends Abstract {
    * usersAmount - Amount that will receive end user
    * usersConnectedAccount - End user connected account
    */
-  public async createPaymentIntent(
-    userId: string,
-    allAmount: number,
-    receiverConnectedAccountId: string,
-    applicationPaymentPercent?: number,
-    title?: string,
-    cardId?: string,
-  ): Promise<void> {
+  public async createPaymentIntent({
+    userId,
+    totalAmount,
+    receiverConnectedAccountId,
+    cardId,
+    title,
+    applicationPaymentPercent,
+  }: IPaymentIntentParams): Promise<Transaction> {
     const customer = await this.customerRepository.findOne({ userId });
 
     if (!customer) {
@@ -630,7 +639,7 @@ class Stripe extends Abstract {
       params: { paymentMethodId },
     } = await this.getChargingCard(cardId);
 
-    const totalUnitAmount = this.toSmallestCurrencyUnit(allAmount);
+    const totalUnitAmount = this.toSmallestCurrencyUnit(totalAmount);
 
     const receiverAmount = await this.getReceiverPaymentAmount(
       totalUnitAmount,
@@ -650,7 +659,9 @@ class Stripe extends Abstract {
         ...this.buildPaymentIntentTransferData(receiverAmount, receiverConnectedAccountId),
       });
 
-    await this.transactionRepository.save({
+    /* eslint-enable camelcase */
+
+    return this.transactionRepository.save({
       transactionId: stripePaymentIntent.id,
       userId,
       cardId,
@@ -659,7 +670,6 @@ class Stripe extends Abstract {
       amount: totalUnitAmount,
       params: { paymentMethodId },
     });
-    /* eslint-enable camelcase */
   }
 
   /**
