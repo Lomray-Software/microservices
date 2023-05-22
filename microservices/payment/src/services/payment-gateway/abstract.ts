@@ -8,7 +8,7 @@ import Card from '@entities/card';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
-import Transaction, { ITransactionParams as ITransactionEntityParams } from '@entities/transaction';
+import Transaction, { IParams as ITransactionEntityParams } from '@entities/transaction';
 import type TPaymentOptions from '@interfaces/payment-options';
 
 export interface ICardParams {
