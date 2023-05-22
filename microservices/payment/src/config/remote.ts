@@ -8,6 +8,7 @@ const defaultConfig: IRemoteConfig = {
   paymentOptions: JSON.parse(CONST.PAYMENT_OPTIONS),
   paymentWebhookKey: CONST.PAYMENT_WEBHOOK_KEY,
   payoutCoeff: CONST.PAYOUT_COEFF,
+  fees: JSON.parse(CONST.FEES),
 };
 
 /**

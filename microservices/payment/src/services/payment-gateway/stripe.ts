@@ -268,29 +268,98 @@ class Stripe extends Abstract {
         void this.handleTransactionCompleted(event);
         break;
 
-      /**
-       * @TODO: Handle if needed and setup_intent.canceled
-       * Will be called when intent will be approved
-       */
+      case 'customer.update':
+        void this.handleCustomerUpdate(event);
+        break;
+
       case 'setup_intent.succeeded':
         void this.handleSetupIntentSucceed(event);
         break;
 
       /**
-       * @TODO: Handle if needed account.external_account.updated and account.external_account.deleted
+       * @TODO: Handle if needed account.external_account.updated
        * Will be called when customer setup connect account with card or bank account
        */
       case 'account.external_account.created':
         void this.handleExternalAccountCreate(event);
         break;
+
       case 'account.external_account.deleted':
         void this.handleExternalAccountDeleted(event);
         break;
 
-      case 'customer.update':
-        void this.handleCustomerUpdate(event);
+      case 'payment_intent.processing':
+        void this.handlePaymentIntentProcessing(event);
+        break;
+
+      case 'payment_intent.payment_failed':
+        void this.handlePaymentIntentFailed(event);
+        break;
+
+      case 'payment_intent.succeeded':
+        void this.handlePaymentIntentSucceeded(event);
         break;
     }
+  }
+
+  /**
+   * Handles payment intent processing
+   */
+  public async handlePaymentIntentProcessing(event: StripeSdk.Event): Promise<void> {
+    const { id } = event.data.object as StripeSdk.PaymentIntent;
+
+    const transaction = await this.transactionRepository.findOne({ transactionId: id });
+
+    if (!transaction) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Transaction'),
+      });
+    }
+
+    transaction.status = TransactionStatus.IN_PROCESS;
+
+    await this.transactionRepository.save(transaction);
+  }
+
+  /**
+   * Handles payment intent failed
+   */
+  public async handlePaymentIntentFailed(event: StripeSdk.Event): Promise<void> {
+    const { id } = event.data.object as StripeSdk.PaymentIntent;
+
+    const transaction = await this.transactionRepository.findOne({ transactionId: id });
+
+    if (!transaction) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Transaction'),
+      });
+    }
+
+    transaction.status = TransactionStatus.ERROR;
+
+    await this.transactionRepository.save(transaction);
+  }
+
+  /**
+   * Handles payment intent succeeded
+   */
+  public async handlePaymentIntentSucceeded(event: StripeSdk.Event): Promise<void> {
+    const { id } = event.data.object as StripeSdk.PaymentIntent;
+
+    const transaction = await this.transactionRepository.findOne({ transactionId: id });
+
+    if (!transaction) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Transaction'),
+      });
+    }
+
+    transaction.status = TransactionStatus.SUCCESS;
+
+    await this.transactionRepository.save(transaction);
   }
 
   /**
@@ -304,7 +373,7 @@ class Stripe extends Abstract {
     if (!payment_method) {
       throw new BaseException({
         status: 500,
-        message: "The SetupIntent payment method doesn't exist",
+        message: 'The SetupIntent payment method not found.',
       });
     }
 
@@ -321,7 +390,7 @@ class Stripe extends Abstract {
     if (!paymentMethod?.card || !paymentMethod?.customer) {
       throw new BaseException({
         status: 500,
-        message: 'The payment method card or customer data is invalid',
+        message: 'The payment method card or customer data is invalid.',
       });
     }
 
@@ -332,7 +401,7 @@ class Stripe extends Abstract {
     if (!customer) {
       throw new BaseException({
         status: 500,
-        message: messages.customerNotFound,
+        message: messages.getNotFoundMessage('Customer'),
       });
     }
 
@@ -367,7 +436,7 @@ class Stripe extends Abstract {
     if (!externalAccount?.account) {
       throw new BaseException({
         status: 500,
-        message: 'The connected account reference in external account data not found',
+        message: 'The connected account reference in external account data not found.',
       });
     }
 
@@ -419,7 +488,7 @@ class Stripe extends Abstract {
     if (!externalAccount?.account) {
       throw new BaseException({
         status: 500,
-        message: 'The connected account reference in external account data not found',
+        message: 'The connected account reference in external account data not found.',
       });
     }
 
@@ -454,7 +523,7 @@ class Stripe extends Abstract {
     if (!customer) {
       throw new BaseException({
         status: 500,
-        message: messages.customerNotFound,
+        message: messages.getNotFoundMessage('Customer'),
       });
     }
 
@@ -525,19 +594,35 @@ class Stripe extends Abstract {
    * usersAmount - Amount that will receive end user
    * usersConnectedAccount - End user connected account
    */
-  public async createPaymentIntentWithCapture(
+  public async createPaymentIntent(
     userId: string,
-    receiverConnectedAccount: string,
-    receiverAmount: number,
     allAmount: number,
+    receiverConnectedAccountId: string,
+    applicationPaymentPercent?: number,
+    title?: string,
     cardId?: string,
-  ) {
+  ): Promise<void> {
     const customer = await this.customerRepository.findOne({ userId });
 
     if (!customer) {
       throw new BaseException({
         status: 400,
-        message: messages.customerNotFound,
+        message: messages.getNotFoundMessage('Customer'),
+      });
+    }
+
+    /**
+     * Verify if customer exist
+     * NOTE: Trigger inside validation
+     */
+    const {
+      params: { accountId, isVerified },
+    } = await this.getCustomerByAccountId(receiverConnectedAccountId);
+
+    if (!accountId || !isVerified) {
+      throw new BaseException({
+        status: 400,
+        message: "Passed user don't have setup or verified connected account",
       });
     }
 
@@ -545,24 +630,35 @@ class Stripe extends Abstract {
       params: { paymentMethodId },
     } = await this.getChargingCard(cardId);
 
+    const totalUnitAmount = this.toSmallestCurrencyUnit(allAmount);
+
+    const receiverAmount = await this.getReceiverPaymentAmount(
+      totalUnitAmount,
+      applicationPaymentPercent,
+    );
+
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent =
       await this.paymentEntity.paymentIntents.create({
         currency: 'usd',
-        capture_method: 'manual',
+        capture_method: 'automatic',
         payment_method_types: [StripePaymentMethods.CARD],
         payment_method: paymentMethodId,
         customer: customer.customerId,
-        amount: this.toSmallestCurrencyUnit(allAmount),
-        ...this.buildPaymentIntentTransferData(receiverAmount, receiverConnectedAccount),
+        amount: totalUnitAmount,
+        ...(title ? { description: title } : {}),
+        ...this.buildPaymentIntentTransferData(receiverAmount, receiverConnectedAccountId),
       });
 
-    const stripeCapturePaymentIntent: StripeSdk.PaymentIntent =
-      await this.paymentEntity.paymentIntents.capture(stripePaymentIntent.id, {
-        amount_to_capture: allAmount,
-      });
-
-    return stripeCapturePaymentIntent;
+    await this.transactionRepository.save({
+      transactionId: stripePaymentIntent.id,
+      userId,
+      cardId,
+      title,
+      type: TransactionType.DEBIT,
+      amount: totalUnitAmount,
+      params: { paymentMethodId },
+    });
     /* eslint-enable camelcase */
   }
 
@@ -678,7 +774,7 @@ class Stripe extends Abstract {
     if (!card) {
       throw new BaseException({
         status: 500,
-        message: messages.cardNotFound,
+        message: messages.getNotFoundMessage('Card'),
       });
     }
 
@@ -711,7 +807,7 @@ class Stripe extends Abstract {
     if (!customer) {
       throw new BaseException({
         status: 500,
-        message: messages.customerNotFound,
+        message: messages.getNotFoundMessage('Customer'),
       });
     }
 
@@ -780,6 +876,25 @@ class Stripe extends Abstract {
     destination: string,
   ): StripeSdk.PaymentIntent.TransferData {
     return { amount: this.toSmallestCurrencyUnit(amount), destination };
+  }
+
+  /**
+   * Returns receiver payment amount
+   * NOTES: How much end user will get after fees from transaction
+   * 1. Stable unit - stable amount that payment provider charges
+   * 2. Payment percent - payment provider fee percent for single transaction
+   */
+  private async getReceiverPaymentAmount(totalUnitAmount: number, applicationPaymentPercent = 0) {
+    const {
+      fees: { stableUnit, paymentPercent },
+    } = await remoteConfig();
+
+    /**
+     * How much percent from total amount will receive end user
+     */
+    const paymentReceivePercent = 100 - (paymentPercent + applicationPaymentPercent);
+
+    return (totalUnitAmount - stableUnit) * paymentReceivePercent;
   }
 }
 

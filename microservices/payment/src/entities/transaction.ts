@@ -13,6 +13,7 @@ export interface IParams {
   paymentStatus?: StripeTransactionStatus;
   checkoutStatus?: StripeCheckoutStatus;
   errorMessage?: string;
+  paymentMethodId?: string;
 }
 
 @JSONSchema({
@@ -31,7 +32,7 @@ class Transaction {
   @Length(1, 66)
   transactionId: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', length: 100, default: '' })
   @IsUndefinable()
   @Length(1, 100)
   title: string;
@@ -64,11 +65,17 @@ class Transaction {
   @IsUndefinable()
   type: TransactionType;
 
+  @JSONSchema({
+    description: 'Payment provider percent',
+  })
   @Column({ type: 'int' })
   @IsUndefinable()
   @IsNumber()
   tax: number;
 
+  @JSONSchema({
+    description: 'Application percent',
+  })
   @Column({ type: 'int' })
   @IsUndefinable()
   @IsNumber()
@@ -77,7 +84,7 @@ class Transaction {
   @JSONSchema({
     description: 'Field for storing status of payment by the card or any other source',
   })
-  @Column({ type: 'enum', enum: TransactionStatus })
+  @Column({ type: 'enum', enum: TransactionStatus, default: TransactionStatus.INITIAL })
   @IsEnum(TransactionStatus)
   @IsUndefinable()
   status: TransactionStatus;
