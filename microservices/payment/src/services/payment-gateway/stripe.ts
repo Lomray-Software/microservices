@@ -723,19 +723,19 @@ class Stripe extends Abstract {
    * NOTE: Uses to search related connect account (external account) data
    */
   private async getCardById(cardId: string): Promise<Card> {
-    const customer = await this.cardRepository
+    const card = await this.cardRepository
       .createQueryBuilder('card')
       .where("card.params->>'cardId' = :value", { value: cardId })
       .getOne();
 
-    if (!customer) {
+    if (!card) {
       throw new BaseException({
         status: 500,
         message: 'Card not found',
       });
     }
 
-    return customer;
+    return card;
   }
 
   /**
@@ -743,19 +743,19 @@ class Stripe extends Abstract {
    * NOTE: Uses to search related connect account (external account) data
    */
   private async getBankAccountById(bankAccountId: string): Promise<BankAccount> {
-    const customer = await this.bankAccountRepository
+    const bankAccount = await this.bankAccountRepository
       .createQueryBuilder('bankAccount')
       .where("bankAccount.params->>'bankAccountId' = :value", { value: bankAccountId })
       .getOne();
 
-    if (!customer) {
+    if (!bankAccount) {
       throw new BaseException({
         status: 500,
         message: 'Bank account not found',
       });
     }
 
-    return customer;
+    return bankAccount;
   }
 
   /**
