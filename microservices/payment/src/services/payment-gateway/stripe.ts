@@ -515,16 +515,13 @@ class Stripe extends Abstract {
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent =
       await this.paymentEntity.paymentIntents.create({
-        amount: allAmount,
+        capture_method: 'manual',
         currency: 'usd',
         payment_method_types: [StripePaymentMethods.CARD],
         payment_method: paymentMethodId,
-        capture_method: 'manual',
         customer: customer.customerId,
-        transfer_data: {
-          amount: usersAmount,
-          destination: usersConnectedAccount,
-        },
+        amount: this.toSmallestCurrencyUnit(allAmount),
+        ...this.buildTransferData(usersAmount, usersConnectedAccount),
       });
 
     const stripeCapturePaymentIntent: StripeSdk.PaymentIntent =
@@ -674,6 +671,30 @@ class Stripe extends Abstract {
     }
 
     return customer;
+  }
+
+  /**
+   * Returns positive int amount
+   * NOTE: Should return the positive integer representing how much
+   * to charge in the smallest currency unit
+   */
+  private toSmallestCurrencyUnit(amount: number | string): number {
+    /**
+     * Convert the amount to a number if it's a string
+     */
+    const parsedAmount = typeof amount === 'string' ? Number.parseFloat(amount) : amount;
+
+    return parsedAmount * 100;
+  }
+
+  /**
+   * Returns payment intent transfer data
+   */
+  private buildTransferData(
+    amount: number | string,
+    destination: string,
+  ): StripeSdk.PaymentIntent.TransferData {
+    return { amount: this.toSmallestCurrencyUnit(amount), destination };
   }
 }
 
