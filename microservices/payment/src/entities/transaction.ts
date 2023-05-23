@@ -1,4 +1,4 @@
-import { IsUndefinable } from '@lomray/microservice-helpers';
+import { IsNullable, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
 import { Allow, IsEnum, IsNumber, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
@@ -8,11 +8,13 @@ import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import type Customer from '@entities/customer';
 import type Product from '@entities/product';
+import IsValidStripeId from '@helpers/validators/is-stripe-id-valid';
 
 export interface IParams {
   paymentStatus?: StripeTransactionStatus;
   checkoutStatus?: StripeCheckoutStatus;
   errorMessage?: string;
+  // Payment method that was used to charge (e.g. pm_1N0vl32eZvKYlo2CiORpHAvo)
   paymentMethodId?: string;
 }
 
@@ -41,21 +43,39 @@ class Transaction {
   @Length(1, 36)
   userId: string;
 
-  @Column({ type: 'varchar', length: 66 })
-  @IsUndefinable()
+  @JSONSchema({
+    example: 'ba_1NArBxFpQjUWTpHeyN22YIFw',
+  })
+  @Column({ type: 'varchar', length: 66, default: null })
+  @IsValidStripeId()
   @Length(1, 66)
-  bankAccountId: string;
+  @IsValidate(Transaction, (e) => !Transaction.isCardIdExist(e))
+  bankAccountId: string | null;
 
-  @Column({ type: 'varchar', length: 66 })
-  @IsUndefinable()
+  @JSONSchema({
+    example: 'card_1NArBYFpQjUWTpHeFXcGACHa',
+  })
+  @Column({ type: 'varchar', length: 66, default: null })
+  @IsValidStripeId()
   @Length(1, 66)
-  cardId: string;
-
-  @Column({ type: 'varchar', length: 32 })
   @IsUndefinable()
-  @Length(1, 32)
+  cardId: string | null;
+
+  @JSONSchema({
+    description: 'Microservice entity',
+  })
+  @Column({ type: 'varchar', length: 36 })
+  @IsUndefinable()
+  @Length(1, 36)
   entityId: string;
 
+  @Column({ type: 'varchar', length: 19, default: null })
+  @Length(1, 19)
+  @IsUndefinable()
+  @IsNullable()
+  productId: string | null;
+
+  @JSONSchema({ description: 'Unit amount (e.g. 100$ = 10000 in unit' })
   @Column({ type: 'int' })
   @IsNumber()
   amount: number;
@@ -104,6 +124,13 @@ class Transaction {
   @ManyToOne('Customer', 'transactions')
   @JoinColumn({ name: 'userId' })
   customer: Customer;
+
+  /**
+   * Check is cardId exist
+   */
+  public static isCardIdExist(entity: Transaction): boolean {
+    return Boolean(entity.cardId);
+  }
 }
 
 export default Transaction;
