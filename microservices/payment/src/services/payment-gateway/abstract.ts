@@ -195,16 +195,10 @@ abstract class Abstract {
   }
 
   /**
-   * Get the customer
+   * Returns unit percent from amount
    */
-  protected async getCustomer(userId: string): Promise<Customer> {
-    const customer = await this.customerRepository.findOne({ userId });
-
-    if (customer) {
-      return customer;
-    }
-
-    return this.createCustomer(userId);
+  public getPercentFromAmount(amountUnit: number, percent: number): number {
+    return amountUnit * (percent / 100);
   }
 
   /**
@@ -221,6 +215,19 @@ abstract class Abstract {
     }
 
     return transaction;
+  }
+
+  /**
+   * Get the customer
+   */
+  protected async getCustomer(userId: string): Promise<Customer> {
+    const customer = await this.customerRepository.findOne({ userId });
+
+    if (customer) {
+      return customer;
+    }
+
+    return this.createCustomer(userId);
   }
 }
 

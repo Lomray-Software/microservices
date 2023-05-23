@@ -903,13 +903,6 @@ class Stripe extends Abstract {
       paymentProviderUnitFee,
     };
   }
-
-  /**
-   * Returns unit percent from amount
-   */
-  private getPercentFromAmount(amountUnit: number, percent: number) {
-    return amountUnit * (percent / 100);
-  }
 }
 
 export default Stripe;
