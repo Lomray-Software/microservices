@@ -827,7 +827,7 @@ class Stripe extends Abstract {
     if (!card) {
       throw new BaseException({
         status: 500,
-        message: 'Card not found',
+        message: messages.getNotFoundMessage('Card'),
       });
     }
 
@@ -847,7 +847,7 @@ class Stripe extends Abstract {
     if (!bankAccount) {
       throw new BaseException({
         status: 500,
-        message: 'Bank account not found',
+        message: messages.getNotFoundMessage('Bank account'),
       });
     }
 
