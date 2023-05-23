@@ -14,8 +14,6 @@ export interface IParams {
   paymentStatus?: StripeTransactionStatus;
   checkoutStatus?: StripeCheckoutStatus;
   errorMessage?: string;
-  // Payment method that was used to charge (e.g. pm_1N0vl32eZvKYlo2CiORpHAvo)
-  paymentMethodId?: string;
 }
 
 @JSONSchema({
@@ -39,27 +37,42 @@ class Transaction {
   @Length(1, 100)
   title: string;
 
+  @JSONSchema({
+    description: 'User (customer) which pays (init transaction)',
+  })
   @Column({ type: 'varchar', length: 36 })
   @Length(1, 36)
   userId: string;
 
-  @JSONSchema({
-    example: 'ba_1NArBxFpQjUWTpHeyN22YIFw',
-  })
+  @Column({ type: 'enum', enum: TransactionType })
+  @IsEnum(TransactionType)
+  @IsUndefinable()
+  type: TransactionType;
+
   @Column({ type: 'varchar', length: 66, default: null })
   @IsValidStripeId()
   @Length(1, 66)
-  @IsValidate(Transaction, (e) => !Transaction.isCardIdExist(e))
+  @IsUndefinable()
   bankAccountId: string | null;
 
-  @JSONSchema({
-    example: 'card_1NArBYFpQjUWTpHeFXcGACHa',
-  })
   @Column({ type: 'varchar', length: 66, default: null })
   @IsValidStripeId()
   @Length(1, 66)
   @IsUndefinable()
   cardId: string | null;
+
+  /**
+   * Setup intent don't have card or bank account id
+   */
+  @JSONSchema({
+    description: 'Payment method that was used to charge',
+    example: 'pm_1N0vl32eZvKYlo2CiORpHAvo',
+  })
+  @Column({ type: 'varchar', length: 27, default: null })
+  @IsValidStripeId()
+  @Length(1, 27)
+  @IsValidate(Transaction, (e) => !Transaction.isCardOrBankAccountExist(e))
+  paymentMethodId: string | null;
 
   @JSONSchema({
     description: 'Microservice entity',
@@ -79,11 +92,6 @@ class Transaction {
   @Column({ type: 'int' })
   @IsNumber()
   amount: number;
-
-  @Column({ type: 'enum', enum: TransactionType })
-  @IsEnum(TransactionType)
-  @IsUndefinable()
-  type: TransactionType;
 
   @JSONSchema({
     description: 'Payment provider percent',
@@ -128,8 +136,8 @@ class Transaction {
   /**
    * Check is cardId exist
    */
-  public static isCardIdExist(entity: Transaction): boolean {
-    return Boolean(entity.cardId);
+  public static isCardOrBankAccountExist(entity: Transaction): boolean {
+    return Boolean(entity.cardId) || Boolean(entity.bankAccountId);
   }
 }
 
