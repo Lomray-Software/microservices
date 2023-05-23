@@ -36,6 +36,10 @@ class PaymentIntentInput {
   @IsEnum(TransactionRole)
   @IsUndefinable()
   feesPayer?: TransactionRole;
+
+  @IsObject()
+  @IsUndefinable()
+  additionalFeesPercent?: Record<TransactionRole, number>;
 }
 
 class PaymentIntentOutput {
@@ -61,6 +65,7 @@ const connectAccount = Endpoint.custom(
     title,
     entityId,
     feesPayer,
+    additionalFeesPercent,
   }) => {
     const { paymentOptions } = await remoteConfig();
 
@@ -80,6 +85,7 @@ const connectAccount = Endpoint.custom(
         title,
         applicationPaymentPercent,
         feesPayer,
+        additionalFeesPercent,
       }),
     };
   },
