@@ -16,16 +16,20 @@ import IsCardExpirationValid from '@helpers/validators/is-card-expiration-valid'
 import IsLastCardDigitsValid from '@helpers/validators/is-last-card-digits-valid';
 
 /**
- * In case of stipe:
- * cardId - only have cards from connected account and
- * cards related to SetupIntent doesn't have own id
- * isExternalConnect - if card setup in connect account as external account
- * isApproved - is approved by payment provider
+ * NOTES:
+ * 1. Card with paymentMethodId (from setupIntent) uses for CHARGING specific
+ * amount from user card without user manual approve
+ * 2. Card with the cardId it's related to user connect account card for
+ * ACCEPTING payments and money payout. Can't be used for money transfer
+ * 3. Card can be default for connect account and for charge
  */
 export interface IParams {
+  // Only have cards from connected account and cards related to SetupIntent doesn't have own id
   cardId?: string;
+  // Related payment method for card. Uses in paymentIntent for proceed payments
+  paymentMethodId?: string;
+  // Is approved by payment provider (setup is succeeded)
   isApproved?: boolean;
-  isExternalConnect?: boolean;
 }
 
 /**

@@ -17,6 +17,7 @@ import Price from '@entities/price';
 import Product from '@entities/product';
 import Transaction from '@entities/transaction';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
+import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
 import type IStripeOptions from '@interfaces/stripe-options';
 import Abstract, { IPriceParams, IProductParams } from './abstract';
@@ -25,6 +26,16 @@ export interface IStripeProductParams extends IProductParams {
   name: string;
   description?: string;
   images?: string[];
+}
+
+interface IPaymentIntentParams {
+  userId: string;
+  totalAmount: number;
+  receiverId: string;
+  cardId?: string;
+  title?: string;
+  applicationPaymentPercent?: number;
+  entityId?: string;
 }
 
 interface ICheckoutParams {
@@ -123,13 +134,20 @@ class Stripe extends Abstract {
    */
   public getStatus(stripeStatus: StripeTransactionStatus): TransactionStatus {
     switch (stripeStatus) {
+      case StripeTransactionStatus.SUCCEEDED:
       case StripeTransactionStatus.PAID:
         return TransactionStatus.SUCCESS;
+
       case StripeTransactionStatus.UNPAID:
+      case StripeTransactionStatus.REQUIRES_CONFIRMATION:
         return TransactionStatus.REQUIRED_PAYMENT;
+
       case StripeTransactionStatus.ERROR:
+      case StripeTransactionStatus.PAYMENT_FAILED:
         return TransactionStatus.ERROR;
+
       case StripeTransactionStatus.NO_PAYMENT_REQUIRED:
+      case StripeTransactionStatus.PROCESSING:
         return TransactionStatus.IN_PROCESS;
     }
   }
@@ -268,26 +286,56 @@ class Stripe extends Abstract {
         void this.handleTransactionCompleted(event);
         break;
 
-      /**
-       * @TODO: Handle if needed and setup_intent.canceled
-       * Will be called when intent will be approved
-       */
+      case 'customer.update':
+        void this.handleCustomerUpdate(event);
+        break;
+
       case 'setup_intent.succeeded':
         void this.handleSetupIntentSucceed(event);
         break;
 
       /**
-       * @TODO: Handle if needed account.external_account.updated and account.external_account.deleted
+       * @TODO: Handle if needed account.external_account.updated
        * Will be called when customer setup connect account with card or bank account
        */
       case 'account.external_account.created':
         void this.handleExternalAccountCreate(event);
         break;
 
-      case 'customer.update':
-        void this.handleCustomerUpdate(event);
+      case 'account.external_account.deleted':
+        void this.handleExternalAccountDeleted(event);
+        break;
+
+      case 'payment_intent.processing':
+      case 'payment_intent.payment_failed':
+      case 'payment_intent.succeeded':
+        void this.handlePaymentIntent(event);
         break;
     }
+  }
+
+  /**
+   * Handles payment intent processing
+   */
+  public async handlePaymentIntent(event: StripeSdk.Event): Promise<void> {
+    const { id, status } = event.data.object as StripeSdk.PaymentIntent;
+
+    const transactions = await this.transactionRepository.find({ transactionId: id });
+
+    if (!transactions.length) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Debit or credit transaction'),
+      });
+    }
+
+    const saveRequests = transactions.map((transaction) => {
+      transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
+
+      return this.transactionRepository.save(transaction);
+    });
+
+    await Promise.all(saveRequests);
   }
 
   /**
@@ -301,7 +349,7 @@ class Stripe extends Abstract {
     if (!payment_method) {
       throw new BaseException({
         status: 500,
-        message: "The SetupIntent payment method doesn't exist",
+        message: 'The SetupIntent payment method not found.',
       });
     }
 
@@ -318,7 +366,7 @@ class Stripe extends Abstract {
     if (!paymentMethod?.card || !paymentMethod?.customer) {
       throw new BaseException({
         status: 500,
-        message: 'The payment method card or customer data is invalid',
+        message: 'The payment method card or customer data is invalid.',
       });
     }
 
@@ -329,11 +377,12 @@ class Stripe extends Abstract {
     if (!customer) {
       throw new BaseException({
         status: 500,
-        message: messages.customerNotFound,
+        message: messages.getNotFoundMessage('Customer'),
       });
     }
 
     const {
+      id,
       card: { brand: type, last4: lastDigits, exp_month, exp_year },
     } = paymentMethod;
 
@@ -348,7 +397,7 @@ class Stripe extends Abstract {
       isDefault,
       userId,
       expired: toExpirationDate(exp_month, exp_year),
-      params: { isApproved: true },
+      params: { isApproved: true, paymentMethodId: id },
     });
   }
 
@@ -363,38 +412,25 @@ class Stripe extends Abstract {
     if (!externalAccount?.account) {
       throw new BaseException({
         status: 500,
-        message: 'The connected account reference in external account data not found',
+        message: 'The connected account reference in external account data not found.',
       });
     }
 
-    const { account } = externalAccount;
-
-    const customer = await this.customerRepository
-      .createQueryBuilder('customer')
-      .where("customer.params->>'accountId' = :value", { value: this.extractId(account) })
-      .getOne();
-
-    if (!customer) {
-      throw new BaseException({
-        status: 500,
-        message: messages.customerNotFound,
-      });
-    }
-
-    const { userId } = customer;
+    const { userId } = await this.getCustomerByAccountId(this.extractId(externalAccount.account));
 
     if (!this.isExternalAccountIsBankAccount(externalAccount)) {
       const { id: cardId, last4: lastDigits, brand: type, exp_year, exp_month } = externalAccount;
 
-      const isDefault = await this.isFirstAddedCard(userId);
-
-      await super.cardRepository.save({
+      /**
+       * @TODO: check if connected account have default payment method
+       */
+      await this.cardRepository.save({
         lastDigits,
         type,
         userId,
-        isDefault,
+        isDefault: false,
         expired: toExpirationDate(exp_month, exp_year),
-        params: { cardId, isExternalConnect: true },
+        params: { cardId },
       });
 
       return;
@@ -413,9 +449,38 @@ class Stripe extends Abstract {
       userId,
       holderName,
       bankName,
-      params: { bankAccountId, isExternalConnect: true },
+      params: { bankAccountId },
     });
     /* eslint-enable camelcase */
+  }
+
+  /**
+   * Handles connect account deleted
+   * NOTE: Should be called when webhook triggers
+   */
+  public async handleExternalAccountDeleted(event: StripeSdk.Event): Promise<void> {
+    const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
+
+    if (!externalAccount?.account) {
+      throw new BaseException({
+        status: 500,
+        message: 'The connected account reference in external account data not found.',
+      });
+    }
+
+    const externalAccountId = this.extractId(externalAccount.account);
+
+    if (!this.isExternalAccountIsBankAccount(externalAccount)) {
+      const card = await this.getCardById(externalAccountId);
+
+      await this.cardRepository.remove(card);
+
+      return;
+    }
+
+    const bankAccount = await this.getBankAccountById(externalAccountId);
+
+    await this.bankAccountRepository.remove(bankAccount);
   }
 
   /**
@@ -429,12 +494,12 @@ class Stripe extends Abstract {
       capabilities,
     } = event.data.object as StripeSdk.Account;
 
-    const customer = await this.customerRepository.findOne({ params: { accountId: id } });
+    const customer = await this.getCustomerByAccountId(id);
 
     if (!customer) {
       throw new BaseException({
         status: 500,
-        message: messages.customerNotFound,
+        message: messages.getNotFoundMessage('Customer'),
       });
     }
 
@@ -442,6 +507,7 @@ class Stripe extends Abstract {
      * Check if customer can accept payment
      * NOTE: Check if user correctly and verify setup connect account
      */
+    customer.params.transferCapabilityStatus = capabilities?.transfers;
     customer.params.isVerified = isChargesEnabled && capabilities?.transfers === 'active';
 
     await this.customerRepository.save(customer);
@@ -499,6 +565,121 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Create PaymentIntent with Capture
+   * NOTES:
+   * allAmount - Full amount that will be charged from card
+   * usersAmount - Amount that will receive end user
+   * usersConnectedAccount - End user connected account
+   */
+  public async createPaymentIntent({
+    userId,
+    totalAmount,
+    receiverId,
+    cardId,
+    title,
+    applicationPaymentPercent,
+    entityId,
+  }: IPaymentIntentParams): Promise<[Transaction, Transaction]> {
+    const senderCustomer = await this.customerRepository.findOne({ userId });
+    const receiverCustomer = await this.customerRepository.findOne({ userId: receiverId });
+
+    if (!senderCustomer) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Sender customer account'),
+      });
+    }
+
+    if (!receiverCustomer) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Receiver customer account'),
+      });
+    }
+
+    /**
+     * Verify if customer verified
+     */
+    const {
+      customerId: receiverCustomerId,
+      params: { accountId: receiverAccountId, isVerified: isReceiverVerified },
+    } = receiverCustomer;
+
+    if (!receiverAccountId || !isReceiverVerified) {
+      throw new BaseException({
+        status: 400,
+        message: "Receiver don't have setup or verified connected account",
+      });
+    }
+
+    const {
+      params: { paymentMethodId },
+    } = await this.getChargingCard(cardId);
+
+    const totalUnitAmount = this.toSmallestCurrencyUnit(totalAmount);
+
+    const { receiverUnitAmount, applicationUnitFee, paymentProviderUnitFee } =
+      await this.getReceiverPaymentAmount(totalUnitAmount, applicationPaymentPercent);
+
+    /* eslint-disable camelcase */
+    const stripePaymentIntent: StripeSdk.PaymentIntent =
+      await this.paymentEntity.paymentIntents.create({
+        currency: 'usd',
+        capture_method: 'automatic',
+        payment_method_types: [StripePaymentMethods.CARD],
+        payment_method: paymentMethodId,
+        customer: senderCustomer.customerId,
+        amount: totalUnitAmount,
+        ...(title ? { description: title } : {}),
+        transfer_data: {
+          amount: receiverUnitAmount,
+          destination: receiverAccountId,
+        },
+      });
+
+    if (stripePaymentIntent.status === 'requires_confirmation') {
+      await this.paymentEntity.paymentIntents.confirm(stripePaymentIntent.id);
+    }
+
+    const transactionData = {
+      entityId,
+      title,
+      paymentMethodId,
+      transactionId: stripePaymentIntent.id,
+      tax: paymentProviderUnitFee,
+      fee: applicationUnitFee,
+      amount: totalUnitAmount,
+    };
+
+    /* eslint-enable camelcase */
+    return Promise.all([
+      this.transactionRepository.save({
+        ...transactionData,
+        userId: senderCustomer.customerId,
+        type: TransactionType.CREDIT,
+      }),
+      this.transactionRepository.save({
+        ...transactionData,
+        userId: receiverCustomerId,
+        type: TransactionType.DEBIT,
+      }),
+    ]);
+  }
+
+  /**
+   * Refund payment intent
+   * @TODO: create refund and handle status via webhooks
+   */
+  public async refund(transactionId: string): Promise<void> {
+    const transaction = await this.getTransactionById(transactionId);
+
+    await this.paymentEntity.refunds.create({
+      // payment_intent: transaction.paymentId,
+      amount: transaction.amount,
+    });
+  }
+
+  /**
    * Creates payout transfers for given entities
    */
   public async payout(entitiesIds: { id: string; userId: string }[]) {
@@ -520,7 +701,6 @@ class Stripe extends Abstract {
 
   /**
    * Get and calculate transfer information
-   * @protected
    */
   protected async getTransferInfo(
     entityId: string,
@@ -560,7 +740,11 @@ class Stripe extends Abstract {
    * Check is first added card
    */
   private async isFirstAddedCard(userId: string): Promise<boolean> {
-    return (await this.cardRepository.count({ userId })) === 0;
+    return (
+      (await this.cardRepository.count({
+        userId,
+      })) === 0
+    );
   }
 
   /**
@@ -577,6 +761,148 @@ class Stripe extends Abstract {
    */
   private extractId<T extends { id: string }>(data: string | T): string {
     return typeof data === 'string' ? data : data.id;
+  }
+
+  /**
+   * Returns card for charging payment
+   */
+  private async getChargingCard(cardId?: string): Promise<Card> {
+    let card: Card | undefined;
+
+    if (cardId) {
+      card = await this.cardRepository.findOne({ id: cardId });
+    } else {
+      card = await this.cardRepository.findOne({ where: { isDefault: true } });
+    }
+
+    if (!card) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Card'),
+      });
+    }
+
+    if (!card.params.paymentMethodId) {
+      throw new BaseException({
+        status: 400,
+        message: "Amount can't be charged from this card. Card isn't specified is payment method.",
+      });
+    }
+
+    if (card.params.cardId) {
+      throw new BaseException({
+        status: 400,
+        message: "Amount can't be charged from this card. Card is related to the connect account.",
+      });
+    }
+
+    return card;
+  }
+
+  /**
+   * Returns customer by account id
+   */
+  private async getCustomerByAccountId(accountId: string): Promise<Customer> {
+    const customer = await this.customerRepository
+      .createQueryBuilder('customer')
+      .where("customer.params->>'accountId' = :value", { value: accountId })
+      .getOne();
+
+    if (!customer) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Customer'),
+      });
+    }
+
+    return customer;
+  }
+
+  /**
+   * Returns card by card id
+   * NOTE: Uses to search related connect account (external account) data
+   */
+  private async getCardById(cardId: string): Promise<Card> {
+    const card = await this.cardRepository
+      .createQueryBuilder('card')
+      .where("card.params->>'cardId' = :value", { value: cardId })
+      .getOne();
+
+    if (!card) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Card'),
+      });
+    }
+
+    return card;
+  }
+
+  /**
+   * Returns bank account by bank account id
+   * NOTE: Uses to search related connect account (external account) data
+   */
+  private async getBankAccountById(bankAccountId: string): Promise<BankAccount> {
+    const bankAccount = await this.bankAccountRepository
+      .createQueryBuilder('bankAccount')
+      .where("bankAccount.params->>'bankAccountId' = :value", { value: bankAccountId })
+      .getOne();
+
+    if (!bankAccount) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Bank account'),
+      });
+    }
+
+    return bankAccount;
+  }
+
+  /**
+   * Returns positive int amount
+   * NOTE: Should return the positive integer representing how much
+   * to charge in the smallest currency unit
+   */
+  private toSmallestCurrencyUnit(amount: number | string): number {
+    /**
+     * Convert the amount to a number if it's a string
+     */
+    const parsedAmount = typeof amount === 'string' ? Number.parseFloat(amount) : amount;
+
+    return parsedAmount * 100;
+  }
+
+  /**
+   * Returns receiver payment amount
+   * NOTES: How much end user will get after fees from transaction
+   * 1. Stable unit - stable amount that payment provider charges
+   * 2. Payment percent - payment provider fee percent for single transaction
+   */
+  private async getReceiverPaymentAmount(
+    totalUnitAmount: number,
+    applicationPaymentPercent = 0,
+  ): Promise<{
+    receiverUnitAmount: number;
+    paymentProviderUnitFee: number;
+    applicationUnitFee: number;
+  }> {
+    const {
+      paymentFees: { stableUnit, paymentPercent },
+    } = await remoteConfig();
+
+    /**
+     * How much percent from total amount will receive end user
+     */
+    const paymentProviderUnitFee =
+      getPercentFromAmount(totalUnitAmount, paymentPercent) - stableUnit;
+    const applicationUnitFee = getPercentFromAmount(totalUnitAmount, applicationPaymentPercent);
+    const receiverUnitAmount = totalUnitAmount - paymentProviderUnitFee - applicationUnitFee;
+
+    return {
+      receiverUnitAmount,
+      applicationUnitFee,
+      paymentProviderUnitFee,
+    };
   }
 }
 
