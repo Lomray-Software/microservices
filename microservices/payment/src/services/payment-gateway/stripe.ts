@@ -137,12 +137,15 @@ class Stripe extends Abstract {
       case StripeTransactionStatus.SUCCEEDED:
       case StripeTransactionStatus.PAID:
         return TransactionStatus.SUCCESS;
+
       case StripeTransactionStatus.UNPAID:
       case StripeTransactionStatus.REQUIRES_CONFIRMATION:
         return TransactionStatus.REQUIRED_PAYMENT;
+
       case StripeTransactionStatus.ERROR:
       case StripeTransactionStatus.PAYMENT_FAILED:
         return TransactionStatus.ERROR;
+
       case StripeTransactionStatus.NO_PAYMENT_REQUIRED:
       case StripeTransactionStatus.PROCESSING:
         return TransactionStatus.IN_PROCESS;
