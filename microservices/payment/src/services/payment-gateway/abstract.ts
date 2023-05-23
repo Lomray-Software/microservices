@@ -195,13 +195,6 @@ abstract class Abstract {
   }
 
   /**
-   * Returns unit percent from amount
-   */
-  public getPercentFromAmount(amountUnit: number, percent: number): number {
-    return amountUnit * (percent / 100);
-  }
-
-  /**
    * Get transaction by transactionId
    */
   public async getTransactionById(transactionId: string): Promise<Transaction> {

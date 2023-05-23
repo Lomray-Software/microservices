@@ -17,6 +17,7 @@ import Price from '@entities/price';
 import Product from '@entities/product';
 import Transaction from '@entities/transaction';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
+import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
 import type IStripeOptions from '@interfaces/stripe-options';
 import Abstract, { IPriceParams, IProductParams } from './abstract';
@@ -890,11 +891,8 @@ class Stripe extends Abstract {
      * How much percent from total amount will receive end user
      */
     const paymentProviderUnitFee =
-      this.getPercentFromAmount(totalUnitAmount, paymentPercent) - stableUnit;
-    const applicationUnitFee = this.getPercentFromAmount(
-      totalUnitAmount,
-      applicationPaymentPercent,
-    );
+      getPercentFromAmount(totalUnitAmount, paymentPercent) - stableUnit;
+    const applicationUnitFee = getPercentFromAmount(totalUnitAmount, applicationPaymentPercent);
     const receiverUnitAmount = totalUnitAmount - paymentProviderUnitFee - applicationUnitFee;
 
     return {
