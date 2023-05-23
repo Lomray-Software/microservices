@@ -8,6 +8,7 @@ import StripeAccountTypes from '@constants/stripe-acoount-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
+import TransactionRole from '@constants/transaction-role';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
@@ -28,14 +29,24 @@ export interface IStripeProductParams extends IProductParams {
   images?: string[];
 }
 
+interface IPayerFee {
+  payer: TransactionRole;
+  percent: number;
+}
+
 interface IPaymentIntentParams {
   userId: string;
-  totalAmount: number;
   receiverId: string;
+  // Original cost of entity for which will be pay user
+  entityCost: number;
+  // Set who will be pay for provider and application fees
+  feesPayer?: TransactionRole;
   cardId?: string;
   title?: string;
   applicationPaymentPercent?: number;
   entityId?: string;
+  // Additional fee that should pay one of the transaction contributor
+  additionalFee?: IPayerFee;
 }
 
 interface ICheckoutParams {
@@ -60,6 +71,11 @@ interface ITransferInfo {
   destinationUser: string;
   userId: string;
 }
+
+type TGetPaymentIntentFeesParams = Pick<
+  IPaymentIntentParams,
+  'entityCost' | 'applicationPaymentPercent' | 'feesPayer'
+>;
 
 /**
  * Stripe payment provider
@@ -349,7 +365,7 @@ class Stripe extends Abstract {
     if (!payment_method) {
       throw new BaseException({
         status: 500,
-        message: 'The SetupIntent payment method not found.',
+        message: messages.getNotFoundMessage('The SetupIntent payment method'),
       });
     }
 
@@ -565,20 +581,17 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Create PaymentIntent with Capture
-   * NOTES:
-   * allAmount - Full amount that will be charged from card
-   * usersAmount - Amount that will receive end user
-   * usersConnectedAccount - End user connected account
+   * Create PaymentIntent
    */
   public async createPaymentIntent({
     userId,
-    totalAmount,
+    entityCost,
     receiverId,
     cardId,
     title,
     applicationPaymentPercent,
     entityId,
+    feesPayer,
   }: IPaymentIntentParams): Promise<[Transaction, Transaction]> {
     const senderCustomer = await this.customerRepository.findOne({ userId });
     const receiverCustomer = await this.customerRepository.findOne({ userId: receiverId });
@@ -598,7 +611,7 @@ class Stripe extends Abstract {
     }
 
     /**
-     * Verify if customer verified
+     * Verify if customer is verified
      */
     const {
       customerId: receiverCustomerId,
@@ -616,10 +629,17 @@ class Stripe extends Abstract {
       params: { paymentMethodId },
     } = await this.getChargingCard(cardId);
 
-    const totalUnitAmount = this.toSmallestCurrencyUnit(totalAmount);
+    const entityUnitCost = this.toSmallestCurrencyUnit(entityCost);
 
-    const { receiverUnitAmount, applicationUnitFee, paymentProviderUnitFee } =
-      await this.getReceiverPaymentAmount(totalUnitAmount, applicationPaymentPercent);
+    /**
+     * Calculate fees
+     */
+    const { userUnitAmount, receiverUnitRevenue, applicationUnitFee, paymentProviderUnitFee } =
+      await this.getPaymentIntentFees({
+        entityCost: entityUnitCost,
+        applicationPaymentPercent,
+        feesPayer,
+      });
 
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent =
@@ -629,15 +649,16 @@ class Stripe extends Abstract {
         payment_method_types: [StripePaymentMethods.CARD],
         payment_method: paymentMethodId,
         customer: senderCustomer.customerId,
-        amount: totalUnitAmount,
+        amount: userUnitAmount,
         ...(title ? { description: title } : {}),
         transfer_data: {
-          amount: receiverUnitAmount,
+          amount: receiverUnitRevenue,
           destination: receiverAccountId,
         },
       });
 
-    if (stripePaymentIntent.status === 'requires_confirmation') {
+    /* eslint-enable camelcase */
+    if (stripePaymentIntent.status === StripeTransactionStatus.REQUIRES_CONFIRMATION) {
       await this.paymentEntity.paymentIntents.confirm(stripePaymentIntent.id);
     }
 
@@ -648,20 +669,23 @@ class Stripe extends Abstract {
       transactionId: stripePaymentIntent.id,
       tax: paymentProviderUnitFee,
       fee: applicationUnitFee,
-      amount: totalUnitAmount,
+      params: {
+        feesPayer,
+      },
     };
 
-    /* eslint-enable camelcase */
     return Promise.all([
       this.transactionRepository.save({
         ...transactionData,
         userId: senderCustomer.customerId,
         type: TransactionType.CREDIT,
+        amount: userUnitAmount,
       }),
       this.transactionRepository.save({
         ...transactionData,
         userId: receiverCustomerId,
         type: TransactionType.DEBIT,
+        amount: receiverUnitRevenue,
       }),
     ]);
   }
@@ -877,31 +901,49 @@ class Stripe extends Abstract {
    * NOTES: How much end user will get after fees from transaction
    * 1. Stable unit - stable amount that payment provider charges
    * 2. Payment percent - payment provider fee percent for single transaction
+   * Fees calculation:
+   * 1. User pays fee
+   * totalAmount = 106$, receiverReceiver = 100, taxFee = 3, applicationFee = 3
+   * 2. Receiver pays fees
+   * totalAmount = 100$, receiverReceiver = 94, taxFee = 3, applicationFee = 3
    */
-  private async getReceiverPaymentAmount(
-    totalUnitAmount: number,
+  private async getPaymentIntentFees({
+    entityCost,
+    feesPayer = TransactionRole.SENDER,
     applicationPaymentPercent = 0,
-  ): Promise<{
-    receiverUnitAmount: number;
+  }: TGetPaymentIntentFeesParams): Promise<{
     paymentProviderUnitFee: number;
     applicationUnitFee: number;
+    userUnitAmount: number;
+    receiverUnitRevenue: number;
   }> {
-    const {
-      paymentFees: { stableUnit, paymentPercent },
-    } = await remoteConfig();
+    const { paymentFees } = await remoteConfig();
+
+    const { paymentPercent, stableUnit } = paymentFees || { paymentPercent: 0, stableUnit: 0 };
 
     /**
      * How much percent from total amount will receive end user
      */
-    const paymentProviderUnitFee =
-      getPercentFromAmount(totalUnitAmount, paymentPercent) - stableUnit;
-    const applicationUnitFee = getPercentFromAmount(totalUnitAmount, applicationPaymentPercent);
-    const receiverUnitAmount = totalUnitAmount - paymentProviderUnitFee - applicationUnitFee;
+    const paymentProviderUnitFee = getPercentFromAmount(entityCost, paymentPercent) + stableUnit;
+    const applicationUnitFee = getPercentFromAmount(entityCost, applicationPaymentPercent);
 
-    return {
-      receiverUnitAmount,
+    const fees = {
       applicationUnitFee,
       paymentProviderUnitFee,
+    };
+
+    if (feesPayer === TransactionRole.SENDER) {
+      return {
+        ...fees,
+        userUnitAmount: entityCost + paymentProviderUnitFee + applicationUnitFee,
+        receiverUnitRevenue: entityCost,
+      };
+    }
+
+    return {
+      ...fees,
+      userUnitAmount: entityCost,
+      receiverUnitRevenue: entityCost - paymentProviderUnitFee - applicationUnitFee,
     };
   }
 }
