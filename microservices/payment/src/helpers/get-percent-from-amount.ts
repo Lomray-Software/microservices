@@ -2,7 +2,7 @@
  * Returns unit percent from amount
  */
 const getPercentFromAmount = (amountUnit: number, percent?: number): number => {
-  if (!percent) {
+  if (!percent || percent > 100) {
     return 0;
   }
 

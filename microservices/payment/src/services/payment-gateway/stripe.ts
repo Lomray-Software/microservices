@@ -917,7 +917,7 @@ class Stripe extends Abstract {
   }> {
     const { paymentFees } = await remoteConfig();
 
-    const { paymentPercent, stableUnit } = paymentFees || { paymentPercent: 0, stableUnit: 0 };
+    const { paymentPercent, stableUnit } = paymentFees || { paymentPercent: 2.9, stableUnit: 30 };
 
     /**
      * Calculate additional fees
