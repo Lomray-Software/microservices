@@ -133,13 +133,17 @@ class Stripe extends Abstract {
    */
   public getStatus(stripeStatus: StripeTransactionStatus): TransactionStatus {
     switch (stripeStatus) {
+      case StripeTransactionStatus.SUCCEEDED:
       case StripeTransactionStatus.PAID:
         return TransactionStatus.SUCCESS;
       case StripeTransactionStatus.UNPAID:
+      case StripeTransactionStatus.REQUIRES_CONFIRMATION:
         return TransactionStatus.REQUIRED_PAYMENT;
       case StripeTransactionStatus.ERROR:
+      case StripeTransactionStatus.PAYMENT_FAILED:
         return TransactionStatus.ERROR;
       case StripeTransactionStatus.NO_PAYMENT_REQUIRED:
+      case StripeTransactionStatus.PROCESSING:
         return TransactionStatus.IN_PROCESS;
     }
   }
@@ -299,15 +303,9 @@ class Stripe extends Abstract {
         break;
 
       case 'payment_intent.processing':
-        void this.handlePaymentIntentProcessing(event);
-        break;
-
       case 'payment_intent.payment_failed':
-        void this.handlePaymentIntentFailed(event);
-        break;
-
       case 'payment_intent.succeeded':
-        void this.handlePaymentIntentSucceeded(event);
+        void this.handlePaymentIntent(event);
         break;
     }
   }
@@ -315,61 +313,25 @@ class Stripe extends Abstract {
   /**
    * Handles payment intent processing
    */
-  public async handlePaymentIntentProcessing(event: StripeSdk.Event): Promise<void> {
-    const { id } = event.data.object as StripeSdk.PaymentIntent;
+  public async handlePaymentIntent(event: StripeSdk.Event): Promise<void> {
+    const { id, status } = event.data.object as StripeSdk.PaymentIntent;
 
-    const transaction = await this.transactionRepository.findOne({ transactionId: id });
+    const transactions = await this.transactionRepository.find({ transactionId: id });
 
-    if (!transaction) {
+    if (!transactions.length) {
       throw new BaseException({
         status: 500,
         message: messages.getNotFoundMessage('Transaction'),
       });
     }
 
-    transaction.status = TransactionStatus.IN_PROCESS;
+    const saveRequests = transactions.map((transaction) => {
+      transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
 
-    await this.transactionRepository.save(transaction);
-  }
+      return this.transactionRepository.save(transaction);
+    });
 
-  /**
-   * Handles payment intent failed
-   */
-  public async handlePaymentIntentFailed(event: StripeSdk.Event): Promise<void> {
-    const { id } = event.data.object as StripeSdk.PaymentIntent;
-
-    const transaction = await this.transactionRepository.findOne({ transactionId: id });
-
-    if (!transaction) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Transaction'),
-      });
-    }
-
-    transaction.status = TransactionStatus.ERROR;
-
-    await this.transactionRepository.save(transaction);
-  }
-
-  /**
-   * Handles payment intent succeeded
-   */
-  public async handlePaymentIntentSucceeded(event: StripeSdk.Event): Promise<void> {
-    const { id } = event.data.object as StripeSdk.PaymentIntent;
-
-    const transaction = await this.transactionRepository.findOne({ transactionId: id });
-
-    if (!transaction) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Transaction'),
-      });
-    }
-
-    transaction.status = TransactionStatus.SUCCESS;
-
-    await this.transactionRepository.save(transaction);
+    await Promise.all(saveRequests);
   }
 
   /**
@@ -612,14 +574,21 @@ class Stripe extends Abstract {
     title,
     applicationPaymentPercent,
     entityId,
-  }: IPaymentIntentParams): Promise<Transaction> {
+  }: IPaymentIntentParams): Promise<[Transaction, Transaction]> {
     const senderCustomer = await this.customerRepository.findOne({ userId });
     const receiverCustomer = await this.customerRepository.findOne({ userId: receiverId });
 
-    if (!senderCustomer || !receiverCustomer) {
+    if (!senderCustomer) {
       throw new BaseException({
         status: 400,
-        message: messages.getNotFoundMessage('Customer'),
+        message: messages.getNotFoundMessage('Sender customer account'),
+      });
+    }
+
+    if (!receiverCustomer) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Receiver customer account'),
       });
     }
 
@@ -627,8 +596,9 @@ class Stripe extends Abstract {
      * Verify if customer verified
      */
     const {
+      customerId: receiverCustomerId,
       params: { accountId: receiverAccountId, isVerified: isReceiverVerified },
-    } = await this.getCustomerByAccountId(receiverCustomer.customerId);
+    } = receiverCustomer;
 
     if (!receiverAccountId || !isReceiverVerified) {
       throw new BaseException({
@@ -662,30 +632,33 @@ class Stripe extends Abstract {
         },
       });
 
+    if (stripePaymentIntent.status === 'requires_confirmation') {
+      await this.paymentEntity.paymentIntents.confirm(stripePaymentIntent.id);
+    }
+
     const transactionData = {
-      transactionId: stripePaymentIntent.id,
       entityId,
+      title,
+      paymentMethodId,
+      transactionId: stripePaymentIntent.id,
       tax: paymentProviderUnitFee,
       fee: applicationUnitFee,
-      paymentMethodId,
-      title,
       amount: totalUnitAmount,
     };
 
     /* eslint-enable camelcase */
-    const senderTransaction = await this.transactionRepository.save({
-      ...transactionData,
-      userId,
-      type: TransactionType.CREDIT,
-    });
-
-    await this.transactionRepository.save({
-      ...transactionData,
-      userId: receiverId,
-      type: TransactionType.DEBIT,
-    });
-
-    return senderTransaction;
+    return Promise.all([
+      this.transactionRepository.save({
+        ...transactionData,
+        userId: senderCustomer.customerId,
+        type: TransactionType.CREDIT,
+      }),
+      this.transactionRepository.save({
+        ...transactionData,
+        userId: receiverCustomerId,
+        type: TransactionType.DEBIT,
+      }),
+    ]);
   }
 
   /**
@@ -934,7 +907,7 @@ class Stripe extends Abstract {
    * Returns unit percent from amount
    */
   private getPercentFromAmount(amountUnit: number, percent: number) {
-    return amountUnit * (1 - percent / 100);
+    return amountUnit * (percent / 100);
   }
 }
 
