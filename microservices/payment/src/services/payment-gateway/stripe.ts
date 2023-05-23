@@ -1,4 +1,3 @@
-import * as console from 'console';
 import { Log } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import StripeSdk from 'stripe';
@@ -31,10 +30,11 @@ export interface IStripeProductParams extends IProductParams {
 interface IPaymentIntentParams {
   userId: string;
   totalAmount: number;
-  receiverConnectedAccountId: string;
+  receiverId: string;
   cardId?: string;
   title?: string;
   applicationPaymentPercent?: number;
+  entityId?: string;
 }
 
 interface ICheckoutParams {
@@ -607,14 +607,16 @@ class Stripe extends Abstract {
   public async createPaymentIntent({
     userId,
     totalAmount,
-    receiverConnectedAccountId,
+    receiverId,
     cardId,
     title,
     applicationPaymentPercent,
+    entityId,
   }: IPaymentIntentParams): Promise<Transaction> {
-    const customer = await this.customerRepository.findOne({ userId });
+    const senderCustomer = await this.customerRepository.findOne({ userId });
+    const receiverCustomer = await this.customerRepository.findOne({ userId: receiverId });
 
-    if (!customer) {
+    if (!senderCustomer || !receiverCustomer) {
       throw new BaseException({
         status: 400,
         message: messages.getNotFoundMessage('Customer'),
@@ -622,18 +624,16 @@ class Stripe extends Abstract {
     }
 
     /**
-     * Verify if customer exist
-     * NOTE: Trigger inside validation
-     * @TODO: Change on receiver user id
+     * Verify if customer verified
      */
     const {
-      params: { accountId, isVerified },
-    } = await this.getCustomerByAccountId(receiverConnectedAccountId);
+      params: { accountId: receiverAccountId, isVerified: isReceiverVerified },
+    } = await this.getCustomerByAccountId(receiverCustomer.customerId);
 
-    if (!accountId || !isVerified) {
+    if (!receiverAccountId || !isReceiverVerified) {
       throw new BaseException({
         status: 400,
-        message: "Passed user don't have setup or verified connected account",
+        message: "Receiver don't have setup or verified connected account",
       });
     }
 
@@ -643,13 +643,9 @@ class Stripe extends Abstract {
 
     const totalUnitAmount = this.toSmallestCurrencyUnit(totalAmount);
 
-    const receiverUnitAmount = await this.getReceiverPaymentAmount(
-      totalUnitAmount,
-      applicationPaymentPercent,
-    );
+    const { receiverUnitAmount, applicationUnitFee, paymentProviderUnitFee } =
+      await this.getReceiverPaymentAmount(totalUnitAmount, applicationPaymentPercent);
 
-    console.log('totalUnitAmount', totalUnitAmount);
-    console.log('receiverUnitAmount', receiverUnitAmount);
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent =
       await this.paymentEntity.paymentIntents.create({
@@ -657,26 +653,39 @@ class Stripe extends Abstract {
         capture_method: 'automatic',
         payment_method_types: [StripePaymentMethods.CARD],
         payment_method: paymentMethodId,
-        customer: customer.customerId,
+        customer: senderCustomer.customerId,
         amount: totalUnitAmount,
         ...(title ? { description: title } : {}),
         transfer_data: {
           amount: receiverUnitAmount,
-          destination: receiverConnectedAccountId,
+          destination: receiverAccountId,
         },
       });
 
-    /* eslint-enable camelcase */
-
-    return this.transactionRepository.save({
+    const transactionData = {
       transactionId: stripePaymentIntent.id,
-      userId,
-      cardId,
+      entityId,
+      tax: paymentProviderUnitFee,
+      fee: applicationUnitFee,
+      paymentMethodId,
       title,
-      type: TransactionType.DEBIT,
       amount: totalUnitAmount,
-      params: { paymentMethodId },
+    };
+
+    /* eslint-enable camelcase */
+    const senderTransaction = await this.transactionRepository.save({
+      ...transactionData,
+      userId,
+      type: TransactionType.CREDIT,
     });
+
+    await this.transactionRepository.save({
+      ...transactionData,
+      userId: receiverId,
+      type: TransactionType.DEBIT,
+    });
+
+    return senderTransaction;
   }
 
   /**
@@ -894,7 +903,11 @@ class Stripe extends Abstract {
   private async getReceiverPaymentAmount(
     totalUnitAmount: number,
     applicationPaymentPercent = 0,
-  ): Promise<number> {
+  ): Promise<{
+    receiverUnitAmount: number;
+    paymentProviderUnitFee: number;
+    applicationUnitFee: number;
+  }> {
     const {
       paymentFees: { stableUnit, paymentPercent },
     } = await remoteConfig();
@@ -902,9 +915,26 @@ class Stripe extends Abstract {
     /**
      * How much percent from total amount will receive end user
      */
-    const paymentReceivePercent = 1 - (paymentPercent + applicationPaymentPercent) / 100;
+    const paymentProviderUnitFee =
+      this.getPercentFromAmount(totalUnitAmount, paymentPercent) - stableUnit;
+    const applicationUnitFee = this.getPercentFromAmount(
+      totalUnitAmount,
+      applicationPaymentPercent,
+    );
+    const receiverUnitAmount = totalUnitAmount - paymentProviderUnitFee - applicationUnitFee;
 
-    return totalUnitAmount * paymentReceivePercent - stableUnit;
+    return {
+      receiverUnitAmount,
+      applicationUnitFee,
+      paymentProviderUnitFee,
+    };
+  }
+
+  /**
+   * Returns unit percent from amount
+   */
+  private getPercentFromAmount(amountUnit: number, percent: number) {
+    return amountUnit * (1 - percent / 100);
   }
 }
 
