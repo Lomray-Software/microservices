@@ -11,6 +11,8 @@ export interface IParams {
   accountId?: string;
   // Is user setup and verify payment data for accept payments
   isVerified?: boolean;
+  // Connect account transfer capability status
+  transferCapabilityStatus?: 'active' | 'inactive' | 'pending';
 }
 
 @JSONSchema({
