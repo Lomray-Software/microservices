@@ -35,7 +35,7 @@ class PaymentIntentInput {
 
 class PaymentIntentOutput {
   @IsObject()
-  transaction: Transaction;
+  transaction: [Transaction, Transaction];
 }
 
 /**
