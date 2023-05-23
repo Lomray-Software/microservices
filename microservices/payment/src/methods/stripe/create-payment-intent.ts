@@ -14,7 +14,7 @@ class PaymentIntentInput {
   totalAmount: number;
 
   @IsString()
-  receiverConnectedAccountId: string;
+  receiverId: string;
 
   @IsNumber()
   @IsUndefinable()
@@ -27,6 +27,10 @@ class PaymentIntentInput {
   @IsString()
   @IsUndefinable()
   cardId?: string;
+
+  @IsString()
+  @IsUndefinable()
+  entityId?: string;
 }
 
 class PaymentIntentOutput {
@@ -46,10 +50,11 @@ const connectAccount = Endpoint.custom(
   async ({
     userId,
     totalAmount,
-    receiverConnectedAccountId,
+    receiverId,
     applicationPaymentPercent,
     cardId,
     title,
+    entityId,
   }) => {
     const { paymentOptions } = await remoteConfig();
 
@@ -62,8 +67,9 @@ const connectAccount = Endpoint.custom(
     return {
       transaction: await service.createPaymentIntent({
         userId,
+        entityId,
         totalAmount,
-        receiverConnectedAccountId,
+        receiverId,
         cardId,
         title,
         applicationPaymentPercent,
