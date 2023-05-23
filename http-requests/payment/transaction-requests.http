@@ -10,10 +10,10 @@ Content-Type: application/json
     "fields": {
       "transactionId": "pi_1Gszgw2eZvKYlo2CwnE1DT7I",
       "title": "Ticket",
-      "userId": "5ebf7319-5206-487f-895c-5f8e53e365a1",
-      "cardId": "card_1NArBYFpQjUWTpHeFXcGACHa",
+      "userId": "cus_NwnBSPJcmUMhNO",
+      "paymentMethodId": "pm_1N0vl32eZvKYlo2CiORpHAvo",
       "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
-      "type": "debit",
+      "type": "credit",
       "tax": 30,
       "fee": 500,
       "amount": 10000
