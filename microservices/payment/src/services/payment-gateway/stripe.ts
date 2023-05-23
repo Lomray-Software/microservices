@@ -1,3 +1,4 @@
+import * as console from 'console';
 import { Log } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import StripeSdk from 'stripe';
@@ -623,6 +624,7 @@ class Stripe extends Abstract {
     /**
      * Verify if customer exist
      * NOTE: Trigger inside validation
+     * @TODO: Change on receiver user id
      */
     const {
       params: { accountId, isVerified },
@@ -641,11 +643,13 @@ class Stripe extends Abstract {
 
     const totalUnitAmount = this.toSmallestCurrencyUnit(totalAmount);
 
-    const receiverAmount = await this.getReceiverPaymentAmount(
+    const receiverUnitAmount = await this.getReceiverPaymentAmount(
       totalUnitAmount,
       applicationPaymentPercent,
     );
 
+    console.log('totalUnitAmount', totalUnitAmount);
+    console.log('receiverUnitAmount', receiverUnitAmount);
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent =
       await this.paymentEntity.paymentIntents.create({
@@ -656,7 +660,10 @@ class Stripe extends Abstract {
         customer: customer.customerId,
         amount: totalUnitAmount,
         ...(title ? { description: title } : {}),
-        ...this.buildPaymentIntentTransferData(receiverAmount, receiverConnectedAccountId),
+        transfer_data: {
+          amount: receiverUnitAmount,
+          destination: receiverConnectedAccountId,
+        },
       });
 
     /* eslint-enable camelcase */
@@ -879,22 +886,15 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Returns payment intent transfer data
-   */
-  private buildPaymentIntentTransferData(
-    amount: number | string,
-    destination: string,
-  ): StripeSdk.PaymentIntent.TransferData {
-    return { amount: this.toSmallestCurrencyUnit(amount), destination };
-  }
-
-  /**
    * Returns receiver payment amount
    * NOTES: How much end user will get after fees from transaction
    * 1. Stable unit - stable amount that payment provider charges
    * 2. Payment percent - payment provider fee percent for single transaction
    */
-  private async getReceiverPaymentAmount(totalUnitAmount: number, applicationPaymentPercent = 0) {
+  private async getReceiverPaymentAmount(
+    totalUnitAmount: number,
+    applicationPaymentPercent = 0,
+  ): Promise<number> {
     const {
       fees: { stableUnit, paymentPercent },
     } = await remoteConfig();
@@ -902,9 +902,9 @@ class Stripe extends Abstract {
     /**
      * How much percent from total amount will receive end user
      */
-    const paymentReceivePercent = 100 - (paymentPercent + applicationPaymentPercent);
+    const paymentReceivePercent = 1 - (paymentPercent + applicationPaymentPercent) / 100;
 
-    return (totalUnitAmount - stableUnit) * paymentReceivePercent;
+    return totalUnitAmount * paymentReceivePercent - stableUnit;
   }
 }
 
