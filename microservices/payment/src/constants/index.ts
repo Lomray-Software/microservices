@@ -11,7 +11,7 @@ const constants = {
   PAYMENT_OPTIONS: process.env.PAYMENT_OPTIONS ?? '{}',
   PAYMENT_WEBHOOK_KEY: process.env.PAYMENT_WEBHOOK_KEY ?? '',
   PAYOUT_COEFF: Number(process.env.PAYOUT_COEFF) ?? 0.3,
-  FEES: process.env.PAYMENT_OPTIONS ?? '{ stableUnit: 30, paymentPercent: 2.9 }',
+  PAYMENT_FEES: process.env.PAYMENT_FEES ?? '{ "stableUnit": 30, "paymentPercent": 2.9 }',
 };
 
 export default constants;

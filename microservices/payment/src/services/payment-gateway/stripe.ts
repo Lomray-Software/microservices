@@ -896,7 +896,7 @@ class Stripe extends Abstract {
     applicationPaymentPercent = 0,
   ): Promise<number> {
     const {
-      fees: { stableUnit, paymentPercent },
+      paymentFees: { stableUnit, paymentPercent },
     } = await remoteConfig();
 
     /**
