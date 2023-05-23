@@ -10,6 +10,7 @@ import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
 import Transaction, { IParams as ITransactionEntityParams } from '@entities/transaction';
+import messages from '@helpers/validators/messages';
 import type TPaymentOptions from '@interfaces/payment-options';
 
 export interface ICardParams {
@@ -215,7 +216,7 @@ abstract class Abstract {
     if (!transaction) {
       throw new BaseException({
         status: 500,
-        message: 'Transaction not found',
+        message: messages.getNotFoundMessage('Transaction'),
       });
     }
 

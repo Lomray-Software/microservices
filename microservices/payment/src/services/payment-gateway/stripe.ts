@@ -321,7 +321,7 @@ class Stripe extends Abstract {
     if (!transactions.length) {
       throw new BaseException({
         status: 500,
-        message: messages.getNotFoundMessage('Transaction'),
+        message: messages.getNotFoundMessage('Debit or credit transaction'),
       });
     }
 
