@@ -503,6 +503,7 @@ class Stripe extends Abstract {
      * Check if customer can accept payment
      * NOTE: Check if user correctly and verify setup connect account
      */
+    customer.params.transferCapabilityStatus = capabilities?.transfers;
     customer.params.isVerified = isChargesEnabled && capabilities?.transfers === 'active';
 
     await this.customerRepository.save(customer);
