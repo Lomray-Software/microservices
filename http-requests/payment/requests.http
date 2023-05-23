@@ -8,7 +8,7 @@ Content-Type: application/json
   "id": "1",
   "method": "customer.create",
   "params": {
-    "userId": "e261f8f1-17f8-4501-9de2-a6e775ea39f3"
+    "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3"
   }
 }
 
@@ -21,7 +21,7 @@ Content-Type: application/json
   "id": "1",
   "method": "stripe.setup-intent",
   "params": {
-    "userId": "ace0e0d8-ecd6-483a-9117-2af2e104b5f8"
+    "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3"
   }
 }
 
@@ -34,15 +34,15 @@ Content-Type: application/json
   "id": "1",
   "method": "stripe.connect-account",
   "params": {
-    "userId": "e261f8f1-17f8-4501-9de2-a6e775ea39f3",
-    "email": "kysoiilru@internetkeno.com",
+    "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "email": "jegupkvqcvkutrm@internetkeno.com",
     "accountType": "standard",
     "refreshUrl": "https://example.com",
     "returnUrl": "https://example.com"
   }
 }
 
-### Step 4. Create PaymentIntent
+### Step 4. Create PaymentIntent (Pay 100$)
 POST http://127.0.0.1:8001/ms/payment
 Accept: application/json
 Content-Type: application/json
@@ -51,10 +51,10 @@ Content-Type: application/json
   "id": "1",
   "method": "stripe.create-payment-intent",
   "params": {
-    "userId": "ace0e0d8-ecd6-483a-9117-2af2e104b5f8",
-    "totalAmount": 100,
-    "receiverConnectedAccountId": "acct_1MqHQ9CIIPEgSMMl",
-    "title": "1 event slot",
-    "applicationPaymentPercent": 5.1
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
+    "totalAmount": 110,
+    "receiverId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "title": "new",
+    "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8"
   }
 }
