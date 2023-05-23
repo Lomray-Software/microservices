@@ -10,5 +10,5 @@ export interface IRemoteConfig {
   paymentOptions?: TPaymentOptions;
   paymentWebhookKey?: string;
   payoutCoeff?: number;
-  paymentFees: IFees;
+  paymentFees?: IFees;
 }

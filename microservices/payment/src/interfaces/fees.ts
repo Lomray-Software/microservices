@@ -1,6 +1,6 @@
 interface IFees {
-  stableUnit: 30;
-  paymentPercent: 2.9;
+  stableUnit: number;
+  paymentPercent: number;
 }
 
 export default IFees;
