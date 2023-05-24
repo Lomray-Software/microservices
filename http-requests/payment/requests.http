@@ -1,5 +1,5 @@
 ### Full account setup flow
-### Step 1. Create customer
+### Step 1. Create sender customer
 POST http://127.0.0.1:8001/ms/payment
 Accept: application/json
 Content-Type: application/json
@@ -12,7 +12,20 @@ Content-Type: application/json
   }
 }
 
-### Step 2. Stripe setup intent
+### Step 2. Create receiver customer
+POST http://127.0.0.1:8001/ms/payment
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "customer.create",
+  "params": {
+    "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3"
+  }
+}
+
+### Step 3. Stripe setup intent for sender
 POST http://127.0.0.1:8001/ms/payment
 Accept: application/json
 Content-Type: application/json
@@ -25,7 +38,7 @@ Content-Type: application/json
   }
 }
 
-### Step 3. Connect accout (Setup bank account)
+### Step 4. Connect accout (Setup bank account)
 POST http://127.0.0.1:8001/ms/payment
 Accept: application/json
 Content-Type: application/json
@@ -35,14 +48,14 @@ Content-Type: application/json
   "method": "stripe.connect-account",
   "params": {
     "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
-    "email": "bttvjfpxokom@internetkeno.com",
+    "email": "receiver@gmail.com",
     "accountType": "standard",
     "refreshUrl": "https://example.com",
     "returnUrl": "https://example.com"
   }
 }
 
-### Step 4. Example 1. Create PaymentIntent (Buy ticket for 100$) with extra receiver revenue
+### Step 5 (Example 1). Create PaymentIntent (Buy ticket for 100$) with extra receiver revenue
 POST http://127.0.0.1:8001/ms/payment
 Accept: application/json
 Content-Type: application/json
@@ -62,7 +75,7 @@ Content-Type: application/json
   }
 }
 
-### Example 2. Create PaymentIntent (Buy ticket for 100$) with the application fees
+### Step 5 (Example 2). Create PaymentIntent (Buy ticket for 100$) with the application fees
 POST http://127.0.0.1:8001/ms/payment
 Accept: application/json
 Content-Type: application/json
@@ -81,7 +94,7 @@ Content-Type: application/json
   }
 }
 
-### Example 3. Create PaymentIntent (Buy ticket for 100$)
+### Step 5 (Example 3). Create PaymentIntent (Buy ticket for 100$)
 POST http://127.0.0.1:8001/ms/payment
 Accept: application/json
 Content-Type: application/json
