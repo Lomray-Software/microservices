@@ -1,0 +1,22 @@
+### Create transaction (send 100$)
+POST http://127.0.0.1:8001/ms/payment
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "transaction.create",
+  "params": {
+    "fields": {
+      "transactionId": "pi_1Gszgw2eZvKYlo2CwnE1DT7I",
+      "title": "Ticket",
+      "userId": "cus_NwnBSPJcmUMhNO",
+      "paymentMethodId": "pm_1N0vl32eZvKYlo2CiORpHAvo",
+      "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
+      "type": "credit",
+      "tax": 30,
+      "fee": 500,
+      "amount": 10000
+    }
+  }
+}

@@ -7,6 +7,7 @@ enum TransactionStatus {
   REQUIRED_PAYMENT = 'requiredPayment',
   INITIAL = 'initial',
   EXPIRED = 'expired',
+  REFUNDED = 'refunded',
   ERROR = 'error',
 }
 

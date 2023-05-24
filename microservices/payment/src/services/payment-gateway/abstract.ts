@@ -1,3 +1,4 @@
+import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { EntityManager, Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
 import PaymentProvider from '@constants/payment-provider';
@@ -8,7 +9,8 @@ import Card from '@entities/card';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
-import Transaction, { ITransactionParams as ITransactionEntityParams } from '@entities/transaction';
+import Transaction, { IParams as ITransactionEntityParams } from '@entities/transaction';
+import messages from '@helpers/validators/messages';
 import type TPaymentOptions from '@interfaces/payment-options';
 
 export interface ICardParams {
@@ -149,33 +151,6 @@ abstract class Abstract {
   }
 
   /**
-   * Create new card
-   */
-  public async createCard(params: ICardParams): Promise<Card> {
-    const { cardId, ...restValues } = params;
-    const card = this.cardRepository.create({ ...restValues, params: { cardId } });
-
-    await this.cardRepository.save(card);
-
-    return card;
-  }
-
-  /**
-   * Create new bank account
-   */
-  public async createBankAccount(params: IBankAccountParams): Promise<BankAccount> {
-    const { bankAccountId, ...restValues } = params;
-    const bankAccount = this.bankAccountRepository.create({
-      ...restValues,
-      params: { bankAccountId },
-    });
-
-    await this.bankAccountRepository.save(bankAccount);
-
-    return bankAccount;
-  }
-
-  /**
    * Create new customer
    */
   public async createCustomer(userId: string, customerId: string = uuid()): Promise<Customer> {
@@ -223,6 +198,22 @@ abstract class Abstract {
     await this.priceRepository.save(price);
 
     return price;
+  }
+
+  /**
+   * Get transaction by transactionId
+   */
+  public async getTransactionById(transactionId: string): Promise<Transaction> {
+    const transaction = await this.transactionRepository.findOne({ id: transactionId });
+
+    if (!transaction) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Transaction'),
+      });
+    }
+
+    return transaction;
   }
 
   /**
