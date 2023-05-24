@@ -42,7 +42,7 @@ Content-Type: application/json
   }
 }
 
-### Step 4. Create PaymentIntent (Buy ticket for 100$)
+### Step 4. Create PaymentIntent (Buy ticket for 100$) with extra receiver revenue
 POST http://127.0.0.1:8001/ms/payment
 Accept: application/json
 Content-Type: application/json
@@ -59,5 +59,24 @@ Content-Type: application/json
     "title": "ticket",
     "applicationPaymentPercent": 3,
     "extraReceiverRevenuePercent": 1
+  }
+}
+
+### Create PaymentIntent (Buy ticket for 100$)
+POST http://127.0.0.1:8001/ms/payment
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.create-payment-intent",
+  "params": {
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
+    "receiverId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
+    "entityCost": 100,
+    "feesPayer": "sender",
+    "title": "ticket",
+    "applicationPaymentPercent": 3
   }
 }

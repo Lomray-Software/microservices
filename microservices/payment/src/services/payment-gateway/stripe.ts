@@ -947,7 +947,7 @@ class Stripe extends Abstract {
 
     const fees = {
       applicationUnitFee,
-      paymentProviderUnitFee,
+      paymentProviderUnitFee: paymentProviderUnitFee - extraReceiverUnitRevenue,
     };
 
     if (feesPayer === TransactionRole.SENDER) {
