@@ -351,8 +351,8 @@ class Stripe extends Abstract {
         void this.handlePaymentIntent(event);
         break;
 
-      case 'refund.updated':
-        void this.handleRefund(event);
+      case 'charge.refund.updated':
+        void this.handleChargeRefund(event);
         break;
     }
   }
@@ -360,7 +360,7 @@ class Stripe extends Abstract {
   /**
    * Handles refund statuses
    */
-  public async handleRefund(event: StripeSdk.Event): Promise<void> {
+  public async handleChargeRefund(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
     const { status, payment_intent } = event.data.object as StripeSdk.Refund;
 
@@ -847,27 +847,27 @@ class Stripe extends Abstract {
   /**
    * Returns connected account balance
    */
-  private async getConnectAccountBalance(userId: string): Promise<StripeSdk.Balance> {
-    const customer = await this.customerRepository.findOne({ userId });
-
-    if (!customer) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Customer'),
-      });
-    }
-
-    if (!customer.params.accountId) {
-      throw new BaseException({
-        status: 500,
-        message: "Customer don't have related connected account",
-      });
-    }
-
-    return this.paymentEntity.balance.retrieve({
-      stripeAccount: customer.params.accountId,
-    });
-  }
+  // private async getConnectAccountBalance(userId: string): Promise<StripeSdk.Balance> {
+  //   const customer = await this.customerRepository.findOne({ userId });
+  //
+  //   if (!customer) {
+  //     throw new BaseException({
+  //       status: 500,
+  //       message: messages.getNotFoundMessage('Customer'),
+  //     });
+  //   }
+  //
+  //   if (!customer.params.accountId) {
+  //     throw new BaseException({
+  //       status: 500,
+  //       message: "Customer don't have related connected account",
+  //     });
+  //   }
+  //
+  //   return this.paymentEntity.balance.retrieve({
+  //     stripeAccount: customer.params.accountId,
+  //   });
+  // }
 
   /**
    * Check is first added card
