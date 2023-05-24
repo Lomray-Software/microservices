@@ -79,14 +79,16 @@ interface ITransferInfo {
   userId: string;
 }
 
-type TGetPaymentIntentFeesParams = Pick<
-  IPaymentIntentParams,
-  | 'entityCost'
-  | 'applicationPaymentPercent'
-  | 'feesPayer'
-  | 'additionalFeesPercent'
-  | 'extraReceiverRevenuePercent'
->;
+interface IGetPaymentIntentFeesParams
+  extends Pick<
+    IPaymentIntentParams,
+    | 'applicationPaymentPercent'
+    | 'feesPayer'
+    | 'additionalFeesPercent'
+    | 'extraReceiverRevenuePercent'
+  > {
+  entityUnitCost: number;
+}
 
 /**
  * Stripe payment provider
@@ -700,7 +702,7 @@ class Stripe extends Abstract {
      */
     const { userUnitAmount, receiverUnitRevenue, applicationUnitFee, paymentProviderUnitFee } =
       await this.getPaymentIntentFees({
-        entityCost: entityUnitCost,
+        entityUnitCost,
         applicationPaymentPercent,
         feesPayer,
         additionalFeesPercent,
@@ -1023,12 +1025,12 @@ class Stripe extends Abstract {
    * totalAmount = 100$, receiverReceiver = 94, taxFee = 3, applicationFee = 3
    */
   private async getPaymentIntentFees({
-    entityCost,
+    entityUnitCost,
     feesPayer = TransactionRole.SENDER,
     additionalFeesPercent,
     applicationPaymentPercent = 0,
     extraReceiverRevenuePercent = 0,
-  }: TGetPaymentIntentFeesParams): Promise<{
+  }: IGetPaymentIntentFeesParams): Promise<{
     paymentProviderUnitFee: number;
     applicationUnitFee: number;
     userUnitAmount: number;
@@ -1041,42 +1043,50 @@ class Stripe extends Abstract {
     /**
      * Calculate additional fees
      */
-    const receiverAdditionalFee = getPercentFromAmount(entityCost, additionalFeesPercent?.receiver);
-    const senderAdditionalFee = getPercentFromAmount(entityCost, additionalFeesPercent?.sender);
+    const receiverAdditionalFee = getPercentFromAmount(
+      entityUnitCost,
+      additionalFeesPercent?.receiver,
+    );
+    const senderAdditionalFee = getPercentFromAmount(entityUnitCost, additionalFeesPercent?.sender);
 
     /**
      * Additional receiver revenue from application percent
      */
-    const extraReceiverUnitRevenue = getPercentFromAmount(entityCost, extraReceiverRevenuePercent);
+    const extraReceiverUnitRevenue = getPercentFromAmount(
+      entityUnitCost,
+      extraReceiverRevenuePercent,
+    );
 
     /**
      * How much percent from total amount will receive end user
      */
-    const paymentProviderUnitFee = getPercentFromAmount(entityCost, paymentPercent) + stableUnit;
-    const applicationUnitFee = getPercentFromAmount(entityCost, applicationPaymentPercent);
-
-    const fees = {
-      applicationUnitFee: Math.round(applicationUnitFee),
-      paymentProviderUnitFee: Math.round(paymentProviderUnitFee - extraReceiverUnitRevenue),
-    };
+    const applicationUnitFee = getPercentFromAmount(entityUnitCost, applicationPaymentPercent);
 
     if (feesPayer === TransactionRole.SENDER) {
+      const userTempUnitAmount = entityUnitCost + applicationUnitFee + senderAdditionalFee;
+      const userUnitAmount = Math.round(
+        (userTempUnitAmount + stableUnit) / (1 - paymentPercent / 100),
+      );
+
       return {
-        ...fees,
-        userUnitAmount: Math.round(
-          entityCost + paymentProviderUnitFee + applicationUnitFee + senderAdditionalFee,
-        ),
+        applicationUnitFee,
+        userUnitAmount,
+        paymentProviderUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
         receiverUnitRevenue: Math.round(
-          entityCost - receiverAdditionalFee + extraReceiverUnitRevenue,
+          entityUnitCost - receiverAdditionalFee + extraReceiverUnitRevenue,
         ),
       };
     }
 
+    const paymentProviderUnitFee =
+      getPercentFromAmount(entityUnitCost, paymentPercent) + stableUnit;
+
     return {
-      ...fees,
-      userUnitAmount: Math.round(entityCost + senderAdditionalFee),
+      applicationUnitFee,
+      paymentProviderUnitFee,
+      userUnitAmount: Math.round(entityUnitCost + senderAdditionalFee),
       receiverUnitRevenue: Math.round(
-        entityCost -
+        entityUnitCost -
           paymentProviderUnitFee -
           applicationUnitFee -
           receiverAdditionalFee +
