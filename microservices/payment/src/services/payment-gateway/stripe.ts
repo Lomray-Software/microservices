@@ -46,6 +46,16 @@ interface IPaymentIntentParams {
   extraReceiverRevenuePercent?: number;
 }
 
+interface IRefundParams {
+  transactionId: string;
+  /**
+   * If user don't have required amount in connect account, he must provide
+   * bank account or card id that will be used for refund charge
+   */
+  bankAccountId?: string;
+  cardId?: string;
+}
+
 interface ICheckoutParams {
   priceId: string;
   userId: string;
@@ -166,6 +176,18 @@ class Stripe extends Abstract {
       case StripeTransactionStatus.NO_PAYMENT_REQUIRED:
       case StripeTransactionStatus.PROCESSING:
         return TransactionStatus.IN_PROCESS;
+
+      case StripeTransactionStatus.REFUND_SUCCEEDED:
+        return TransactionStatus.REFUNDED;
+
+      case StripeTransactionStatus.REFUND_PENDING:
+        return TransactionStatus.REFUND_IN_PROCESS;
+
+      case StripeTransactionStatus.REFUND_CANCELED:
+        return TransactionStatus.REFUND_CANCELED;
+
+      case StripeTransactionStatus.REFUND_FAILED:
+        return TransactionStatus.REFUND_FAILED;
     }
   }
 
@@ -328,11 +350,50 @@ class Stripe extends Abstract {
       case 'payment_intent.succeeded':
         void this.handlePaymentIntent(event);
         break;
+
+      case 'refund.updated':
+        void this.handleRefund(event);
+        break;
     }
   }
 
   /**
-   * Handles payment intent processing
+   * Handles refund statuses
+   */
+  public async handleRefund(event: StripeSdk.Event): Promise<void> {
+    /* eslint-disable camelcase */
+    const { status, payment_intent } = event.data.object as StripeSdk.Refund;
+
+    if (!payment_intent || !status) {
+      throw new BaseException({
+        status: 500,
+        message: "Payment intent id or refund status wasn't provided",
+      });
+    }
+
+    const transactions = await this.transactionRepository.find({
+      transactionId: this.extractId(payment_intent),
+    });
+
+    if (!transactions.length) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Debit or credit transaction'),
+      });
+    }
+
+    const saveRequests = transactions.map((transaction) => {
+      transaction.status = this.getStatus(`refund_${status}` as unknown as StripeTransactionStatus);
+
+      return this.transactionRepository.save(transaction);
+    });
+
+    /* eslint-enable camelcase */
+    await Promise.all(saveRequests);
+  }
+
+  /**
+   * Handles payment intent statuses
    */
   public async handlePaymentIntent(event: StripeSdk.Event): Promise<void> {
     const { id, status } = event.data.object as StripeSdk.PaymentIntent;
@@ -696,16 +757,34 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Refund payment intent
-   * @TODO: create refund and handle status via webhooks
+   * Refund transaction (payment intent)
    */
-  public async refund(transactionId: string): Promise<void> {
-    const transaction = await this.getTransactionById(transactionId);
-
-    await this.paymentEntity.refunds.create({
-      // payment_intent: transaction.paymentId,
-      amount: transaction.amount,
+  public async refund({ transactionId }: IRefundParams): Promise<boolean> {
+    /**
+     * Payer (credit) transaction
+     */
+    const transaction = await this.transactionRepository.findOne({
+      transactionId,
+      type: TransactionType.CREDIT,
     });
+
+    if (!transaction) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Transaction'),
+      });
+    }
+
+    /* eslint-disable camelcase */
+    await this.paymentEntity.refunds.create({
+      reason: 'requested_by_customer',
+      payment_intent: transaction.transactionId,
+      refund_application_fee: true,
+      reverse_transfer: true,
+    });
+
+    /* eslint-enable camelcase */
+    return true;
   }
 
   /**
@@ -763,6 +842,31 @@ class Stripe extends Abstract {
         userId: transactions[0].userId,
       },
     );
+  }
+
+  /**
+   * Returns connected account balance
+   */
+  private async getConnectAccountBalance(userId: string): Promise<StripeSdk.Balance> {
+    const customer = await this.customerRepository.findOne({ userId });
+
+    if (!customer) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Customer'),
+      });
+    }
+
+    if (!customer.params.accountId) {
+      throw new BaseException({
+        status: 500,
+        message: "Customer don't have related connected account",
+      });
+    }
+
+    return this.paymentEntity.balance.retrieve({
+      stripeAccount: customer.params.accountId,
+    });
   }
 
   /**
