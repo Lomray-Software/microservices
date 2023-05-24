@@ -16,8 +16,7 @@ describe('rawBodySaver', () => {
 
     rawBodySaver(req, res, buf);
 
-    // @ts-ignore
-    expect(req.rawBody).to.equal('Test data');
+    expect(req['rawBody']).to.equal('Test data');
   });
 
   it('should not set req.rawBody if buffer is empty', () => {
@@ -25,8 +24,7 @@ describe('rawBodySaver', () => {
 
     rawBodySaver(req, res, buf);
 
-    // @ts-ignore
-    expect(req.rawBody).to.equal(undefined);
+    expect(req['rawBody']).to.equal(undefined);
   });
 
   it('should not set req.rawBody if buffer is undefined', () => {
@@ -34,7 +32,6 @@ describe('rawBodySaver', () => {
 
     rawBodySaver(req, res, buf);
 
-    // @ts-ignore
-    expect(req.rawBody).to.equal(undefined);
+    expect(req['rawBody']).to.equal(undefined);
   });
 });

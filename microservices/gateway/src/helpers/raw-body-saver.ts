@@ -5,8 +5,7 @@ import { IncomingMessage, ServerResponse } from 'http';
  */
 const rawBodySaver = function (req: IncomingMessage, res: ServerResponse, buf: Buffer | undefined) {
   if (buf && buf.length) {
-    // @ts-ignore
-    req.rawBody = buf.toString();
+    req['rawBody'] = buf.toString();
   }
 };
 
