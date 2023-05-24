@@ -1,7 +1,8 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsNumber, IsObject, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import remoteConfig from '@config/remote';
+import TransactionRole from '@constants/transaction-role';
 import type Transaction from '@entities/transaction';
 import Factory from '@services/payment-gateway/factory';
 import Stripe from '@services/payment-gateway/stripe';
@@ -10,11 +11,11 @@ class PaymentIntentInput {
   @IsString()
   userId: string;
 
-  @IsNumber()
-  totalAmount: number;
-
   @IsString()
   receiverId: string;
+
+  @IsNumber()
+  entityCost: number;
 
   @IsNumber()
   @IsUndefinable()
@@ -31,6 +32,18 @@ class PaymentIntentInput {
   @IsString()
   @IsUndefinable()
   entityId?: string;
+
+  @IsEnum(TransactionRole)
+  @IsUndefinable()
+  feesPayer?: TransactionRole;
+
+  @IsObject()
+  @IsUndefinable()
+  additionalFeesPercent?: Record<TransactionRole, number>;
+
+  @IsNumber()
+  @IsUndefinable()
+  extraReceiverRevenuePercent?: number;
 }
 
 class PaymentIntentOutput {
@@ -49,12 +62,15 @@ const connectAccount = Endpoint.custom(
   }),
   async ({
     userId,
-    totalAmount,
+    entityCost,
     receiverId,
     applicationPaymentPercent,
     cardId,
     title,
     entityId,
+    feesPayer,
+    additionalFeesPercent,
+    extraReceiverRevenuePercent,
   }) => {
     const { paymentOptions } = await remoteConfig();
 
@@ -68,11 +84,14 @@ const connectAccount = Endpoint.custom(
       transaction: await service.createPaymentIntent({
         userId,
         entityId,
-        totalAmount,
+        entityCost,
         receiverId,
         cardId,
         title,
         applicationPaymentPercent,
+        feesPayer,
+        additionalFeesPercent,
+        extraReceiverRevenuePercent,
       }),
     };
   },
