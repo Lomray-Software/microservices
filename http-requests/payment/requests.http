@@ -148,3 +148,16 @@ Content-Type: application/json
     "applicationPaymentPercent": 3
   }
 }
+
+### Step 6. Refund full transaction amout
+POST http://127.0.0.1:8001/ms/payment
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.refund",
+  "params": {
+    "transactionId": "pi_3NBIfuFpQjUWTpHe0H7NlJ5o"
+  }
+}
