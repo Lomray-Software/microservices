@@ -43,6 +43,7 @@ export interface ITransactionParams {
   title?: string;
   bankAccountId?: string;
   productId?: string;
+  customerId?: string;
   cardId?: string;
   entityId?: string;
   type?: TransactionType;
@@ -135,7 +136,12 @@ abstract class Abstract {
     params: ITransactionParams,
     transactionId = uuid(),
   ): Promise<Transaction> {
-    const transaction = this.transactionRepository.create({ ...params, transactionId });
+    const transaction = this.transactionRepository.create({
+      ...params,
+      product: { productId: params.productId },
+      customer: { customerId: params.customerId },
+      transactionId,
+    });
 
     await this.transactionRepository.save(transaction);
 

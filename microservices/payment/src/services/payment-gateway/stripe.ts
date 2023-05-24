@@ -213,6 +213,7 @@ class Stripe extends Abstract {
       {
         type: TransactionType.CREDIT,
         amount: price.unitAmount,
+        customerId,
         userId,
         productId: price.productId,
         status: TransactionStatus.INITIAL,
@@ -473,9 +474,12 @@ class Stripe extends Abstract {
    */
   public async createTransfer(entityId: string, userId: string, payoutCoeff: number) {
     const transfer = await this.getTransferInfo(entityId, userId);
+    const product = await this.productRepository.findOne({ entityId });
 
-    if (!transfer) {
-      Log.error(`There is no actual transfers for entity with following id: ${entityId}`);
+    if (!transfer || !product) {
+      Log.error(
+        `There is no actual transfers or product for entity with following id: ${entityId}`,
+      );
 
       return;
     }
@@ -493,6 +497,9 @@ class Stripe extends Abstract {
       amount: transfer.amount,
       type: TransactionType.DEBIT,
       status: TransactionStatus.INITIAL,
+      product: {
+        productId: product.productId,
+      },
     });
 
     await this.transactionRepository.save(transaction);

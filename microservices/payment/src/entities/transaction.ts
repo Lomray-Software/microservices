@@ -1,4 +1,4 @@
-import { IsUndefinable } from '@lomray/microservice-helpers';
+import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsEnum, IsNumber, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
@@ -33,6 +33,7 @@ class Transaction {
 
   @Column({ type: 'varchar', length: 100 })
   @IsUndefinable()
+  @IsNullable()
   @Length(1, 100)
   title: string;
 
@@ -42,16 +43,19 @@ class Transaction {
 
   @Column({ type: 'varchar', length: 66 })
   @IsUndefinable()
+  @IsNullable()
   @Length(1, 66)
   bankAccountId: string;
 
   @Column({ type: 'varchar', length: 66 })
   @IsUndefinable()
+  @IsNullable()
   @Length(1, 66)
   cardId: string;
 
   @Column({ type: 'varchar', length: 32 })
   @IsUndefinable()
+  @IsNullable()
   @Length(1, 32)
   entityId: string;
 
@@ -66,11 +70,13 @@ class Transaction {
 
   @Column({ type: 'int' })
   @IsUndefinable()
+  @IsNullable()
   @IsNumber()
   tax: number;
 
   @Column({ type: 'int' })
   @IsUndefinable()
+  @IsNullable()
   @IsNumber()
   fee: number;
 
@@ -86,16 +92,20 @@ class Transaction {
     description: 'Store data about payment connected account and etc.',
   })
   @Column({ type: 'json', default: {} })
-  @IsObject()
   @IsUndefinable()
+  @IsObject()
   params: ITransactionParams;
 
   @ManyToOne('Product', 'transactions')
-  @JoinColumn({ name: 'productId' })
+  @JoinColumn({
+    name: 'productId',
+  })
   product: Product;
 
   @ManyToOne('Customer', 'transactions')
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({
+    name: 'customerId',
+  })
   customer: Customer;
 }
 
