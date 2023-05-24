@@ -221,7 +221,7 @@ class Stripe extends Abstract {
     const { priceId, userId, successUrl, cancelUrl } = params;
 
     const { customerId } = await super.getCustomer(userId);
-    const price = await this.priceRepository.findOne({ priceId });
+    const price = await this.priceRepository.findOne({ priceId }, { relations: ['product'] });
 
     if (!price) {
       Log.error(`There is no price related to this priceId: ${priceId}`);
@@ -251,6 +251,7 @@ class Stripe extends Abstract {
         customerId,
         userId,
         productId: price.productId,
+        entityId: price.product.entityId,
         status: TransactionStatus.INITIAL,
       },
       id,
