@@ -15,6 +15,7 @@ import ConnectAccount from '@methods/stripe/connect-account';
 import CreateCheckout from '@methods/stripe/create-checkout';
 import CreatePaymentIntent from '@methods/stripe/create-payment-intent';
 import Payout from '@methods/stripe/payout';
+import Refund from '@methods/stripe/refund';
 import SetupIntent from '@methods/stripe/setup-intent';
 import WebhookHandler from '@methods/stripe/webhook';
 import CrudTransaction from '@methods/transaction/crud';
@@ -44,6 +45,7 @@ export default (ms: Microservice): void => {
       'create-payment-intent': CreatePaymentIntent,
       webhook: WebhookHandler,
       payout: Payout,
+      refund: Refund,
     },
     product: {
       ...CrudProduct,
