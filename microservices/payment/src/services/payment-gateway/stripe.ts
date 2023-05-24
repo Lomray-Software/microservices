@@ -42,6 +42,8 @@ interface IPaymentIntentParams {
   entityId?: string;
   // Additional fee that should pay one of the transaction contributor
   additionalFeesPercent?: Record<TransactionRole, number>;
+  // Extra receiver revenue percent from application payment percent
+  extraReceiverRevenuePercent?: number;
 }
 
 interface ICheckoutParams {
@@ -69,7 +71,11 @@ interface ITransferInfo {
 
 type TGetPaymentIntentFeesParams = Pick<
   IPaymentIntentParams,
-  'entityCost' | 'applicationPaymentPercent' | 'feesPayer' | 'additionalFeesPercent'
+  | 'entityCost'
+  | 'applicationPaymentPercent'
+  | 'feesPayer'
+  | 'additionalFeesPercent'
+  | 'extraReceiverRevenuePercent'
 >;
 
 /**
@@ -297,8 +303,8 @@ class Stripe extends Abstract {
         void this.handleTransactionCompleted(event);
         break;
 
-      case 'customer.update':
-        void this.handleCustomerUpdate(event);
+      case 'account.updated':
+        void this.handleAccountUpdated(event);
         break;
 
       case 'setup_intent.succeeded':
@@ -497,7 +503,7 @@ class Stripe extends Abstract {
   /**
    * Handles customer update
    */
-  public async handleCustomerUpdate(event: StripeSdk.Event) {
+  public async handleAccountUpdated(event: StripeSdk.Event) {
     /* eslint-disable camelcase */
     const {
       id,
@@ -588,6 +594,7 @@ class Stripe extends Abstract {
     entityId,
     feesPayer,
     additionalFeesPercent,
+    extraReceiverRevenuePercent,
   }: IPaymentIntentParams): Promise<[Transaction, Transaction]> {
     const senderCustomer = await this.customerRepository.findOne({ userId });
     const receiverCustomer = await this.customerRepository.findOne({ userId: receiverId });
@@ -636,6 +643,7 @@ class Stripe extends Abstract {
         applicationPaymentPercent,
         feesPayer,
         additionalFeesPercent,
+        extraReceiverRevenuePercent,
       });
 
     /* eslint-disable camelcase */
@@ -909,6 +917,7 @@ class Stripe extends Abstract {
     feesPayer = TransactionRole.SENDER,
     applicationPaymentPercent = 0,
     additionalFeesPercent,
+    extraReceiverRevenuePercent = 0,
   }: TGetPaymentIntentFeesParams): Promise<{
     paymentProviderUnitFee: number;
     applicationUnitFee: number;
@@ -926,6 +935,11 @@ class Stripe extends Abstract {
     const senderAdditionalFee = getPercentFromAmount(entityCost, additionalFeesPercent?.sender);
 
     /**
+     * Additional receiver revenue from application percent
+     */
+    const extraReceiverUnitRevenue = getPercentFromAmount(entityCost, extraReceiverRevenuePercent);
+
+    /**
      * How much percent from total amount will receive end user
      */
     const paymentProviderUnitFee = getPercentFromAmount(entityCost, paymentPercent) + stableUnit;
@@ -941,7 +955,7 @@ class Stripe extends Abstract {
         ...fees,
         userUnitAmount:
           entityCost + paymentProviderUnitFee + applicationUnitFee + senderAdditionalFee,
-        receiverUnitRevenue: entityCost - receiverAdditionalFee,
+        receiverUnitRevenue: entityCost - receiverAdditionalFee + extraReceiverUnitRevenue,
       };
     }
 
@@ -949,7 +963,11 @@ class Stripe extends Abstract {
       ...fees,
       userUnitAmount: entityCost + senderAdditionalFee,
       receiverUnitRevenue:
-        entityCost - paymentProviderUnitFee - applicationUnitFee - receiverAdditionalFee,
+        entityCost -
+        paymentProviderUnitFee -
+        applicationUnitFee -
+        receiverAdditionalFee +
+        extraReceiverUnitRevenue,
     };
   }
 }
