@@ -710,24 +710,28 @@ class Stripe extends Abstract {
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent =
       await this.paymentEntity.paymentIntents.create({
+        ...(title ? { description: title } : {}),
+        payment_method_types: [StripePaymentMethods.CARD],
         currency: 'usd',
         capture_method: 'automatic',
-        payment_method_types: [StripePaymentMethods.CARD],
         payment_method: paymentMethodId,
         customer: senderCustomer.customerId,
+        // How much must sender must pay
         amount: userUnitAmount,
-        ...(title ? { description: title } : {}),
         transfer_data: {
+          // How much must receive end user
           amount: receiverUnitRevenue,
           destination: receiverAccountId,
         },
       });
 
-    /* eslint-enable camelcase */
     if (stripePaymentIntent.status === StripeTransactionStatus.REQUIRES_CONFIRMATION) {
-      await this.paymentEntity.paymentIntents.confirm(stripePaymentIntent.id);
+      await this.paymentEntity.paymentIntents.confirm(stripePaymentIntent.id, {
+        payment_method: paymentMethodId,
+      });
     }
 
+    /* eslint-enable camelcase */
     const transactionData = {
       entityId,
       title,
@@ -758,6 +762,9 @@ class Stripe extends Abstract {
 
   /**
    * Refund transaction (payment intent)
+   * NOTE:
+   * reverse_transfer: If true - amount will be charged from receiver connected account,
+   * false - from main application account
    */
   public async refund({ transactionId }: IRefundParams): Promise<boolean> {
     /**
@@ -779,7 +786,6 @@ class Stripe extends Abstract {
     await this.paymentEntity.refunds.create({
       reason: 'requested_by_customer',
       payment_intent: transaction.transactionId,
-      refund_application_fee: true,
       reverse_transfer: true,
     });
 
@@ -1019,8 +1025,8 @@ class Stripe extends Abstract {
   private async getPaymentIntentFees({
     entityCost,
     feesPayer = TransactionRole.SENDER,
-    applicationPaymentPercent = 0,
     additionalFeesPercent,
+    applicationPaymentPercent = 0,
     extraReceiverRevenuePercent = 0,
   }: TGetPaymentIntentFeesParams): Promise<{
     paymentProviderUnitFee: number;
