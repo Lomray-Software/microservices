@@ -6,7 +6,7 @@ const getPercentFromAmount = (amountUnit: number, percent?: number): number => {
     return 0;
   }
 
-  return amountUnit * (percent / 100);
+  return Math.round(amountUnit * (percent / 100));
 };
 
 export default getPercentFromAmount;
