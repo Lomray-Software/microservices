@@ -946,28 +946,32 @@ class Stripe extends Abstract {
     const applicationUnitFee = getPercentFromAmount(entityCost, applicationPaymentPercent);
 
     const fees = {
-      applicationUnitFee,
-      paymentProviderUnitFee: paymentProviderUnitFee - extraReceiverUnitRevenue,
+      applicationUnitFee: Math.round(applicationUnitFee),
+      paymentProviderUnitFee: Math.round(paymentProviderUnitFee - extraReceiverUnitRevenue),
     };
 
     if (feesPayer === TransactionRole.SENDER) {
       return {
         ...fees,
-        userUnitAmount:
+        userUnitAmount: Math.round(
           entityCost + paymentProviderUnitFee + applicationUnitFee + senderAdditionalFee,
-        receiverUnitRevenue: entityCost - receiverAdditionalFee + extraReceiverUnitRevenue,
+        ),
+        receiverUnitRevenue: Math.round(
+          entityCost - receiverAdditionalFee + extraReceiverUnitRevenue,
+        ),
       };
     }
 
     return {
       ...fees,
-      userUnitAmount: entityCost + senderAdditionalFee,
-      receiverUnitRevenue:
+      userUnitAmount: Math.round(entityCost + senderAdditionalFee),
+      receiverUnitRevenue: Math.round(
         entityCost -
-        paymentProviderUnitFee -
-        applicationUnitFee -
-        receiverAdditionalFee +
-        extraReceiverUnitRevenue,
+          paymentProviderUnitFee -
+          applicationUnitFee -
+          receiverAdditionalFee +
+          extraReceiverUnitRevenue,
+      ),
     };
   }
 }

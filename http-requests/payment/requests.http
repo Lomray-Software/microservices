@@ -142,7 +142,7 @@ Content-Type: application/json
     "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
     "receiverId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
     "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
-    "entityCost": 100,
+    "entityCost": 33,
     "feesPayer": "receiver",
     "title": "ticket 5",
     "applicationPaymentPercent": 3
