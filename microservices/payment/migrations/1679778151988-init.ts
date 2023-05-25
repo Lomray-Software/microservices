@@ -70,7 +70,6 @@ export default class init1679778151988 implements MigrationInterface {
     );
     await queryRunner.query(`CREATE INDEX "IDX_product_userId" ON "product" ("userId") `);
     await queryRunner.query(`CREATE INDEX "IDX_price_userId" ON "price" ("userId") `);
-    await queryRunner.query(`CREATE INDEX "IDX_payment_userId" ON "customer" ("userId") `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
