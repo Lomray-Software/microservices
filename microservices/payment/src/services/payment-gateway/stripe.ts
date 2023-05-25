@@ -364,10 +364,9 @@ class Stripe extends Abstract {
    * Handles refund statuses
    */
   public async handleChargeRefund(event: StripeSdk.Event): Promise<void> {
-    /* eslint-disable camelcase */
-    const { status, payment_intent } = event.data.object as StripeSdk.Refund;
+    const { status, payment_intent: paymentIntent } = event.data.object as StripeSdk.Refund;
 
-    if (!payment_intent || !status) {
+    if (!paymentIntent || !status) {
       throw new BaseException({
         status: 500,
         message: "Payment intent id or refund status wasn't provided",
@@ -375,7 +374,7 @@ class Stripe extends Abstract {
     }
 
     const transactions = await this.transactionRepository.find({
-      transactionId: this.extractId(payment_intent),
+      transactionId: this.extractId(paymentIntent),
     });
 
     if (!transactions.length) {
@@ -391,7 +390,6 @@ class Stripe extends Abstract {
       return this.transactionRepository.save(transaction);
     });
 
-    /* eslint-enable camelcase */
     await Promise.all(saveRequests);
   }
 
@@ -568,9 +566,6 @@ class Stripe extends Abstract {
         default_for_currency: isDefault,
       } = externalAccount;
 
-      /**
-       * @TODO: check if connected account have default payment method
-       */
       await this.cardRepository.save({
         lastDigits,
         type,

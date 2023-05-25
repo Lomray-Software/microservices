@@ -61,7 +61,7 @@ class BankAccount {
   holderName: string | null;
 
   @JSONSchema({
-    description: "If it's the first attached user card it should be default",
+    description: "If it's the first attached user bank account it should be default",
   })
   @Column({ type: 'boolean', default: false })
   @IsUndefinable()
