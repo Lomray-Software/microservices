@@ -10,6 +10,10 @@ enum TransactionStatus {
   PAYMENT_FAILED = 'payment_failed',
   PROCESSING = 'processing',
   REQUIRES_CONFIRMATION = 'requires_confirmation',
+  REFUND_SUCCEEDED = 'refund_succeeded',
+  REFUND_PENDING = 'refund_pending',
+  REFUND_CANCELED = 'refund_canceled',
+  REFUND_FAILED = 'refund_failed',
 }
 
 export default TransactionStatus;

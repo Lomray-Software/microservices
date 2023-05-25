@@ -46,6 +46,16 @@ interface IPaymentIntentParams {
   extraReceiverRevenuePercent?: number;
 }
 
+interface IRefundParams {
+  transactionId: string;
+  /**
+   * If user don't have required amount in connect account, he must provide
+   * bank account or card id that will be used for refund charge
+   */
+  bankAccountId?: string;
+  cardId?: string;
+}
+
 interface ICheckoutParams {
   priceId: string;
   userId: string;
@@ -69,14 +79,16 @@ interface ITransferInfo {
   userId: string;
 }
 
-type TGetPaymentIntentFeesParams = Pick<
-  IPaymentIntentParams,
-  | 'entityCost'
-  | 'applicationPaymentPercent'
-  | 'feesPayer'
-  | 'additionalFeesPercent'
-  | 'extraReceiverRevenuePercent'
->;
+interface IGetPaymentIntentFeesParams
+  extends Pick<
+    IPaymentIntentParams,
+    | 'applicationPaymentPercent'
+    | 'feesPayer'
+    | 'additionalFeesPercent'
+    | 'extraReceiverRevenuePercent'
+  > {
+  entityUnitCost: number;
+}
 
 /**
  * Stripe payment provider
@@ -166,6 +178,18 @@ class Stripe extends Abstract {
       case StripeTransactionStatus.NO_PAYMENT_REQUIRED:
       case StripeTransactionStatus.PROCESSING:
         return TransactionStatus.IN_PROCESS;
+
+      case StripeTransactionStatus.REFUND_SUCCEEDED:
+        return TransactionStatus.REFUNDED;
+
+      case StripeTransactionStatus.REFUND_PENDING:
+        return TransactionStatus.REFUND_IN_PROCESS;
+
+      case StripeTransactionStatus.REFUND_CANCELED:
+        return TransactionStatus.REFUND_CANCELED;
+
+      case StripeTransactionStatus.REFUND_FAILED:
+        return TransactionStatus.REFUND_FAILED;
     }
   }
 
@@ -312,12 +336,12 @@ class Stripe extends Abstract {
         void this.handleSetupIntentSucceed(event);
         break;
 
-      /**
-       * @TODO: Handle if needed account.external_account.updated
-       * Will be called when customer setup connect account with card or bank account
-       */
       case 'account.external_account.created':
         void this.handleExternalAccountCreate(event);
+        break;
+
+      case 'account.external_account.updated':
+        void this.handleExternalAccountUpdated(event);
         break;
 
       case 'account.external_account.deleted':
@@ -329,14 +353,52 @@ class Stripe extends Abstract {
       case 'payment_intent.succeeded':
         void this.handlePaymentIntent(event);
         break;
+
+      case 'charge.refund.updated':
+      case 'charge.refunded':
+        void this.handleChargeRefund(event);
+        break;
     }
   }
 
   /**
-   * Handles payment intent processing
+   * Handles refund statuses
+   */
+  public async handleChargeRefund(event: StripeSdk.Event): Promise<void> {
+    const { status, payment_intent: paymentIntent } = event.data.object as StripeSdk.Refund;
+
+    if (!paymentIntent || !status) {
+      throw new BaseException({
+        status: 500,
+        message: "Payment intent id or refund status wasn't provided",
+      });
+    }
+
+    const transactions = await this.transactionRepository.find({
+      transactionId: this.extractId(paymentIntent),
+    });
+
+    if (!transactions.length) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Debit or credit transaction'),
+      });
+    }
+
+    const saveRequests = transactions.map((transaction) => {
+      transaction.status = this.getStatus(`refund_${status}` as unknown as StripeTransactionStatus);
+
+      return this.transactionRepository.save(transaction);
+    });
+
+    await Promise.all(saveRequests);
+  }
+
+  /**
+   * Handles payment intent statuses
    */
   public async handlePaymentIntent(event: StripeSdk.Event): Promise<void> {
-    const { id, status } = event.data.object as StripeSdk.PaymentIntent;
+    const { id, status, ...rest } = event.data.object as StripeSdk.PaymentIntent;
 
     const transactions = await this.transactionRepository.find({ transactionId: id });
 
@@ -348,6 +410,16 @@ class Stripe extends Abstract {
     }
 
     const saveRequests = transactions.map((transaction) => {
+      if (status === StripeTransactionStatus.SUCCEEDED) {
+        /**
+         * @TODO: charges property MUST exist is paymentIntent, check stripe sdk version
+         */
+        transaction.params.transferId = this.extractTransferIdFromPaymentIntent(
+          // @ts-ignore
+          rest?.charges?.data as StripeSdk.Charge[],
+        );
+      }
+
       transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
 
       return this.transactionRepository.save(transaction);
@@ -423,6 +495,53 @@ class Stripe extends Abstract {
    * Handles connect account update
    * NOTE: Should be called when webhook triggers
    */
+  public async handleExternalAccountUpdated(event: StripeSdk.Event): Promise<void> {
+    /* eslint-disable camelcase */
+    const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
+
+    if (!this.isExternalAccountIsBankAccount(externalAccount)) {
+      const card = await this.getCardById(externalAccount.id);
+
+      const {
+        last4: lastDigits,
+        brand: type,
+        exp_year,
+        exp_month,
+        default_for_currency: isDefault,
+      } = externalAccount;
+
+      card.isDefault = Boolean(isDefault);
+      card.lastDigits = lastDigits;
+      card.expired = toExpirationDate(exp_month, exp_year);
+      card.type = type;
+
+      await this.cardRepository.save(card);
+
+      return;
+    }
+
+    const bankAccount = await this.getBankAccountById(externalAccount.id);
+
+    const {
+      last4: lastDigits,
+      account_holder_name: holderName,
+      bank_name: bankName,
+      default_for_currency: isDefault,
+    } = externalAccount as StripeSdk.BankAccount;
+
+    bankAccount.isDefault = Boolean(isDefault);
+    bankAccount.lastDigits = lastDigits;
+    bankAccount.holderName = holderName;
+    bankAccount.bankName = bankName;
+
+    await this.bankAccountRepository.save(bankAccount);
+    /* eslint-enable camelcase */
+  }
+
+  /**
+   * Handles connect account create
+   * NOTE: Should be called when webhook triggers
+   */
   public async handleExternalAccountCreate(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
     const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
@@ -430,23 +549,29 @@ class Stripe extends Abstract {
     if (!externalAccount?.account) {
       throw new BaseException({
         status: 500,
-        message: 'The connected account reference in external account data not found.',
+        message: messages.getNotFoundMessage(
+          'The connected account reference in external account data',
+        ),
       });
     }
 
     const { userId } = await this.getCustomerByAccountId(this.extractId(externalAccount.account));
 
     if (!this.isExternalAccountIsBankAccount(externalAccount)) {
-      const { id: cardId, last4: lastDigits, brand: type, exp_year, exp_month } = externalAccount;
+      const {
+        id: cardId,
+        last4: lastDigits,
+        brand: type,
+        exp_year,
+        exp_month,
+        default_for_currency: isDefault,
+      } = externalAccount;
 
-      /**
-       * @TODO: check if connected account have default payment method
-       */
       await this.cardRepository.save({
         lastDigits,
         type,
         userId,
-        isDefault: false,
+        isDefault: Boolean(isDefault),
         expired: toExpirationDate(exp_month, exp_year),
         params: { cardId },
       });
@@ -459,9 +584,11 @@ class Stripe extends Abstract {
       last4: lastDigits,
       account_holder_name: holderName,
       bank_name: bankName,
+      default_for_currency: isDefault,
     } = externalAccount as StripeSdk.BankAccount;
 
     await this.bankAccountRepository.save({
+      isDefault: Boolean(isDefault),
       bankAccountId,
       lastDigits,
       userId,
@@ -646,7 +773,7 @@ class Stripe extends Abstract {
      */
     const { userUnitAmount, receiverUnitRevenue, applicationUnitFee, paymentProviderUnitFee } =
       await this.getPaymentIntentFees({
-        entityCost: entityUnitCost,
+        entityUnitCost,
         applicationPaymentPercent,
         feesPayer,
         additionalFeesPercent,
@@ -656,24 +783,26 @@ class Stripe extends Abstract {
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent =
       await this.paymentEntity.paymentIntents.create({
+        ...(title ? { description: title } : {}),
+        metadata: {
+          ...(entityId ? { entityId } : {}),
+        },
+        payment_method_types: [StripePaymentMethods.CARD],
+        confirm: true,
         currency: 'usd',
         capture_method: 'automatic',
-        payment_method_types: [StripePaymentMethods.CARD],
         payment_method: paymentMethodId,
         customer: senderCustomer.customerId,
+        // How much must sender must pay
         amount: userUnitAmount,
-        ...(title ? { description: title } : {}),
         transfer_data: {
+          // How much must receive end user
           amount: receiverUnitRevenue,
           destination: receiverAccountId,
         },
       });
 
     /* eslint-enable camelcase */
-    if (stripePaymentIntent.status === StripeTransactionStatus.REQUIRES_CONFIRMATION) {
-      await this.paymentEntity.paymentIntents.confirm(stripePaymentIntent.id);
-    }
-
     const transactionData = {
       entityId,
       title,
@@ -703,16 +832,47 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Refund payment intent
-   * @TODO: create refund and handle status via webhooks
+   * Refund transaction (payment intent)
+   * NOTES:
+   * Sender payed 106.39$: 100$ - entity cost, 3.39$ - stripe fees, 3$ - platform application fee.
+   * In the end of refund sender will receive 100$ and platform revenue will be 3$.
    */
-  public async refund(transactionId: string): Promise<void> {
-    const transaction = await this.getTransactionById(transactionId);
-
-    await this.paymentEntity.refunds.create({
-      // payment_intent: transaction.paymentId,
-      amount: transaction.amount,
+  public async refund({ transactionId }: IRefundParams): Promise<boolean> {
+    const debitTransaction = await this.transactionRepository.findOne({
+      transactionId,
+      type: TransactionType.DEBIT,
     });
+
+    if (!debitTransaction) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Transaction'),
+      });
+    }
+
+    if (!debitTransaction.params.transferId) {
+      throw new BaseException({
+        status: 400,
+        message: "Transaction don't have related transfer id and can't be refunded",
+      });
+    }
+
+    /**
+     * Returns refunds from receiver connect account to platform (application) account
+     */
+    await this.paymentEntity.transfers.createReversal(debitTransaction.params.transferId);
+
+    /**
+     * Returns refunds from platform (application) account to sender
+     */
+    /* eslint-disable camelcase */
+    await this.paymentEntity.refunds.create({
+      amount: debitTransaction.amount,
+      payment_intent: debitTransaction.transactionId,
+    });
+
+    /* eslint-enable camelcase */
+    return true;
   }
 
   /**
@@ -733,6 +893,88 @@ class Stripe extends Abstract {
     );
 
     return true;
+  }
+
+  /**
+   * Returns receiver payment amount
+   * NOTES: How much end user will get after fees from transaction
+   * 1. Stable unit - stable amount that payment provider charges
+   * 2. Payment percent - payment provider fee percent for single transaction
+   * Fees calculation:
+   * 1. User pays fee
+   * totalAmount = 106$, receiverReceiver = 100, taxFee = 3, applicationFee = 3
+   * 2. Receiver pays fees
+   * totalAmount = 100$, receiverReceiver = 94, taxFee = 3, applicationFee = 3
+   */
+  public async getPaymentIntentFees({
+    entityUnitCost,
+    feesPayer = TransactionRole.SENDER,
+    additionalFeesPercent,
+    applicationPaymentPercent = 0,
+    extraReceiverRevenuePercent = 0,
+  }: IGetPaymentIntentFeesParams): Promise<{
+    paymentProviderUnitFee: number;
+    applicationUnitFee: number;
+    userUnitAmount: number;
+    receiverUnitRevenue: number;
+  }> {
+    const { paymentFees } = await remoteConfig();
+
+    const { paymentPercent, stableUnit } = paymentFees!;
+
+    /**
+     * Calculate additional fees
+     */
+    const receiverAdditionalFee = getPercentFromAmount(
+      entityUnitCost,
+      additionalFeesPercent?.receiver,
+    );
+    const senderAdditionalFee = getPercentFromAmount(entityUnitCost, additionalFeesPercent?.sender);
+
+    /**
+     * Additional receiver revenue from application percent
+     */
+    const extraReceiverUnitRevenue = getPercentFromAmount(
+      entityUnitCost,
+      extraReceiverRevenuePercent,
+    );
+
+    /**
+     * How much percent from total amount will receive end user
+     */
+    const applicationUnitFee = getPercentFromAmount(entityUnitCost, applicationPaymentPercent);
+
+    if (feesPayer === TransactionRole.SENDER) {
+      const userTempUnitAmount = entityUnitCost + applicationUnitFee + senderAdditionalFee;
+      const userUnitAmount = Math.round(
+        (userTempUnitAmount + stableUnit) / (1 - paymentPercent / 100),
+      );
+
+      return {
+        applicationUnitFee,
+        userUnitAmount,
+        paymentProviderUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
+        receiverUnitRevenue: Math.round(
+          entityUnitCost - receiverAdditionalFee + extraReceiverUnitRevenue,
+        ),
+      };
+    }
+
+    const paymentProviderUnitFee =
+      getPercentFromAmount(entityUnitCost, paymentPercent) + stableUnit;
+
+    return {
+      applicationUnitFee,
+      paymentProviderUnitFee,
+      userUnitAmount: Math.round(entityUnitCost + senderAdditionalFee),
+      receiverUnitRevenue: Math.round(
+        entityUnitCost -
+          paymentProviderUnitFee -
+          applicationUnitFee -
+          receiverAdditionalFee +
+          extraReceiverUnitRevenue,
+      ),
+    };
   }
 
   /**
@@ -909,73 +1151,21 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Returns receiver payment amount
-   * NOTES: How much end user will get after fees from transaction
-   * 1. Stable unit - stable amount that payment provider charges
-   * 2. Payment percent - payment provider fee percent for single transaction
-   * Fees calculation:
-   * 1. User pays fee
-   * totalAmount = 106$, receiverReceiver = 100, taxFee = 3, applicationFee = 3
-   * 2. Receiver pays fees
-   * totalAmount = 100$, receiverReceiver = 94, taxFee = 3, applicationFee = 3
+   * Returns extracted transfer id from succeeded payment intent
+   * NOTE: handles single paymentIntent charge
    */
-  private async getPaymentIntentFees({
-    entityCost,
-    feesPayer = TransactionRole.SENDER,
-    applicationPaymentPercent = 0,
-    additionalFeesPercent,
-    extraReceiverRevenuePercent = 0,
-  }: TGetPaymentIntentFeesParams): Promise<{
-    paymentProviderUnitFee: number;
-    applicationUnitFee: number;
-    userUnitAmount: number;
-    receiverUnitRevenue: number;
-  }> {
-    const { paymentFees } = await remoteConfig();
-
-    const { paymentPercent, stableUnit } = paymentFees!;
-
-    /**
-     * Calculate additional fees
-     */
-    const receiverAdditionalFee = getPercentFromAmount(entityCost, additionalFeesPercent?.receiver);
-    const senderAdditionalFee = getPercentFromAmount(entityCost, additionalFeesPercent?.sender);
-
-    /**
-     * Additional receiver revenue from application percent
-     */
-    const extraReceiverUnitRevenue = getPercentFromAmount(entityCost, extraReceiverRevenuePercent);
-
-    /**
-     * How much percent from total amount will receive end user
-     */
-    const paymentProviderUnitFee = getPercentFromAmount(entityCost, paymentPercent) + stableUnit;
-    const applicationUnitFee = getPercentFromAmount(entityCost, applicationPaymentPercent);
-
-    const fees = {
-      applicationUnitFee,
-      paymentProviderUnitFee: paymentProviderUnitFee - extraReceiverUnitRevenue,
-    };
-
-    if (feesPayer === TransactionRole.SENDER) {
-      return {
-        ...fees,
-        userUnitAmount:
-          entityCost + paymentProviderUnitFee + applicationUnitFee + senderAdditionalFee,
-        receiverUnitRevenue: entityCost - receiverAdditionalFee + extraReceiverUnitRevenue,
-      };
+  private extractTransferIdFromPaymentIntent(charges?: StripeSdk.Charge[]): string | undefined {
+    if (!charges || charges.length < 0) {
+      return;
     }
 
-    return {
-      ...fees,
-      userUnitAmount: entityCost + senderAdditionalFee,
-      receiverUnitRevenue:
-        entityCost -
-        paymentProviderUnitFee -
-        applicationUnitFee -
-        receiverAdditionalFee +
-        extraReceiverUnitRevenue,
-    };
+    const [charge] = charges;
+
+    if (!charge?.transfer) {
+      return;
+    }
+
+    return this.extractId(charge.transfer);
   }
 }
 

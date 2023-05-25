@@ -8,6 +8,9 @@ enum TransactionStatus {
   INITIAL = 'initial',
   EXPIRED = 'expired',
   REFUNDED = 'refunded',
+  REFUND_FAILED = 'refundFailed',
+  REFUND_CANCELED = 'refundCanceled',
+  REFUND_IN_PROCESS = 'refundInProcess',
   ERROR = 'error',
 }
 

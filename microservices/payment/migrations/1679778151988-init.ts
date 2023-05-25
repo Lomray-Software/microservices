@@ -11,7 +11,7 @@ export default class init1679778151988 implements MigrationInterface {
       `CREATE TYPE "public"."transaction_type_enum" AS ENUM('credit', 'debit')`,
     );
     await queryRunner.query(
-      `CREATE TYPE "public"."transaction_status_enum" AS ENUM('success', 'inProcess', 'requiredPayment', 'initial', 'expired', 'error')`,
+      `CREATE TYPE "public"."transaction_status_enum" AS ENUM('success', 'inProcess', 'requiredPayment', 'initial', 'expired', 'error', 'refunded', 'refundFailed', 'refundCanceled', 'refundInProcess')`,
     );
 
     /**
@@ -30,7 +30,7 @@ export default class init1679778151988 implements MigrationInterface {
       `CREATE TABLE "transaction" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "transactionId" character varying(66) NOT NULL, "title" character varying(100) NOT NULL DEFAULT '', "userId" character varying(36) NOT NULL, "bankAccountId" character varying(66), "cardId" character varying(66), "paymentMethodId" character varying(66), "entityId" character varying(36) NOT NULL, "productId" character varying(19), "amount" integer NOT NULL, "type" "public"."transaction_type_enum" NOT NULL, "tax" integer NOT NULL DEFAULT 0, "fee" integer NOT NULL DEFAULT 0, "status" "public"."transaction_status_enum" NOT NULL DEFAULT 'initial', "params" json NOT NULL DEFAULT '{}', CONSTRAINT "transaction(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "bank_account" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" character varying(36) NOT NULL, "lastDigits" character varying(4) NOT NULL, "bankName" character varying(100), "holderName" character varying(100), "params" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "bank_account(pk):id" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "bank_account" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" character varying(36) NOT NULL, "lastDigits" character varying(4) NOT NULL, "bankName" character varying(100), "holderName" character varying(100), "isDefault" boolean NOT NULL DEFAULT false, "params" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "bank_account(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "card" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" character varying(36) NOT NULL, "lastDigits" character varying(4) NOT NULL, "params" json NOT NULL DEFAULT '{}', "expired" character varying(5) NOT NULL, "holderName" character varying(100) NOT NULL DEFAULT '', "type" character varying(20) NOT NULL, "isDefault" boolean NOT NULL DEFAULT false, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "card(pk):id" PRIMARY KEY ("id"))`,
