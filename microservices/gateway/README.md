@@ -30,6 +30,7 @@ RPC 2.0 Microservice. This is a single entry point for all clients.
 - `MS_REQ_TIMEOUT` - Gateway request timeout in sec. Default: `15`
 - `MS_LISTENER_PORT` - Express listener port. Default: `3000`
 - `MS_CORS_CONFIG` - Express CORS config. See [CORS](https://www.npmjs.com/package/cors) lib. Default: `{"origin":["http://localhost:3000"],"credentials":true}`
+- `MS_WEBHOOK_URL` - String which provides to stripe webhook listener to get it understand that this request belongs to webhook functionality. Default: `/webhook/`
 - [See full list `COMMON ENVIRONMENTS`](https://github.com/Lomray-Software/microservice-helpers#common-environments)
 
 ### <a id="how-to-run"></a>HOW TO RUN:

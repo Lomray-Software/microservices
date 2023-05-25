@@ -27,7 +27,8 @@
     "microservice": "gateway",
     "type": "config",
     "params": {
-      "corsOptions": {}
+      "corsOptions": {},
+      "webhookUrl": "/webhook/"
     }
   },
   {
