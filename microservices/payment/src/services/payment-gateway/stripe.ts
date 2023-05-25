@@ -335,12 +335,12 @@ class Stripe extends Abstract {
         void this.handleSetupIntentSucceed(event);
         break;
 
-      /**
-       * @TODO: Handle if needed account.external_account.updated
-       * Will be called when customer setup connect account with card or bank account
-       */
       case 'account.external_account.created':
         void this.handleExternalAccountCreate(event);
+        break;
+
+      case 'account.external_account.updated':
+        void this.handleExternalAccountUpdated(event);
         break;
 
       case 'account.external_account.deleted':
@@ -496,6 +496,53 @@ class Stripe extends Abstract {
    * Handles connect account update
    * NOTE: Should be called when webhook triggers
    */
+  public async handleExternalAccountUpdated(event: StripeSdk.Event): Promise<void> {
+    /* eslint-disable camelcase */
+    const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
+
+    if (!this.isExternalAccountIsBankAccount(externalAccount)) {
+      const card = await this.getCardById(externalAccount.id);
+
+      const {
+        last4: lastDigits,
+        brand: type,
+        exp_year,
+        exp_month,
+        default_for_currency: isDefault,
+      } = externalAccount;
+
+      card.isDefault = Boolean(isDefault);
+      card.lastDigits = lastDigits;
+      card.expired = toExpirationDate(exp_month, exp_year);
+      card.type = type;
+
+      await this.cardRepository.save(card);
+
+      return;
+    }
+
+    const bankAccount = await this.getBankAccountById(externalAccount.id);
+
+    const {
+      last4: lastDigits,
+      account_holder_name: holderName,
+      bank_name: bankName,
+      default_for_currency: isDefault,
+    } = externalAccount as StripeSdk.BankAccount;
+
+    bankAccount.isDefault = Boolean(isDefault);
+    bankAccount.lastDigits = lastDigits;
+    bankAccount.holderName = holderName;
+    bankAccount.bankName = bankName;
+
+    await this.bankAccountRepository.save(bankAccount);
+    /* eslint-enable camelcase */
+  }
+
+  /**
+   * Handles connect account create
+   * NOTE: Should be called when webhook triggers
+   */
   public async handleExternalAccountCreate(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
     const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
@@ -503,14 +550,23 @@ class Stripe extends Abstract {
     if (!externalAccount?.account) {
       throw new BaseException({
         status: 500,
-        message: 'The connected account reference in external account data not found.',
+        message: messages.getNotFoundMessage(
+          'The connected account reference in external account data',
+        ),
       });
     }
 
     const { userId } = await this.getCustomerByAccountId(this.extractId(externalAccount.account));
 
     if (!this.isExternalAccountIsBankAccount(externalAccount)) {
-      const { id: cardId, last4: lastDigits, brand: type, exp_year, exp_month } = externalAccount;
+      const {
+        id: cardId,
+        last4: lastDigits,
+        brand: type,
+        exp_year,
+        exp_month,
+        default_for_currency: isDefault,
+      } = externalAccount;
 
       /**
        * @TODO: check if connected account have default payment method
@@ -519,7 +575,7 @@ class Stripe extends Abstract {
         lastDigits,
         type,
         userId,
-        isDefault: false,
+        isDefault: Boolean(isDefault),
         expired: toExpirationDate(exp_month, exp_year),
         params: { cardId },
       });
@@ -532,9 +588,11 @@ class Stripe extends Abstract {
       last4: lastDigits,
       account_holder_name: holderName,
       bank_name: bankName,
+      default_for_currency: isDefault,
     } = externalAccount as StripeSdk.BankAccount;
 
     await this.bankAccountRepository.save({
+      isDefault: Boolean(isDefault),
       bankAccountId,
       lastDigits,
       userId,
