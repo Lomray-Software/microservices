@@ -24,7 +24,7 @@ export default class init1679778151988 implements MigrationInterface {
       `CREATE TABLE "product" ("productId" character varying(19) NOT NULL, "entityId" character varying(36) NOT NULL, "userId" character varying(36), CONSTRAINT "product(pk):productId" PRIMARY KEY ("productId"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "price" ("priceId" character varying(30) NOT NULL, "productId" character varying(19) NOT NULL, "userId" character varying(36), "currency" character varying(10) NOT NULL, "unitAmount" integer NOT NULL, CONSTRAINT "price(rel):productId" UNIQUE ("productId"), CONSTRAINT "price(pk):priceId" PRIMARY KEY ("priceId"))`,
+      `CREATE TABLE "price" ("priceId" character varying(30) NOT NULL, "productId" character varying(19) NOT NULL, "userId" character varying(36) NOT NULL, "currency" character varying(10) NOT NULL, "unitAmount" integer NOT NULL, CONSTRAINT "price(rel):productId" UNIQUE ("productId"), CONSTRAINT "price(pk):priceId" PRIMARY KEY ("priceId"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "transaction" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "transactionId" character varying(66) NOT NULL, "title" character varying(100) NOT NULL DEFAULT '', "userId" character varying(36) NOT NULL, "customerId" character varying(19) NOT NULL, "bankAccountId" character varying(66), "cardId" character varying(66), "paymentMethodId" character varying(66), "entityId" character varying(36) NOT NULL, "productId" character varying(19), "amount" integer NOT NULL, "type" "public"."transaction_type_enum" NOT NULL, "tax" integer, "fee" integer, "status" "public"."transaction_status_enum" NOT NULL DEFAULT 'initial', "params" json NOT NULL DEFAULT '{}', CONSTRAINT "transaction(pk):id" PRIMARY KEY ("id"))`,
