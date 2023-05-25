@@ -83,7 +83,6 @@ export default class init1679778151988 implements MigrationInterface {
     /**
      * Indexes
      */
-    await queryRunner.query(`DROP INDEX "public"."IDX_payment_userId"`);
     await queryRunner.query(`DROP INDEX "public"."IDX_product_userId"`);
     await queryRunner.query(`DROP INDEX "public"."IDX_price_userId"`);
     await queryRunner.query(`DROP INDEX "public"."IDX_card_userId"`);
