@@ -773,6 +773,9 @@ class Stripe extends Abstract {
 
   /**
    * Refund transaction (payment intent)
+   * NOTES:
+   * Sender payed 106.39$: 100$ - entity cost, 3.39$ - stripe fees, 3$ - platform application fee.
+   * In the end of refund sender will receive 100$ and platform revenue will be 3$.
    */
   public async refund({ transactionId }: IRefundParams): Promise<boolean> {
     const debitTransaction = await this.transactionRepository.findOne({
