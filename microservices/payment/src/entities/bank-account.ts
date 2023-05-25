@@ -1,5 +1,5 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, IsObject, Length } from 'class-validator';
+import { Allow, IsBoolean, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -59,6 +59,14 @@ class BankAccount {
   @IsUndefinable()
   @Length(1, 100)
   holderName: string | null;
+
+  @JSONSchema({
+    description: "If it's the first attached user card it should be default",
+  })
+  @Column({ type: 'boolean', default: false })
+  @IsUndefinable()
+  @IsBoolean()
+  isDefault: boolean;
 
   @Column({ type: 'json', default: {} })
   @IsObject()
