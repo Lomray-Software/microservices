@@ -353,10 +353,10 @@ class Stripe extends Abstract {
         void this.handlePaymentIntent(event);
         break;
 
-      case 'charge.refund.updated':
-      case 'charge.refunded':
-        void this.handleChargeRefund(event);
-        break;
+      // case 'charge.refund.updated':
+      // case 'charge.refunded':
+      //   void this.handleChargeRefund(event);
+      //   break;
     }
   }
 
@@ -399,7 +399,7 @@ class Stripe extends Abstract {
    * Handles payment intent statuses
    */
   public async handlePaymentIntent(event: StripeSdk.Event): Promise<void> {
-    const { id, status } = event.data.object as StripeSdk.PaymentIntent;
+    const { id, status, ...rest } = event.data.object as StripeSdk.PaymentIntent;
 
     const transactions = await this.transactionRepository.find({ transactionId: id });
 
@@ -411,6 +411,16 @@ class Stripe extends Abstract {
     }
 
     const saveRequests = transactions.map((transaction) => {
+      if (status === StripeTransactionStatus.SUCCEEDED) {
+        /**
+         * @TODO: charges property MUST exist is paymentIntent, check stripe sdk version
+         */
+        transaction.params.transferId = this.extractTransferIdFromPaymentIntent(
+          // @ts-ignore
+          rest?.charges?.data as StripeSdk.Charge[],
+        );
+      }
+
       transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
 
       return this.transactionRepository.save(transaction);
@@ -714,7 +724,11 @@ class Stripe extends Abstract {
     const stripePaymentIntent: StripeSdk.PaymentIntent =
       await this.paymentEntity.paymentIntents.create({
         ...(title ? { description: title } : {}),
+        metadata: {
+          ...(entityId ? { entityId } : {}),
+        },
         payment_method_types: [StripePaymentMethods.CARD],
+        confirm: true,
         currency: 'usd',
         capture_method: 'automatic',
         payment_method: paymentMethodId,
@@ -727,12 +741,6 @@ class Stripe extends Abstract {
           destination: receiverAccountId,
         },
       });
-
-    if (stripePaymentIntent.status === StripeTransactionStatus.REQUIRES_CONFIRMATION) {
-      await this.paymentEntity.paymentIntents.confirm(stripePaymentIntent.id, {
-        payment_method: paymentMethodId,
-      });
-    }
 
     /* eslint-enable camelcase */
     const transactionData = {
@@ -765,31 +773,39 @@ class Stripe extends Abstract {
 
   /**
    * Refund transaction (payment intent)
-   * NOTE:
-   * reverse_transfer: If true - amount will be charged from receiver connected account,
-   * false - from main application account
    */
   public async refund({ transactionId }: IRefundParams): Promise<boolean> {
-    /**
-     * Payer (credit) transaction
-     */
-    const transaction = await this.transactionRepository.findOne({
+    const debitTransaction = await this.transactionRepository.findOne({
       transactionId,
-      type: TransactionType.CREDIT,
+      type: TransactionType.DEBIT,
     });
 
-    if (!transaction) {
+    if (!debitTransaction) {
       throw new BaseException({
         status: 400,
         message: messages.getNotFoundMessage('Transaction'),
       });
     }
 
+    if (!debitTransaction.params.transferId) {
+      throw new BaseException({
+        status: 400,
+        message: "Transaction don't have related transfer id and can't be refunded",
+      });
+    }
+
+    /**
+     * Returns refunds from receiver connect account to platform (application) account
+     */
+    await this.paymentEntity.transfers.createReversal(debitTransaction.params.transferId);
+
+    /**
+     * Returns refunds from platform (application) account to sender
+     */
     /* eslint-disable camelcase */
     await this.paymentEntity.refunds.create({
-      reason: 'requested_by_customer',
-      payment_intent: transaction.transactionId,
-      reverse_transfer: true,
+      amount: debitTransaction.amount,
+      payment_intent: debitTransaction.transactionId,
     });
 
     /* eslint-enable camelcase */
@@ -814,6 +830,88 @@ class Stripe extends Abstract {
     );
 
     return true;
+  }
+
+  /**
+   * Returns receiver payment amount
+   * NOTES: How much end user will get after fees from transaction
+   * 1. Stable unit - stable amount that payment provider charges
+   * 2. Payment percent - payment provider fee percent for single transaction
+   * Fees calculation:
+   * 1. User pays fee
+   * totalAmount = 106$, receiverReceiver = 100, taxFee = 3, applicationFee = 3
+   * 2. Receiver pays fees
+   * totalAmount = 100$, receiverReceiver = 94, taxFee = 3, applicationFee = 3
+   */
+  public async getPaymentIntentFees({
+    entityUnitCost,
+    feesPayer = TransactionRole.SENDER,
+    additionalFeesPercent,
+    applicationPaymentPercent = 0,
+    extraReceiverRevenuePercent = 0,
+  }: IGetPaymentIntentFeesParams): Promise<{
+    paymentProviderUnitFee: number;
+    applicationUnitFee: number;
+    userUnitAmount: number;
+    receiverUnitRevenue: number;
+  }> {
+    const { paymentFees } = await remoteConfig();
+
+    const { paymentPercent, stableUnit } = paymentFees!;
+
+    /**
+     * Calculate additional fees
+     */
+    const receiverAdditionalFee = getPercentFromAmount(
+      entityUnitCost,
+      additionalFeesPercent?.receiver,
+    );
+    const senderAdditionalFee = getPercentFromAmount(entityUnitCost, additionalFeesPercent?.sender);
+
+    /**
+     * Additional receiver revenue from application percent
+     */
+    const extraReceiverUnitRevenue = getPercentFromAmount(
+      entityUnitCost,
+      extraReceiverRevenuePercent,
+    );
+
+    /**
+     * How much percent from total amount will receive end user
+     */
+    const applicationUnitFee = getPercentFromAmount(entityUnitCost, applicationPaymentPercent);
+
+    if (feesPayer === TransactionRole.SENDER) {
+      const userTempUnitAmount = entityUnitCost + applicationUnitFee + senderAdditionalFee;
+      const userUnitAmount = Math.round(
+        (userTempUnitAmount + stableUnit) / (1 - paymentPercent / 100),
+      );
+
+      return {
+        applicationUnitFee,
+        userUnitAmount,
+        paymentProviderUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
+        receiverUnitRevenue: Math.round(
+          entityUnitCost - receiverAdditionalFee + extraReceiverUnitRevenue,
+        ),
+      };
+    }
+
+    const paymentProviderUnitFee =
+      getPercentFromAmount(entityUnitCost, paymentPercent) + stableUnit;
+
+    return {
+      applicationUnitFee,
+      paymentProviderUnitFee,
+      userUnitAmount: Math.round(entityUnitCost + senderAdditionalFee),
+      receiverUnitRevenue: Math.round(
+        entityUnitCost -
+          paymentProviderUnitFee -
+          applicationUnitFee -
+          receiverAdditionalFee +
+          extraReceiverUnitRevenue,
+      ),
+    };
   }
 
   /**
@@ -852,31 +950,6 @@ class Stripe extends Abstract {
       },
     );
   }
-
-  /**
-   * Returns connected account balance
-   */
-  // private async getConnectAccountBalance(userId: string): Promise<StripeSdk.Balance> {
-  //   const customer = await this.customerRepository.findOne({ userId });
-  //
-  //   if (!customer) {
-  //     throw new BaseException({
-  //       status: 500,
-  //       message: messages.getNotFoundMessage('Customer'),
-  //     });
-  //   }
-  //
-  //   if (!customer.params.accountId) {
-  //     throw new BaseException({
-  //       status: 500,
-  //       message: "Customer don't have related connected account",
-  //     });
-  //   }
-  //
-  //   return this.paymentEntity.balance.retrieve({
-  //     stripeAccount: customer.params.accountId,
-  //   });
-  // }
 
   /**
    * Check is first added card
@@ -1015,85 +1088,21 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Returns receiver payment amount
-   * NOTES: How much end user will get after fees from transaction
-   * 1. Stable unit - stable amount that payment provider charges
-   * 2. Payment percent - payment provider fee percent for single transaction
-   * Fees calculation:
-   * 1. User pays fee
-   * totalAmount = 106$, receiverReceiver = 100, taxFee = 3, applicationFee = 3
-   * 2. Receiver pays fees
-   * totalAmount = 100$, receiverReceiver = 94, taxFee = 3, applicationFee = 3
+   * Returns extracted transfer id from succeeded payment intent
+   * NOTE: handles single paymentIntent charge
    */
-  private async getPaymentIntentFees({
-    entityUnitCost,
-    feesPayer = TransactionRole.SENDER,
-    additionalFeesPercent,
-    applicationPaymentPercent = 0,
-    extraReceiverRevenuePercent = 0,
-  }: IGetPaymentIntentFeesParams): Promise<{
-    paymentProviderUnitFee: number;
-    applicationUnitFee: number;
-    userUnitAmount: number;
-    receiverUnitRevenue: number;
-  }> {
-    const { paymentFees } = await remoteConfig();
-
-    const { paymentPercent, stableUnit } = paymentFees!;
-
-    /**
-     * Calculate additional fees
-     */
-    const receiverAdditionalFee = getPercentFromAmount(
-      entityUnitCost,
-      additionalFeesPercent?.receiver,
-    );
-    const senderAdditionalFee = getPercentFromAmount(entityUnitCost, additionalFeesPercent?.sender);
-
-    /**
-     * Additional receiver revenue from application percent
-     */
-    const extraReceiverUnitRevenue = getPercentFromAmount(
-      entityUnitCost,
-      extraReceiverRevenuePercent,
-    );
-
-    /**
-     * How much percent from total amount will receive end user
-     */
-    const applicationUnitFee = getPercentFromAmount(entityUnitCost, applicationPaymentPercent);
-
-    if (feesPayer === TransactionRole.SENDER) {
-      const userTempUnitAmount = entityUnitCost + applicationUnitFee + senderAdditionalFee;
-      const userUnitAmount = Math.round(
-        (userTempUnitAmount + stableUnit) / (1 - paymentPercent / 100),
-      );
-
-      return {
-        applicationUnitFee,
-        userUnitAmount,
-        paymentProviderUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
-        receiverUnitRevenue: Math.round(
-          entityUnitCost - receiverAdditionalFee + extraReceiverUnitRevenue,
-        ),
-      };
+  private extractTransferIdFromPaymentIntent(charges?: StripeSdk.Charge[]): string | undefined {
+    if (!charges || charges.length < 0) {
+      return;
     }
 
-    const paymentProviderUnitFee =
-      getPercentFromAmount(entityUnitCost, paymentPercent) + stableUnit;
+    const [charge] = charges;
 
-    return {
-      applicationUnitFee,
-      paymentProviderUnitFee,
-      userUnitAmount: Math.round(entityUnitCost + senderAdditionalFee),
-      receiverUnitRevenue: Math.round(
-        entityUnitCost -
-          paymentProviderUnitFee -
-          applicationUnitFee -
-          receiverAdditionalFee +
-          extraReceiverUnitRevenue,
-      ),
-    };
+    if (!charge?.transfer) {
+      return;
+    }
+
+    return this.extractId(charge.transfer);
   }
 }
 

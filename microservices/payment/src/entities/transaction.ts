@@ -16,6 +16,8 @@ export interface IParams {
   checkoutStatus?: StripeCheckoutStatus;
   errorMessage?: string;
   feesPayer?: TransactionRole;
+  // PaymentIntent charge transfer id, must exist for refund
+  transferId?: string;
 }
 
 @JSONSchema({
