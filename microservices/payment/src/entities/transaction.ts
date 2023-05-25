@@ -1,4 +1,4 @@
-import { IsNullable, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
+import { IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
 import { Allow, IsEnum, IsNumber, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
@@ -84,6 +84,7 @@ class Transaction {
   @Length(1, 36)
   entityId: string;
 
+  @JSONSchema({ description: 'Unit amount (e.g. 100$ = 10000 in unit' })
   @Column({ type: 'int' })
   @IsNumber()
   amount: number;
@@ -93,7 +94,6 @@ class Transaction {
   })
   @Column({ type: 'int', default: 0 })
   @IsUndefinable()
-  @IsNullable()
   @IsNumber()
   tax: number;
 
@@ -102,7 +102,6 @@ class Transaction {
   })
   @Column({ type: 'int', default: 0 })
   @IsUndefinable()
-  @IsNullable()
   @IsNumber()
   fee: number;
 
