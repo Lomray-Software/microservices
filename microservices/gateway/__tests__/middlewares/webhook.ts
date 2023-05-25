@@ -9,6 +9,9 @@ describe('webhook', () => {
   const sandbox = sinon.createSandbox();
   const nextStub = sandbox.stub().resolves();
 
+  res.status = () => res;
+  res.json = () => res;
+
   afterEach(() => {
     sandbox.restore();
   });
