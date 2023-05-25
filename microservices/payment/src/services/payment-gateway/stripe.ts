@@ -353,10 +353,10 @@ class Stripe extends Abstract {
         void this.handlePaymentIntent(event);
         break;
 
-      // case 'charge.refund.updated':
-      // case 'charge.refunded':
-      //   void this.handleChargeRefund(event);
-      //   break;
+      case 'charge.refund.updated':
+      case 'charge.refunded':
+        void this.handleChargeRefund(event);
+        break;
     }
   }
 
