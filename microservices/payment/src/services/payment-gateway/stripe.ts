@@ -248,7 +248,6 @@ class Stripe extends Abstract {
       {
         type: TransactionType.CREDIT,
         amount: price.unitAmount,
-        customerId,
         userId,
         productId: price.productId,
         entityId: price.product.entityId,

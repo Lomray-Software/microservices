@@ -27,7 +27,7 @@ export default class init1679778151988 implements MigrationInterface {
       `CREATE TABLE "price" ("priceId" character varying(30) NOT NULL, "productId" character varying(19) NOT NULL, "userId" character varying(36) NOT NULL, "currency" character varying(10) NOT NULL, "unitAmount" integer NOT NULL, CONSTRAINT "price(rel):productId" UNIQUE ("productId"), CONSTRAINT "price(pk):priceId" PRIMARY KEY ("priceId"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "transaction" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "transactionId" character varying(66) NOT NULL, "title" character varying(100) NOT NULL DEFAULT '', "userId" character varying(36) NOT NULL, "customerId" character varying(19) NOT NULL, "bankAccountId" character varying(66), "cardId" character varying(66), "paymentMethodId" character varying(66), "entityId" character varying(36) NOT NULL, "productId" character varying(19), "amount" integer NOT NULL, "type" "public"."transaction_type_enum" NOT NULL, "tax" integer, "fee" integer, "status" "public"."transaction_status_enum" NOT NULL DEFAULT 'initial', "params" json NOT NULL DEFAULT '{}', CONSTRAINT "transaction(pk):id" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "transaction" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "transactionId" character varying(66) NOT NULL, "title" character varying(100) NOT NULL DEFAULT '', "userId" character varying(36) NOT NULL, "bankAccountId" character varying(66), "cardId" character varying(66), "paymentMethodId" character varying(66), "entityId" character varying(36) NOT NULL, "productId" character varying(19), "amount" integer NOT NULL, "type" "public"."transaction_type_enum" NOT NULL, "tax" integer NOT NULL DEFAULT 0, "fee" integer NOT NULL DEFAULT 0, "status" "public"."transaction_status_enum" NOT NULL DEFAULT 'initial', "params" json NOT NULL DEFAULT '{}', CONSTRAINT "transaction(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "bank_account" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" character varying(36) NOT NULL, "lastDigits" character varying(4) NOT NULL, "bankName" character varying(100), "holderName" character varying(100), "params" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "bank_account(pk):id" PRIMARY KEY ("id"))`,
@@ -52,7 +52,7 @@ export default class init1679778151988 implements MigrationInterface {
       `ALTER TABLE "price" ADD CONSTRAINT "price(fk):productId_productId" FOREIGN KEY ("productId") REFERENCES "product"("productId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "transaction" ADD CONSTRAINT "transaction(fk):customerId" FOREIGN KEY ("customerId") REFERENCES "customer"("customerId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "transaction" ADD CONSTRAINT "transaction(fk):userId" FOREIGN KEY ("userId") REFERENCES "customer"("userId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE "transaction" ADD CONSTRAINT "transaction(fk):productId" FOREIGN KEY ("productId") REFERENCES "product"("productId") ON DELETE NO ACTION ON UPDATE NO ACTION`,

@@ -40,7 +40,7 @@ class Transaction {
   title: string;
 
   @JSONSchema({
-    description: 'User (customer) which pays (init transaction)',
+    description: 'UserId from our microservice for user (customer) which pays (init transaction)',
   })
   @Column({ type: 'varchar', length: 36 })
   @Length(1, 36)
@@ -91,7 +91,7 @@ class Transaction {
   @JSONSchema({
     description: 'Payment provider percent',
   })
-  @Column({ type: 'int' })
+  @Column({ type: 'int', default: 0 })
   @IsUndefinable()
   @IsNullable()
   @IsNumber()
@@ -100,7 +100,7 @@ class Transaction {
   @JSONSchema({
     description: 'Application percent',
   })
-  @Column({ type: 'int' })
+  @Column({ type: 'int', default: 0 })
   @IsUndefinable()
   @IsNullable()
   @IsNumber()
@@ -130,7 +130,8 @@ class Transaction {
 
   @ManyToOne('Customer', 'transactions')
   @JoinColumn({
-    name: 'customerId',
+    name: 'userId',
+    referencedColumnName: 'userId',
   })
   customer: Customer;
 

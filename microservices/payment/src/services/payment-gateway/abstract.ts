@@ -45,7 +45,6 @@ export interface ITransactionParams {
   title?: string;
   bankAccountId?: string;
   productId?: string;
-  customerId?: string;
   cardId?: string;
   entityId?: string;
   type?: TransactionType;
@@ -141,7 +140,7 @@ abstract class Abstract {
     const transaction = this.transactionRepository.create({
       ...params,
       product: { productId: params.productId },
-      customer: { customerId: params.customerId },
+      customer: { userId: params.userId },
       transactionId,
     });
 
