@@ -1,4 +1,4 @@
-import { IsNullable, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
+import { IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
 import { Allow, IsEnum, IsNumber, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
@@ -40,7 +40,7 @@ class Transaction {
   title: string;
 
   @JSONSchema({
-    description: 'User (customer) which pays (init transaction)',
+    description: 'UserId from our microservice for user (customer) which pays (init transaction)',
   })
   @Column({ type: 'varchar', length: 36 })
   @Length(1, 36)
@@ -84,12 +84,6 @@ class Transaction {
   @Length(1, 36)
   entityId: string;
 
-  @Column({ type: 'varchar', length: 19, default: null })
-  @Length(1, 19)
-  @IsUndefinable()
-  @IsNullable()
-  productId: string | null;
-
   @JSONSchema({ description: 'Unit amount (e.g. 100$ = 10000 in unit' })
   @Column({ type: 'int' })
   @IsNumber()
@@ -98,7 +92,7 @@ class Transaction {
   @JSONSchema({
     description: 'Payment provider percent',
   })
-  @Column({ type: 'int' })
+  @Column({ type: 'int', default: 0 })
   @IsUndefinable()
   @IsNumber()
   tax: number;
@@ -106,7 +100,7 @@ class Transaction {
   @JSONSchema({
     description: 'Application percent',
   })
-  @Column({ type: 'int' })
+  @Column({ type: 'int', default: 0 })
   @IsUndefinable()
   @IsNumber()
   fee: number;
@@ -128,11 +122,16 @@ class Transaction {
   params: IParams;
 
   @ManyToOne('Product', 'transactions')
-  @JoinColumn({ name: 'productId' })
+  @JoinColumn({
+    name: 'productId',
+  })
   product: Product;
 
   @ManyToOne('Customer', 'transactions')
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({
+    name: 'userId',
+    referencedColumnName: 'userId',
+  })
   customer: Customer;
 
   /**

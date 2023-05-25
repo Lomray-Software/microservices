@@ -137,7 +137,12 @@ abstract class Abstract {
     params: ITransactionParams,
     transactionId = uuid(),
   ): Promise<Transaction> {
-    const transaction = this.transactionRepository.create({ ...params, transactionId });
+    const transaction = this.transactionRepository.create({
+      ...params,
+      product: { productId: params.productId },
+      customer: { userId: params.userId },
+      transactionId,
+    });
 
     await this.transactionRepository.save(transaction);
 

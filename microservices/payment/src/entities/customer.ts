@@ -1,7 +1,7 @@
 import { IsUndefinable } from '@lomray/microservice-helpers';
 import { Length, IsObject } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { Column, Entity, Index, OneToMany, PrimaryColumn, Unique } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryColumn, Unique } from 'typeorm';
 import type BankAccount from '@entities/bank-account';
 import type Card from '@entities/card';
 import type Transaction from '@entities/transaction';
@@ -31,7 +31,6 @@ class Customer {
   @Length(1, 18)
   customerId: string;
 
-  @Index('IDX_payment_userId', ['userId'])
   @Column({ type: 'varchar', length: 36 })
   @Unique(['userId'])
   @Length(1, 36)

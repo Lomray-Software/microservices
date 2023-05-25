@@ -221,7 +221,7 @@ class Stripe extends Abstract {
     const { priceId, userId, successUrl, cancelUrl } = params;
 
     const { customerId } = await super.getCustomer(userId);
-    const price = await this.priceRepository.findOne({ priceId });
+    const price = await this.priceRepository.findOne({ priceId }, { relations: ['product'] });
 
     if (!price) {
       Log.error(`There is no price related to this priceId: ${priceId}`);
@@ -250,6 +250,7 @@ class Stripe extends Abstract {
         amount: price.unitAmount,
         userId,
         productId: price.productId,
+        entityId: price.product.entityId,
         status: TransactionStatus.INITIAL,
       },
       id,
@@ -556,9 +557,12 @@ class Stripe extends Abstract {
    */
   public async createTransfer(entityId: string, userId: string, payoutCoeff: number) {
     const transfer = await this.getTransferInfo(entityId, userId);
+    const product = await this.productRepository.findOne({ entityId });
 
-    if (!transfer) {
-      Log.error(`There is no actual transfers for entity with following id: ${entityId}`);
+    if (!transfer || !product) {
+      Log.error(
+        `There is no actual transfers or product for entity with following id: ${entityId}`,
+      );
 
       return;
     }
@@ -576,6 +580,9 @@ class Stripe extends Abstract {
       amount: transfer.amount,
       type: TransactionType.DEBIT,
       status: TransactionStatus.INITIAL,
+      product: {
+        productId: product.productId,
+      },
     });
 
     await this.transactionRepository.save(transaction);
