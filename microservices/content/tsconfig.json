@@ -1,0 +1,6 @@
+{
+  "extends": "@lomray/microservice-config/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "."
+  },
+}
