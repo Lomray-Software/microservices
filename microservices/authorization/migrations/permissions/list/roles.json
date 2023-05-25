@@ -6,6 +6,12 @@
     "createdAt": "2022-02-25T07:11:22.570Z"
   },
   {
+    "alias": "webhook",
+    "parentAlias": "guest",
+    "name": "Webhook",
+    "createdAt": "2022-02-25T07:11:34.858Z"
+  },
+  {
     "alias": "user",
     "parentAlias": "guest",
     "name": "User",
