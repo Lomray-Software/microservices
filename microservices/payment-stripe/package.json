@@ -46,5 +46,10 @@
     "stripe": "^11.16.0",
     "typeorm": "0.2.41",
     "uuidv4": "^6.2.13"
+  },
+  "overrides": {
+    "typeorm": {
+      "xml2js": "0.5.0"
+    }
   }
 }
