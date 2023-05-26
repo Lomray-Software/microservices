@@ -184,3 +184,34 @@ Content-Type: application/json
     "transactionId": "pi_3NBIfuFpQjUWTpHe0H7NlJ5o"
   }
 }
+
+### Additional requests
+### Get connect account link
+POST http://127.0.0.1:8001/ms/payment
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.connect-account",
+  "params": {
+    "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "refreshUrl": "https://example.com",
+    "returnUrl": "https://example.com"
+  }
+}
+
+### Get payment intent fees
+POST http://127.0.0.1:8001/ms/payment
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.payment-intent-fees",
+  "params": {
+    "entityCost": 100,
+    "feesPayer": "sender",
+    "applicationPaymentPercent": 3
+  }
+}
