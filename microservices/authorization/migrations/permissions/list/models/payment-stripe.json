@@ -1222,15 +1222,15 @@
     "schema": {
       "body": {
         "in": {
-          "admin": "allow"
+          "webhook": "allow"
         },
         "out": {
           "admin": "allow"
         }
       },
-      "headers": {
+      "rawBody": {
         "in": {
-          "admin": "allow"
+          "webhook": "allow"
         },
         "out": {
           "admin": "allow"
@@ -1243,7 +1243,16 @@
     "microservice": "payment-stripe",
     "alias": "payment-stripe.WebhookOutput",
     "title": "Webhook Output",
-    "schema": {},
+    "schema": {
+      "isHandled": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "webhook": "allow"
+        }
+      }
+    },
     "createdAt": "2023-05-26T15:01:39.186Z"
   },
   {
