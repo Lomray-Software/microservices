@@ -1,6 +1,6 @@
 ### Full account setup flow
 ### Step 1. Create sender customer
-POST http://127.0.0.1:8001/ms/payment
+POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
 
@@ -13,7 +13,7 @@ Content-Type: application/json
 }
 
 ### Step 2. Create receiver customer
-POST http://127.0.0.1:8001/ms/payment
+POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
 
@@ -26,7 +26,7 @@ Content-Type: application/json
 }
 
 ### Step 3. Stripe setup intent for sender
-POST http://127.0.0.1:8001/ms/payment
+POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
 
@@ -39,7 +39,7 @@ Content-Type: application/json
 }
 
 ### Step 4. Connect accout (Setup bank account)
-POST http://127.0.0.1:8001/ms/payment
+POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
 
@@ -56,7 +56,7 @@ Content-Type: application/json
 }
 
 ### Step 5 (Example 1). Create PaymentIntent (Buy ticket for 100$) with extra receiver revenue
-POST http://127.0.0.1:8001/ms/payment
+POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
 
@@ -76,7 +76,7 @@ Content-Type: application/json
 }
 
 ### Step 5 (Example 2). Create PaymentIntent (Buy ticket for 100$) with the application fees
-POST http://127.0.0.1:8001/ms/payment
+POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
 
@@ -95,7 +95,7 @@ Content-Type: application/json
 }
 
 ### Step 5 (Example 3). Create PaymentIntent (Buy ticket for 100$)
-POST http://127.0.0.1:8001/ms/payment
+POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
 
@@ -113,7 +113,7 @@ Content-Type: application/json
 }
 
 ### Step 5 (Example 4). Create PaymentIntent (Buy ticket for 100$) fees pays receiver
-POST http://127.0.0.1:8001/ms/payment
+POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
 
@@ -131,7 +131,7 @@ Content-Type: application/json
 }
 
 ### Step 5 (Example 5). Create PaymentIntent (Buy ticket for 100$) fees pays receiver with the application fee
-POST http://127.0.0.1:8001/ms/payment
+POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
 
@@ -150,7 +150,7 @@ Content-Type: application/json
 }
 
 ### Step 5 (Example 6). Create PaymentIntent (Buy ticket for 100$) with the additional fees for receiver
-POST http://127.0.0.1:8001/ms/payment
+POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
 
@@ -173,7 +173,7 @@ Content-Type: application/json
 }
 
 ### Step 6. Refund full transaction amout
-POST http://127.0.0.1:8001/ms/payment
+POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
 
@@ -187,7 +187,7 @@ Content-Type: application/json
 
 ### Additional requests
 ### Get connect account link
-POST http://127.0.0.1:8001/ms/payment
+POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
 
@@ -202,7 +202,7 @@ Content-Type: application/json
 }
 
 ### Get payment intent fees
-POST http://127.0.0.1:8001/ms/payment
+POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
 
