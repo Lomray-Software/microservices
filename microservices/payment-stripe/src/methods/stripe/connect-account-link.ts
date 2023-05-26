@@ -1,6 +1,6 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { IsObject, IsString } from 'class-validator';
-import StripeSdk from 'stripe';
+import type StripeSdk from 'stripe';
 import { getManager } from 'typeorm';
 import Factory from '@services/payment-gateway/factory';
 
