@@ -307,14 +307,35 @@ class Stripe extends Abstract {
       await this.customerRepository.save(customer);
     }
 
-    return this.paymentEntity.accountLinks.create({
-      account: customer.params.accountId as string,
-      type: 'account_onboarding',
-      // eslint-disable-next-line camelcase
-      refresh_url: refreshUrl,
-      // eslint-disable-next-line camelcase
-      return_url: returnUrl,
-    });
+    return this.buildAccountLink(customer.params.accountId, refreshUrl, returnUrl);
+  }
+
+  /**
+   * Returns account link
+   * NOTE: Use when user needs to update connect account data
+   */
+  public async getConnectAccountLink(
+    userId: string,
+    refreshUrl: string,
+    returnUrl: string,
+  ): Promise<StripeSdk.AccountLink> {
+    const customer = await this.customerRepository.findOne({ userId });
+
+    if (!customer) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Customer'),
+      });
+    }
+
+    if (!customer.params.accountId) {
+      throw new BaseException({
+        status: 400,
+        message: "Customer don't have setup connect account",
+      });
+    }
+
+    return this.buildAccountLink(customer.params.accountId, refreshUrl, returnUrl);
   }
 
   /**
@@ -1166,6 +1187,24 @@ class Stripe extends Abstract {
     }
 
     return this.extractId(charge.transfer);
+  }
+
+  /**
+   * Returns account link
+   */
+  private buildAccountLink(
+    accountId: string,
+    refreshUrl: string,
+    returnUrl: string,
+  ): Promise<StripeSdk.AccountLink> {
+    return this.paymentEntity.accountLinks.create({
+      account: accountId,
+      type: 'account_onboarding',
+      // eslint-disable-next-line camelcase
+      refresh_url: refreshUrl,
+      // eslint-disable-next-line camelcase
+      return_url: returnUrl,
+    });
   }
 }
 

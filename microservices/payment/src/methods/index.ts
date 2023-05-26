@@ -12,6 +12,7 @@ import CrudPrice from '@methods/price/crud';
 import ProductCreate from '@methods/product/create';
 import CrudProduct from '@methods/product/crud';
 import ConnectAccount from '@methods/stripe/connect-account';
+import ConnectAccountLink from '@methods/stripe/connect-account-link';
 import CreateCheckout from '@methods/stripe/create-checkout';
 import CreatePaymentIntent from '@methods/stripe/create-payment-intent';
 import Payout from '@methods/stripe/payout';
@@ -43,6 +44,7 @@ export default (ms: Microservice): void => {
       'create-checkout': CreateCheckout,
       'connect-account': ConnectAccount,
       'create-payment-intent': CreatePaymentIntent,
+      'connect-account-link': ConnectAccountLink,
       webhook: WebhookHandler,
       payout: Payout,
       refund: Refund,
