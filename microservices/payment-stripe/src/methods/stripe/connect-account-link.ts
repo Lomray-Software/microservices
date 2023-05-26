@@ -3,7 +3,6 @@ import { IsObject, IsString } from 'class-validator';
 import StripeSdk from 'stripe';
 import { getManager } from 'typeorm';
 import Factory from '@services/payment-gateway/factory';
-import Stripe from '@services/payment-gateway/stripe';
 
 class ConnectAccountLinkInput {
   @IsString()
@@ -31,7 +30,7 @@ const connectAccountLink = Endpoint.custom(
     description: 'Create new link for access to the connect account',
   }),
   async ({ userId, refreshUrl, returnUrl }) => {
-    const service = (await Factory.create(getManager())) as Stripe;
+    const service = await Factory.create(getManager());
 
     return {
       accountLink: await service.getConnectAccountLink(userId, refreshUrl, returnUrl),

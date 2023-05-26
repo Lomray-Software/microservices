@@ -3,7 +3,6 @@ import { IsEnum, IsNumber } from 'class-validator';
 import { getManager } from 'typeorm';
 import TransactionRole from '@constants/transaction-role';
 import Factory from '@services/payment-gateway/factory';
-import Stripe from '@services/payment-gateway/stripe';
 
 class PaymentIntentFeesInput {
   @IsNumber()
@@ -57,7 +56,7 @@ const paymentIntentFees = Endpoint.custom(
     additionalFeesPercent,
     feesPayer,
   }) => {
-    const service = (await Factory.create(getManager())) as Stripe;
+    const service = await Factory.create(getManager());
 
     const entityUnitCost = service.toSmallestCurrencyUnit(entityCost);
 
