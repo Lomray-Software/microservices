@@ -29,13 +29,15 @@ const connectAccountLink = Endpoint.custom(
   () => ({
     input: ConnectAccountLinkInput,
     output: ConnectAccountLinkOutput,
-    description: 'Create new link for access to the connect account ofr update',
+    description: 'Create new link for access to the connect account',
   }),
   async ({ userId, refreshUrl, returnUrl }) => {
     const { paymentOptions } = await remoteConfig();
 
     if (!paymentOptions) {
-      throw new Error('Payment intent only suitable for the stripe payment provider');
+      throw new Error(
+        'Create new connect account link only suitable for the stripe payment provider',
+      );
     }
 
     const service = (await Factory.create(getManager())) as Stripe;
