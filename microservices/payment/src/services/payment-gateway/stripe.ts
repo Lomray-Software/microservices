@@ -917,6 +917,27 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Returns positive int amount
+   * NOTE: Should return the positive integer representing how much
+   * to charge in the smallest currency unit
+   */
+  public toSmallestCurrencyUnit(amount: number | string): number {
+    /**
+     * Convert the amount to a number if it's a string
+     */
+    const parsedAmount = typeof amount === 'string' ? Number.parseFloat(amount) : amount;
+
+    return parsedAmount * 100;
+  }
+
+  /**
+   * Returns float value from unit
+   */
+  public fromSmallestCurrencyUnit(amount: number): number {
+    return amount / 100;
+  }
+
+  /**
    * Returns receiver payment amount
    * NOTES: How much end user will get after fees from transaction
    * 1. Stable unit - stable amount that payment provider charges
@@ -1155,20 +1176,6 @@ class Stripe extends Abstract {
     }
 
     return bankAccount;
-  }
-
-  /**
-   * Returns positive int amount
-   * NOTE: Should return the positive integer representing how much
-   * to charge in the smallest currency unit
-   */
-  private toSmallestCurrencyUnit(amount: number | string): number {
-    /**
-     * Convert the amount to a number if it's a string
-     */
-    const parsedAmount = typeof amount === 'string' ? Number.parseFloat(amount) : amount;
-
-    return parsedAmount * 100;
   }
 
   /**
