@@ -1,5 +1,5 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, IsBoolean, IsObject, Length } from 'class-validator';
+import { Allow, IsBoolean, IsEnum, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Entity,
@@ -11,6 +11,7 @@ import {
   Index,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import CardFundingType from '@constants/card-funding-type';
 import type Customer from '@entities/customer';
 import IsCardExpirationValid from '@helpers/validators/is-card-expiration-valid';
 import IsLastCardDigitsValid from '@helpers/validators/is-last-card-digits-valid';
@@ -77,9 +78,21 @@ class Card {
   @JSONSchema({
     example: 'visa',
   })
+  @Column({ type: 'enum', enum: CardFundingType })
+  @IsEnum(CardFundingType)
+  fundingType: CardFundingType;
+
+  @JSONSchema({
+    example: 'visa',
+  })
   @Column({ type: 'varchar', length: 20 })
   @Length(1, 20)
-  type: string;
+  brand: string;
+
+  @Column({ type: 'boolean', default: false })
+  @IsBoolean()
+  @IsUndefinable()
+  isInstantPayoutAllowed: boolean;
 
   @Column({ type: 'json', default: {} })
   @IsObject()

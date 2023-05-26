@@ -1,7 +1,9 @@
+import * as console from 'console';
 import { Log } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
+import CardFundingType from '@constants/card-funding-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
@@ -86,6 +88,11 @@ interface IGetPaymentIntentFeesParams
   > {
   entityUnitCost: number;
 }
+
+type TAvailablePaymentMethods =
+  | StripeSdk.Card.AvailablePayoutMethod[]
+  | StripeSdk.BankAccount.AvailablePayoutMethod[]
+  | null;
 
 /**
  * Stripe payment provider
@@ -421,6 +428,44 @@ class Stripe extends Abstract {
     });
 
     await Promise.all(saveRequests);
+
+    console.log(1, { status, id, td: rest?.transfer_data });
+
+    if (status !== StripeTransactionStatus.SUCCEEDED) {
+      return;
+    }
+
+    await this.handleInstantPayout(id, rest?.transfer_data);
+  }
+
+  /**
+   * Create instant payout
+   */
+  public async handleInstantPayout(
+    connectAccountId: string,
+    transferData?: StripeSdk.PaymentIntent.TransferData | null,
+  ): Promise<void> {
+    console.log(2);
+
+    if (!transferData?.amount) {
+      throw new BaseException({
+        status: 500,
+        message: "PaymentIntent transfer data amount wasn't provided",
+      });
+    }
+
+    const payout = await this.sdk.payouts.create(
+      {
+        amount: transferData.amount,
+        currency: 'usd',
+        method: 'instant',
+      },
+      {
+        stripeAccount: connectAccountId,
+      },
+    );
+
+    console.log('payout', payout);
   }
 
   /**
@@ -496,16 +541,20 @@ class Stripe extends Abstract {
 
       const {
         last4: lastDigits,
-        brand: type,
+        brand,
         exp_year,
         exp_month,
         default_for_currency: isDefault,
+        available_payout_methods: availablePayoutMethods,
+        funding,
       } = externalAccount;
 
       card.isDefault = Boolean(isDefault);
       card.lastDigits = lastDigits;
       card.expired = toExpirationDate(exp_month, exp_year);
-      card.type = type;
+      card.brand = brand;
+      card.fundingType = funding as CardFundingType;
+      card.isInstantPayoutAllowed = this.isAllowedInstantPayout(availablePayoutMethods);
 
       await this.cardRepository.save(card);
 
@@ -519,12 +568,14 @@ class Stripe extends Abstract {
       account_holder_name: holderName,
       bank_name: bankName,
       default_for_currency: isDefault,
+      available_payout_methods: availablePayoutMethods,
     } = externalAccount as StripeSdk.BankAccount;
 
     bankAccount.isDefault = Boolean(isDefault);
     bankAccount.lastDigits = lastDigits;
     bankAccount.holderName = holderName;
     bankAccount.bankName = bankName;
+    bankAccount.isInstantPayoutAllowed = this.isAllowedInstantPayout(availablePayoutMethods);
 
     await this.bankAccountRepository.save(bankAccount);
     /* eslint-enable camelcase */
@@ -553,16 +604,20 @@ class Stripe extends Abstract {
       const {
         id: cardId,
         last4: lastDigits,
-        brand: type,
+        brand,
+        funding,
         exp_year,
         exp_month,
+        available_payout_methods: availablePayoutMethods,
         default_for_currency: isDefault,
       } = externalAccount;
 
       await this.cardRepository.save({
         lastDigits,
-        type,
+        brand,
+        fundingType: funding as CardFundingType,
         userId,
+        isInstantPayoutAllowed: this.isAllowedInstantPayout(availablePayoutMethods),
         isDefault: Boolean(isDefault),
         expired: toExpirationDate(exp_month, exp_year),
         params: { cardId },
@@ -577,6 +632,7 @@ class Stripe extends Abstract {
       account_holder_name: holderName,
       bank_name: bankName,
       default_for_currency: isDefault,
+      available_payout_methods: availablePayoutMethods,
     } = externalAccount as StripeSdk.BankAccount;
 
     await this.bankAccountRepository.save({
@@ -584,6 +640,7 @@ class Stripe extends Abstract {
       bankAccountId,
       lastDigits,
       userId,
+      isInstantPayoutAllowed: this.isAllowedInstantPayout(availablePayoutMethods),
       holderName,
       bankName,
       params: { bankAccountId },
@@ -743,7 +800,7 @@ class Stripe extends Abstract {
      * Verify if customer is verified
      */
     const {
-      customerId: receiverCustomerId,
+      userId: receiverUserId,
       params: { accountId: receiverAccountId, isVerified: isReceiverVerified },
     } = receiverCustomer;
 
@@ -809,13 +866,13 @@ class Stripe extends Abstract {
     return Promise.all([
       this.transactionRepository.save({
         ...transactionData,
-        userId: senderCustomer.customerId,
+        userId: senderCustomer.userId,
         type: TransactionType.CREDIT,
         amount: userUnitAmount,
       }),
       this.transactionRepository.save({
         ...transactionData,
-        userId: receiverCustomerId,
+        userId: receiverUserId,
         type: TransactionType.DEBIT,
         amount: receiverUnitRevenue,
       }),
@@ -1182,6 +1239,17 @@ class Stripe extends Abstract {
       // eslint-disable-next-line camelcase
       return_url: returnUrl,
     });
+  }
+
+  /**
+   * Check is allowed instant payout
+   */
+  private isAllowedInstantPayout(availablePayoutMethods?: TAvailablePaymentMethods): boolean {
+    if (!availablePayoutMethods) {
+      return false;
+    }
+
+    return availablePayoutMethods.includes('instant');
   }
 }
 

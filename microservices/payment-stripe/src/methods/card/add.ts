@@ -2,7 +2,7 @@ import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
 import { IsBoolean, IsEnum, IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
-import CardType from '@constants/card-type';
+import CardFundingType from '@constants/card-funding-type';
 import Card from '@entities/card';
 import Factory from '@services/payment-gateway/factory';
 
@@ -19,8 +19,8 @@ class CardAddInput {
   @IsString()
   lastDigits: string;
 
-  @IsEnum(CardType)
-  type: CardType;
+  @IsEnum(CardFundingType)
+  fundingType: CardFundingType;
 
   @IsString()
   cardId: string;
