@@ -1,4 +1,3 @@
-import CardFundingType from '@constants/card-funding-type';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 
 const cardMock = {
@@ -6,7 +5,7 @@ const cardMock = {
   userId: 'user-id',
   lastDigits: '4242',
   brand: 'visa',
-  fundingType: CardFundingType.DEBIT,
+  funding: 'debit',
   expired: toExpirationDate(1, 2040),
 };
 

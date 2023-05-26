@@ -3,7 +3,6 @@ import { Log } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
-import CardFundingType from '@constants/card-funding-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
@@ -510,7 +509,7 @@ class Stripe extends Abstract {
 
     const {
       id,
-      card: { brand: type, last4: lastDigits, exp_month, exp_year },
+      card: { brand, last4: lastDigits, exp_month, exp_year, funding },
     } = paymentMethod;
 
     const { userId } = customer;
@@ -520,9 +519,10 @@ class Stripe extends Abstract {
     /* eslint-enable camelcase */
     await this.cardRepository.save({
       lastDigits,
-      type,
+      brand,
       isDefault,
       userId,
+      funding,
       expired: toExpirationDate(exp_month, exp_year),
       params: { isApproved: true, paymentMethodId: id },
     });
@@ -553,7 +553,7 @@ class Stripe extends Abstract {
       card.lastDigits = lastDigits;
       card.expired = toExpirationDate(exp_month, exp_year);
       card.brand = brand;
-      card.fundingType = funding as CardFundingType;
+      card.funding = funding;
       card.isInstantPayoutAllowed = this.isAllowedInstantPayout(availablePayoutMethods);
 
       await this.cardRepository.save(card);
@@ -615,7 +615,7 @@ class Stripe extends Abstract {
       await this.cardRepository.save({
         lastDigits,
         brand,
-        fundingType: funding as CardFundingType,
+        funding,
         userId,
         isInstantPayoutAllowed: this.isAllowedInstantPayout(availablePayoutMethods),
         isDefault: Boolean(isDefault),
