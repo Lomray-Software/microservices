@@ -13,6 +13,8 @@ export interface IParams {
   isVerified?: boolean;
   // Connect account transfer capability status
   transferCapabilityStatus?: 'active' | 'inactive' | 'pending';
+  // Is instant payout enabled
+  isInstantPayoutEnabled?: boolean;
 }
 
 @JSONSchema({

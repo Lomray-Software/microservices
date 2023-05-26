@@ -362,6 +362,22 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Handles instant payout
+   */
+  public async createInstantPayout(
+    receiverConnectAccountId?: string | StripeSdk.Account,
+  ): Promise<void> {
+    if (!receiverConnectAccountId) {
+      throw new BaseException({
+        status: 500,
+        message: "Failed to create instant payout, receiver connect account id wasn't provided",
+      });
+    }
+
+    await this.paymentEntity.payouts.create({ currency: 'usd', amount: 100, method: 'instant' });
+  }
+
+  /**
    * Handles refund statuses
    */
   public async handleChargeRefund(event: StripeSdk.Event): Promise<void> {
@@ -426,6 +442,12 @@ class Stripe extends Abstract {
     });
 
     await Promise.all(saveRequests);
+
+    if (status !== StripeTransactionStatus.SUCCEEDED) {
+      return;
+    }
+
+    await this.createInstantPayout(rest.transfer_data?.destination);
   }
 
   /**
