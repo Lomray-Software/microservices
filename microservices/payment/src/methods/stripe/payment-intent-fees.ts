@@ -80,10 +80,10 @@ const paymentIntentFees = Endpoint.custom(
     });
 
     return Object.fromEntries(
-      Object.entries(unitFees).map(([key, value]) => {
-        const newKey = key.replace('Unit', '');
+      Object.entries(unitFees).map(([title, amount]) => {
+        const newKey = title.replace('Unit', '');
 
-        return [newKey, service.fromSmallestCurrencyUnit(value)];
+        return [newKey, service.fromSmallestCurrencyUnit(amount)];
       }),
     ) as unknown as PaymentIntentFeesOutput;
   },
