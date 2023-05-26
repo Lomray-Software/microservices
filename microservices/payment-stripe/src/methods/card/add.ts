@@ -41,11 +41,11 @@ class CardAddOutput {
  */
 const add = Endpoint.custom(
   () => ({ input: CardAddInput, output: CardAddOutput, description: 'Add new card' }),
-  async (params) => {
+  async () => {
     const service = await Factory.create(getManager());
 
     return {
-      entity: await service.addCard(params),
+      entity: await service.addCard(),
     };
   },
 );

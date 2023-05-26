@@ -29,11 +29,11 @@ const add = Endpoint.custom(
     output: BankAccountAddOutput,
     description: 'Add new bank account',
   }),
-  async (params) => {
+  async () => {
     const service = await Factory.create(getManager());
 
     return {
-      entity: await service.addBankAccount(params),
+      entity: await service.addBankAccount(),
     };
   },
 );
