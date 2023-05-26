@@ -4,11 +4,11 @@ import type { IRemoteConfig } from '@interfaces/remote-config';
 
 const defaultConfig: IRemoteConfig = {
   paymentMethods: CONST.PAYMENT_METHODS,
-  paymentApiKey: CONST.PAYMENT_API_KEY,
-  paymentConfig: CONST.PAYMENT_CONFIG,
+  apiKey: CONST.API_KEY,
+  config: CONST.CONFIG,
   webhookKey: CONST.WEBHOOK_KEY,
   payoutCoeff: CONST.PAYOUT_COEFF,
-  paymentFees: JSON.parse(CONST.PAYMENT_FEES),
+  fees: JSON.parse(CONST.FEES),
 };
 
 /**

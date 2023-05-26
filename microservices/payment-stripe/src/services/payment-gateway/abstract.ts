@@ -1,4 +1,5 @@
 import { BaseException } from '@lomray/microservice-nodejs-lib';
+import StripeSdk, { Stripe as StripeTypes } from 'stripe';
 import { EntityManager, Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
 import TransactionStatus from '@constants/transaction-status';
@@ -91,15 +92,32 @@ abstract class Abstract {
   protected readonly transactionRepository: Repository<Transaction>;
 
   /**
+   * @protected
+   */
+  protected readonly sdk: StripeSdk;
+
+  /**
+   * @protected
+   */
+  protected readonly methods: string[];
+
+  /**
    * @constructor
    */
-  public constructor(manager: EntityManager) {
+  public constructor(
+    manager: EntityManager,
+    apiKey: string,
+    stripeConfig: StripeTypes.StripeConfig,
+    methods: string[],
+  ) {
     this.customerRepository = manager.getRepository(Customer);
     this.productRepository = manager.getRepository(Product);
     this.priceRepository = manager.getRepository(Price);
     this.transactionRepository = manager.getRepository(Transaction);
     this.cardRepository = manager.getRepository(Card);
     this.bankAccountRepository = manager.getRepository(BankAccount);
+    this.methods = methods;
+    this.sdk = new StripeSdk(apiKey, stripeConfig);
   }
 
   /**

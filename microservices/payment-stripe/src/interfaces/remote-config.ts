@@ -7,8 +7,8 @@ import IFees from '@interfaces/fees';
 export interface IRemoteConfig {
   webhookKey?: string;
   payoutCoeff?: number;
-  paymentFees?: IFees;
+  fees?: IFees;
   paymentMethods?: string[];
-  paymentApiKey?: string;
-  paymentConfig?: Stripe.StripeConfig;
+  apiKey?: string;
+  config?: Stripe.StripeConfig;
 }
