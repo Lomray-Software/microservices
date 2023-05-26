@@ -12,8 +12,6 @@ class Factory {
   public static async create(manager: EntityManager): Promise<Stripe> {
     const { config, paymentMethods, apiKey } = await remoteConfig();
 
-    console.log({ config, paymentMethods, apiKey }, { config, paymentMethods, apiKey });
-
     if (!config || !apiKey || !paymentMethods) {
       throw new Error('Payment options or api key or payment methods for stripe are not provided');
     }
