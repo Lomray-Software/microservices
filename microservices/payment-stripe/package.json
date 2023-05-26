@@ -1,7 +1,7 @@
 {
-  "name": "@lomray/microservice-payment",
+  "name": "@lomray/microservice-payment-stripe",
   "version": "1.0.0",
-  "description": "Payment microservice based on NodeJS & inverted json.",
+  "description": "Stripe payment microservice based on NodeJS & inverted json.",
   "main": "index.js",
   "types": "index.d.ts",
   "keywords": [
@@ -12,7 +12,7 @@
     "json",
     "worker",
     "typescript",
-    "payment"
+    "payment-stripe"
   ],
   "publishConfig": {
     "access": "public"
@@ -39,7 +39,7 @@
     "start:prod": "node --require ./lib/tracer.js ./lib/index.js"
   },
   "dependencies": {
-    "@lomray/microservice-helpers": "^2.5.2",
+    "@lomray/microservice-helpers": "^2.5.6",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "class-validator-jsonschema": "^5.0.0",

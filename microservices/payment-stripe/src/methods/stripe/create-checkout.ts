@@ -1,10 +1,7 @@
 import { Endpoint, IsNullable } from '@lomray/microservice-helpers';
 import { IsString } from 'class-validator';
 import { getManager } from 'typeorm';
-import remoteConfig from '@config/remote';
-import PaymentProvider from '@constants/payment-provider';
 import Factory from '@services/payment-gateway/factory';
-import Stripe from '@services/payment-gateway/stripe';
 
 class CreateCheckoutInput {
   @IsString()
@@ -36,13 +33,7 @@ const createCheckout = Endpoint.custom(
     description: 'Setup intent and return client secret key',
   }),
   async ({ priceId, successUrl, cancelUrl, userId }) => {
-    const { paymentProvider } = await remoteConfig();
-
-    if (paymentProvider !== PaymentProvider.STRIPE) {
-      throw new Error('Create checkout session only suitable for the stripe payment provider');
-    }
-
-    const service = (await Factory.create(getManager())) as Stripe;
+    const service = await Factory.create(getManager());
 
     return {
       redirectUrl: await service.createCheckout({ priceId, userId, successUrl, cancelUrl }),

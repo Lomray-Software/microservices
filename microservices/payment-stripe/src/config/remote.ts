@@ -1,14 +1,14 @@
 import { RemoteConfig } from '@lomray/microservice-helpers';
 import CONST from '@constants/index';
-import PaymentProvider from '@constants/payment-provider';
 import type { IRemoteConfig } from '@interfaces/remote-config';
 
 const defaultConfig: IRemoteConfig = {
-  paymentProvider: CONST.PAYMENT_PROVIDER as PaymentProvider,
-  paymentOptions: JSON.parse(CONST.PAYMENT_OPTIONS),
-  paymentWebhookKey: CONST.PAYMENT_WEBHOOK_KEY,
-  payoutCoeff: CONST.PAYOUT_COEFF,
-  paymentFees: JSON.parse(CONST.PAYMENT_FEES),
+  paymentMethods: CONST.MS_PAYMENT_METHODS,
+  apiKey: CONST.MS_API_KEY,
+  config: CONST.MS_CONFIG,
+  webhookKey: CONST.MS_WEBHOOK_KEY,
+  payoutCoeff: CONST.MS_PAYOUT_COEFF,
+  fees: JSON.parse(CONST.MS_FEES),
 };
 
 /**

@@ -1,10 +1,8 @@
 import { Log } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import StripeSdk from 'stripe';
-import type { EntityManager } from 'typeorm';
 import remoteConfig from '@config/remote';
-import type PaymentProvider from '@constants/payment-provider';
-import StripeAccountTypes from '@constants/stripe-acoount-types';
+import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
@@ -20,7 +18,6 @@ import Transaction from '@entities/transaction';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
-import type IStripeOptions from '@interfaces/stripe-options';
 import Abstract, { IPriceParams, IProductParams } from './abstract';
 
 export interface IStripeProductParams extends IProductParams {
@@ -95,29 +92,6 @@ interface IGetPaymentIntentFeesParams
  */
 class Stripe extends Abstract {
   /**
-   * @protected
-   */
-  protected readonly paymentEntity: StripeSdk;
-
-  /**
-   * @protected
-   */
-  protected readonly paymentOptions: IStripeOptions;
-
-  /**
-   * @constructor
-   */
-  constructor(
-    manager: EntityManager,
-    paymentProvider: PaymentProvider.STRIPE,
-    paymentOptions: IStripeOptions,
-  ) {
-    super(paymentProvider, paymentOptions, manager);
-
-    this.paymentEntity = new StripeSdk(paymentOptions.apiKey, paymentOptions.config);
-  }
-
-  /**
    * Add new card
    */
   addCard(): Promise<Card> {
@@ -137,10 +111,10 @@ class Stripe extends Abstract {
   public async setupIntent(userId: string): Promise<string | null> {
     const { customerId } = await super.getCustomer(userId);
 
-    const { client_secret: clientSecret } = await this.paymentEntity.setupIntents.create({
+    const { client_secret: clientSecret } = await this.sdk.setupIntents.create({
       customer: customerId,
       // eslint-disable-next-line camelcase
-      payment_method_types: this.paymentOptions.methods,
+      payment_method_types: this.methods,
     });
 
     return clientSecret;
@@ -153,7 +127,7 @@ class Stripe extends Abstract {
     /**
      * @TODO: get users name, email and pass it into customer
      */
-    const { id }: StripeSdk.Customer = await this.paymentEntity.customers.create();
+    const { id }: StripeSdk.Customer = await this.sdk.customers.create();
 
     return super.createCustomer(userId, id);
   }
@@ -199,7 +173,7 @@ class Stripe extends Abstract {
   public async createProduct(params: IStripeProductParams): Promise<Product> {
     const { entityId, name, description, images, userId } = params;
 
-    const { id }: StripeSdk.Product = await this.paymentEntity.products.create({
+    const { id }: StripeSdk.Product = await this.sdk.products.create({
       name,
       description,
       images,
@@ -220,7 +194,7 @@ class Stripe extends Abstract {
   public async createPrice(params: IPriceParams): Promise<Price> {
     const { currency, unitAmount, productId, userId } = params;
 
-    const { id }: StripeSdk.Price = await this.paymentEntity.prices.create({
+    const { id }: StripeSdk.Price = await this.sdk.prices.create({
       currency,
       product: productId,
       // eslint-disable-next-line camelcase
@@ -254,7 +228,7 @@ class Stripe extends Abstract {
     }
 
     /* eslint-disable camelcase */
-    const { id, url } = await this.paymentEntity.checkout.sessions.create({
+    const { id, url } = await this.sdk.checkout.sessions.create({
       line_items: [
         {
           price: priceId,
@@ -296,7 +270,7 @@ class Stripe extends Abstract {
     const customer = await super.getCustomer(userId);
 
     if (!customer.params.accountId) {
-      const stripeConnectAccount: StripeSdk.Account = await this.paymentEntity.accounts.create({
+      const stripeConnectAccount: StripeSdk.Account = await this.sdk.accounts.create({
         type: accountType,
         country: 'US',
         email,
@@ -307,7 +281,7 @@ class Stripe extends Abstract {
       await this.customerRepository.save(customer);
     }
 
-    return this.paymentEntity.accountLinks.create({
+    return this.sdk.accountLinks.create({
       account: customer.params.accountId as string,
       type: 'account_onboarding',
       // eslint-disable-next-line camelcase
@@ -321,7 +295,7 @@ class Stripe extends Abstract {
    * Get the webhook from stripe and handle deciding on type of event
    */
   public handleWebhookEvent(payload: string, signature: string, webhookKey: string): void {
-    const event = this.paymentEntity.webhooks.constructEvent(payload, signature, webhookKey);
+    const event = this.sdk.webhooks.constructEvent(payload, signature, webhookKey);
 
     switch (event.type) {
       case 'checkout.session.completed':
@@ -446,12 +420,9 @@ class Stripe extends Abstract {
     /**
      * Get payment method data
      */
-    const paymentMethod = await this.paymentEntity.paymentMethods.retrieve(
-      this.extractId(payment_method),
-      {
-        expand: [StripePaymentMethods.CARD],
-      },
-    );
+    const paymentMethod = await this.sdk.paymentMethods.retrieve(this.extractId(payment_method), {
+      expand: [StripePaymentMethods.CARD],
+    });
 
     if (!paymentMethod?.card || !paymentMethod?.customer) {
       throw new BaseException({
@@ -694,7 +665,7 @@ class Stripe extends Abstract {
       return;
     }
 
-    const { id } = await this.paymentEntity.transfers.create({
+    const { id } = await this.sdk.transfers.create({
       amount: transfer.amount * payoutCoeff,
       currency: 'usd',
       destination: transfer.destinationUser,
@@ -781,26 +752,25 @@ class Stripe extends Abstract {
       });
 
     /* eslint-disable camelcase */
-    const stripePaymentIntent: StripeSdk.PaymentIntent =
-      await this.paymentEntity.paymentIntents.create({
-        ...(title ? { description: title } : {}),
-        metadata: {
-          ...(entityId ? { entityId } : {}),
-        },
-        payment_method_types: [StripePaymentMethods.CARD],
-        confirm: true,
-        currency: 'usd',
-        capture_method: 'automatic',
-        payment_method: paymentMethodId,
-        customer: senderCustomer.customerId,
-        // How much must sender must pay
-        amount: userUnitAmount,
-        transfer_data: {
-          // How much must receive end user
-          amount: receiverUnitRevenue,
-          destination: receiverAccountId,
-        },
-      });
+    const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
+      ...(title ? { description: title } : {}),
+      metadata: {
+        ...(entityId ? { entityId } : {}),
+      },
+      payment_method_types: [StripePaymentMethods.CARD],
+      confirm: true,
+      currency: 'usd',
+      capture_method: 'automatic',
+      payment_method: paymentMethodId,
+      customer: senderCustomer.customerId,
+      // How much must sender must pay
+      amount: userUnitAmount,
+      transfer_data: {
+        // How much must receive end user
+        amount: receiverUnitRevenue,
+        destination: receiverAccountId,
+      },
+    });
 
     /* eslint-enable camelcase */
     const transactionData = {
@@ -860,13 +830,13 @@ class Stripe extends Abstract {
     /**
      * Returns refunds from receiver connect account to platform (application) account
      */
-    await this.paymentEntity.transfers.createReversal(debitTransaction.params.transferId);
+    await this.sdk.transfers.createReversal(debitTransaction.params.transferId);
 
     /**
      * Returns refunds from platform (application) account to sender
      */
     /* eslint-disable camelcase */
-    await this.paymentEntity.refunds.create({
+    await this.sdk.refunds.create({
       amount: debitTransaction.amount,
       payment_intent: debitTransaction.transactionId,
     });
@@ -918,9 +888,9 @@ class Stripe extends Abstract {
     userUnitAmount: number;
     receiverUnitRevenue: number;
   }> {
-    const { paymentFees } = await remoteConfig();
+    const { fees } = await remoteConfig();
 
-    const { paymentPercent, stableUnit } = paymentFees!;
+    const { paymentPercent, stableUnit } = fees!;
 
     /**
      * Calculate additional fees
