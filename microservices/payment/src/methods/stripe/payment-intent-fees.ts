@@ -7,13 +7,6 @@ import TransactionRole from '@constants/transaction-role';
 import Factory from '@services/payment-gateway/factory';
 import Stripe from '@services/payment-gateway/stripe';
 
-interface IPaymentFees {
-  paymentProviderFee: number;
-  applicationFee: number;
-  userAmount: number;
-  receiverRevenue: number;
-}
-
 class PaymentIntentFeesInput {
   @IsNumber()
   entityCost: number;
@@ -35,7 +28,7 @@ class PaymentIntentFeesInput {
   extraReceiverRevenuePercent?: number;
 }
 
-class PaymentIntentFeesOutput implements IPaymentFees {
+class PaymentIntentFeesOutput {
   @IsNumber()
   paymentProviderFee: number;
 
@@ -92,7 +85,7 @@ const paymentIntentFees = Endpoint.custom(
 
         return [newKey, service.fromSmallestCurrencyUnit(value)];
       }),
-    ) as unknown as IPaymentFees;
+    ) as unknown as PaymentIntentFeesOutput;
   },
 );
 
