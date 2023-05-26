@@ -1,5 +1,5 @@
 ### Create transaction (send 100$)
-POST http://127.0.0.1:8001/ms/payment
+POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
 
