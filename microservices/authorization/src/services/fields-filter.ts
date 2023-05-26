@@ -162,15 +162,28 @@ class FieldsFilter {
         newValue = await this.filterBySchema(nestedSchema, type, policy, value);
       } else if ('case' in policy) {
         // dynamic schema (like switch - case)
-        const caseValue = this.templateValue(policy.case.template, type, field, schemaAlias, value);
-        const dynamicSchema = { [field]: policy.object[caseValue] } as IModelSchema;
+        const caseValue = await this.checkField(
+          policy.case[type] as IRolePermissions,
+          type,
+          field,
+          schemaAlias,
+          '*',
+          fields,
+        );
 
-        newValue = (
-          await this.filterBySchema(dynamicSchema, type, schemaAlias, { [field]: value })
-        )?.[field];
+        // field is fully allowed
+        if (caseValue === '*') {
+          newValue = value;
+        } else {
+          const dynamicSchema = { [field]: policy.object[caseValue] } as IModelSchema;
 
-        if (_.isEmpty(newValue)) {
-          newValue = undefined;
+          newValue = (
+            await this.filterBySchema(dynamicSchema, type, schemaAlias, { [field]: value })
+          )?.[field];
+
+          if (_.isEmpty(newValue)) {
+            newValue = undefined;
+          }
         }
       } else if ('object' in policy) {
         // nested schema

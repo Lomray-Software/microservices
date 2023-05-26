@@ -35,7 +35,7 @@ export interface IModelSchema {
     | string // related model alias
     | ({ object: IModelSchema | string } & IFieldPermission) // can be is object or related model alias
     | {
-        case: { template: string };
+        case: Omit<IFieldPermission, 'isCustom'>;
         object: { [key: string]: string | IModelSchema };
         isCustom?: boolean;
       }

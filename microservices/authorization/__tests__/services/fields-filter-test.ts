@@ -386,6 +386,13 @@ describe('services/fields-filter', () => {
   });
 
   it('should correctly filter field: dynamic schema', async () => {
+    const serviceAdmins = FieldsFilter.init({
+      userId: 'admin-id',
+      userRoles: ['admins', 'users', 'guests'],
+      modelRepository,
+      conditionRepository,
+      conditionChecker,
+    });
     const input1 = {
       value: {
         test1: {
@@ -448,7 +455,14 @@ describe('services/fields-filter', () => {
         schema: {
           value: {
             case: {
-              template: `<%= "${modelAlias}" %>`,
+              in: {
+                admins: FieldPolicy.allow,
+                users: { template: `<%= "${modelAlias}" %>` },
+              },
+              out: {
+                admins: FieldPolicy.allow,
+                users: { template: `<%= "${modelAlias}" %>` },
+              },
             },
             object: {
               input1: 'aliasToInput1',
@@ -475,6 +489,7 @@ describe('services/fields-filter', () => {
     const res2 = await service.filter(FilterType.OUT, getModel('input2'), input2);
     const res3 = await service.filter(FilterType.IN, getModel('input2'), input2);
     const res4 = await service.filter(FilterType.IN, getModel(), input2); // mismatch input data and caseValue
+    const res5 = await serviceAdmins.filter(FilterType.IN, getModel(), input2); // admin
 
     expect(res1).to.deep.equal({
       value: {
@@ -500,5 +515,6 @@ describe('services/fields-filter', () => {
       },
     });
     expect(res4).to.deep.equal({});
+    expect(res5).to.deep.equal(input2);
   });
 });

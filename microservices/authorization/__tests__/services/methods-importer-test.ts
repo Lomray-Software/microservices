@@ -162,7 +162,15 @@ describe('services/methods-importer', () => {
         keepIt: { in: { user: FieldPolicy.deny }, out: {} },
         keepObj: {
           case: {
-            template: 'my-template',
+            in: {
+              admin: FieldPolicy.allow,
+            },
+            out: {
+              admin: FieldPolicy.allow,
+              user: {
+                template: 'my-template',
+              },
+            },
           },
           object: {
             hello: { in: { user: FieldPolicy.deny }, out: {} },
@@ -232,7 +240,15 @@ describe('services/methods-importer', () => {
         newField: { in: { admin: 'allow' }, out: { admin: 'allow' } },
         keepObj: {
           case: {
-            template: 'my-template',
+            in: {
+              admin: 'allow',
+            },
+            out: {
+              admin: 'allow',
+              user: {
+                template: 'my-template',
+              },
+            },
           },
           object: {
             hello: {

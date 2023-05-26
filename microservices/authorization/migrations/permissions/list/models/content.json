@@ -173,7 +173,15 @@
       "value": {
         "object": {},
         "case": {
-          "template": "<%= _.get(params, 'fields.entity.alias', _.get(params, 'fields.alias', _.get(params, 'query.where.alias'))) %>"
+          "in": {
+            "admin": "allow"
+          },
+          "out": {
+            "admin": "allow",
+            "guest": {
+              "template": "<%= _.get(params, 'fields.entity.alias', _.get(params, 'fields.alias', _.get(params, 'query.where.alias'))) %>"
+            }
+          }
         }
       },
       "createdAt": {

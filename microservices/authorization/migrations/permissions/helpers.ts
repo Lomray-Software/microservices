@@ -1,4 +1,5 @@
 import fs from 'fs';
+import _ from 'lodash';
 import { createConnection, Repository } from 'typeorm';
 import CONST from '@constants/index';
 import Condition from '@entities/condition';
@@ -142,6 +143,24 @@ const importMethodsPermissions = async (
 };
 
 /**
+ * Get models records
+ */
+const getModelRecords = async (repo: Repository<any>) => {
+  const records = getDumpEntitiesInFiles(DUMP_PATH_MODELS);
+  const singleTypePredicate = { alias: 'content.SingleType' };
+  const singleTypeRecord = _.find(records, { alias: singleTypePredicate });
+
+  // keep original single type value schema object
+  if (singleTypeRecord) {
+    const dbSingleType = await repo.findOne(singleTypePredicate);
+
+    _.set(singleTypeRecord, 'schema.value.object', dbSingleType?.schema?.value?.object ?? {});
+  }
+
+  return records;
+};
+
+/**
  * Import permissions from json files to DB
  */
 const importPermissions = async (onlyCleanup = false) => {
@@ -162,9 +181,9 @@ const importPermissions = async (onlyCleanup = false) => {
 
     const entities = [
       { repository: rolesRepo, file: 'roles', updateBy: 'alias' },
-      { repository: filtersRepo, file: 'filters' },
-      { repository: conditionRepo, file: 'conditions' },
-      { repository: modelRepo, file: getDumpEntitiesInFiles(DUMP_PATH_MODELS) },
+      { repository: filtersRepo, file: 'filters', updateBy: 'title' },
+      { repository: conditionRepo, file: 'conditions', updateBy: 'title' },
+      { repository: modelRepo, file: await getModelRecords(modelRepo), updateBy: 'alias' },
       () =>
         importMethodsPermissions(
           methodRepo,
