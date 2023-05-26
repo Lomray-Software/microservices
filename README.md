@@ -11,12 +11,13 @@ Prod: [![Build prod](https://github.com/Lomray-Software/microservices/actions/wo
  - [Authentication](microservices/authentication)
  - [Authorization](microservices/authorization)
  - [Configuration](microservices/configuration)
+ - [Content](microservices/content)
  - [Cron](microservices/cron)
  - [Files](microservices/files)
  - [Gateway](microservices/gateway)
  - [Notification](microservices/notification)
+ - [Payment-stripe](microservices/payment-stripe)
  - [Users](microservices/users)
- - [Content](microservices/content)
  
 ## Use [CLI](https://github.com/Lomray-Software/microservices-cli) to start your own art.
 

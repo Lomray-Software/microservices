@@ -79,3 +79,12 @@ services:
       - configuration
     environment:
       MS_CONNECTION: $MS_CONNECTION
+
+  payment-stripe:
+    image: ghcr.io/lomray-software/microservices/payment-stripe:${VERSION_TAG}
+    container_name: payment-stripe
+    restart: always
+    depends_on:
+      - configuration
+    environment:
+      MS_CONNECTION: $MS_CONNECTION

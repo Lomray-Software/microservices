@@ -1,0 +1,217 @@
+### Full account setup flow
+### Step 1. Create sender customer
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "customer.create",
+  "params": {
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3"
+  }
+}
+
+### Step 2. Create receiver customer
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "customer.create",
+  "params": {
+    "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3"
+  }
+}
+
+### Step 3. Stripe setup intent for sender
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.setup-intent",
+  "params": {
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3"
+  }
+}
+
+### Step 4. Connect accout (Setup bank account)
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.connect-account",
+  "params": {
+    "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "email": "receiver@gmail.com",
+    "accountType": "standard",
+    "refreshUrl": "https://example.com",
+    "returnUrl": "https://example.com"
+  }
+}
+
+### Step 5 (Example 1). Create PaymentIntent (Buy ticket for 100$) with extra receiver revenue
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.create-payment-intent",
+  "params": {
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
+    "receiverId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
+    "entityCost": 100,
+    "feesPayer": "sender",
+    "title": "ticket",
+    "applicationPaymentPercent": 3,
+    "extraReceiverRevenuePercent": 1
+  }
+}
+
+### Step 5 (Example 2). Create PaymentIntent (Buy ticket for 100$) with the application fees
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.create-payment-intent",
+  "params": {
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
+    "receiverId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
+    "entityCost": 100,
+    "feesPayer": "sender",
+    "title": "ticket 2",
+    "applicationPaymentPercent": 3
+  }
+}
+
+### Step 5 (Example 3). Create PaymentIntent (Buy ticket for 100$)
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.create-payment-intent",
+  "params": {
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
+    "receiverId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
+    "entityCost": 100,
+    "feesPayer": "sender",
+    "title": "ticket 3"
+  }
+}
+
+### Step 5 (Example 4). Create PaymentIntent (Buy ticket for 100$) fees pays receiver
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.create-payment-intent",
+  "params": {
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
+    "receiverId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
+    "entityCost": 100,
+    "feesPayer": "receiver",
+    "title": "ticket 4"
+  }
+}
+
+### Step 5 (Example 5). Create PaymentIntent (Buy ticket for 100$) fees pays receiver with the application fee
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.create-payment-intent",
+  "params": {
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
+    "receiverId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
+    "entityCost": 33,
+    "feesPayer": "receiver",
+    "title": "ticket 5",
+    "applicationPaymentPercent": 3
+  }
+}
+
+### Step 5 (Example 6). Create PaymentIntent (Buy ticket for 100$) with the additional fees for receiver
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.create-payment-intent",
+  "params": {
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
+    "receiverId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
+    "entityCost": 100,
+    "feesPayer": "sender",
+    "title": "ticket 6",
+    "applicationPaymentPercent": 3,
+    "additionalFeesPercent": {
+      "receiver": 5,
+      "sender": 0
+    }
+  }
+}
+
+### Step 6. Refund full transaction amout
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.refund",
+  "params": {
+    "transactionId": "pi_3NBIfuFpQjUWTpHe0H7NlJ5o"
+  }
+}
+
+### Additional requests
+### Get connect account link
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.connect-account",
+  "params": {
+    "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "refreshUrl": "https://example.com",
+    "returnUrl": "https://example.com"
+  }
+}
+
+### Get payment intent fees
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.payment-intent-fees",
+  "params": {
+    "entityCost": 100,
+    "feesPayer": "sender",
+    "applicationPaymentPercent": 3
+  }
+}
