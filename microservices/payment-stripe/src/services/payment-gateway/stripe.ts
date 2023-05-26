@@ -281,14 +281,35 @@ class Stripe extends Abstract {
       await this.customerRepository.save(customer);
     }
 
-    return this.sdk.accountLinks.create({
-      account: customer.params.accountId as string,
-      type: 'account_onboarding',
-      // eslint-disable-next-line camelcase
-      refresh_url: refreshUrl,
-      // eslint-disable-next-line camelcase
-      return_url: returnUrl,
-    });
+    return this.buildAccountLink(customer.params.accountId, refreshUrl, returnUrl);
+  }
+
+  /**
+   * Returns account link
+   * NOTE: Use when user needs to update connect account data
+   */
+  public async getConnectAccountLink(
+    userId: string,
+    refreshUrl: string,
+    returnUrl: string,
+  ): Promise<StripeSdk.AccountLink> {
+    const customer = await this.customerRepository.findOne({ userId });
+
+    if (!customer) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Customer'),
+      });
+    }
+
+    if (!customer.params.accountId) {
+      throw new BaseException({
+        status: 400,
+        message: "Customer don't have setup connect account",
+      });
+    }
+
+    return this.buildAccountLink(customer.params.accountId, refreshUrl, returnUrl);
   }
 
   /**
@@ -866,6 +887,27 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Returns positive int amount
+   * NOTE: Should return the positive integer representing how much
+   * to charge in the smallest currency unit
+   */
+  public toSmallestCurrencyUnit(amount: number | string): number {
+    /**
+     * Convert the amount to a number if it's a string
+     */
+    const parsedAmount = typeof amount === 'string' ? Number.parseFloat(amount) : amount;
+
+    return parsedAmount * 100;
+  }
+
+  /**
+   * Returns float value from unit
+   */
+  public fromSmallestCurrencyUnit(amount: number): number {
+    return amount / 100;
+  }
+
+  /**
    * Returns receiver payment amount
    * NOTES: How much end user will get after fees from transaction
    * 1. Stable unit - stable amount that payment provider charges
@@ -1107,20 +1149,6 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Returns positive int amount
-   * NOTE: Should return the positive integer representing how much
-   * to charge in the smallest currency unit
-   */
-  private toSmallestCurrencyUnit(amount: number | string): number {
-    /**
-     * Convert the amount to a number if it's a string
-     */
-    const parsedAmount = typeof amount === 'string' ? Number.parseFloat(amount) : amount;
-
-    return parsedAmount * 100;
-  }
-
-  /**
    * Returns extracted transfer id from succeeded payment intent
    * NOTE: handles single paymentIntent charge
    */
@@ -1136,6 +1164,24 @@ class Stripe extends Abstract {
     }
 
     return this.extractId(charge.transfer);
+  }
+
+  /**
+   * Returns account link
+   */
+  private buildAccountLink(
+    accountId: string,
+    refreshUrl: string,
+    returnUrl: string,
+  ): Promise<StripeSdk.AccountLink> {
+    return this.sdk.accountLinks.create({
+      account: accountId,
+      type: 'account_onboarding',
+      // eslint-disable-next-line camelcase
+      refresh_url: refreshUrl,
+      // eslint-disable-next-line camelcase
+      return_url: returnUrl,
+    });
   }
 }
 
