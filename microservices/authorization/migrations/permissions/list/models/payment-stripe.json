@@ -1,0 +1,1572 @@
+[
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.Price",
+    "title": "Price",
+    "schema": {
+      "priceId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "productId": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "currency": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "unitAmount": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "product": "payment-stripe.Product"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.Transactions",
+    "title": "Transactions",
+    "schema": {},
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.Product",
+    "title": "Product",
+    "schema": {
+      "productId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "entityId": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "price": "payment-stripe.Price",
+      "transactions": "payment-stripe.Transactions"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.Transaction",
+    "title": "Transaction",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "transactionId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "productId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "title": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "bankAccountId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "cardId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "entityId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "amount": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "fee": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "tax": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "status": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "customer": "payment-stripe.Customer",
+      "product": "payment-stripe.Product"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.BankAccount",
+    "title": "Bank Account",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "lastDigits": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "bankName": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "holderName": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "isDefault": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "customer": "payment-stripe.Customer"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.Customer",
+    "title": "Customer",
+    "schema":  {
+      "customerId": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "transactions": "payment-stripe.Transaction",
+      "cards": "payment-stripe.Card",
+      "bankAccounts": "payment-stripe.BankAccount"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.Card",
+    "title": "Card",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "lastDigits": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "expired": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "holderName": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "isDefault": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "customer": "payment-stripe.Customer"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ListOutputParams.bb3225128bd0a5c1d6c51e6f2668d280",
+    "title": "List Output Params",
+    "schema": {
+      "list": "payment-stripe.Card",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ViewOutputParams.42c9fcbd79b41712464c2f718e4b31d1",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "payment-stripe.Card"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateRequestParams.bc0eee0eff80ec697c58d5923b8da605",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "payment-stripe.Card"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateOutputParams.42c9fcbd79b41712464c2f718e4b31d1",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "payment-stripe.Card"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateRequestParams.bc0eee0eff80ec697c58d5923b8da605",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "payment-stripe.Card",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateOutputParams.42c9fcbd79b41712464c2f718e4b31d1",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "payment-stripe.Card"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.RemoveOutputParams.459a27ea29a2aa8be591913f062e74be",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "payment-stripe.Card",
+      "entities": "payment-stripe.Card"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CardAddInput",
+    "title": "Card Add Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "expired": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "holderName": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "lastDigits": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "cardId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "isDefault": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CardAddOutput",
+    "title": "Card Add Output",
+    "schema": {
+      "entity": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ListOutputParams.8f41f4d656756a40d24eaed65ae77f97",
+    "title": "List Output Params",
+    "schema": {
+      "list": "payment-stripe.BankAccount",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ViewOutputParams.6acc04786eedd28356976dfd5cad3ec3",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "payment-stripe.BankAccount"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateRequestParams.d7923746734a8d55a60e93204b0c3631",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "payment-stripe.BankAccount"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateOutputParams.6acc04786eedd28356976dfd5cad3ec3",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "payment-stripe.BankAccount"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateRequestParams.d7923746734a8d55a60e93204b0c3631",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "payment-stripe.BankAccount",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateOutputParams.6acc04786eedd28356976dfd5cad3ec3",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "payment-stripe.BankAccount"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.RemoveOutputParams.412123be180d48c45741772511bb7f94",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "payment-stripe.BankAccount",
+      "entities": "payment-stripe.BankAccount"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.BankAccountAddInput",
+    "title": "Bank Account Add Input",
+    "schema": {},
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.BankAccountAddOutput",
+    "title": "Bank Account Add Output",
+    "schema": {
+      "entity": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ListOutputParams.ab8bbade2b229df1cce267b8a3de985f",
+    "title": "List Output Params",
+    "schema": {
+      "list": "payment-stripe.Transaction",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ViewOutputParams.6dee9dddb2a4fce8a6c8ac5fc7881f25",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "payment-stripe.Transaction"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ListOutputParams.9ab1b5ead60adbc64ac3edf088918ea5",
+    "title": "List Output Params",
+    "schema": {
+      "list": "payment-stripe.Customer",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ViewOutputParams.b1d097cd23e411dc8f5dde074a276503",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "payment-stripe.Customer"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateRequestParams.4f3c8cc105ab4fed359329c47e0f8224",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "payment-stripe.Customer",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateOutputParams.b1d097cd23e411dc8f5dde074a276503",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "payment-stripe.Customer"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.RemoveOutputParams.87d10388e62bc5cd27e433c97b2b7ea5",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "payment-stripe.Customer",
+      "entities": "payment-stripe.Customer"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CustomerCreateInput",
+    "title": "Customer Create Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CustomerCreateOutput",
+    "title": "Customer Create Output",
+    "schema": {
+      "entity": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.SetupIntentInput",
+    "title": "Setup Intent Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.SetupIntentOutput",
+    "title": "Setup Intent Output",
+    "schema": {
+      "clientSecretToken": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateCheckoutInput",
+    "title": "Create Checkout Input",
+    "schema": {
+      "priceId": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "successUrl": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "cancelUrl": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateCheckoutOutput",
+    "title": "Create Checkout Output",
+    "schema": {
+      "redirectUrl": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ConnectAccountInput",
+    "title": "Connect Account Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "email": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "accountType": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "refreshUrl": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "returnUrl": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ConnectAccountOutput",
+    "title": "Connect Account Output",
+    "schema": {
+      "accountLink": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.PaymentIntentInput",
+    "title": "Payment Intent Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "receiverId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "entityCost": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "applicationPaymentPercent": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "title": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "cardId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "entityId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "feesPayer": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "additionalFeesPercent": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "extraReceiverRevenuePercent": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.PaymentIntentOutput",
+    "title": "Payment Intent Output",
+    "schema": {
+      "transaction": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.PaymentIntentFeesInput",
+    "title": "Payment Intent Fees Input",
+    "schema": {
+      "entityCost": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "feesPayer": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "applicationPaymentPercent": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "additionalFeesPercent": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "extraReceiverRevenuePercent": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.PaymentIntentFeesOutput",
+    "title": "Payment Intent Fees Output",
+    "schema": {
+      "paymentProviderFee": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "applicationFee": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userAmount": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "receiverRevenue": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ConnectAccountLinkInput",
+    "title": "Connect Account Link Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "refreshUrl": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "returnUrl": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ConnectAccountLinkOutput",
+    "title": "Connect Account Link Output",
+    "schema": {
+      "accountLink": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.WebhookInput",
+    "title": "Webhook Input",
+    "schema": {
+      "body": {
+        "in": {
+          "webhook": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "rawBody": {
+        "in": {
+          "webhook": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.WebhookOutput",
+    "title": "Webhook Output",
+    "schema": {
+      "isHandled": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "webhook": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.PayoutInput",
+    "title": "Payout Input",
+    "schema": {
+      "entities": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.PayoutOutput",
+    "title": "Payout Output",
+    "schema": {
+      "isComplete": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.RefundInput",
+    "title": "Refund Input",
+    "schema": {
+      "transactionId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.RefundOutput",
+    "title": "Refund Output",
+    "schema": {
+      "isInstantiated": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ListOutputParams.303da06f1a333ac1f38154b06d358190",
+    "title": "List Output Params",
+    "schema": {
+      "list": "payment-stripe.Product",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ViewOutputParams.266356321330cf8ce992459b7c5b3928",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "payment-stripe.Product"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateRequestParams.27959bbe8159d0d82e5c6ffb23a81e54",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "payment-stripe.Product",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateOutputParams.266356321330cf8ce992459b7c5b3928",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "payment-stripe.Product"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.RemoveOutputParams.a150411c4aa64f4b732916d98cee05f6",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "payment-stripe.Product",
+      "entities": "payment-stripe.Product"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ProductCreateInput",
+    "title": "Product Create Input",
+    "schema": {
+      "entityId": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "name": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "description": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "images": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ProductCreateOutput",
+    "title": "Product Create Output",
+    "schema": {
+      "entity": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ListOutputParams.0b740ee3b21ec023df99be0542e31f3e",
+    "title": "List Output Params",
+    "schema": {
+      "list": "payment-stripe.Price",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ViewOutputParams.35d659b8a4662f112b893310b15fd907",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "payment-stripe.Price"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateRequestParams.6c63bdcc30bd5fa302069e1922a1ace6",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "payment-stripe.Price",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateOutputParams.35d659b8a4662f112b893310b15fd907",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "payment-stripe.Price"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.RemoveOutputParams.9acd7ab2a60538cf116cf454460cee13",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "payment-stripe.Price",
+      "entities": "payment-stripe.Price"
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.PriceCreateInput",
+    "title": "Price Create Input",
+    "schema": {
+      "productId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "currency": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "unitAmount": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.PriceCreateOutput",
+    "title": "Price Create Output",
+    "schema": {
+      "entity": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-05-26T15:01:39.186Z"
+  }
+]

@@ -4,6 +4,20 @@ payment-stripe
 RPC 2.0 Microservice.
 This microservice provides payments mechanism for stipe.
 
+![npm (scoped)](https://img.shields.io/npm/v/@lomray/microservice-payment-stripe)  
+![Docker](https://img.shields.io/npm/v/@lomray/microservice-payment-stripe?label=docker)  
+![Docker prod](https://img.shields.io/badge/Docker%20prod-%3Alatest-blue)  
+![Docker staging](https://img.shields.io/badge/Docker%20staging-%3Alatest--staging-orange)  
+![GitHub](https://img.shields.io/github/license/Lomray-Software/microservices)
+![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=microservice-payment-stripe&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=microservice-payment-stripe)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-payment-stripe&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=microservice-payment-stripe)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-payment-stripe&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=microservice-payment-stripe)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=microservice-payment-stripe&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=microservice-payment-stripe)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=microservice-payment-stripe&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=microservice-payment-stripe)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=microservice-payment-stripe&metric=coverage)](https://sonarcloud.io/summary/new_code?id=microservice-payment-stripe)
+
 ## Navigation
 - [ENVIRONMENTS](#environments)
 - [HOW TO RUN](#how-to-run)

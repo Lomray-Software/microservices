@@ -191,5 +191,17 @@
     "modelIn": "CountRequestParams",
     "modelOut": "CountOutputParams",
     "methodFilters": []
+  },
+  {
+    "microservice": "configuration",
+    "method": "config-reset",
+    "description": "Reset RemoteConfig cache",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-05-26T15:12:57.613Z",
+    "modelOut": "RemoteConfigOutput",
+    "methodFilters": []
   }
 ]
