@@ -2,7 +2,7 @@
   <configuration default="false" name="payment" type="NodeJSConfigurationType" folderName="microservices" node-parameters="--require ts-node/register" path-to-js-file="$PROJECT_DIR$/microservices/payment-stripe/src/index.ts" working-dir="$PROJECT_DIR$/microservices/payment-stripe">
     <envs>
       <env name="DB_FROM_CONFIG_MS" value="0" />
-      <env name="PAYMENT_WEBHOOK_KEY" value="" />
+      <env name="MS_WEBHOOK_KEY" value="" />
     </envs>
     <method v="2" />
   </configuration>
