@@ -1,10 +1,7 @@
 import { Endpoint, IsNullable } from '@lomray/microservice-helpers';
 import { IsString } from 'class-validator';
 import { getManager } from 'typeorm';
-import remoteConfig from '@config/remote';
-import PaymentProvider from '@constants/payment-provider';
 import Factory from '@services/payment-gateway/factory';
-import Stripe from '@services/payment-gateway/stripe';
 
 class SetupIntentInput {
   @IsString()
@@ -27,13 +24,7 @@ const setupIntent = Endpoint.custom(
     description: 'Setup intent and return client secret key',
   }),
   async ({ userId }) => {
-    const { paymentProvider } = await remoteConfig();
-
-    if (paymentProvider !== PaymentProvider.STRIPE) {
-      throw new Error('Setup intent only suitable for the stripe payment provider');
-    }
-
-    const service = (await Factory.create(getManager())) as Stripe;
+    const service = await Factory.create(getManager());
 
     return {
       clientSecretToken: await service.setupIntent(userId),

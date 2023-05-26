@@ -1,7 +1,6 @@
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { EntityManager, Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
-import PaymentProvider from '@constants/payment-provider';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
@@ -11,7 +10,6 @@ import Price from '@entities/price';
 import Product from '@entities/product';
 import Transaction, { IParams as ITransactionEntityParams } from '@entities/transaction';
 import messages from '@helpers/validators/messages';
-import type TPaymentOptions from '@interfaces/payment-options';
 
 export interface ICardParams {
   lastDigits: string;
@@ -65,11 +63,6 @@ abstract class Abstract {
   /**
    * @protected
    */
-  protected readonly paymentProvider: PaymentProvider;
-
-  /**
-   * @protected
-   */
   protected readonly customerRepository: Repository<Customer>;
 
   /**
@@ -98,20 +91,9 @@ abstract class Abstract {
   protected readonly transactionRepository: Repository<Transaction>;
 
   /**
-   * @protected
-   */
-  protected readonly paymentOptions: TPaymentOptions;
-
-  /**
    * @constructor
    */
-  public constructor(
-    paymentProvider: Abstract['paymentProvider'],
-    paymentOptions: TPaymentOptions,
-    manager: EntityManager,
-  ) {
-    this.paymentProvider = paymentProvider;
-    this.paymentOptions = paymentOptions;
+  public constructor(manager: EntityManager) {
     this.customerRepository = manager.getRepository(Customer);
     this.productRepository = manager.getRepository(Product);
     this.priceRepository = manager.getRepository(Price);

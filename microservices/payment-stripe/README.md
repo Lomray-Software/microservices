@@ -1,8 +1,8 @@
-payment
+payment-stripe
 -------------------
 
 RPC 2.0 Microservice.
-This microservice provides payments mechanism.
+This microservice provides payments mechanism for stipe.
 
 ## Navigation
 - [ENVIRONMENTS](#environments)
@@ -11,6 +11,12 @@ This microservice provides payments mechanism.
 - [MEMORY USAGE](#memory-usage)
 
 ### <a id="environments"></a>ENVIRONMENTS:
+- `PAYMENT_API_KEY` - Stripe api key to connect ms with stripe sdk. Default: `example`
+- `PAYMENT_CONFIG` - JSON onject which contains apiVersion property required by Stripe. Default: `'{"apiVersion": "2022-11-15"}'`
+- `PAYMENT_METHODS` - Payment methods allowed using in Stripe. Default: `'["bancontact", "card"]'`
+- `WEBHOOK_KEY` - Stripe webhook key to connect ms and work with stripe webhook service. Example: `whsec_c6332a6b339173127d2e6c813112e2f2323b4b2b10eea5ac17c5649a60cf335e`
+- `PAYOUT_COEFF` - Number for calculating amount of money for transferring to the product owners. Default: `0.3`
+- `PAYMENT_FEES` - Fees that takes while creating payment intent. Default: `'{ "stableUnit": 30, "paymentPercent": 2.9 }'`
 - [See full list `COMMON ENVIRONMENTS`](https://github.com/Lomray-Software/microservice-helpers#common-environments)
 
 ### <a id="how-to-run"></a>HOW TO RUN:
@@ -24,14 +30,14 @@ npm run start:dev
 ```
 3. Make some request
 ```bash
-curl localhost:8001/ms/payment -d '{"id": "unique-id", "method": "demo", "params": {}}'
+curl localhost:8001/ms/payment-stripe -d '{"id": "unique-id", "method": "demo", "params": {}}'
 ```
 
 If you use `JetBrains` IDE, try to find run configurations in `.run`
 
 You can also install microservice like npm package:
 ```bash
-npm i --save @lomray/microservice-payment
+npm i --save @lomray/microservice-payment-stripe
 ```
 
 ### <a id="how-to-develop"></a>HOW TO DEVELOP:

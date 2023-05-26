@@ -1,10 +1,9 @@
 import { Log } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
-import StripeSdk from 'stripe';
+import StripeSdk, { Stripe as StripeTypes } from 'stripe';
 import type { EntityManager } from 'typeorm';
 import remoteConfig from '@config/remote';
-import type PaymentProvider from '@constants/payment-provider';
-import StripeAccountTypes from '@constants/stripe-acoount-types';
+import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
@@ -20,7 +19,6 @@ import Transaction from '@entities/transaction';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
-import type IStripeOptions from '@interfaces/stripe-options';
 import Abstract, { IPriceParams, IProductParams } from './abstract';
 
 export interface IStripeProductParams extends IProductParams {
@@ -102,19 +100,21 @@ class Stripe extends Abstract {
   /**
    * @protected
    */
-  protected readonly paymentOptions: IStripeOptions;
+  protected readonly methods: string[];
 
   /**
    * @constructor
    */
   constructor(
     manager: EntityManager,
-    paymentProvider: PaymentProvider.STRIPE,
-    paymentOptions: IStripeOptions,
+    apiKey: string,
+    stripeConfig: StripeTypes.StripeConfig,
+    methods: string[],
   ) {
-    super(paymentProvider, paymentOptions, manager);
+    super(manager);
 
-    this.paymentEntity = new StripeSdk(paymentOptions.apiKey, paymentOptions.config);
+    this.methods = methods;
+    this.paymentEntity = new StripeSdk(apiKey, stripeConfig);
   }
 
   /**
@@ -140,7 +140,7 @@ class Stripe extends Abstract {
     const { client_secret: clientSecret } = await this.paymentEntity.setupIntents.create({
       customer: customerId,
       // eslint-disable-next-line camelcase
-      payment_method_types: this.paymentOptions.methods,
+      payment_method_types: this.methods,
     });
 
     return clientSecret;

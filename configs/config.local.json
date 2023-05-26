@@ -110,14 +110,14 @@
     "microservice": "payment",
     "type": "config",
     "params": {
-      "paymentOptions": {
-        "methods": ["bancontact", "card"],
-        "apiKey": "your test key from stripe or other service",
-        "config": {
+        "paymentMethods": ["bancontact", "card"],
+        "paymentApiKey": "your test key from stripe or other service",
+        "paymentConfig": {
           "apiVersion": "2022-11-15"
-        }
       },
-      "paymentProvider": "stripe"
+      "payoutCoeff": 0.3,
+      "webhookKey": "your test webhook key from stripe or other service",
+      "paymentFees": { "stableUnit": 30, "paymentPercent": 2.9 }
     }
   }
 ]
