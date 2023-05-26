@@ -9,39 +9,42 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "productId": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "userId": {
         "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "currency": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "unitAmount": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "product": "payment-stripe.Product"
@@ -65,23 +68,26 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "entityId": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "userId": {
         "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "price": "payment-stripe.Price",
@@ -110,6 +116,14 @@
           "admin": "allow"
         }
       },
+      "productId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "title": {
         "in": {
           "admin": "allow"
@@ -119,14 +133,6 @@
         }
       },
       "userId": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
-      "type": {
         "in": {
           "admin": "allow"
         },
@@ -150,14 +156,6 @@
           "admin": "allow"
         }
       },
-      "paymentMethodId": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
       "entityId": {
         "in": {
           "admin": "allow"
@@ -171,15 +169,7 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
-        }
-      },
-      "tax": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "fee": {
@@ -187,7 +177,23 @@
           "admin": "allow"
         },
         "out": {
+          "user": "allow"
+        }
+      },
+      "tax": {
+        "in": {
           "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
         }
       },
       "status": {
@@ -296,20 +302,26 @@
     "microservice": "payment-stripe",
     "alias": "payment-stripe.Customer",
     "title": "Customer",
-    "schema": {
+    "schema":  {
       "customerId": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "userId": {
         "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
           "admin": "allow"
         },
         "out": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
           "admin": "allow"
         }
       },
@@ -318,7 +330,7 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "transactions": "payment-stripe.Transaction",
@@ -690,7 +702,7 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -774,10 +786,13 @@
     "schema": {
       "userId": {
         "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -790,10 +805,10 @@
     "schema": {
       "entity": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -806,10 +821,13 @@
     "schema": {
       "userId": {
         "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -825,7 +843,7 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -838,34 +856,37 @@
     "schema": {
       "priceId": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "userId": {
         "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "successUrl": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "cancelUrl": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -881,7 +902,7 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -894,6 +915,9 @@
     "schema": {
       "userId": {
         "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
           "admin": "allow"
         },
         "out": {
@@ -902,7 +926,7 @@
       },
       "email": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
           "admin": "allow"
@@ -910,7 +934,7 @@
       },
       "accountType": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
           "admin": "allow"
@@ -918,7 +942,7 @@
       },
       "refreshUrl": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
           "admin": "allow"
@@ -926,7 +950,7 @@
       },
       "returnUrl": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
           "admin": "allow"
@@ -945,7 +969,7 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -1355,42 +1379,45 @@
     "schema": {
       "entityId": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
-        }
-      },
-      "name": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "userId": {
         "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
+        }
+      },
+      "name": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
         }
       },
       "description": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       },
       "images": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -1403,10 +1430,10 @@
     "schema": {
       "entity": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -1487,28 +1514,31 @@
           "admin": "allow"
         }
       },
-      "currency": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
       "userId": {
         "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
+        }
+      },
+      "currency": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
         }
       },
       "unitAmount": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -1521,10 +1551,10 @@
     "schema": {
       "entity": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },

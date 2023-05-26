@@ -40,8 +40,8 @@ services:
       MS_CONNECTION: $MS_CONNECTION
     depends_on:
       - configuration
-    volumes:
-      - ./microservices/authorization/migrations/permissions/list:/var/www/lib/migrations/permissions/list
+    #volumes:
+    #  - ./microservices/authorization/permissions:/var/www/lib/migrations/permissions/list
 
   cron:
     image: ghcr.io/lomray-software/microservices/cron:${VERSION_TAG}
