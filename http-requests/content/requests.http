@@ -1,0 +1,243 @@
+### Build page
+### Create page header
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "component.create",
+  "params": {
+    "fields": {
+      "alias": "pageHeader",
+      "title": "Page header",
+      "schema": [
+        {
+          "name": "headerTitle",
+          "title": "Header title",
+          "type": "text"
+        },
+        {
+          "name": "postNumber",
+          "title": "Post number",
+          "type": "number"
+        }
+      ]
+    }
+  }
+}
+
+### Create page content
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "component.create",
+  "params": {
+    "fields": {
+      "alias": "pageContent",
+      "title": "Page content",
+      "schema": [
+        {
+          "name": "contentTitle",
+          "title": "Content title",
+          "type": "text"
+        },
+        {
+          "name": "contentDate",
+          "title": "Date of creation",
+          "type": "date"
+        },
+        {
+          "name": "contentDescription",
+          "title": "Content description",
+          "type": "richText"
+        },
+        {
+          "name": "contentCreators",
+          "type": "relation",
+          "relation": {
+            "microservice": "users",
+            "entity": "user",
+            "hasMany": false
+          }
+        }
+      ]
+    }
+  }
+}
+
+### Create page footer
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "component.create",
+  "params": {
+    "fields": {
+      "alias": "pageFooter",
+      "title": "Page footer",
+      "schema": [
+        {
+          "name": "contactUsWithTheEmail",
+          "title": "Contact us with the email",
+          "type": "email"
+        },
+        {
+          "name": "isThisPostRecommendedByUS",
+          "title": "Is this post recommended by us",
+          "type": "boolean"
+        }
+      ]
+    }
+  }
+}
+
+### Create page component
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "component.create",
+  "params": {
+    "fields": {
+      "children": [
+        {
+          "id": "9a7aedb4-4b00-44b3-89a3-a535692d28d6"
+        },
+        {
+          "id": "e6186469-a9a5-444c-812c-c801c95245b8"
+        },
+        {
+          "id": "78567003-f8cb-4d92-8aab-d7c9dc88bf2e"
+        }
+      ],
+      "alias": "blogPostPage",
+      "title": "Blog post page",
+      "schema": [
+        {
+          "id": "9a7aedb4-4b00-44b3-89a3-a535692d28d6",
+          "name": "header",
+          "type": "component",
+          "hasMany": false
+        },
+        {
+          "id": "e6186469-a9a5-444c-812c-c801c95245b8",
+          "name": "content",
+          "type": "component",
+          "hasMany": false
+        },
+        {
+          "id": "78567003-f8cb-4d92-8aab-d7c9dc88bf2e",
+          "name": "footer",
+          "type": "component",
+          "hasMany": false
+        },
+        {
+          "name": "options",
+          "title": "Options",
+          "type": "json"
+        }
+      ]
+    }
+  }
+}
+
+### Create single type for page
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.create",
+  "params": {
+    "fields": {
+      "components": [
+        {
+          "id": "dff2719e-3c57-4248-9408-59af6287a568"
+        }
+      ],
+      "title": "Page single type",
+      "alias": "pageSingleType",
+      "value": {
+        "blogPostPage": {
+          "id": "dff2719e-3c57-4248-9408-59af6287a568",
+          "data": {
+            "header": {
+              "id": "9a7aedb4-4b00-44b3-89a3-a535692d28d6",
+              "data": {
+                "pageHeader": {
+                  "id": "9a7aedb4-4b00-44b3-89a3-a535692d28d6",
+                  "data": {
+                    "headerTitle": "Cars",
+                    "postNumber": 1
+                  }
+                }
+              }
+            },
+            "content": {
+              "id": "e6186469-a9a5-444c-812c-c801c95245b8",
+              "data": {
+                "pageContent": {
+                  "id": "e6186469-a9a5-444c-812c-c801c95245b8",
+                  "data": {
+                    "contentTitle": "Green Lamborghini",
+                    "contentDate": "2023-05-28T13:56:55.360Z",
+                    "contentDescription": "contentTitle",
+                    "contentCreators": [
+                      "b9b61ca6-761b-4051-84b2-647a2262b78b",
+                      "a5326de3-d04c-425c-8711-0f99fc031c67"
+                    ]
+                  }
+                }
+              }
+            },
+            "footer": {
+              "id": "78567003-f8cb-4d92-8aab-d7c9dc88bf2e",
+              "data": {
+                "id": "78567003-f8cb-4d92-8aab-d7c9dc88bf2e",
+                "pageFooter": {
+                  "contactUsWithTheEmail": "contact@us.com",
+                  "isThisPostRecommendedByUS": true
+                }
+              }
+            },
+            "options": {
+              "timeZoneId": "America/Los_Angeles",
+              "timeZoneName": "Pacific Daylight Time"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+### View signle type
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.view",
+  "params": {
+    "query": {
+      "where": {
+        "id": "c59cdc52-86d0-4d61-bc8e-ab770fc1fd7b"
+      }
+    },
+    "payload": {
+      "expand": [
+        "blogPostPage.content.pageContent.contentCreators"
+      ]
+    }
+  }
+}
