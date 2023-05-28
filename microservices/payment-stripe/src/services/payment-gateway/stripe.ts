@@ -15,9 +15,11 @@ import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
 import Transaction from '@entities/transaction';
+import composeBalance from '@helpers/compose-balance';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
+import TCurrency from '@interfaces/currency';
 import Abstract, { IPriceParams, IProductParams } from './abstract';
 
 export interface IStripeProductParams extends IProductParams {
@@ -74,6 +76,18 @@ interface ITransferInfo {
   amount: number;
   destinationUser: string;
   userId: string;
+}
+
+interface IPayoutMethod {
+  id: string;
+  method: 'card' | 'bankAccount';
+}
+
+interface IInstantPayoutParams {
+  userId: string;
+  amount: number;
+  payoutMethod?: IPayoutMethod;
+  currency?: TCurrency;
 }
 
 interface IGetPaymentIntentFeesParams
@@ -430,8 +444,19 @@ class Stripe extends Abstract {
 
   /**
    * Create instant payout
+   * NOTE: Should be called from the API
    */
-  public async createInstantPayout(userId: string): Promise<void> {
+  public async instantPayout({
+    userId,
+    amount,
+    payoutMethod,
+    currency = 'usd',
+  }: IInstantPayoutParams): Promise<StripeSdk.Payout> {
+    const unitAmount = this.toSmallestCurrencyUnit(amount);
+
+    /**
+     * Get related customer
+     */
     const customer = await this.customerRepository.findOne({
       userId,
     });
@@ -443,13 +468,83 @@ class Stripe extends Abstract {
       });
     }
 
-    // const payout = await this.sdk.payouts.create(
-    //   {
-    //     amount: transferData.amount,
-    //     currency: 'usd',
-    //     method: 'instant',
-    //   },
-    // );
+    if (!customer.params.accountId) {
+      throw new BaseException({
+        status: 400,
+        message: "Customer don't have related connect account",
+      });
+    }
+
+    if (!customer.params.isPayoutEnabled) {
+      throw new BaseException({
+        status: 400,
+        message: "Payout isn't available",
+      });
+    }
+
+    const { instant_available: instantBalance } = await this.sdk.balance.retrieve({
+      stripeAccount: customer.params.accountId,
+    });
+
+    if (!instantBalance) {
+      throw new BaseException({
+        status: 500,
+        message: "Instant balance isn't available",
+      });
+    }
+
+    const balance = composeBalance(instantBalance);
+
+    if (!balance?.[currency]) {
+      throw new BaseException({
+        status: 400,
+        message: `Balance with the ${currency} isn't available`,
+      });
+    }
+
+    if (balance?.[currency] < unitAmount) {
+      throw new BaseException({
+        status: 400,
+        message: `Insufficient funds. Instant balance is ${balance?.[currency]} in ${currency}`,
+      });
+    }
+
+    const destination = await this.extractDestinationFromPayoutMethod(payoutMethod);
+
+    return this.sdk.payouts.create(
+      {
+        currency,
+        amount: unitAmount,
+        method: 'instant',
+        ...(destination ? { destination } : {}),
+      },
+      { stripeAccount: customer.params.accountId },
+    );
+  }
+
+  /**
+   * Returns user related connect account balance
+   */
+  public async getBalance(userId: string): Promise<StripeSdk.Balance> {
+    const customer = await this.customerRepository.findOne({
+      userId,
+    });
+
+    if (!customer) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Customer'),
+      });
+    }
+
+    if (!customer.params.accountId) {
+      throw new BaseException({
+        status: 400,
+        message: "Customer don't have related connect account",
+      });
+    }
+
+    return this.sdk.balance.retrieve({ stripeAccount: customer.params.accountId });
   }
 
   /**
@@ -1237,6 +1332,25 @@ class Stripe extends Abstract {
     }
 
     return availablePayoutMethods.includes('instant');
+  }
+
+  /**
+   * Returns payout method
+   */
+  private async extractDestinationFromPayoutMethod(
+    payoutMethod?: IPayoutMethod,
+  ): Promise<string | undefined> {
+    if (!payoutMethod) {
+      return;
+    }
+
+    const { method, id } = payoutMethod;
+
+    if (method === 'card') {
+      return (await this.cardRepository.findOne(id))?.params.cardId;
+    }
+
+    return (await this.bankAccountRepository.findOne(id))?.params.bankAccountId;
   }
 }
 
