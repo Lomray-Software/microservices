@@ -1,4 +1,3 @@
-import * as console from 'console';
 import { Log } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import StripeSdk from 'stripe';
@@ -427,44 +426,30 @@ class Stripe extends Abstract {
     });
 
     await Promise.all(saveRequests);
-
-    console.log(1, { status, id, td: rest?.transfer_data });
-
-    if (status !== StripeTransactionStatus.SUCCEEDED) {
-      return;
-    }
-
-    await this.handleInstantPayout(id, rest?.transfer_data);
   }
 
   /**
    * Create instant payout
    */
-  public async handleInstantPayout(
-    connectAccountId: string,
-    transferData?: StripeSdk.PaymentIntent.TransferData | null,
-  ): Promise<void> {
-    console.log(2);
+  public async createInstantPayout(userId: string): Promise<void> {
+    const customer = await this.customerRepository.findOne({
+      userId,
+    });
 
-    if (!transferData?.amount) {
+    if (!customer) {
       throw new BaseException({
-        status: 500,
-        message: "PaymentIntent transfer data amount wasn't provided",
+        status: 400,
+        message: messages.getNotFoundMessage('Customer'),
       });
     }
 
-    const payout = await this.sdk.payouts.create(
-      {
-        amount: transferData.amount,
-        currency: 'usd',
-        method: 'instant',
-      },
-      {
-        stripeAccount: connectAccountId,
-      },
-    );
-
-    console.log('payout', payout);
+    // const payout = await this.sdk.payouts.create(
+    //   {
+    //     amount: transferData.amount,
+    //     currency: 'usd',
+    //     method: 'instant',
+    //   },
+    // );
   }
 
   /**

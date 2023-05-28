@@ -1,4 +1,5 @@
 ### Full account setup flow
+### Webhook token: webhookktokenoooooooooooooooooon
 ### Step 1. Create sender customer
 POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
@@ -193,7 +194,7 @@ Content-Type: application/json
 
 {
   "id": "1",
-  "method": "stripe.connect-account",
+  "method": "stripe.connect-account-link",
   "params": {
     "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
     "refreshUrl": "https://example.com",
