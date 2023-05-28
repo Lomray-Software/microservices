@@ -24,6 +24,11 @@
     "params": {}
   },
   {
+    "microservice": "content",
+    "type": "config",
+    "params": {}
+  },
+  {
     "microservice": "gateway",
     "type": "config",
     "params": {
