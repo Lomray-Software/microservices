@@ -509,14 +509,21 @@ class Stripe extends Abstract {
       });
     }
 
-    const destination = await this.extractDestinationFromPayoutMethod(payoutMethod);
+    const payoutMethodData = await this.getPayoutMethodData(payoutMethod);
+
+    if (!payoutMethodData?.isInstantPayoutAllow) {
+      throw new BaseException({
+        status: 400,
+        message: "Provided payout method isn't support instant payout",
+      });
+    }
 
     return this.sdk.payouts.create(
       {
         currency,
         amount: unitAmount,
         method: 'instant',
-        ...(destination ? { destination } : {}),
+        ...(payoutMethodData ? { destination: payoutMethodData.id } : {}),
       },
       { stripeAccount: customer.params.accountId },
     );
@@ -1335,22 +1342,35 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Returns payout method
+   * Returns payout method data
    */
-  private async extractDestinationFromPayoutMethod(
+  private async getPayoutMethodData(
     payoutMethod?: IPayoutMethod,
-  ): Promise<string | undefined> {
+  ): Promise<{ id?: string; isInstantPayoutAllow: boolean } | undefined> {
     if (!payoutMethod) {
       return;
     }
 
     const { method, id } = payoutMethod;
 
+    /**
+     * @TODO: Simplify this
+     */
     if (method === 'card') {
-      return (await this.cardRepository.findOne(id))?.params.cardId;
+      const card = await this.cardRepository.findOne(id);
+
+      return {
+        id: card?.params?.cardId,
+        isInstantPayoutAllow: Boolean(card?.isInstantPayoutAllowed),
+      };
     }
 
-    return (await this.bankAccountRepository.findOne(id))?.params.bankAccountId;
+    const bankAccount = await this.bankAccountRepository.findOne(id);
+
+    return {
+      id: bankAccount?.params?.bankAccountId,
+      isInstantPayoutAllow: Boolean(bankAccount?.isInstantPayoutAllowed),
+    };
   }
 }
 
