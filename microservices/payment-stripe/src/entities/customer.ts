@@ -1,12 +1,15 @@
 import { IsUndefinable } from '@lomray/microservice-helpers';
 import { Length, IsObject } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
+import type StripeSdk from 'stripe';
 import { Column, Entity, OneToMany, PrimaryColumn, Unique } from 'typeorm';
 import type BankAccount from '@entities/bank-account';
 import type Card from '@entities/card';
 import type Transaction from '@entities/transaction';
 
 export interface IParams {
+  // Payment service account id
+  accountType?: StripeSdk.Account.Type;
   // Payment service account id
   accountId?: string;
   // Is user setup and verify payment data for accept payments
