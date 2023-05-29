@@ -383,9 +383,6 @@ class Stripe extends Abstract {
         void this.handlePaymentMethodDetached(event);
         break;
 
-      case 'payment_method.attached':
-        break;
-
       case 'customer.updated':
         void this.handleCustomerUpdated(event);
         break;
