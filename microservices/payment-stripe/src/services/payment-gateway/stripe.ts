@@ -1,5 +1,6 @@
 import { Log } from '@lomray/microservice-helpers';
-import { BaseException } from '@lomray/microservice-nodejs-lib';
+import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
+import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
 import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
 import StripeAccountTypes from '@constants/stripe-account-types';
@@ -658,6 +659,12 @@ class Stripe extends Abstract {
     /* eslint-disable camelcase */
     const { id, payment_status, status } = event.data.object as ICheckoutEvent;
 
+    const transaction = await this.transactionRepository.findOne(id);
+
+    if (!transaction) {
+      Log.error(`There is no actual transfer for entity with following  transaction id: ${id}`);
+    }
+
     await this.transactionRepository.update(
       { transactionId: id },
       {
@@ -669,6 +676,11 @@ class Stripe extends Abstract {
       },
     );
     /* eslint-enable camelcase */
+
+    void Microservice.eventPublish(Event.EntityPaid, {
+      entityId: transaction?.entityId,
+      userId: transaction?.userId,
+    });
   }
 
   /**
