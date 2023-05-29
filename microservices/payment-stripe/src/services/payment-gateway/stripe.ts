@@ -296,6 +296,7 @@ class Stripe extends Abstract {
       });
 
       customer.params.accountId = stripeConnectAccount.id;
+      customer.params.accountType = stripeConnectAccount.type;
 
       await this.customerRepository.save(customer);
     }
@@ -1287,17 +1288,6 @@ class Stripe extends Abstract {
         destinationUser: destinationUser.params.accountId,
         userId: transactions[0].userId,
       },
-    );
-  }
-
-  /**
-   * Check is first added card
-   */
-  private async isFirstAddedCard(userId: string): Promise<boolean> {
-    return (
-      (await this.cardRepository.count({
-        userId,
-      })) === 0
     );
   }
 
