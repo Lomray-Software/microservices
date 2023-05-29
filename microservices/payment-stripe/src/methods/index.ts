@@ -16,7 +16,7 @@ import ConnectAccount from '@methods/stripe/connect-account';
 import ConnectAccountLink from '@methods/stripe/connect-account-link';
 import CreateCheckout from '@methods/stripe/create-checkout';
 import CreatePaymentIntent from '@methods/stripe/create-payment-intent';
-import InstantPayout from '@methods/stripe/instant-payot';
+import InstantPayout from '@methods/stripe/instant-payout';
 import PaymentIntentFees from '@methods/stripe/payment-intent-fees';
 import Payout from '@methods/stripe/payout';
 import Refund from '@methods/stripe/refund';
