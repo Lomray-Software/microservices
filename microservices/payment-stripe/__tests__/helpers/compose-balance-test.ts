@@ -16,9 +16,9 @@ describe('helpers/compose-balance', () => {
   it('should return total balances with zero amounts for USD and EUR if no balances are provided', () => {
     const balances: StripeSdk.Balance.Available[] = [];
 
-    const result = composeBalance(balances);
+    const res = composeBalance(balances);
 
-    expect(result).to.deep.equal(totalBalances);
+    expect(res).to.deep.equal(totalBalances);
   });
 
   it('should return total balances with correct amounts for USD and EUR when balances are provided', () => {
@@ -32,9 +32,9 @@ describe('helpers/compose-balance', () => {
       eur: 200,
     };
 
-    const result = composeBalance(balances);
+    const res = composeBalance(balances);
 
-    expect(result).to.deep.equal(expected);
+    expect(res).to.deep.equal(expected);
   });
 
   it('should add amounts correctly when balances have the same currency', () => {
@@ -48,8 +48,8 @@ describe('helpers/compose-balance', () => {
       eur: 0,
     };
 
-    const result = composeBalance(balances);
+    const res = composeBalance(balances);
 
-    expect(result).to.deep.equal(expected);
+    expect(res).to.deep.equal(expected);
   });
 });
