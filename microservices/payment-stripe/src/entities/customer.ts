@@ -16,6 +16,7 @@ export interface IParams {
   isVerified?: boolean;
   // Connect account transfer capability status
   transferCapabilityStatus?: 'active' | 'inactive' | 'pending';
+  // Is allowed for init default payout
   isPayoutEnabled?: boolean;
 }
 
