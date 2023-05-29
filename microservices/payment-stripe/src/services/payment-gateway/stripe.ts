@@ -1021,7 +1021,7 @@ class Stripe extends Abstract {
 
     const {
       params: { paymentMethodId },
-    } = await this.getChargingCard(cardId);
+    } = await this.getChargingCard(senderCustomer.userId, cardId);
 
     const entityUnitCost = this.toSmallestCurrencyUnit(entityCost);
 
@@ -1310,13 +1310,22 @@ class Stripe extends Abstract {
   /**
    * Returns card for charging payment
    */
-  private async getChargingCard(cardId?: string): Promise<Card> {
+  private async getChargingCard(userId: string, cardId?: string): Promise<Card> {
     let card: Card | undefined;
 
+    /**
+     * Find card that declared as the payment method
+     */
+    const cardQuery = this.cardRepository
+      .createQueryBuilder('card')
+      .where('card.userId = :userId', { userId })
+      .andWhere('card.isDefault = true')
+      .andWhere("card.params ->> 'paymentMethodId' IS NOT NULL");
+
     if (cardId) {
-      card = await this.cardRepository.findOne({ id: cardId });
+      card = await cardQuery.andWhere("card.params ->> 'cardId' = :cardId", { cardId }).getOne();
     } else {
-      card = await this.cardRepository.findOne({ where: { isDefault: true } });
+      card = await cardQuery.getOne();
     }
 
     if (!card) {
