@@ -1,5 +1,6 @@
 import { Log } from '@lomray/microservice-helpers';
-import { BaseException } from '@lomray/microservice-nodejs-lib';
+import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
+import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
 import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
 import StripeAccountTypes from '@constants/stripe-account-types';
@@ -917,20 +918,29 @@ class Stripe extends Abstract {
    * Handles completing of transaction inside stripe payment process
    */
   public async handleTransactionCompleted(event: StripeSdk.Event): Promise<Transaction | void> {
-    /* eslint-disable camelcase */
-    const { id, payment_status, status } = event.data.object as ICheckoutEvent;
+    const { id, payment_status: paymentStatus, status } = event.data.object as ICheckoutEvent;
+
+    const transaction = await this.transactionRepository.findOne(id);
+
+    if (!transaction) {
+      Log.error(`There is no actual transfer for entity with following  transaction id: ${id}`);
+    }
 
     await this.transactionRepository.update(
       { transactionId: id },
       {
-        status: this.getStatus(payment_status as StripeTransactionStatus),
+        status: this.getStatus(paymentStatus as StripeTransactionStatus),
         params: {
           checkoutStatus: status as StripeCheckoutStatus,
-          paymentStatus: payment_status as StripeTransactionStatus,
+          paymentStatus: paymentStatus as StripeTransactionStatus,
         },
       },
     );
-    /* eslint-enable camelcase */
+
+    void Microservice.eventPublish(Event.EntityPaid, {
+      entityId: transaction?.entityId,
+      userId: transaction?.userId,
+    });
   }
 
   /**
