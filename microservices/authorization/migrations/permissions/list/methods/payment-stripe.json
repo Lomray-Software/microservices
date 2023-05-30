@@ -76,7 +76,7 @@
     "method": "customer.create",
     "description": "Create new customer",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",

@@ -1218,7 +1218,9 @@
       "userId": {
         "in": {
           "admin": "allow",
-          "user": "allow"
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
           "admin": "allow",
@@ -1344,10 +1346,10 @@
     "schema": {
       "transactionId": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -1363,7 +1365,7 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
