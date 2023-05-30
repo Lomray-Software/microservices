@@ -656,8 +656,7 @@ class Stripe extends Abstract {
    * Handles completing of transaction inside stripe payment process
    */
   public async handleTransactionCompleted(event: StripeSdk.Event): Promise<Transaction | void> {
-    /* eslint-disable camelcase */
-    const { id, payment_status, status } = event.data.object as ICheckoutEvent;
+    const { id, payment_status: paymentStatus, status } = event.data.object as ICheckoutEvent;
 
     const transaction = await this.transactionRepository.findOne(id);
 
@@ -668,14 +667,13 @@ class Stripe extends Abstract {
     await this.transactionRepository.update(
       { transactionId: id },
       {
-        status: this.getStatus(payment_status as StripeTransactionStatus),
+        status: this.getStatus(paymentStatus as StripeTransactionStatus),
         params: {
           checkoutStatus: status as StripeCheckoutStatus,
-          paymentStatus: payment_status as StripeTransactionStatus,
+          paymentStatus: paymentStatus as StripeTransactionStatus,
         },
       },
     );
-    /* eslint-enable camelcase */
 
     void Microservice.eventPublish(Event.EntityPaid, {
       entityId: transaction?.entityId,
