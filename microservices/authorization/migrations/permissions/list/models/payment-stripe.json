@@ -105,7 +105,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "transactionId": {
@@ -113,7 +114,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "productId": {
@@ -121,7 +123,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "title": {
@@ -129,7 +132,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "userId": {
@@ -137,7 +141,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "bankAccountId": {
@@ -145,7 +150,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "cardId": {
@@ -153,7 +159,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "entityId": {
@@ -161,7 +168,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "amount": {
@@ -169,6 +177,7 @@
           "admin": "allow"
         },
         "out": {
+          "admin": "allow",
           "user": "allow"
         }
       },
@@ -185,6 +194,7 @@
           "admin": "allow"
         },
         "out": {
+          "admin": "allow",
           "user": "allow"
         }
       },
@@ -193,6 +203,7 @@
           "admin": "allow"
         },
         "out": {
+          "admin": "allow",
           "user": "allow"
         }
       },
@@ -201,7 +212,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "params": {
@@ -209,7 +221,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "customer": "payment-stripe.Customer",
@@ -227,7 +240,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "userId": {
@@ -235,7 +249,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "lastDigits": {
@@ -243,7 +258,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "bankName": {
@@ -251,7 +267,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "holderName": {
@@ -259,7 +276,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "isDefault": {
@@ -267,7 +285,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "params": {
@@ -275,7 +294,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "createdAt": {
@@ -349,7 +369,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "userId": {
@@ -357,7 +378,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "lastDigits": {
@@ -365,7 +387,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "expired": {
@@ -373,7 +396,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "holderName": {
@@ -381,7 +405,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "type": {
@@ -389,7 +414,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "params": {
@@ -397,7 +423,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "isDefault": {
@@ -405,7 +432,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "createdAt": {
@@ -439,7 +467,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       }
     },
@@ -1086,42 +1115,52 @@
     "schema": {
       "entityCost": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "feesPayer": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "applicationPaymentPercent": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "additionalFeesPercent": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "extraReceiverRevenuePercent": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       }
     },
@@ -1137,7 +1176,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "applicationFee": {
@@ -1145,7 +1185,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "userAmount": {
@@ -1153,7 +1194,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "receiverRevenue": {
@@ -1161,7 +1203,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       }
     },
@@ -1174,26 +1217,34 @@
     "schema": {
       "userId": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "refreshUrl": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       },
       "returnUrl": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       }
     },
@@ -1209,7 +1260,8 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": "allow"
         }
       }
     },
@@ -1294,10 +1346,10 @@
     "schema": {
       "transactionId": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
@@ -1313,7 +1365,7 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
