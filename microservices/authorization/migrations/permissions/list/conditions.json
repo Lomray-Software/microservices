@@ -139,5 +139,58 @@
       ]
     },
     "createdAt": "2023-03-31T09:41:44.183Z"
+  },
+  {
+    "title": "Payment-stripe: if exist in customers and myself",
+    "conditions": {
+      "or": [
+        {
+          "template": "<%= _.includes(roles, 'admin') %>"
+        },
+        {
+          "requests": {
+            "customer": {
+              "method": "payment-stripe.customer.view",
+              "params": {
+                "query": {
+                  "where": {
+                    "userId": "<%= _.get(payload, 'authentication.userId') %>"
+                  }
+                }
+              }
+            }
+          },
+          "template": "<%= !_.isEmpty(_.get(customer, 'entity')) && _.get(reqParams, 'userId') === _.get(payload, 'authentication.userId') %>"
+        }
+      ]
+    },
+    "createdAt": "2022-06-20T09:41:44.183Z"
+  },
+  {
+    "title": "Payment-stripe: refund",
+    "conditions": {
+      "or": [
+        {
+          "template": "<%= _.includes(roles, 'admin') %>"
+        },
+        {
+          "requests": {
+            "transaction": {
+              "method": "payment-stripe.transaction.view",
+              "params": {
+                "query": {
+                  "where": {
+                    "transactionId": "<%= _.get(reqParams, 'transactionId') %>",
+                    "type": "debit"
+                  }
+                }
+              }
+            }
+          },
+          "template": "<%= _.get(transaction, 'entity.userId') === _.get(payload, 'authentication.userId') && _.get(transaction, 'entity.status') === 'success' %>"
+        }
+      ]
+    },
+    "createdAt": "2022-06-20T09:41:44.183Z"
   }
 ]

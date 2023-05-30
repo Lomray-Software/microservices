@@ -68,6 +68,11 @@ class BankAccount {
   @IsBoolean()
   isDefault: boolean;
 
+  @Column({ type: 'boolean', default: false })
+  @IsBoolean()
+  @IsUndefinable()
+  isInstantPayoutAllowed: boolean;
+
   @Column({ type: 'json', default: {} })
   @IsObject()
   @IsUndefinable()

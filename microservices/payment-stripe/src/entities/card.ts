@@ -74,12 +74,28 @@ class Card {
   @Length(1, 100)
   holderName: string | null;
 
+  /**
+   * @TODO: add converter for stripe funding enum to funding type
+   */
+  @JSONSchema({
+    example: 'debit',
+    description: 'Uses in instant payouts: available only for debit cards',
+  })
+  @Column({ type: 'varchar', length: 10 })
+  @Length(1, 10)
+  funding: string;
+
   @JSONSchema({
     example: 'visa',
   })
   @Column({ type: 'varchar', length: 20 })
   @Length(1, 20)
-  type: string;
+  brand: string;
+
+  @Column({ type: 'boolean', default: false })
+  @IsBoolean()
+  @IsUndefinable()
+  isInstantPayoutAllowed: boolean;
 
   @Column({ type: 'json', default: {} })
   @IsObject()

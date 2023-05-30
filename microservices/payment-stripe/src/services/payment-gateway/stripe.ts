@@ -15,9 +15,11 @@ import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
 import Transaction from '@entities/transaction';
+import composeBalance from '@helpers/compose-balance';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
+import TCurrency from '@interfaces/currency';
 import Abstract, { IPriceParams, IProductParams } from './abstract';
 
 export interface IStripeProductParams extends IProductParams {
@@ -76,6 +78,18 @@ interface ITransferInfo {
   userId: string;
 }
 
+interface IPayoutMethod {
+  id: string;
+  method: 'card' | 'bankAccount';
+}
+
+interface IInstantPayoutParams {
+  userId: string;
+  amount: number;
+  payoutMethod?: IPayoutMethod;
+  currency?: TCurrency;
+}
+
 interface IGetPaymentIntentFeesParams
   extends Pick<
     IPaymentIntentParams,
@@ -86,6 +100,11 @@ interface IGetPaymentIntentFeesParams
   > {
   entityUnitCost: number;
 }
+
+type TAvailablePaymentMethods =
+  | StripeSdk.Card.AvailablePayoutMethod[]
+  | StripeSdk.BankAccount.AvailablePayoutMethod[]
+  | null;
 
 /**
  * Stripe payment provider
@@ -277,6 +296,7 @@ class Stripe extends Abstract {
       });
 
       customer.params.accountId = stripeConnectAccount.id;
+      customer.params.accountType = stripeConnectAccount.type;
 
       await this.customerRepository.save(customer);
     }
@@ -353,7 +373,112 @@ class Stripe extends Abstract {
       case 'charge.refunded':
         void this.handleChargeRefund(event);
         break;
+
+      case 'payment_method.updated':
+      case 'payment_method.automatically_updated':
+        void this.handlePaymentMethodUpdated(event);
+        break;
+
+      case 'payment_method.detached':
+        void this.handlePaymentMethodDetached(event);
+        break;
+
+      case 'customer.updated':
+        void this.handleCustomerUpdated(event);
+        break;
     }
+  }
+
+  /**
+   * Handles payment method detach
+   */
+  public async handlePaymentMethodDetached(event: StripeSdk.Event): Promise<void> {
+    const { id } = event.data.object as StripeSdk.PaymentMethod;
+
+    const paymentMethod = await this.cardRepository
+      .createQueryBuilder('card')
+      .where("card.params->>'paymentMethodId' = :value", { value: id })
+      .getOne();
+
+    if (!paymentMethod) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Payment method'),
+      });
+    }
+
+    await this.cardRepository.remove(paymentMethod);
+  }
+
+  /**
+   * Handles customer update
+   */
+  public async handleCustomerUpdated(event: StripeSdk.Event): Promise<void> {
+    const { id, invoice_settings: invoiceSettings } = event.data.object as StripeSdk.Customer;
+
+    /**
+     * @TODO: Investigate why relations return empty array
+     */
+    const customer = await this.customerRepository.findOne({ customerId: id });
+
+    if (!customer) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Customer'),
+      });
+    }
+
+    const cards = await this.cardRepository.find({
+      userId: customer.userId,
+    });
+
+    const saveCardRequests = cards.map((card) => {
+      card.isDefault = card.params.paymentMethodId === invoiceSettings.default_payment_method;
+
+      return this.cardRepository.save(card);
+    });
+
+    await Promise.all(saveCardRequests);
+  }
+
+  /**
+   * Handles payment method update
+   * NOTE: Expected card that can be setup via setupIntent
+   */
+  public async handlePaymentMethodUpdated(event: StripeSdk.Event): Promise<void> {
+    const { id, card: cardPaymentMethod } = event.data.object as StripeSdk.PaymentMethod;
+
+    if (!cardPaymentMethod) {
+      throw new BaseException({
+        status: 500,
+        message: "Payment method card wasn't provided",
+      });
+    }
+
+    const card = await this.cardRepository
+      .createQueryBuilder('card')
+      .where("card.params->>'paymentMethodId' = :value", { value: id })
+      .getOne();
+
+    if (!card) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Payment method'),
+      });
+    }
+
+    const {
+      exp_month: expMonth,
+      exp_year: expYear,
+      last4: lastDigits,
+      brand,
+      funding,
+    } = cardPaymentMethod;
+
+    card.lastDigits = lastDigits;
+    card.expired = toExpirationDate(expMonth, expYear);
+    card.brand = brand;
+    card.funding = funding;
   }
 
   /**
@@ -424,6 +549,118 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Create instant payout
+   * NOTE: Should be called from the API
+   */
+  public async instantPayout({
+    userId,
+    amount,
+    payoutMethod,
+    currency = 'usd',
+  }: IInstantPayoutParams): Promise<StripeSdk.Payout> {
+    const unitAmount = this.toSmallestCurrencyUnit(amount);
+
+    /**
+     * Get related customer
+     */
+    const customer = await this.customerRepository.findOne({
+      userId,
+    });
+
+    if (!customer) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Customer'),
+      });
+    }
+
+    if (!customer.params.accountId) {
+      throw new BaseException({
+        status: 400,
+        message: "Customer don't have related connect account",
+      });
+    }
+
+    if (!customer.params.isPayoutEnabled) {
+      throw new BaseException({
+        status: 400,
+        message: "Payout isn't available",
+      });
+    }
+
+    const { instant_available: instantBalance } = await this.sdk.balance.retrieve({
+      stripeAccount: customer.params.accountId,
+    });
+
+    if (!instantBalance) {
+      throw new BaseException({
+        status: 500,
+        message: "Instant balance isn't available",
+      });
+    }
+
+    const balance = composeBalance(instantBalance);
+
+    if (!balance?.[currency]) {
+      throw new BaseException({
+        status: 400,
+        message: `Balance with the ${currency} isn't available`,
+      });
+    }
+
+    if (balance?.[currency] < unitAmount) {
+      throw new BaseException({
+        status: 400,
+        message: `Insufficient funds. Instant balance is ${balance?.[currency]} in ${currency}`,
+      });
+    }
+
+    const payoutMethodData = await this.getPayoutMethodData(payoutMethod);
+
+    if (!payoutMethodData?.isInstantPayoutAllow) {
+      throw new BaseException({
+        status: 400,
+        message: "Provided payout method isn't support instant payout",
+      });
+    }
+
+    return this.sdk.payouts.create(
+      {
+        currency,
+        amount: unitAmount,
+        method: 'instant',
+        ...(payoutMethodData ? { destination: payoutMethodData.id } : {}),
+      },
+      { stripeAccount: customer.params.accountId },
+    );
+  }
+
+  /**
+   * Returns user related connect account balance
+   */
+  public async getBalance(userId: string): Promise<StripeSdk.Balance> {
+    const customer = await this.customerRepository.findOne({
+      userId,
+    });
+
+    if (!customer) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Customer'),
+      });
+    }
+
+    if (!customer.params.accountId) {
+      throw new BaseException({
+        status: 400,
+        message: "Customer don't have related connect account",
+      });
+    }
+
+    return this.sdk.balance.retrieve({ stripeAccount: customer.params.accountId });
+  }
+
+  /**
    * Handles setup intent succeed
    * NOTE: Should be called when webhook triggers
    */
@@ -464,23 +701,34 @@ class Stripe extends Abstract {
     }
 
     const {
-      id,
-      card: { brand: type, last4: lastDigits, exp_month, exp_year },
+      id: paymentMethodId,
+      card: { brand, last4: lastDigits, exp_month: expMonth, exp_year: expYear, funding },
     } = paymentMethod;
 
-    const { userId } = customer;
+    const { userId, customerId } = customer;
 
-    const isDefault = await this.isFirstAddedCard(userId);
+    /**
+     * Get attached cards count
+     */
+    const attachedCardsCount = await this.cardRepository.count({ userId });
 
-    /* eslint-enable camelcase */
     await this.cardRepository.save({
       lastDigits,
-      type,
-      isDefault,
+      brand,
       userId,
-      expired: toExpirationDate(exp_month, exp_year),
-      params: { isApproved: true, paymentMethodId: id },
+      funding,
+      expired: toExpirationDate(expMonth, expYear),
+      params: { isApproved: true, paymentMethodId },
     });
+
+    /**
+     * Handle if it's first customer payment method
+     */
+    if (attachedCardsCount !== 0) {
+      return;
+    }
+
+    await this.setDefaultPaymentMethod(customerId, paymentMethodId);
   }
 
   /**
@@ -496,16 +744,20 @@ class Stripe extends Abstract {
 
       const {
         last4: lastDigits,
-        brand: type,
+        brand,
         exp_year,
         exp_month,
         default_for_currency: isDefault,
+        available_payout_methods: availablePayoutMethods,
+        funding,
       } = externalAccount;
 
       card.isDefault = Boolean(isDefault);
       card.lastDigits = lastDigits;
       card.expired = toExpirationDate(exp_month, exp_year);
-      card.type = type;
+      card.brand = brand;
+      card.funding = funding;
+      card.isInstantPayoutAllowed = this.isAllowedInstantPayout(availablePayoutMethods);
 
       await this.cardRepository.save(card);
 
@@ -519,12 +771,14 @@ class Stripe extends Abstract {
       account_holder_name: holderName,
       bank_name: bankName,
       default_for_currency: isDefault,
+      available_payout_methods: availablePayoutMethods,
     } = externalAccount as StripeSdk.BankAccount;
 
     bankAccount.isDefault = Boolean(isDefault);
     bankAccount.lastDigits = lastDigits;
     bankAccount.holderName = holderName;
     bankAccount.bankName = bankName;
+    bankAccount.isInstantPayoutAllowed = this.isAllowedInstantPayout(availablePayoutMethods);
 
     await this.bankAccountRepository.save(bankAccount);
     /* eslint-enable camelcase */
@@ -553,16 +807,20 @@ class Stripe extends Abstract {
       const {
         id: cardId,
         last4: lastDigits,
-        brand: type,
+        brand,
+        funding,
         exp_year,
         exp_month,
+        available_payout_methods: availablePayoutMethods,
         default_for_currency: isDefault,
       } = externalAccount;
 
       await this.cardRepository.save({
         lastDigits,
-        type,
+        brand,
+        funding,
         userId,
+        isInstantPayoutAllowed: this.isAllowedInstantPayout(availablePayoutMethods),
         isDefault: Boolean(isDefault),
         expired: toExpirationDate(exp_month, exp_year),
         params: { cardId },
@@ -577,6 +835,7 @@ class Stripe extends Abstract {
       account_holder_name: holderName,
       bank_name: bankName,
       default_for_currency: isDefault,
+      available_payout_methods: availablePayoutMethods,
     } = externalAccount as StripeSdk.BankAccount;
 
     await this.bankAccountRepository.save({
@@ -584,6 +843,7 @@ class Stripe extends Abstract {
       bankAccountId,
       lastDigits,
       userId,
+      isInstantPayoutAllowed: this.isAllowedInstantPayout(availablePayoutMethods),
       holderName,
       bankName,
       params: { bankAccountId },
@@ -627,6 +887,7 @@ class Stripe extends Abstract {
     /* eslint-disable camelcase */
     const {
       id,
+      payouts_enabled: isPayoutEnabled,
       charges_enabled: isChargesEnabled,
       capabilities,
     } = event.data.object as StripeSdk.Account;
@@ -644,6 +905,7 @@ class Stripe extends Abstract {
      * Check if customer can accept payment
      * NOTE: Check if user correctly and verify setup connect account
      */
+    customer.params.isPayoutEnabled = isPayoutEnabled;
     customer.params.transferCapabilityStatus = capabilities?.transfers;
     customer.params.isVerified = isChargesEnabled && capabilities?.transfers === 'active';
 
@@ -743,7 +1005,7 @@ class Stripe extends Abstract {
      * Verify if customer is verified
      */
     const {
-      customerId: receiverCustomerId,
+      userId: receiverUserId,
       params: { accountId: receiverAccountId, isVerified: isReceiverVerified },
     } = receiverCustomer;
 
@@ -756,7 +1018,7 @@ class Stripe extends Abstract {
 
     const {
       params: { paymentMethodId },
-    } = await this.getChargingCard(cardId);
+    } = await this.getChargingCard(senderCustomer.userId, cardId);
 
     const entityUnitCost = this.toSmallestCurrencyUnit(entityCost);
 
@@ -809,13 +1071,13 @@ class Stripe extends Abstract {
     return Promise.all([
       this.transactionRepository.save({
         ...transactionData,
-        userId: senderCustomer.customerId,
+        userId: senderCustomer.userId,
         type: TransactionType.CREDIT,
         amount: userUnitAmount,
       }),
       this.transactionRepository.save({
         ...transactionData,
-        userId: receiverCustomerId,
+        userId: receiverUserId,
         type: TransactionType.DEBIT,
         amount: receiverUnitRevenue,
       }),
@@ -1027,17 +1289,6 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Check is first added card
-   */
-  private async isFirstAddedCard(userId: string): Promise<boolean> {
-    return (
-      (await this.cardRepository.count({
-        userId,
-      })) === 0
-    );
-  }
-
-  /**
    * Check if external account is bank account
    */
   private isExternalAccountIsBankAccount(
@@ -1056,13 +1307,22 @@ class Stripe extends Abstract {
   /**
    * Returns card for charging payment
    */
-  private async getChargingCard(cardId?: string): Promise<Card> {
+  private async getChargingCard(userId: string, cardId?: string): Promise<Card> {
     let card: Card | undefined;
 
+    /**
+     * Find card that declared as the payment method
+     */
+    const cardQuery = this.cardRepository
+      .createQueryBuilder('card')
+      .where('card.userId = :userId', { userId })
+      .andWhere('card.isDefault = true')
+      .andWhere("card.params ->> 'paymentMethodId' IS NOT NULL");
+
     if (cardId) {
-      card = await this.cardRepository.findOne({ id: cardId });
+      card = await cardQuery.andWhere("card.params ->> 'cardId' = :cardId", { cardId }).getOne();
     } else {
-      card = await this.cardRepository.findOne({ where: { isDefault: true } });
+      card = await cardQuery.getOne();
     }
 
     if (!card) {
@@ -1181,6 +1441,65 @@ class Stripe extends Abstract {
       refresh_url: refreshUrl,
       // eslint-disable-next-line camelcase
       return_url: returnUrl,
+    });
+  }
+
+  /**
+   * Check is allowed instant payout
+   */
+  private isAllowedInstantPayout(availablePayoutMethods?: TAvailablePaymentMethods): boolean {
+    if (!availablePayoutMethods) {
+      return false;
+    }
+
+    return availablePayoutMethods.includes('instant');
+  }
+
+  /**
+   * Returns payout method data
+   */
+  private async getPayoutMethodData(
+    payoutMethod?: IPayoutMethod,
+  ): Promise<{ id?: string; isInstantPayoutAllow: boolean } | undefined> {
+    if (!payoutMethod) {
+      return;
+    }
+
+    const { method, id } = payoutMethod;
+
+    /**
+     * @TODO: Simplify this
+     */
+    if (method === 'card') {
+      const card = await this.cardRepository.findOne(id);
+
+      return {
+        id: card?.params?.cardId,
+        isInstantPayoutAllow: Boolean(card?.isInstantPayoutAllowed),
+      };
+    }
+
+    const bankAccount = await this.bankAccountRepository.findOne(id);
+
+    return {
+      id: bankAccount?.params?.bankAccountId,
+      isInstantPayoutAllow: Boolean(bankAccount?.isInstantPayoutAllowed),
+    };
+  }
+
+  /**
+   * Set default payment method
+   */
+  private async setDefaultPaymentMethod(
+    customerId: string,
+    paymentMethodId: string,
+  ): Promise<void> {
+    await this.sdk.customers.update(customerId, {
+      // eslint-disable-next-line camelcase
+      invoice_settings: {
+        // eslint-disable-next-line camelcase
+        default_payment_method: paymentMethodId,
+      },
     });
   }
 }
