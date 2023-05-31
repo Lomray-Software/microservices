@@ -19,6 +19,7 @@ const isRelationInputValid = (schema: ISchema[]): boolean => {
     (input) =>
       input?.relation?.entity &&
       input?.relation?.microservice &&
+      input?.relation?.fields.length > 0 &&
       typeof input?.relation?.hasMany === 'boolean',
   );
 };

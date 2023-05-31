@@ -119,6 +119,7 @@ describe('methods/component/crud', () => {
           relation: {
             microservice: 'users',
             entity: 'user',
+            fields: [{ name: 'firstName' }],
             hasMany: true,
           },
         },
