@@ -30,14 +30,27 @@ Content-Type: application/json
             "adminBlog": {
               "id": "f8cbb4aa-90ae-48b8-a4dc-cda73485cf9c",
               "data": {
-                "admins": ["445072e0-39ba-433a-9563-31ca57fad15f", "6a3572f3-aefa-42bd-8083-6c1af529a8fb"]
+                "admins": [
+                  {
+                    "id": "445072e0-39ba-433a-9563-31ca57fad15f"
+                  },
+                  {
+                    "id": "6a3572f3-aefa-42bd-8083-6c1af529a8fb"
+                  }
+                ]
               }
             },
             "userBlog": {
               "id": "0efc116b-b159-425c-94ac-e8598acd0988",
               "data": {
-                  "influencers": ["5baa1616-021a-47b4-a19b-a30630c3efec", "5f6fe925-4e88-4b25-9683-76f038fb719c"]
-                }
+                "influencers": [
+                  {
+                    "id": "5baa1616-021a-47b4-a19b-a30630c3efec"
+                  },
+                  {
+                    "id": "5f6fe925-4e88-4b25-9683-76f038fb719c"
+                  }
+                ]
               }
             }
           }
@@ -45,6 +58,7 @@ Content-Type: application/json
       }
     }
   }
+}
 
 ### Create single-type
 POST http://127.0.0.1:8001/ms/content

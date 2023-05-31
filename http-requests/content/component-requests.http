@@ -24,7 +24,24 @@ Content-Type: application/json
         {
           "name": "users",
           "type": "relation",
-          "entity": "user"
+          "entity": "user",
+          "searchFields": [
+            {
+              "name": "firstName",
+              "insensitive": true
+            },
+            {
+              "name": "lastName",
+              "insensitive": true
+            }
+          ],
+          "idFields": [
+            "id"
+          ],
+          "titleFields": [
+            "firstName",
+            "lastName"
+          ]
         }
       ]
     }
@@ -79,6 +96,23 @@ Content-Type: application/json
           "relation": {
             "microservice": "users",
             "entity": "user",
+            "searchFields": [
+              {
+                "name": "firstName",
+                "insensitive": true
+              },
+              {
+                "name": "lastName",
+                "insensitive": true
+              }
+            ],
+            "idFields": [
+              "id"
+            ],
+            "titleFields": [
+              "firstName",
+              "lastName"
+            ],
             "hasMany": false
           }
         }
@@ -106,6 +140,23 @@ Content-Type: application/json
           "relation": {
             "microservice": "users",
             "entity": "user",
+            "searchFields": [
+              {
+                "name": "firstName",
+                "insensitive": true
+              },
+              {
+                "name": "lastName",
+                "insensitive": true
+              }
+            ],
+            "idFields": [
+              "id"
+            ],
+            "titleFields": [
+              "firstName",
+              "lastName"
+            ],
             "hasMany": false
           }
         }

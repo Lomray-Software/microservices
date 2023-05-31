@@ -65,9 +65,7 @@ class SingleTypeViewProcess {
 
     const query = {
       where: {
-        id: {
-          in: expandEntityData,
-        },
+        or: Array.isArray(expandEntityData) ? expandEntityData : [expandEntityData],
       },
     };
     const { result, error } = await Api.get()[microservice][entity].list({ query });

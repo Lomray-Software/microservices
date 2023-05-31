@@ -61,6 +61,23 @@ Content-Type: application/json
           "relation": {
             "microservice": "users",
             "entity": "user",
+            "searchFields": [
+              {
+                "name": "firstName",
+                "insensitive": true
+              },
+              {
+                "name": "lastName",
+                "insensitive": true
+              }
+            ],
+            "idFields": [
+              "id"
+            ],
+            "titleFields": [
+              "firstName",
+              "lastName"
+            ],
             "hasMany": false
           }
         }
@@ -306,6 +323,23 @@ Authorization: Bearer admintokenooooooooooooooooooooon
           "relation": {
             "microservice": "users",
             "entity": "user",
+            "searchFields": [
+              {
+                "name": "firstName",
+                "insensitive": true
+              },
+              {
+                "name": "lastName",
+                "insensitive": true
+              }
+            ],
+            "idFields": [
+              "id"
+            ],
+            "titleFields": [
+              "firstName",
+              "lastName"
+            ],
             "hasMany": false
           }
         }

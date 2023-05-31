@@ -13,11 +13,13 @@ interface IBaseSchema {
 interface IRelation {
   microservice: string;
   entity: string;
-  fields: {
+  searchFields: {
     name: string;
     insensitive?: boolean;
     castType?: JQFieldType;
   }[];
+  idFields: string[];
+  titleFields: string[];
   hasMany: boolean;
 }
 
