@@ -126,7 +126,10 @@
       },
       "userId": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
           "user": "allow"
