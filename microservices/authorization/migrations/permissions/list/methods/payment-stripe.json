@@ -264,7 +264,14 @@
     "createdAt": "2023-05-26T15:12:57.976Z",
     "modelIn": "ListRequestParams",
     "modelOut": "payment-stripe.ListOutputParams.ab8bbade2b229df1cce267b8a3de985f",
-    "methodFilters": []
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "and",
+        "roleAlias": "guest",
+        "createdAt": "2022-03-15T06:17:23.698Z"
+      }
+    ]
   },
   {
     "microservice": "payment-stripe",
