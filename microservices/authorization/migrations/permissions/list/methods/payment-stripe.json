@@ -317,6 +317,7 @@
     "createdAt": "2023-05-26T15:12:57.976Z",
     "modelIn": "payment-stripe.SetupIntentInput",
     "modelOut": "payment-stripe.SetupIntentOutput",
+    "conditions": "Payment-stripe: if exist in customers and myself",
     "methodFilters": []
   },
   {
@@ -545,6 +546,7 @@
     "createdAt": "2023-05-26T15:12:57.976Z",
     "modelIn": "payment-stripe.RefundInput",
     "modelOut": "payment-stripe.RefundOutput",
+    "condition": "Payment-stripe: refund",
     "methodFilters": []
   },
   {
@@ -677,6 +679,7 @@
     "createdAt": "2023-05-26T15:12:57.976Z",
     "modelIn": "payment-stripe.ConnectAccountInput",
     "modelOut": "payment-stripe.ConnectAccountOutput",
+    "condition": "Payment-stripe: if exist in customers and myself",
     "methodFilters": []
   },
   {
