@@ -33,7 +33,7 @@ class SingleType {
   @Length(1, 255)
   title: string;
 
-  @Unique('article(uq):alias', ['alias'])
+  @Unique('singleType(uq):alias', ['alias'])
   @Column({ type: 'varchar', length: 255 })
   @Length(1, 255)
   @Validate(IsCamelCaseString)

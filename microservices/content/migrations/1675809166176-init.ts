@@ -8,7 +8,7 @@ export default class init1675809166176 implements MigrationInterface {
       `CREATE TABLE "component" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "alias" character varying(255) NOT NULL, "title" character varying(255) NOT NULL, "schema" json NOT NULL DEFAULT '[]', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "component(uq):alias" UNIQUE ("alias"), CONSTRAINT "component(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "single_type" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "title" character varying(255) NOT NULL, "alias" character varying(255) NOT NULL, "value" json NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "article(uq):alias" UNIQUE ("alias"), CONSTRAINT "article(pk):id" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "single_type" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "title" character varying(255) NOT NULL, "alias" character varying(255) NOT NULL, "value" json NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "singleType(uq):alias" UNIQUE ("alias"), CONSTRAINT "singleType(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "component_parent_component" ("childrenId" uuid NOT NULL, "parentId" uuid NOT NULL, CONSTRAINT "component_parent_component(pk:childrenId_parentId" PRIMARY KEY ("childrenId", "parentId"))`,
