@@ -1,5 +1,5 @@
 import type { RequiredProps } from '@lomray/client-helpers/interfaces';
-import { IsTypeormDate } from '@lomray/microservice-helpers';
+import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsObject, Length, Validate } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
@@ -78,6 +78,7 @@ class SingleType {
   })
   @Column({ type: 'json', default: {} })
   @IsObject()
+  @IsUndefinable()
   value: ISingleTypeValue;
 
   @IsTypeormDate()
@@ -92,6 +93,7 @@ class SingleType {
     example: [{ id: 'id' }],
   })
   @IsObject({ each: true })
+  @IsUndefinable()
   @ManyToMany('Component', 'singleTypes')
   @JoinTable({
     name: 'singleTypes_components',
