@@ -301,7 +301,7 @@ class Stripe extends Abstract {
       });
 
       customer.params.accountId = stripeConnectAccount.id;
-      customer.params.accountType = stripeConnectAccount.type;
+      customer.params.accountType = stripeConnectAccount.type as StripeAccountTypes;
 
       await this.customerRepository.save(customer);
     }
@@ -925,7 +925,7 @@ class Stripe extends Abstract {
      * NOTE: Check if user correctly and verify setup connect account
      */
     customer.params.isPayoutEnabled = isPayoutEnabled;
-    customer.params.transferCapabilityStatus = capabilities?.transfers;
+    customer.params.transferCapabilityStatus = capabilities?.transfers || 'inactive';
     customer.params.isVerified = isChargesEnabled && capabilities?.transfers === 'active';
 
     await this.customerRepository.save(customer);

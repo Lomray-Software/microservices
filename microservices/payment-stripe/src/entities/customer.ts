@@ -1,21 +1,22 @@
 import { IsUndefinable } from '@lomray/microservice-helpers';
 import { Length, IsObject } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import type StripeSdk from 'stripe';
 import { Column, Entity, OneToMany, PrimaryColumn, Unique } from 'typeorm';
+import type StripeAccountTypes from '@constants/stripe-account-types';
 import type BankAccount from '@entities/bank-account';
 import type Card from '@entities/card';
 import type Transaction from '@entities/transaction';
+import type TCapabilitiesStatus from '@interfaces/capabilities-status';
 
 export interface IParams {
   // Payment service account id
-  accountType?: StripeSdk.Account.Type;
+  accountType?: StripeAccountTypes;
   // Payment service account id
   accountId?: string;
   // Is user setup and verify payment data for accept payments
   isVerified?: boolean;
   // Connect account transfer capability status
-  transferCapabilityStatus?: 'active' | 'inactive' | 'pending';
+  transferCapabilityStatus?: TCapabilitiesStatus;
   // Is allowed for init default payout
   isPayoutEnabled?: boolean;
 }
