@@ -1625,7 +1625,7 @@
     "alias": "payment-stripe.CreateInstantPayoutOutput",
     "title": "Create Instant Payout Output",
     "schema": {
-      "payout": {
+      "isInstantiated": {
         "in": {
           "admin": "allow"
         },
