@@ -694,5 +694,38 @@
     "modelIn": "ListRequestParams",
     "modelOut": "payment-stripe.ListOutputParams.303da06f1a333ac1f38154b06d358190",
     "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "stripe.instant-payout",
+    "description": "Create instant payout",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-06-01T10:19:54.332Z",
+    "modelIn": "payment-stripe.CreateInstantPayoutInput",
+    "modelOut": "payment-stripe.CreateInstantPayoutOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "stripe.balance",
+    "description": "Returns balance",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-06-01T10:19:54.332Z",
+    "modelIn": "payment-stripe.BalanceInput",
+    "modelOut": "payment-stripe.BalanceOutput",
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "and",
+        "roleAlias": "guest",
+        "createdAt": "2022-03-15T06:17:23.698Z"
+      }
+    ]
   }
 ]

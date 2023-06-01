@@ -105,7 +105,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -114,16 +113,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
-          "user": "allow"
-        }
-      },
-      "productId": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -132,7 +121,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -141,7 +129,14 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
           "user": "allow"
         }
       },
@@ -150,7 +145,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -159,7 +153,14 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "paymentMethodId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
           "user": "allow"
         }
       },
@@ -168,20 +169,10 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
       "amount": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow",
-          "user": "allow"
-        }
-      },
-      "fee": {
         "in": {
           "admin": "allow"
         },
@@ -194,16 +185,14 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
-      "type": {
+      "fee": {
         "in": {
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -212,7 +201,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -221,7 +209,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -240,7 +227,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -249,7 +235,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -258,7 +243,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -267,7 +251,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -276,7 +259,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -285,7 +267,14 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "isInstantPayoutAllowed": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
           "user": "allow"
         }
       },
@@ -294,7 +283,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -322,7 +310,7 @@
     "microservice": "payment-stripe",
     "alias": "payment-stripe.Customer",
     "title": "Customer",
-    "schema":  {
+    "schema": {
       "customerId": {
         "in": {
           "user": "allow"
@@ -369,7 +357,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -378,7 +365,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -387,7 +373,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -396,7 +381,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -405,16 +389,30 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
-      "type": {
+      "funding": {
         "in": {
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
+          "user": "allow"
+        }
+      },
+      "brand": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "isInstantPayoutAllowed": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
           "user": "allow"
         }
       },
@@ -423,7 +421,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -432,7 +429,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -467,7 +463,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       }
@@ -574,7 +569,7 @@
           "admin": "allow"
         }
       },
-      "type": {
+      "funding": {
         "in": {
           "admin": "allow"
         },
@@ -1115,51 +1110,41 @@
     "schema": {
       "entityCost": {
         "in": {
-          "admin": "allow",
           "user": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
       "feesPayer": {
         "in": {
-          "admin": "allow",
           "user": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
       "applicationPaymentPercent": {
         "in": {
-          "admin": "allow",
           "user": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
       "additionalFeesPercent": {
         "in": {
-          "admin": "allow",
           "user": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
       "extraReceiverRevenuePercent": {
         "in": {
-          "admin": "allow",
           "user": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       }
@@ -1176,7 +1161,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -1185,7 +1169,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
@@ -1194,8 +1177,7 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
-          "user": "allow"
+          "admin": "allow"
         }
       },
       "receiverRevenue": {
@@ -1203,7 +1185,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       }
@@ -1223,27 +1204,22 @@
           }
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
       "refreshUrl": {
         "in": {
-          "admin": "allow",
           "user": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       },
       "returnUrl": {
         "in": {
-          "admin": "allow",
           "user": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       }
@@ -1260,7 +1236,6 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow",
           "user": "allow"
         }
       }
@@ -1620,5 +1595,82 @@
       }
     },
     "createdAt": "2023-05-26T15:01:39.186Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateInstantPayoutInput",
+    "title": "Create Instant Payout Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "amount": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-06-01T10:19:54.332Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateInstantPayoutOutput",
+    "title": "Create Instant Payout Output",
+    "schema": {
+      "payout": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-06-01T10:19:54.332Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.BalanceInput",
+    "title": "Balance Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-06-01T10:19:54.332Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.BalanceOutput",
+    "title": "Balance Output",
+    "schema": {
+      "balance": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow",
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-06-01T10:19:54.332Z"
   }
 ]
