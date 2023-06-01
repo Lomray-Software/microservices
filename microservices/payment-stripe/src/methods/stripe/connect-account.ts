@@ -1,6 +1,5 @@
 import { Endpoint } from '@lomray/microservice-helpers';
-import { IsObject, IsString } from 'class-validator';
-import type StripeSdk from 'stripe';
+import { IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import Factory from '@services/payment-gateway/factory';
@@ -23,8 +22,8 @@ class ConnectAccountInput {
 }
 
 class ConnectAccountOutput {
-  @IsObject()
-  accountLink: StripeSdk.AccountLink;
+  @IsString()
+  accountLink: string;
 }
 
 /**

@@ -1,6 +1,5 @@
 import { Endpoint } from '@lomray/microservice-helpers';
-import { IsNumber, IsObject, IsString } from 'class-validator';
-import type StripeSdk from 'stripe';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import Factory from '@services/payment-gateway/factory';
 
@@ -13,8 +12,8 @@ class CreateInstantPayoutInput {
 }
 
 class CreateInstantPayoutOutput {
-  @IsObject()
-  payout: StripeSdk.Payout;
+  @IsBoolean()
+  isInstantiated: boolean;
 }
 
 /**
@@ -30,7 +29,7 @@ const instantPayout = Endpoint.custom(
     const service = await Factory.create(getManager());
 
     return {
-      payout: await service.instantPayout({ userId, amount }),
+      isInstantiated: await service.instantPayout({ userId, amount }),
     };
   },
 );

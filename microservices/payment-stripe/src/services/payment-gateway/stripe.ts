@@ -3,6 +3,7 @@ import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
 import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
+import BalanceType from '@constants/balance-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
@@ -20,6 +21,7 @@ import composeBalance from '@helpers/compose-balance';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
+import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
 import Abstract, { IPriceParams, IProductParams } from './abstract';
 
@@ -90,6 +92,8 @@ interface IInstantPayoutParams {
   payoutMethod?: IPayoutMethod;
   currency?: TCurrency;
 }
+
+type TCustomerBalance = Record<BalanceType, TBalance>;
 
 interface IGetPaymentIntentFeesParams
   extends Pick<
@@ -286,7 +290,7 @@ class Stripe extends Abstract {
     accountType: StripeAccountTypes,
     refreshUrl: string,
     returnUrl: string,
-  ): Promise<StripeSdk.AccountLink> {
+  ): Promise<string> {
     const customer = await super.getCustomer(userId);
 
     if (!customer.params.accountId) {
@@ -302,7 +306,7 @@ class Stripe extends Abstract {
       await this.customerRepository.save(customer);
     }
 
-    return this.buildAccountLink(customer.params.accountId, refreshUrl, returnUrl);
+    return (await this.buildAccountLink(customer.params.accountId, refreshUrl, returnUrl)).url;
   }
 
   /**
@@ -313,7 +317,7 @@ class Stripe extends Abstract {
     userId: string,
     refreshUrl: string,
     returnUrl: string,
-  ): Promise<StripeSdk.AccountLink> {
+  ): Promise<string> {
     const customer = await this.customerRepository.findOne({ userId });
 
     if (!customer) {
@@ -330,7 +334,7 @@ class Stripe extends Abstract {
       });
     }
 
-    return this.buildAccountLink(customer.params.accountId, refreshUrl, returnUrl);
+    return (await this.buildAccountLink(customer.params.accountId, refreshUrl, returnUrl)).url;
   }
 
   /**
@@ -558,7 +562,7 @@ class Stripe extends Abstract {
     amount,
     payoutMethod,
     currency = 'usd',
-  }: IInstantPayoutParams): Promise<StripeSdk.Payout> {
+  }: IInstantPayoutParams): Promise<boolean> {
     const unitAmount = this.toSmallestCurrencyUnit(amount);
 
     /**
@@ -625,7 +629,7 @@ class Stripe extends Abstract {
       });
     }
 
-    return this.sdk.payouts.create(
+    await this.sdk.payouts.create(
       {
         currency,
         amount: unitAmount,
@@ -634,12 +638,14 @@ class Stripe extends Abstract {
       },
       { stripeAccount: customer.params.accountId },
     );
+
+    return true;
   }
 
   /**
    * Returns user related connect account balance
    */
-  public async getBalance(userId: string): Promise<StripeSdk.Balance> {
+  public async getBalance(userId: string): Promise<TCustomerBalance> {
     const customer = await this.customerRepository.findOne({
       userId,
     });
@@ -658,7 +664,19 @@ class Stripe extends Abstract {
       });
     }
 
-    return this.sdk.balance.retrieve({ stripeAccount: customer.params.accountId });
+    const {
+      available,
+      pending,
+      instant_available: instant = [],
+    } = await this.sdk.balance.retrieve({
+      stripeAccount: customer.params.accountId,
+    });
+
+    return {
+      available: composeBalance(available),
+      instant: composeBalance(instant),
+      pending: composeBalance(pending),
+    };
   }
 
   /**
