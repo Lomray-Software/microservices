@@ -102,19 +102,6 @@ Content-Type: application/json
   "params": {
     "defaultSchemaRoles": ["admin"],
     "defaultAllowGroup": ["admin"],
-    "commonModelAliases": [
-      "CountRequestParams",
-      "CountOutputParams",
-      "ListRequestParams",
-      "ViewRequestParams",
-      "RemoveRequestParams",
-      "RestoreRequestParams",
-      "MicroserviceMetaOutput",
-      "RemoteConfigOutput",
-      "ClientRegisterMiddlewareInput",
-      "ClientRegisterMiddlewareOutput",
-      "RemoteConfigOutput"
-    ],
     "payload": {
       "isInternal": true
     }

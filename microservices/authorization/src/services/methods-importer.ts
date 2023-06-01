@@ -76,8 +76,10 @@ class MethodsImporter {
   /**
    * Import methods & models
    */
-  public async import(): Promise<IMethodsImporterResult> {
-    const availableMs = await this.ms.lookup(true);
+  public async import(onlyMs: string[] = []): Promise<IMethodsImporterResult> {
+    const availableMs = (await this.ms.lookup(true)).filter(
+      (ms) => !onlyMs.length || onlyMs.includes(ms),
+    );
     const result: IMethodsImporterResult = {};
 
     for (const msName of availableMs) {

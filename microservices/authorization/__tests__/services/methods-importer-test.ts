@@ -56,6 +56,19 @@ describe('services/methods-importer', () => {
     expect(TypeormMock.entityManager.getRepository).to.not.called;
   });
 
+  it('should import only provided microservices: filter', async () => {
+    sandbox.stub(ms, 'lookup').resolves(['demo1', 'demo2']);
+    sandbox.stub(ms, 'sendRequest').rejects(new BaseException());
+
+    const result = await service.import(['demo2']);
+
+    expect(result).to.deep.equal({
+      demo2: {
+        error: "Microservice meta endpoint doesn't exist.",
+      },
+    });
+  });
+
   it('should skip import microservice metadata: microservice endpoints empty', async () => {
     sandbox.stub(ms, 'lookup').resolves(['demo1']);
     sandbox.stub(ms, 'sendRequest').resolves(new MicroserviceResponse({ result: {} }));

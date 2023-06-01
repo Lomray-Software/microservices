@@ -4,6 +4,7 @@ import { expect } from 'chai';
 import rewiremock from 'rewiremock';
 import sinon from 'sinon';
 import { EntityManager } from 'typeorm';
+import COMMON_MODELS from '@constants/common-models';
 import OriginalEndpointSyncMetadata from '@methods/service/sync-metadata';
 import MethodsImporter from '@services/methods-importer';
 
@@ -55,7 +56,10 @@ describe('methods/service/sync-metadata', () => {
     expect(res).to.deep.equal({ microservices });
     expect(msInstance).to.deep.equal(endpointOptions.app);
     expect(managerInstance).to.instanceof(EntityManager);
-    expect(params).to.deep.equal(methodParams);
+    expect(params).to.deep.equal({
+      ...methodParams,
+      commonModelAliases: [...COMMON_MODELS, ...methodParams.commonModelAliases],
+    });
     expect(importStub).to.calledOnce;
   });
 });

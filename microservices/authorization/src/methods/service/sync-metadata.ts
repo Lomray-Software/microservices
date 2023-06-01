@@ -2,26 +2,37 @@ import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsArray, IsObject } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { getManager } from 'typeorm';
+import COMMON_MODELS from '@constants/common-models';
 import MethodsImporter, { IMethodsImporterResult } from '@services/methods-importer';
 
 class SyncMetadataInput {
   @JSONSchema({
-    description: 'Default roles for model attributes',
+    description: 'Default roles for model attributes. By default: admin',
   })
   @IsArray()
   @IsUndefinable()
   defaultSchemaRoles?: string[];
 
   @JSONSchema({
-    description: 'Default roles for methods',
+    description: 'Default roles for methods. By default: admin.',
   })
   @IsArray()
   @IsUndefinable()
   defaultAllowGroup?: string[];
 
+  @JSONSchema({
+    description: 'Common model aliases for all microservices.',
+  })
   @IsArray()
   @IsUndefinable()
   commonModelAliases?: string[];
+
+  @JSONSchema({
+    description: 'Sync metadata only for provided microservices.',
+  })
+  @IsArray()
+  @IsUndefinable()
+  onlyMs?: string[];
 }
 
 class SyncMetadataOutput {
@@ -46,13 +57,21 @@ const syncMetadata = Endpoint.custom(
     description:
       'Import microservices methods and entities (create/update info about methods & models).',
   }),
-  async ({ commonModelAliases, defaultAllowGroup, defaultSchemaRoles }, { app }) => {
+  async (
+    {
+      commonModelAliases = [],
+      defaultAllowGroup = ['admin'],
+      defaultSchemaRoles = ['admin'],
+      onlyMs = [],
+    },
+    { app },
+  ) => {
     const service = MethodsImporter.create(app, getManager(), {
-      commonModelAliases,
+      commonModelAliases: [...COMMON_MODELS, ...commonModelAliases],
       defaultAllowGroup,
       defaultSchemaRoles,
     });
-    const microservices = await service.import();
+    const microservices = await service.import(onlyMs);
 
     return { microservices };
   },

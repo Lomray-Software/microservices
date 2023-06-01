@@ -993,6 +993,14 @@
         "out": {
           "admin": "allow"
         }
+      },
+      "onlyMs": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
       }
     },
     "createdAt": "2022-04-14T05:34:30.652Z"
