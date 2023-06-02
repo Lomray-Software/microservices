@@ -1,7 +1,8 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { IsObject, IsString } from 'class-validator';
-import type StripeSdk from 'stripe';
 import { getManager } from 'typeorm';
+import BalanceType from '@constants/balance-type';
+import TBalance from '@interfaces/balance';
 import Factory from '@services/payment-gateway/factory';
 
 class BalanceInput {
@@ -11,7 +12,7 @@ class BalanceInput {
 
 class BalanceOutput {
   @IsObject()
-  balance: StripeSdk.Balance;
+  balance: Record<BalanceType, TBalance>;
 }
 
 /**

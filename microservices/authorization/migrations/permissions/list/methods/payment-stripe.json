@@ -17,7 +17,7 @@
     "method": "product.update",
     "description": "Update Product by given condition",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -89,7 +89,7 @@
     "method": "bank-account.list",
     "description": "Returns list of BankAccount by given condition",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -160,7 +160,7 @@
     "method": "stripe.create-checkout",
     "description": "Setup intent and return client secret key",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -225,7 +225,7 @@
     "method": "bank-account.view",
     "description": "Returns BankAccount by given condition",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -258,7 +258,7 @@
     "method": "transaction.list",
     "description": "Returns list of Transaction by given condition",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -291,7 +291,7 @@
     "method": "card.list",
     "description": "Returns list of Card by given condition",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -311,7 +311,7 @@
     "method": "stripe.setup-intent",
     "description": "Setup intent and return client secret key",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -325,7 +325,7 @@
     "method": "bank-account.count",
     "description": "Returns count of BankAccount by given condition",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -358,7 +358,7 @@
     "method": "product.view",
     "description": "Returns Product by given condition",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -371,7 +371,7 @@
     "method": "customer.view",
     "description": "Returns Customer by given condition",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -417,7 +417,7 @@
     "method": "transaction.count",
     "description": "Returns count of Transaction by given condition",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -437,7 +437,7 @@
     "method": "stripe.payment-intent-fees",
     "description": "Returns calculated fees for payment intent",
     "allowGroup": [
-      "guest"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -463,7 +463,7 @@
     "method": "product.create",
     "description": "Create new product",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -488,7 +488,7 @@
     "method": "price.view",
     "description": "Returns Price by given condition",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -527,7 +527,7 @@
     "method": "price.create",
     "description": "Create new price",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -540,7 +540,7 @@
     "method": "stripe.refund",
     "description": "Create transaction refund",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -554,7 +554,7 @@
     "method": "card.view",
     "description": "Returns Card by given condition",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -613,7 +613,7 @@
     "method": "stripe.connect-account-link",
     "description": "Create new link for access to the connect account",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -633,7 +633,7 @@
     "method": "transaction.view",
     "description": "Returns Transaction by given condition",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -653,7 +653,7 @@
     "method": "card.count",
     "description": "Returns count of Card by given condition",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -673,7 +673,7 @@
     "method": "stripe.connect-account",
     "description": "Create new connected account with link",
     "allowGroup": [
-      "user"
+      "admin"
     ],
     "denyGroup": [],
     "createdAt": "2023-05-26T15:12:57.976Z",
@@ -693,6 +693,32 @@
     "createdAt": "2023-05-26T15:12:57.976Z",
     "modelIn": "ListRequestParams",
     "modelOut": "payment-stripe.ListOutputParams.303da06f1a333ac1f38154b06d358190",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "stripe.instant-payout",
+    "description": "Create instant payout",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-06-01T10:19:54.332Z",
+    "modelIn": "payment-stripe.CreateInstantPayoutInput",
+    "modelOut": "payment-stripe.CreateInstantPayoutOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "stripe.balance",
+    "description": "Returns balance",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-06-01T10:19:54.332Z",
+    "modelIn": "payment-stripe.BalanceInput",
+    "modelOut": "payment-stripe.BalanceOutput",
     "methodFilters": []
   }
 ]
