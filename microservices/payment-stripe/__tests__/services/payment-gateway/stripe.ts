@@ -55,7 +55,7 @@ describe('services/payment-gateway/stripe', () => {
    * This field is protected
    */
   // @ts-ignore
-  const StripeInstanceParamStub = sinon.stub(service, 'sdk');
+  sinon.stub(service, 'sdk').value(stripeMock());
 
   beforeEach(() => {
     TypeormMock.sandbox.reset();
@@ -66,7 +66,6 @@ describe('services/payment-gateway/stripe', () => {
   });
 
   it('should correctly create customer', async () => {
-    StripeInstanceParamStub.value(stripeMock());
     const { userId, customerId } = await service.createCustomer(userMock.userId);
 
     expect(userId).to.equal(userMock.userId);
@@ -75,7 +74,6 @@ describe('services/payment-gateway/stripe', () => {
   });
 
   it('should correctly return account link', async () => {
-    StripeInstanceParamStub.value(stripeMock());
     TypeormMock.entityManager.findOne.resolves(userMock);
 
     const accountLink = await service.getConnectAccountLink(
@@ -108,7 +106,6 @@ describe('services/payment-gateway/stripe', () => {
   });
 
   it('should correctly return setup intent client secret', async () => {
-    StripeInstanceParamStub.value(stripeMock());
     TypeormMock.entityManager.findOne.resolves(userMock);
 
     const clientSecret = await service.setupIntent(userMock.userId);
@@ -117,7 +114,6 @@ describe('services/payment-gateway/stripe', () => {
   });
 
   it("should correctly return setup intent client secret if customer isn't exist", async () => {
-    StripeInstanceParamStub.value(stripeMock());
     TypeormMock.entityManager.findOne.resolves(undefined);
 
     const clientSecret = await service.setupIntent(userMock.userId);
@@ -129,7 +125,6 @@ describe('services/payment-gateway/stripe', () => {
     const users = [userMock, { ...userMock, params: {} }];
 
     for (const user of users) {
-      StripeInstanceParamStub.value(stripeMock());
       TypeormMock.entityManager.findOne.resolves(user);
 
       const accountLink = await service.connectAccount(
@@ -145,7 +140,6 @@ describe('services/payment-gateway/stripe', () => {
   });
 
   it('should correctly return customer balance', async () => {
-    StripeInstanceParamStub.value(stripeMock());
     TypeormMock.entityManager.findOne.resolves(userMock);
 
     const balance = await service.getBalance(userMock.userId);
@@ -167,7 +161,6 @@ describe('services/payment-gateway/stripe', () => {
   });
 
   it("should return error (balance): customer isn't found", async () => {
-    StripeInstanceParamStub.value(stripeMock());
     TypeormMock.entityManager.findOne.resolves(undefined);
 
     expect(await waitResult(service.getBalance(userMock.userId))).to.throw("Customer isn't found");
