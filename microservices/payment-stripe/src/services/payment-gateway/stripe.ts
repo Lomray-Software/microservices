@@ -1185,7 +1185,7 @@ class Stripe extends Abstract {
     /**
      * Convert the amount to a number if it's a string
      */
-    const parsedAmount = typeof amount === 'string' ? Number.parseFloat(amount) : amount;
+    const parsedAmount = typeof amount === 'string' ? Number(amount) : amount;
 
     return parsedAmount * 100;
   }
