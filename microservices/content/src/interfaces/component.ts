@@ -26,22 +26,39 @@ interface IRelation {
 /**
  * Primitive input types: Text, Number, Rich Text, Date, Boolean, Email, Password, JSON, ENUM
  */
-interface IDefaultSchema extends IBaseSchema {}
+interface IDefaultSchema extends IBaseSchema {
+  isRequired?: boolean;
+}
 
 /**
- * Relation input types: Relation, Media
+ * Text input type options
+ */
+interface ILongTextSchema extends IDefaultSchema {
+  isLong: true;
+}
+
+/**
+ * Relation input types: Relation
  */
 interface IRelationSchema extends IBaseSchema {
   relation: IRelation;
 }
 
 /**
- * Custom input type: Component
+ * Relation input types: Media
  */
-interface IComponentSchema extends IBaseSchema, Pick<IRelation, 'hasMany'> {
-  id: string;
+interface IFileSchema extends IRelationSchema {
+  isFiles: true;
 }
 
-type ISchema = IDefaultSchema | IRelationSchema | IComponentSchema;
+/**
+ * Custom input type: Component
+ */
+interface IComponentSchema extends IBaseSchema {
+  id: string;
+  hasMany: boolean;
+}
 
-export { ISchema, IRelationSchema, IComponentSchema, IDefaultSchema };
+type ISchema = IDefaultSchema | IRelationSchema | IComponentSchema | IFileSchema | ILongTextSchema;
+
+export { ISchema, IRelationSchema, IComponentSchema, IDefaultSchema, IFileSchema, ILongTextSchema };
