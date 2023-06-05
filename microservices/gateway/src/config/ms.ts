@@ -21,7 +21,7 @@ const msOptions: Partial<IGatewayOptions> = {
   },
 };
 
-const msMiddlewares = [webhook, cors, userInfo];
+const msMiddlewares = [cors, webhook, userInfo];
 
 /**
  * Microservice params
