@@ -938,7 +938,7 @@ class Stripe extends Abstract {
   public async handleTransactionCompleted(event: StripeSdk.Event): Promise<Transaction | void> {
     const { id, payment_status: paymentStatus, status } = event.data.object as ICheckoutEvent;
 
-    const transaction = await this.transactionRepository.findOne(id);
+    const transaction = await this.transactionRepository.findOne({ transactionId: id });
 
     if (!transaction) {
       Log.error(`There is no actual transfer for entity with following  transaction id: ${id}`);
