@@ -53,13 +53,6 @@
   },
   {
     "microservice": "payment-stripe",
-    "alias": "payment-stripe.Transactions",
-    "title": "Transactions",
-    "schema": {},
-    "createdAt": "2023-05-26T15:01:39.186Z"
-  },
-  {
-    "microservice": "payment-stripe",
     "alias": "payment-stripe.Product",
     "title": "Product",
     "schema": {
@@ -91,7 +84,7 @@
         }
       },
       "price": "payment-stripe.Price",
-      "transactions": "payment-stripe.Transactions"
+      "transactions": "payment-stripe.Transaction"
     },
     "createdAt": "2023-05-26T15:01:39.186Z"
   },
