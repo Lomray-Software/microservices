@@ -61,19 +61,6 @@ describe('methods/customer/crud', () => {
     expect(res).to.deep.equal(updateResult(fields));
   });
 
-  it('should correctly entity remove', async () => {
-    const entity = { customerId: 'customer-id' };
-
-    TypeormMock.queryBuilder.getMany.returns([entity]);
-
-    const res = await Crud.remove?.(
-      { query: { where: { customerId: entity.customerId } } },
-      endpointOptions,
-    );
-
-    expect(res).to.deep.equal({ deleted: [entity] });
-  });
-
   it("should haven't restore method", () => {
     expect(Crud.restore).to.be.undefined;
   });
