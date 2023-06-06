@@ -9,7 +9,7 @@ import Transaction from '@entities/transaction';
   description: 'Entity for binding application entity with the according payment service entity',
   properties: {
     price: { $ref: '#/definitions/Price' },
-    transactions: { $ref: '#/definitions/Transactions', type: 'array' },
+    transactions: { $ref: '#/definitions/Transaction', type: 'array' },
   },
 })
 @Entity()
