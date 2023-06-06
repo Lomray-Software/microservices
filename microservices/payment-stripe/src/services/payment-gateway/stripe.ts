@@ -501,6 +501,16 @@ class Stripe extends Abstract {
     });
 
     await Promise.all(saveCardRequests);
+
+    /**
+     * If customer has default payment method, and it's exist in stripe
+     */
+    if (customer.params.hasDefaultPaymentMethod && invoiceSettings.default_payment_method) {
+      return;
+    }
+
+    customer.params.hasDefaultPaymentMethod = Boolean(invoiceSettings.default_payment_method);
+    await this.customerRepository.save(customer);
   }
 
   /**

@@ -20,7 +20,7 @@ export interface IParams {
   // Is allowed for init default payout
   isPayoutEnabled?: boolean;
   // If user have card that can be used for payment intent charges
-  isHaveDefaultPaymentMethod?: boolean;
+  hasDefaultPaymentMethod?: boolean;
 }
 
 @JSONSchema({
