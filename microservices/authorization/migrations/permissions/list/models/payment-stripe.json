@@ -1675,5 +1675,37 @@
       }
     },
     "createdAt": "2023-06-01T10:19:54.332Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CustomerRemoveInput",
+    "title": "Customer Remove Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-06-06T09:54:26.730Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CustomerRemoveOutput",
+    "title": "Customer Remove Output",
+    "schema": {
+      "isRemoved": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-06-06T09:54:26.730Z"
   }
 ]
