@@ -3,6 +3,7 @@ import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { Stripe as StripeTypes } from 'stripe';
+import messages from '@__mocks__/messages';
 import {
   customerMock,
   accountMock,
@@ -28,6 +29,9 @@ describe('services/payment-gateway/stripe', () => {
   const stripeMock = () => ({
     customers: {
       create: () => customerMock,
+      del: () => ({
+        deleted: true,
+      }),
     },
     accountLinks: {
       create: () => accountLinkMock,
@@ -94,7 +98,7 @@ describe('services/payment-gateway/stripe', () => {
       await waitResult(
         service.getConnectAccountLink(userMock.userId, accountUrlMock, accountUrlMock),
       ),
-    ).to.throw("Customer isn't found");
+    ).to.throw(messages.customerIsNotFound);
   });
 
   it("should should throw error: customer don't have setup connect account", async () => {
@@ -204,5 +208,23 @@ describe('services/payment-gateway/stripe', () => {
 
       expect(result).to.be.NaN;
     });
+  });
+
+  it('should correctly remove customer', async () => {
+    StripeInstanceParamStub.value(stripeMock());
+    TypeormMock.entityManager.findOne.resolves(userMock);
+
+    const isRemoved = await service.removeCustomer(userMock.userId);
+
+    expect(isRemoved).to.true;
+  });
+
+  it("should return error (remove customer): customer isn't found", async () => {
+    StripeInstanceParamStub.value(stripeMock());
+    TypeormMock.entityManager.findOne.resolves(undefined);
+
+    expect(await waitResult(service.removeCustomer(userMock.userId))).to.throw(
+      messages.customerIsNotFound,
+    );
   });
 });
