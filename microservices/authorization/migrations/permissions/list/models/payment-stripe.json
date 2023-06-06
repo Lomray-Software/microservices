@@ -692,7 +692,48 @@
     "microservice": "payment-stripe",
     "alias": "payment-stripe.BankAccountAddInput",
     "title": "Bank Account Add Input",
-    "schema": {},
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "lastDigits": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "holderName": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "bankName": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "bankAccountId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
     "createdAt": "2023-05-26T15:01:39.186Z"
   },
   {
@@ -700,7 +741,7 @@
     "alias": "payment-stripe.BankAccountAddOutput",
     "title": "Bank Account Add Output",
     "schema": {
-      "entity": {
+      "bankAccount": {
         "in": {
           "admin": "allow"
         },
