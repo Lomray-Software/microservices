@@ -298,6 +298,13 @@ class Stripe extends Abstract {
         type: accountType,
         country: 'US',
         email,
+        settings: {
+          payouts: {
+            // eslint-disable-next-line camelcase
+            debit_negative_balances: false,
+            schedule: { interval: 'manual' },
+          },
+        },
       });
 
       customer.params.accountId = stripeConnectAccount.id;
@@ -400,19 +407,23 @@ class Stripe extends Abstract {
   public async handlePaymentMethodDetached(event: StripeSdk.Event): Promise<void> {
     const { id } = event.data.object as StripeSdk.PaymentMethod;
 
-    const paymentMethod = await this.cardRepository
+    const card = await this.cardRepository
       .createQueryBuilder('card')
       .where("card.params->>'paymentMethodId' = :value", { value: id })
       .getOne();
 
-    if (!paymentMethod) {
+    if (!card) {
       throw new BaseException({
         status: 500,
         message: messages.getNotFoundMessage('Payment method'),
       });
     }
 
-    await this.cardRepository.remove(paymentMethod);
+    await this.cardRepository.remove(card);
+
+    void Microservice.eventPublish(Event.EntityPaid, {
+      cardId: card.id,
+    });
   }
 
   /**
@@ -480,12 +491,22 @@ class Stripe extends Abstract {
       funding,
     } = cardPaymentMethod;
 
+    const expired = toExpirationDate(expMonth, expYear);
+
     card.lastDigits = lastDigits;
     card.expired = toExpirationDate(expMonth, expYear);
     card.brand = brand;
     card.funding = funding;
 
     await this.cardRepository.save(card);
+
+    void Microservice.eventPublish(Event.EntityPaid, {
+      funding,
+      brand,
+      expired,
+      lastDigits,
+      cardId: card.id,
+    });
   }
 
   /**
@@ -733,23 +754,30 @@ class Stripe extends Abstract {
      */
     const attachedCardsCount = await this.cardRepository.count({ userId });
 
-    await this.cardRepository.save({
+    const cardParams = {
       lastDigits,
       brand,
       userId,
       funding,
       expired: toExpirationDate(expMonth, expYear),
+    };
+
+    const savedCard = await this.cardRepository.save({
+      ...cardParams,
       params: { isApproved: true, paymentMethodId },
     });
 
     /**
      * Handle if it's first customer payment method
      */
-    if (attachedCardsCount !== 0) {
-      return;
+    if (attachedCardsCount === 0) {
+      await this.setDefaultPaymentMethod(customerId, paymentMethodId);
     }
 
-    await this.setDefaultPaymentMethod(customerId, paymentMethodId);
+    void Microservice.eventPublish(Event.EntityPaid, {
+      ...cardParams,
+      cardId: savedCard.id,
+    });
   }
 
   /**
