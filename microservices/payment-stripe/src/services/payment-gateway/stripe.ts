@@ -191,7 +191,15 @@ class Stripe extends Abstract {
       throw new BaseException({ status: 500, message: messages.getNotFoundMessage('Customer') });
     }
 
-    return (await this.sdk.customers.del(customer.customerId)).deleted;
+    const { deleted: isDeleted } = await this.sdk.customers.del(customer.customerId);
+
+    if (!isDeleted) {
+      return false;
+    }
+
+    await this.customerRepository.remove(customer);
+
+    return true;
   }
 
   /**
