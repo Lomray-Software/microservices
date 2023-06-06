@@ -228,7 +228,10 @@
       },
       "userId": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
           "user": "allow"
@@ -358,7 +361,10 @@
       },
       "userId": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
           "user": "allow"
@@ -535,7 +541,10 @@
     "schema": {
       "userId": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
           "admin": "allow"
@@ -695,10 +704,13 @@
     "schema": {
       "userId": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
-          "user": "allow"
+          "admin": "allow"
         }
       },
       "lastDigits": {
@@ -706,7 +718,7 @@
           "admin": "allow"
         },
         "out": {
-          "user": "allow"
+          "admin": "allow"
         }
       },
       "holderName": {
@@ -714,7 +726,7 @@
           "admin": "allow"
         },
         "out": {
-          "user": "allow"
+          "admin": "allow"
         }
       },
       "bankName": {
@@ -722,7 +734,7 @@
           "admin": "allow"
         },
         "out": {
-          "user": "allow"
+          "admin": "allow"
         }
       },
       "bankAccountId": {
@@ -730,7 +742,7 @@
           "admin": "allow"
         },
         "out": {
-          "user": "allow"
+          "admin": "allow"
         }
       }
     },
@@ -1043,7 +1055,10 @@
     "schema": {
       "userId": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
           "admin": "allow"
@@ -1640,7 +1655,10 @@
     "schema": {
       "userId": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
           "admin": "allow"
@@ -1717,7 +1735,10 @@
     "schema": {
       "userId": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
           "admin": "allow"
