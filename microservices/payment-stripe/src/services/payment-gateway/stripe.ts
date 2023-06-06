@@ -188,7 +188,7 @@ class Stripe extends Abstract {
     const customer = await this.customerRepository.findOne({ userId });
 
     if (!customer) {
-      throw new BaseException({ status: 500, message: messages.getNotFoundMessage('Customer') });
+      throw new BaseException({ status: 400, message: messages.getNotFoundMessage('Customer') });
     }
 
     const { deleted: isDeleted } = await this.sdk.customers.del(customer.customerId);
