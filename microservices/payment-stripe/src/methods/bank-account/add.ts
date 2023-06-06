@@ -1,16 +1,30 @@
-import { Endpoint } from '@lomray/microservice-helpers';
+import { Endpoint, IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
-import { IsObject } from 'class-validator';
+import { IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import BankAccount from '@entities/bank-account';
 import type { IBankAccountParams } from '@services/payment-gateway/abstract';
 import Factory from '@services/payment-gateway/factory';
 
 class BankAccountAddInput implements IBankAccountParams {
+  @IsString()
   userId: string;
+
+  @IsString()
   lastDigits: string;
+
+  @IsString()
+  @IsUndefinable()
+  @IsNullable()
   holderName?: string | null;
+
+  @IsString()
+  @IsUndefinable()
+  @IsNullable()
   bankName?: string | null;
+
+  @IsString()
+  @IsUndefinable()
   bankAccountId?: string;
 }
 
