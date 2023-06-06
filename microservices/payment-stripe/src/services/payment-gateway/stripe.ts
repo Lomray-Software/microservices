@@ -459,7 +459,7 @@ class Stripe extends Abstract {
 
     await this.cardRepository.remove(card);
 
-    void Microservice.eventPublish(Event.EntityPaid, {
+    void Microservice.eventPublish(Event.PaymentMethodRemoved, {
       cardId: card.id,
     });
   }
@@ -532,13 +532,13 @@ class Stripe extends Abstract {
     const expired = toExpirationDate(expMonth, expYear);
 
     card.lastDigits = lastDigits;
-    card.expired = toExpirationDate(expMonth, expYear);
+    card.expired = expired;
     card.brand = brand;
     card.funding = funding;
 
     await this.cardRepository.save(card);
 
-    void Microservice.eventPublish(Event.EntityPaid, {
+    void Microservice.eventPublish(Event.PaymentMethodUpdated, {
       funding,
       brand,
       expired,
@@ -812,7 +812,7 @@ class Stripe extends Abstract {
       await this.setDefaultPaymentMethod(customerId, paymentMethodId);
     }
 
-    void Microservice.eventPublish(Event.EntityPaid, {
+    void Microservice.eventPublish(Event.SetupIntentSucceeded, {
       ...cardParams,
       cardId: savedCard.id,
     });
