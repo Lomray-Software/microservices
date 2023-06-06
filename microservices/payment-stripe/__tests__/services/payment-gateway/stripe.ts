@@ -3,6 +3,7 @@ import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { Stripe as StripeTypes } from 'stripe';
+import messages from '@__mocks__/messages';
 import {
   customerMock,
   accountMock,
@@ -25,9 +26,12 @@ describe('services/payment-gateway/stripe', () => {
     params: { accountId: accountMock.id },
   };
 
-  const stripeMock = () => ({
+  const stripeMock = (isDeletedCustomer = true) => ({
     customers: {
       create: () => customerMock,
+      del: () => ({
+        deleted: isDeletedCustomer,
+      }),
     },
     accountLinks: {
       create: () => accountLinkMock,
@@ -94,7 +98,7 @@ describe('services/payment-gateway/stripe', () => {
       await waitResult(
         service.getConnectAccountLink(userMock.userId, accountUrlMock, accountUrlMock),
       ),
-    ).to.throw("Customer isn't found");
+    ).to.throw(messages.customerIsNotFound);
   });
 
   it("should should throw error: customer don't have setup connect account", async () => {
@@ -204,5 +208,60 @@ describe('services/payment-gateway/stripe', () => {
 
       expect(result).to.be.NaN;
     });
+  });
+
+  it('should correctly remove customer', async () => {
+    StripeInstanceParamStub.value(stripeMock());
+    TypeormMock.entityManager.findOne.resolves(userMock);
+
+    const isRemoved = await service.removeCustomer(userMock.userId);
+
+    expect(isRemoved).to.true;
+  });
+
+  it("shouldn't remove customer cause stripe remove failed", async () => {
+    StripeInstanceParamStub.value(stripeMock(false));
+    TypeormMock.entityManager.findOne.resolves(userMock);
+
+    const isRemoved = await service.removeCustomer(userMock.userId);
+
+    expect(isRemoved).to.false;
+  });
+
+  it("should return error (remove customer): customer isn't found", async () => {
+    StripeInstanceParamStub.value(stripeMock());
+    TypeormMock.entityManager.findOne.resolves(undefined);
+
+    expect(await waitResult(service.removeCustomer(userMock.userId))).to.throw(
+      messages.customerIsNotFound,
+    );
+  });
+
+  it('should correctly add bank account customer', async () => {
+    StripeInstanceParamStub.value(stripeMock());
+    TypeormMock.entityManager.findOne.resolves(userMock);
+
+    const bankAccount = {
+      userId: userMock.userId,
+      bankAccountId: 'bank-account-id',
+      bankName: 'American Express',
+      holderName: 'Mike',
+      lastDigits: '4242',
+    };
+
+    TypeormMock.entityManager.save.resolves(bankAccount);
+
+    const result = await service.addBankAccount(bankAccount);
+
+    expect(result).to.deep.equal(bankAccount);
+  });
+
+  it("should return error (add bank account): customer isn't found", async () => {
+    StripeInstanceParamStub.value(stripeMock());
+    TypeormMock.entityManager.findOne.resolves(undefined);
+
+    expect(await waitResult(service.removeCustomer(userMock.userId))).to.throw(
+      messages.customerIsNotFound,
+    );
   });
 });

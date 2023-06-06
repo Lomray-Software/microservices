@@ -499,14 +499,14 @@
   {
     "microservice": "payment-stripe",
     "method": "customer.remove",
-    "description": "Remove Customer by given condition",
+    "description": "Remove customer",
     "allowGroup": [
       "admin"
     ],
     "denyGroup": [],
-    "createdAt": "2023-05-26T15:12:57.976Z",
-    "modelIn": "RemoveRequestParams",
-    "modelOut": "payment-stripe.RemoveOutputParams.87d10388e62bc5cd27e433c97b2b7ea5",
+    "createdAt": "2023-05-26T11:12:57.976Z",
+    "modelIn": "payment-stripe.CustomerRemoveInput",
+    "modelOut": "payment-stripe.CustomerRemoveOutput",
     "methodFilters": []
   },
   {

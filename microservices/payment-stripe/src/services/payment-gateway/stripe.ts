@@ -1,6 +1,7 @@
 import { Log } from '@lomray/microservice-helpers';
 import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
+import { validate } from 'class-validator';
 import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
 import BalanceType from '@constants/balance-type';
@@ -23,7 +24,7 @@ import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
-import Abstract, { IPriceParams, IProductParams } from './abstract';
+import Abstract, { IBankAccountParams, IPriceParams, IProductParams } from './abstract';
 
 export interface IStripeProductParams extends IProductParams {
   name: string;
@@ -124,9 +125,32 @@ class Stripe extends Abstract {
 
   /**
    * Add bank account
+   * NOTE: Usage example - integration tests
    */
-  addBankAccount(): Promise<BankAccount> {
-    return Promise.resolve(new BankAccount());
+  public async addBankAccount({
+    bankAccountId,
+    ...rest
+  }: IBankAccountParams): Promise<BankAccount> {
+    const bankAccount = this.bankAccountRepository.create({
+      ...rest,
+      params: { bankAccountId },
+    });
+
+    const errors = await validate(bankAccount, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      validationError: { target: false },
+    });
+
+    if (errors.length > 0) {
+      throw new BaseException({
+        status: 422,
+        message: `Validation failed for bank account.`,
+        payload: errors,
+      });
+    }
+
+    return this.bankAccountRepository.save(bankAccount);
   }
 
   /**
@@ -154,6 +178,28 @@ class Stripe extends Abstract {
     const { id }: StripeSdk.Customer = await this.sdk.customers.create();
 
     return super.createCustomer(userId, id);
+  }
+
+  /**
+   * Remove Customer from db and stripe
+   * NOTE: Usage example - integration tests
+   */
+  public async removeCustomer(userId: string): Promise<boolean> {
+    const customer = await this.customerRepository.findOne({ userId });
+
+    if (!customer) {
+      throw new BaseException({ status: 400, message: messages.getNotFoundMessage('Customer') });
+    }
+
+    const { deleted: isDeleted } = await this.sdk.customers.del(customer.customerId);
+
+    if (!isDeleted) {
+      return false;
+    }
+
+    await this.customerRepository.remove(customer);
+
+    return true;
   }
 
   /**
@@ -298,6 +344,13 @@ class Stripe extends Abstract {
         type: accountType,
         country: 'US',
         email,
+        settings: {
+          payouts: {
+            // eslint-disable-next-line camelcase
+            debit_negative_balances: false,
+            schedule: { interval: 'manual' },
+          },
+        },
       });
 
       customer.params.accountId = stripeConnectAccount.id;
@@ -400,19 +453,23 @@ class Stripe extends Abstract {
   public async handlePaymentMethodDetached(event: StripeSdk.Event): Promise<void> {
     const { id } = event.data.object as StripeSdk.PaymentMethod;
 
-    const paymentMethod = await this.cardRepository
+    const card = await this.cardRepository
       .createQueryBuilder('card')
       .where("card.params->>'paymentMethodId' = :value", { value: id })
       .getOne();
 
-    if (!paymentMethod) {
+    if (!card) {
       throw new BaseException({
         status: 500,
         message: messages.getNotFoundMessage('Payment method'),
       });
     }
 
-    await this.cardRepository.remove(paymentMethod);
+    await this.cardRepository.remove(card);
+
+    void Microservice.eventPublish(Event.PaymentMethodRemoved, {
+      cardId: card.id,
+    });
   }
 
   /**
@@ -437,6 +494,9 @@ class Stripe extends Abstract {
       userId: customer.userId,
     });
 
+    /**
+     * Update cards default statuses on change default card for charge
+     */
     const saveCardRequests = cards.map((card) => {
       card.isDefault = card.params.paymentMethodId === invoiceSettings.default_payment_method;
 
@@ -444,6 +504,16 @@ class Stripe extends Abstract {
     });
 
     await Promise.all(saveCardRequests);
+
+    /**
+     * If customer has default payment method, and it's exist in stripe
+     */
+    if (customer.params.hasDefaultPaymentMethod && invoiceSettings.default_payment_method) {
+      return;
+    }
+
+    customer.params.hasDefaultPaymentMethod = Boolean(invoiceSettings.default_payment_method);
+    await this.customerRepository.save(customer);
   }
 
   /**
@@ -480,10 +550,22 @@ class Stripe extends Abstract {
       funding,
     } = cardPaymentMethod;
 
+    const expired = toExpirationDate(expMonth, expYear);
+
     card.lastDigits = lastDigits;
-    card.expired = toExpirationDate(expMonth, expYear);
+    card.expired = expired;
     card.brand = brand;
     card.funding = funding;
+
+    await this.cardRepository.save(card);
+
+    void Microservice.eventPublish(Event.PaymentMethodUpdated, {
+      funding,
+      brand,
+      expired,
+      lastDigits,
+      cardId: card.id,
+    });
   }
 
   /**
@@ -731,23 +813,30 @@ class Stripe extends Abstract {
      */
     const attachedCardsCount = await this.cardRepository.count({ userId });
 
-    await this.cardRepository.save({
+    const cardParams = {
       lastDigits,
       brand,
       userId,
       funding,
       expired: toExpirationDate(expMonth, expYear),
+    };
+
+    const savedCard = await this.cardRepository.save({
+      ...cardParams,
       params: { isApproved: true, paymentMethodId },
     });
 
     /**
      * Handle if it's first customer payment method
      */
-    if (attachedCardsCount !== 0) {
-      return;
+    if (attachedCardsCount === 0) {
+      await this.setDefaultPaymentMethod(customerId, paymentMethodId);
     }
 
-    await this.setDefaultPaymentMethod(customerId, paymentMethodId);
+    void Microservice.eventPublish(Event.SetupIntentSucceeded, {
+      ...cardParams,
+      cardId: savedCard.id,
+    });
   }
 
   /**

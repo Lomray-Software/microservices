@@ -8,6 +8,7 @@ import Customer from '@entities/customer';
 const crud = Endpoint.controller(() => getRepository(Customer), {
   restore: false,
   create: false,
+  remove: false,
 });
 
 export default crud;

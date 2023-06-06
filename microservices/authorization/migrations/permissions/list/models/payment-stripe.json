@@ -53,13 +53,6 @@
   },
   {
     "microservice": "payment-stripe",
-    "alias": "payment-stripe.Transactions",
-    "title": "Transactions",
-    "schema": {},
-    "createdAt": "2023-05-26T15:01:39.186Z"
-  },
-  {
-    "microservice": "payment-stripe",
     "alias": "payment-stripe.Product",
     "title": "Product",
     "schema": {
@@ -91,7 +84,7 @@
         }
       },
       "price": "payment-stripe.Price",
-      "transactions": "payment-stripe.Transactions"
+      "transactions": "payment-stripe.Transaction"
     },
     "createdAt": "2023-05-26T15:01:39.186Z"
   },
@@ -235,7 +228,10 @@
       },
       "userId": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
           "user": "allow"
@@ -365,7 +361,10 @@
       },
       "userId": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
           "user": "allow"
@@ -542,7 +541,10 @@
     "schema": {
       "userId": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
           "admin": "allow"
@@ -699,7 +701,51 @@
     "microservice": "payment-stripe",
     "alias": "payment-stripe.BankAccountAddInput",
     "title": "Bank Account Add Input",
-    "schema": {},
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "lastDigits": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "holderName": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "bankName": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "bankAccountId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
     "createdAt": "2023-05-26T15:01:39.186Z"
   },
   {
@@ -1009,7 +1055,10 @@
     "schema": {
       "userId": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
           "admin": "allow"
@@ -1606,7 +1655,10 @@
     "schema": {
       "userId": {
         "in": {
-          "admin": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
           "admin": "allow"
@@ -1675,5 +1727,40 @@
       }
     },
     "createdAt": "2023-06-01T10:19:54.332Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CustomerRemoveInput",
+    "title": "Customer Remove Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-06-06T09:54:26.730Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CustomerRemoveOutput",
+    "title": "Customer Remove Output",
+    "schema": {
+      "isRemoved": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-06-06T09:54:26.730Z"
   }
 ]
