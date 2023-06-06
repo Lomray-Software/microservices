@@ -17,7 +17,7 @@ class BankAccountAddInput implements IBankAccountParams {
 class BankAccountAddOutput {
   @IsObject()
   @Type(() => BankAccount)
-  entity: BankAccount;
+  bankAccount: BankAccount;
 }
 
 /**
@@ -29,11 +29,17 @@ const add = Endpoint.custom(
     output: BankAccountAddOutput,
     description: 'Add new bank account',
   }),
-  async () => {
+  async ({ userId, bankName, holderName, bankAccountId, lastDigits }) => {
     const service = await Factory.create(getManager());
 
     return {
-      entity: await service.addBankAccount(),
+      bankAccount: await service.addBankAccount({
+        userId,
+        bankName,
+        holderName,
+        bankAccountId,
+        lastDigits,
+      }),
     };
   },
 );

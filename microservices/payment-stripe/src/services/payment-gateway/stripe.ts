@@ -1,6 +1,7 @@
 import { Log } from '@lomray/microservice-helpers';
 import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
+import { validate } from 'class-validator';
 import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
 import BalanceType from '@constants/balance-type';
@@ -23,7 +24,7 @@ import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
-import Abstract, { IPriceParams, IProductParams } from './abstract';
+import Abstract, { IBankAccountParams, IPriceParams, IProductParams } from './abstract';
 
 export interface IStripeProductParams extends IProductParams {
   name: string;
@@ -124,9 +125,32 @@ class Stripe extends Abstract {
 
   /**
    * Add bank account
+   * NOTE: Usage example - integration tests
    */
-  addBankAccount(): Promise<BankAccount> {
-    return Promise.resolve(new BankAccount());
+  public async addBankAccount({
+    bankAccountId,
+    ...rest
+  }: IBankAccountParams): Promise<BankAccount> {
+    const bankAccount = this.bankAccountRepository.create({
+      ...rest,
+      params: { bankAccountId },
+    });
+
+    const errors = await validate(bankAccount, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      validationError: { target: false },
+    });
+
+    if (errors.length > 0) {
+      throw new BaseException({
+        status: 422,
+        message: `Validation failed for bank account.`,
+        payload: errors,
+      });
+    }
+
+    return this.bankAccountRepository.save(bankAccount);
   }
 
   /**
