@@ -227,4 +227,32 @@ describe('services/payment-gateway/stripe', () => {
       messages.customerIsNotFound,
     );
   });
+
+  it('should correctly add bank account customer', async () => {
+    StripeInstanceParamStub.value(stripeMock());
+    TypeormMock.entityManager.findOne.resolves(userMock);
+
+    const bankAccount = {
+      userId: userMock.userId,
+      bankAccountId: 'bank-account-id',
+      bankName: 'American Express',
+      holderName: 'Mike',
+      lastDigits: '4242',
+    };
+
+    TypeormMock.entityManager.save.resolves(bankAccount);
+
+    const result = await service.addBankAccount(bankAccount);
+
+    expect(result).to.deep.equal(bankAccount);
+  });
+
+  it("should return error (add bank account): customer isn't found", async () => {
+    StripeInstanceParamStub.value(stripeMock());
+    TypeormMock.entityManager.findOne.resolves(undefined);
+
+    expect(await waitResult(service.removeCustomer(userMock.userId))).to.throw(
+      messages.customerIsNotFound,
+    );
+  });
 });
