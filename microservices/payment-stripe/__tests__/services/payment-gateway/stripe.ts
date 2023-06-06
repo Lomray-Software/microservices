@@ -26,11 +26,11 @@ describe('services/payment-gateway/stripe', () => {
     params: { accountId: accountMock.id },
   };
 
-  const stripeMock = () => ({
+  const stripeMock = (isDeletedCustomer = true) => ({
     customers: {
       create: () => customerMock,
       del: () => ({
-        deleted: true,
+        deleted: isDeletedCustomer,
       }),
     },
     accountLinks: {
@@ -217,6 +217,15 @@ describe('services/payment-gateway/stripe', () => {
     const isRemoved = await service.removeCustomer(userMock.userId);
 
     expect(isRemoved).to.true;
+  });
+
+  it("shouldn't remove customer cause stripe remove failed", async () => {
+    StripeInstanceParamStub.value(stripeMock(false));
+    TypeormMock.entityManager.findOne.resolves(userMock);
+
+    const isRemoved = await service.removeCustomer(userMock.userId);
+
+    expect(isRemoved).to.false;
   });
 
   it("should return error (remove customer): customer isn't found", async () => {
