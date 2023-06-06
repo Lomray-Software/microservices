@@ -157,6 +157,20 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Remove Customer from db and stripe
+   * NOTE: Usage example - integration tests
+   */
+  public async removeCustomer(userId: string): Promise<boolean> {
+    const customer = await this.customerRepository.findOne({ userId });
+
+    if (!customer) {
+      throw new BaseException({ status: 500, message: messages.getNotFoundMessage('Customer') });
+    }
+
+    return (await this.sdk.customers.del(customer.customerId)).deleted;
+  }
+
+  /**
    * Get unified transaction status
    */
   public getStatus(stripeStatus: StripeTransactionStatus): TransactionStatus {
