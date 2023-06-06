@@ -484,6 +484,8 @@ class Stripe extends Abstract {
     card.expired = toExpirationDate(expMonth, expYear);
     card.brand = brand;
     card.funding = funding;
+
+    await this.cardRepository.save(card);
   }
 
   /**
