@@ -494,6 +494,9 @@ class Stripe extends Abstract {
       userId: customer.userId,
     });
 
+    /**
+     * Update cards default statuses on change default card for charge
+     */
     const saveCardRequests = cards.map((card) => {
       card.isDefault = card.params.paymentMethodId === invoiceSettings.default_payment_method;
 
