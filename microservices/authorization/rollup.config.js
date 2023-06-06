@@ -7,6 +7,7 @@ module.exports = {
   external: [
     ...rootConfig.external,
     'fs',
+    'child_process',
   ],
   plugins: [
     ...rootConfig.plugins,
