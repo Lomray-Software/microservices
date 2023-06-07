@@ -69,11 +69,6 @@ class Card {
   @Length(1, 5)
   expired: string;
 
-  @Column({ type: 'varchar', length: 100, default: null })
-  @IsUndefinable()
-  @Length(1, 100)
-  holderName: string | null;
-
   /**
    * @TODO: add converter for stripe funding enum to funding type
    */
@@ -91,6 +86,11 @@ class Card {
   @Column({ type: 'varchar', length: 20 })
   @Length(1, 20)
   brand: string;
+
+  @Column({ type: 'varchar', length: 100, default: null })
+  @IsUndefinable()
+  @Length(1, 100)
+  holderName: string | null;
 
   @Column({ type: 'boolean', default: false })
   @IsBoolean()
