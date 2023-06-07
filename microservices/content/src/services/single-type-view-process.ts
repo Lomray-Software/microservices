@@ -1,9 +1,7 @@
 import { Api, Log } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
-import { getCustomRepository } from 'typeorm';
 import SingleTypeEntity from '@entities/single-type';
 import IComponentRoute from '@interfaces/component-route';
-import IExpandData from '@interfaces/expand-data';
 import IExpandRoute from '@interfaces/expand-route';
 import ComponentRepository from '@repositories/component';
 import SingleTypeRepository from '@repositories/single-type';
@@ -54,20 +52,40 @@ class SingleTypeViewProcess {
   }
 
   /**
-   * Returns entity with an expanded data
+   * Handle expand flow
    */
-  private async getExpandData({ route, entity, microservice }: IExpandRoute): Promise<IExpandData> {
-    const expandEntityData = this.singleTypeRepository.getDataAtPath(this.entity, route);
+  public async expand(relations: string[]): Promise<SingleTypeEntity> {
+    const expandRoutes = await this.constructExpandRoutes(relations);
 
-    if (!expandEntityData) {
-      return { data: null, routeRef: route };
-    }
+    const expandRequests = expandRoutes.map((expandRoute) => this.handleExpand(expandRoute));
+
+    await Promise.all(expandRequests);
+
+    return this.entity;
+  }
+
+  /**
+   * Returns requested data from microservice
+   */
+  private async getMicroserviceData<T = unknown>(
+    dataIds: string[],
+    microservice: string,
+    entity: string,
+  ): Promise<T[]> {
+    // const query = {
+    //   where: {
+    //     or: Array.isArray(expandEntityData) ? expandEntityData : [expandEntityData],
+    //   },
+    // };
 
     const query = {
       where: {
-        or: Array.isArray(expandEntityData) ? expandEntityData : [expandEntityData],
+        id: {
+          in: dataIds,
+        },
       },
     };
+
     const { result, error } = await Api.get()[microservice][entity].list({ query });
 
     if (error || !result?.list) {
@@ -82,26 +100,71 @@ class SingleTypeViewProcess {
       });
     }
 
-    return { data: result.list, routeRef: route };
+    return result?.list;
   }
 
   /**
-   * Returns matched expand data by route reference
+   * Returns entity with an expanded data
    */
-  private findExpandDataByRouteRef<T = unknown>(
-    expandData: IExpandData[],
-    route: string,
-  ): T | null {
-    return (expandData.find(({ routeRef }) => routeRef === route)?.data || null) as T | null;
+  private async handleExpand({
+    route,
+    entity,
+    microservice,
+    hasMany,
+  }: IExpandRoute): Promise<void> {
+    if (hasMany) {
+      const expandEntityData = this.singleTypeRepository.getDataAtPath<string[]>(
+        this.entity,
+        route,
+        hasMany,
+      );
+
+      const property = route.split('.').pop();
+
+      if (!expandEntityData || !property) {
+        return;
+      }
+
+      const dataIds = this.extractDataByProperty(expandEntityData, property);
+      const result = await this.getMicroserviceData(dataIds, microservice, entity);
+
+      this.singleTypeRepository.setDataAtPath(this.entity, route, result, hasMany);
+
+      return;
+    }
+
+    const expandEntityData = this.singleTypeRepository.getDataAtPath(this.entity, route);
+
+    if (!expandEntityData) {
+      return;
+    }
+
+    const entitiesResult = await this.getMicroserviceData(
+      expandEntityData as string[],
+      microservice,
+      entity,
+    );
+
+    this.singleTypeRepository.setDataAtPath(this.entity, route, entitiesResult);
   }
 
   /**
-   * Set expand data by route
+   * Extract data from array according property name
    */
-  private setExpandData<T = unknown>(route: string, data: T): void {
-    const repository = getCustomRepository(SingleTypeRepository);
+  private extractDataByProperty(data: string[], property: string): string[] {
+    return data.reduce((values: string[], obj) => {
+      if (obj.hasOwnProperty(property)) {
+        const propertyValue = obj[property] as string[];
 
-    repository.setDataAtPath(this.entity, route, data);
+        if (Array.isArray(propertyValue)) {
+          values = [...values, ...propertyValue];
+        } else {
+          values = [...values, propertyValue];
+        }
+      }
+
+      return values;
+    }, []);
   }
 
   /**
@@ -133,11 +196,13 @@ class SingleTypeViewProcess {
       }
 
       const componentId = component[componentAlias]?.id as string;
+      const hasMany = Array.isArray(component[componentAlias]?.data);
 
       return {
         componentId,
         componentDataName,
         route: relation,
+        hasMany,
       };
     });
   }
@@ -164,22 +229,6 @@ class SingleTypeViewProcess {
     }
 
     return verifiedExpandRoutes;
-  }
-
-  /**
-   * Handle expand flow
-   */
-  public async expand(relations: string[]): Promise<SingleTypeEntity> {
-    const expandRoutes = await this.constructExpandRoutes(relations);
-
-    const expandRequests = expandRoutes.map((expandRoute) => this.getExpandData(expandRoute));
-    const expandData = await Promise.all(expandRequests);
-
-    expandRoutes.map(({ route }) =>
-      this.setExpandData(route, this.findExpandDataByRouteRef(expandData, route)),
-    );
-
-    return this.entity;
   }
 }
 
