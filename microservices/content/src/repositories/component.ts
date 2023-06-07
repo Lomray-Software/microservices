@@ -17,6 +17,7 @@ class Component extends Repository<ComponentEntity> {
     componentId,
     componentDataName: inputName,
     route,
+    hasMany,
   }: IComponentRoute): Promise<IExpandRoute | null> {
     const repository = getRepository(ComponentEntity);
 
@@ -40,6 +41,7 @@ class Component extends Repository<ComponentEntity> {
       route,
       microservice,
       entity,
+      hasMany,
     };
   }
 
