@@ -541,3 +541,106 @@ Authorization: Bearer usertokenoooooooooooooooooooooon
     }
   }
 }
+
+### Additional
+### Create single type for page with hasMany
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.create",
+  "params": {
+    "fields": {
+      "components": [
+        {
+          "id": "e5d4c33f-cd63-437a-a76b-bd798121ce15"
+        }
+      ],
+      "title": "Page single type",
+      "alias": "pageSingleTypeNew",
+      "value": {
+        "blogPostPage": {
+          "id": "e5d4c33f-cd63-437a-a76b-bd798121ce15",
+          "data": {
+            "header": {
+              "id": "43edbae4-ec2f-4a32-a477-b1cfc8bb3673",
+              "data": {
+                "pageHeader": {
+                  "id": "43edbae4-ec2f-4a32-a477-b1cfc8bb3673",
+                  "data": {
+                    "headerTitle": "Cars",
+                    "postNumber": 1
+                  }
+                }
+              }
+            },
+            "content": {
+              "id": "cc896aa8-1734-4556-94c1-fcbf849d520c",
+              "data": {
+                "pageContent": {
+                  "id": "cc896aa8-1734-4556-94c1-fcbf849d520c",
+                  "data": [
+                    {
+                      "contentTitle": "Green Lamborghini",
+                      "contentDate": "2023-05-28T13:56:55.360Z",
+                      "contentDescription": "contentTitle1",
+                      "contentCreators": [
+                        "a5326de3-d04c-425c-8711-0f99fc031c67"
+                      ]
+                    },
+                    {
+                      "contentTitle": "Blue Lamborghini",
+                      "contentDate": "2023-05-28T13:56:55.360Z",
+                      "contentDescription": "contentTitle2",
+                      "contentCreators": [
+                        "b9b61ca6-761b-4051-84b2-647a2262b78b"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "footer": {
+              "id": "1fddf950-159f-419c-b006-eb07a51f7857",
+              "data": {
+                "id": "1fddf950-159f-419c-b006-eb07a51f7857",
+                "pageFooter": {
+                  "contactUsWithTheEmail": "contact@us.com",
+                  "isThisPostRecommendedByUS": true
+                }
+              }
+            },
+            "options": {
+              "timeZoneId": "America/Los_Angeles",
+              "timeZoneName": "Pacific Daylight Time"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+### View signle type
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.view",
+  "params": {
+    "query": {
+      "where": {
+        "id": "8b4d7fa9-4f61-4f6f-9737-01546cd07b4e"
+      }
+    },
+    "payload": {
+      "expand": [
+        "blogPostPage.content.pageContent.contentCreators"
+      ]
+    }
+  }
+}
