@@ -111,10 +111,10 @@ describe('services/single-type-view-process', () => {
      * that's the reason of usage ts-ignore
      */
     // @ts-ignore
-    const getExpandDataStub = sinon.stub(service, 'getExpandData');
+    const handleExpandStub = sinon.stub(service, 'handleExpand');
 
     // @ts-ignore
-    getExpandDataStub.resolves({ data: adminsMock, routeRef: route } as IExpandData);
+    handleExpandStub.resolves({ data: adminsMock, routeRef: route } as IExpandData);
 
     const adminsSingleType = { ...adminsSingleTypeMock };
 
