@@ -3,17 +3,15 @@ import { Type } from 'class-transformer';
 import { IsBoolean, IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import Card from '@entities/card';
+import { ICardParams } from '@services/payment-gateway/abstract';
 import Factory from '@services/payment-gateway/factory';
 
-class CardAddInput {
+class CardAddInput implements ICardParams {
   @IsString()
   userId: string;
 
   @IsString()
   expired: string;
-
-  @IsString()
-  holderName: string;
 
   @IsString()
   lastDigits: string;
@@ -22,7 +20,19 @@ class CardAddInput {
   funding: string;
 
   @IsString()
-  cardId: string;
+  brand: string;
+
+  @IsUndefinable()
+  @IsString()
+  holderName?: string;
+
+  @IsUndefinable()
+  @IsString()
+  cardId?: string;
+
+  @IsUndefinable()
+  @IsString()
+  paymentMethodId?: string;
 
   @IsBoolean()
   @IsUndefinable()
@@ -40,11 +50,31 @@ class CardAddOutput {
  */
 const add = Endpoint.custom(
   () => ({ input: CardAddInput, output: CardAddOutput, description: 'Add new card' }),
-  async () => {
+  async ({
+    userId,
+    lastDigits,
+    funding,
+    brand,
+    cardId,
+    isDefault,
+    expired,
+    paymentMethodId,
+    holderName,
+  }) => {
     const service = await Factory.create(getManager());
 
     return {
-      entity: await service.addCard(),
+      entity: await service.addCard({
+        userId,
+        lastDigits,
+        funding,
+        brand,
+        cardId,
+        isDefault,
+        expired,
+        paymentMethodId,
+        holderName,
+      }),
     };
   },
 );
