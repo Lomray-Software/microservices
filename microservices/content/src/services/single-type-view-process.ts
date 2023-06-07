@@ -68,20 +68,14 @@ class SingleTypeViewProcess {
    * Returns requested data from microservice
    */
   private async getMicroserviceData<T = unknown>(
-    dataIds: string[],
+    dataIds: string | string[],
     microservice: string,
     entity: string,
   ): Promise<T[]> {
-    // const query = {
-    //   where: {
-    //     or: Array.isArray(expandEntityData) ? expandEntityData : [expandEntityData],
-    //   },
-    // };
-
     const query = {
       where: {
         id: {
-          in: dataIds,
+          in: Array.isArray(dataIds) ? dataIds : [dataIds],
         },
       },
     };
