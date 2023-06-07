@@ -13,13 +13,15 @@ import Transaction, { IParams as ITransactionEntityParams } from '@entities/tran
 import messages from '@helpers/validators/messages';
 
 export interface ICardParams {
+  userId: string;
   lastDigits: string;
   expired: string;
-  type: string;
-  userId: string;
-  cardId?: string;
+  funding: string;
+  brand: string;
   holderName?: string;
   isDefault?: boolean;
+  cardId?: string;
+  paymentMethodId?: string;
 }
 
 export interface IBankAccountParams {

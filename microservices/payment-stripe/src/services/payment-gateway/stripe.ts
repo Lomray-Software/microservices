@@ -24,7 +24,12 @@ import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
-import Abstract, { IBankAccountParams, IPriceParams, IProductParams } from './abstract';
+import Abstract, {
+  IBankAccountParams,
+  ICardParams,
+  IPriceParams,
+  IProductParams,
+} from './abstract';
 
 export interface IStripeProductParams extends IProductParams {
   name: string;
@@ -118,14 +123,33 @@ type TAvailablePaymentMethods =
 class Stripe extends Abstract {
   /**
    * Add new card
+   * NOTES: Usage example - integration tests
+   * @TODO: Integrate with stripe
    */
-  addCard(): Promise<Card> {
-    return Promise.resolve(new Card());
+  public async addCard({ cardId, paymentMethodId, ...rest }: ICardParams): Promise<Card> {
+    const card = this.cardRepository.create({ ...rest, params: { cardId, paymentMethodId } });
+
+    const errors = await validate(card, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      validationError: { target: false },
+    });
+
+    if (errors.length > 0) {
+      throw new BaseException({
+        status: 422,
+        message: `Validation failed for card.`,
+        payload: errors,
+      });
+    }
+
+    return this.cardRepository.save(card);
   }
 
   /**
    * Add bank account
    * NOTE: Usage example - integration tests
+   * @TODO: Integrate with stripe
    */
   public async addBankAccount({
     bankAccountId,
