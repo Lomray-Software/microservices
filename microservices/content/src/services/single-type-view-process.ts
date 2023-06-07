@@ -112,40 +112,33 @@ class SingleTypeViewProcess {
     microservice,
     hasMany,
   }: IExpandRoute): Promise<void> {
-    if (hasMany) {
-      const expandEntityData = this.singleTypeRepository.getDataAtPath<string[]>(
-        this.entity,
-        route,
-        hasMany,
-      );
-
-      const property = route.split('.').pop();
-
-      if (!expandEntityData || !property) {
-        return;
-      }
-
-      const dataIds = this.extractDataByProperty(expandEntityData, property);
-      const result = await this.getMicroserviceData(dataIds, microservice, entity);
-
-      this.singleTypeRepository.setDataAtPath(this.entity, route, result, hasMany);
-
-      return;
-    }
-
-    const expandEntityData = this.singleTypeRepository.getDataAtPath(this.entity, route);
-
-    if (!expandEntityData) {
-      return;
-    }
-
-    const entitiesResult = await this.getMicroserviceData(
-      expandEntityData as string[],
-      microservice,
-      entity,
+    const expandEntityData = this.singleTypeRepository.getDataAtPath<string[]>(
+      this.entity,
+      route,
+      hasMany,
     );
 
-    this.singleTypeRepository.setDataAtPath(this.entity, route, entitiesResult);
+    const property = route.split('.').pop();
+
+    if (!expandEntityData || !property) {
+      return;
+    }
+
+    let entitiesResult;
+
+    if (hasMany) {
+      const dataIds = this.extractDataByProperty(expandEntityData, property);
+
+      entitiesResult = await this.getMicroserviceData(dataIds, microservice, entity);
+    } else {
+      entitiesResult = await this.getMicroserviceData(
+        expandEntityData as string[],
+        microservice,
+        entity,
+      );
+    }
+
+    this.singleTypeRepository.setDataAtPath(this.entity, route, entitiesResult, hasMany);
   }
 
   /**
