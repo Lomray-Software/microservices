@@ -550,22 +550,6 @@
           "admin": "allow"
         }
       },
-      "expired": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
-      "holderName": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
       "lastDigits": {
         "in": {
           "admin": "allow"
@@ -582,7 +566,39 @@
           "admin": "allow"
         }
       },
+      "brand": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "expired": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "holderName": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "cardId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "paymentMethodId": {
         "in": {
           "admin": "allow"
         },
