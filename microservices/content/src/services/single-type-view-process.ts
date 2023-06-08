@@ -73,17 +73,24 @@ class SingleTypeViewProcess {
     microservice,
     hasMany,
   }: IExpandRoute): Promise<void> {
-    const expandEntityData = this.singleTypeRepository.getDataAtPath<Record<string, unknown>[]>(
-      this.entity,
-      route,
-      hasMany,
-    );
-
     const property = getExpandRouteProperties(route).properties.pop();
+    const data = this.singleTypeRepository.getDataAtPath(this.entity, route, hasMany);
 
-    if (!expandEntityData || !property) {
+    /**
+     * If no data for expand return original single type
+     */
+    if (!data || !property) {
       return;
     }
+
+    if (typeof data === 'string') {
+      throw new BaseException({
+        status: 400,
+        message: 'Single type expected to expand data should contain primary keys of entity.',
+      });
+    }
+
+    const expandEntityData: Record<string, unknown>[] = Array.isArray(data) ? data : [data];
 
     let entitiesResult: unknown[];
 
