@@ -237,7 +237,7 @@ Content-Type: application/json
   }
 }
 
-### View signle type
+### View signle type with users (profile) relations
 POST http://127.0.0.1:8001/ms/content
 Accept: application/json
 Content-Type: application/json
@@ -253,7 +253,36 @@ Content-Type: application/json
     },
     "payload": {
       "expand": [
-        "blogPostPage.content.pageContent.contentCreators"
+        {
+          "route": "blogPostPage.content.pageContent.contentCreators",
+          "relations": ["profile"]
+        }
+      ]
+    }
+  }
+}
+
+### View signle type with users atributes
+### NOTE: Provide always primary keys to attributes
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.view",
+  "params": {
+    "query": {
+      "where": {
+        "id": "3cff317c-8ece-45b0-b0bb-0021760f06c2"
+      }
+    },
+    "payload": {
+      "expand": [
+        {
+          "route": "blogPostPage.content.pageContent.contentCreators",
+          "attributes": ["id", "firstName"]
+        }
       ]
     }
   }
@@ -644,3 +673,5 @@ Content-Type: application/json
     }
   }
 }
+
+###
