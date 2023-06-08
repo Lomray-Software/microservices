@@ -17,7 +17,7 @@ jobs:
 
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
 
-      - run: npx commitlint -g commitlint.config.js --edit "${{ github.event.pull_request.title }}"
+      - run: echo "${{ github.event.pull_request.title }}" | npx commitlint -g commitlint.config.js
 
       - name: Get changed files
         id: changed-files
