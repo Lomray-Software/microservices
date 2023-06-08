@@ -1,3 +1,4 @@
+import * as console from 'console';
 import { Api, Log } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { EntityRepository, Repository } from 'typeorm';
@@ -101,6 +102,7 @@ class SingleType extends Repository<SingleTypeEntity> {
       },
     };
 
+    console.log('query', query);
     const { result, error } = await Api.get()[microservice][entity].list({ query });
 
     if (error || !result?.list) {
@@ -114,6 +116,8 @@ class SingleType extends Repository<SingleTypeEntity> {
         payload: error,
       });
     }
+
+    console.log('result?.list', result?.list);
 
     return result?.list;
   }

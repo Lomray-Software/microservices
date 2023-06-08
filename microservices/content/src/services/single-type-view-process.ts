@@ -148,7 +148,11 @@ class SingleTypeViewProcess {
    */
   private constructComponentRoutes(relations: IExpandRouteInput[]): IComponentRoute[] {
     return relations.map(({ route: relation, ...restExpandRouteData }) => {
-      const properties = relation.split('.');
+      if (!relation) {
+        throw new BaseException({ status: 400, message: 'Provided route is invalid.' });
+      }
+
+      const { properties } = getExpandRouteProperties(relation);
 
       // Destruct data from relation route
       const componentDataName = properties.pop();
