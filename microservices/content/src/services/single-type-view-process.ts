@@ -1,6 +1,6 @@
-import { Api, Log } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import SingleTypeEntity from '@entities/single-type';
+import getExpandRouteProperties from '@helpers/get-expand-route-properties';
 import IComponentRoute from '@interfaces/component-route';
 import IExpandRoute from '@interfaces/expand-route';
 import ComponentRepository from '@repositories/component';
@@ -65,39 +65,6 @@ class SingleTypeViewProcess {
   }
 
   /**
-   * Returns requested data from microservice
-   */
-  private async getMicroserviceData<T = unknown>(
-    dataIds: string | string[],
-    microservice: string,
-    entity: string,
-  ): Promise<T[]> {
-    const query = {
-      where: {
-        id: {
-          in: Array.isArray(dataIds) ? dataIds : [dataIds],
-        },
-      },
-    };
-
-    const { result, error } = await Api.get()[microservice][entity].list({ query });
-
-    if (error || !result?.list) {
-      const errorMsg = `Failed to get data for expand entity in ${microservice} microservice of ${entity} entity`;
-
-      Log.error(errorMsg, error);
-
-      throw new BaseException({
-        status: 500,
-        message: errorMsg,
-        payload: error,
-      });
-    }
-
-    return result?.list;
-  }
-
-  /**
    * Returns entity with an expanded data
    */
   private async handleExpand({
@@ -106,33 +73,43 @@ class SingleTypeViewProcess {
     microservice,
     hasMany,
   }: IExpandRoute): Promise<void> {
-    const expandEntityData = this.singleTypeRepository.getDataAtPath<string[]>(
+    const expandEntityData = this.singleTypeRepository.getDataAtPath<unknown[]>(
       this.entity,
       route,
       hasMany,
     );
 
-    const property = route.split('.').pop();
+    const property = getExpandRouteProperties(route).properties.pop();
 
     if (!expandEntityData || !property) {
       return;
     }
 
-    let entitiesResult;
+    let entitiesResult: unknown[];
 
     if (hasMany) {
+      // @ts-ignore
       const dataIds = this.extractDataByProperty(expandEntityData, property);
 
-      entitiesResult = await this.getMicroserviceData(dataIds, microservice, entity);
+      entitiesResult = await SingleTypeRepository.getMicroserviceData(
+        dataIds,
+        microservice,
+        entity,
+      );
     } else {
-      entitiesResult = await this.getMicroserviceData(
-        expandEntityData as string[],
+      entitiesResult = await SingleTypeRepository.getMicroserviceData(
+        expandEntityData,
         microservice,
         entity,
       );
     }
 
-    this.singleTypeRepository.setDataAtPath(this.entity, route, entitiesResult, hasMany);
+    this.singleTypeRepository.setDataAtPath({
+      data: entitiesResult,
+      singleType: this.entity,
+      path: route,
+      hasMany,
+    });
   }
 
   /**
@@ -211,7 +188,7 @@ class SingleTypeViewProcess {
       throw new BaseException({
         status: 400,
         message:
-          'Failed to get one or more expanded routes according to the passed relationship routes',
+          'Failed to get one or more expanded routes according to the provided relationship routes.',
       });
     }
 
