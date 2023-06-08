@@ -84,7 +84,7 @@ describe('services/single-type-view-process', () => {
 
     expect(await waitResult(service.expand(adminsRelationMock))).to.throw(
       BaseException,
-      'Failed to get one or more expanded routes according to the passed relationship routes',
+      'Failed to get one or more expanded routes according to the provided relationship routes.',
     );
   });
 
