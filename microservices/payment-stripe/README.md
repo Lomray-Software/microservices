@@ -75,3 +75,5 @@ That is all. **Don't forget install npm dependencies**
 
 __Run on typescript__: ~200 MB PEAK / ~160 MB  
 __Run on JS__: ~110 MB PEAK / ~80 MB
+
+Rebuild: 1
