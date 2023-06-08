@@ -73,7 +73,7 @@ class SingleTypeViewProcess {
     microservice,
     hasMany,
   }: IExpandRoute): Promise<void> {
-    const expandEntityData = this.singleTypeRepository.getDataAtPath<unknown[]>(
+    const expandEntityData = this.singleTypeRepository.getDataAtPath<Record<string, unknown>[]>(
       this.entity,
       route,
       hasMany,
@@ -88,11 +88,10 @@ class SingleTypeViewProcess {
     let entitiesResult: unknown[];
 
     if (hasMany) {
-      // @ts-ignore
-      const dataIds = this.extractDataByProperty(expandEntityData, property);
+      const entitiesIds = this.extractDataByProperty(expandEntityData, property);
 
       entitiesResult = await SingleTypeRepository.getMicroserviceData(
-        dataIds,
+        entitiesIds,
         microservice,
         entity,
       );
@@ -115,8 +114,8 @@ class SingleTypeViewProcess {
   /**
    * Extract data from array according property name
    */
-  private extractDataByProperty(data: string[], property: string): string[] {
-    return data.reduce((values: string[], obj) => {
+  private extractDataByProperty(data: Record<string, unknown>[], property: string): unknown[] {
+    return data.reduce((values: unknown[], obj) => {
       if (obj.hasOwnProperty(property)) {
         const propertyValue = obj[property] as string[];
 
