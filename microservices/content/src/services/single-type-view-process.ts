@@ -2,7 +2,7 @@ import { BaseException } from '@lomray/microservice-nodejs-lib';
 import SingleTypeEntity from '@entities/single-type';
 import getExpandRouteProperties from '@helpers/get-expand-route-properties';
 import IComponentRoute from '@interfaces/component-route';
-import IExpandRoute from '@interfaces/expand-route';
+import { IExpandRoute, IExpandRouteInput } from '@interfaces/expand-route';
 import ComponentRepository from '@repositories/component';
 import SingleTypeRepository from '@repositories/single-type';
 
@@ -54,7 +54,7 @@ class SingleTypeViewProcess {
   /**
    * Handle expand flow
    */
-  public async expand(relations: string[]): Promise<SingleTypeEntity> {
+  public async expand(relations: IExpandRouteInput[]): Promise<SingleTypeEntity> {
     const expandRoutes = await this.constructExpandRoutes(relations);
 
     const expandRequests = expandRoutes.map((expandRoute) => this.handleExpand(expandRoute));
@@ -72,6 +72,8 @@ class SingleTypeViewProcess {
     entity,
     microservice,
     hasMany,
+    attributes,
+    relations,
   }: IExpandRoute): Promise<void> {
     const property = getExpandRouteProperties(route).properties.pop();
     const data = this.singleTypeRepository.getDataAtPath(this.entity, route, hasMany);
@@ -101,12 +103,16 @@ class SingleTypeViewProcess {
         entitiesIds,
         microservice,
         entity,
+        attributes,
+        relations,
       );
     } else {
       entitiesResult = await SingleTypeRepository.getMicroserviceData(
         expandEntityData,
         microservice,
         entity,
+        attributes,
+        relations,
       );
     }
 
@@ -140,8 +146,8 @@ class SingleTypeViewProcess {
   /**
    * Construct component routes
    */
-  private constructComponentRoutes(relations: string[]): IComponentRoute[] {
-    return relations.map((relation) => {
+  private constructComponentRoutes(relations: IExpandRouteInput[]): IComponentRoute[] {
+    return relations.map(({ route: relation, ...restExpandRouteData }) => {
       const properties = relation.split('.');
 
       // Destruct data from relation route
@@ -151,7 +157,7 @@ class SingleTypeViewProcess {
       if (!componentAlias || !componentDataName) {
         throw new BaseException({
           status: 400,
-          message: 'Failed to get relation data. Incorrectly built relation routes',
+          message: 'Failed to get relation data. Incorrectly built relation routes.',
         });
       }
 
@@ -161,7 +167,7 @@ class SingleTypeViewProcess {
         throw new BaseException({
           status: 400,
           message:
-            "Failed to get component data because it doesn't exist according to the passed relationship routes",
+            "Failed to get component data because it doesn't exist according to the passed relationship routes.",
         });
       }
 
@@ -169,6 +175,7 @@ class SingleTypeViewProcess {
       const hasMany = Array.isArray(component[componentAlias]?.data);
 
       return {
+        ...restExpandRouteData,
         componentId,
         componentDataName,
         route: relation,
@@ -180,7 +187,7 @@ class SingleTypeViewProcess {
   /**
    * Construct expand routes
    */
-  private async constructExpandRoutes(relations: string[]): Promise<IExpandRoute[]> {
+  private async constructExpandRoutes(relations: IExpandRouteInput[]): Promise<IExpandRoute[]> {
     const componentRoutes = this.constructComponentRoutes(relations);
 
     const expandRoutesRequests = componentRoutes.map((componentRoute) =>

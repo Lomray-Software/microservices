@@ -28,7 +28,7 @@ describe('services/single-type-view-process', () => {
   });
 
   it('should throw error: incorrect relation routes', async () => {
-    const relations = ['relation/admins'];
+    const relations = [{ route: 'relation/admins' }];
     const service = SingleTypeViewProcess.init({
       // @ts-ignore
       entity: {},
@@ -96,7 +96,7 @@ describe('services/single-type-view-process', () => {
       singleTypeRepository,
     });
 
-    const [route] = adminsRelationMock;
+    const [{ route }] = adminsRelationMock;
 
     const handleRelationsStub = sinon.stub(componentRepository, 'handleRelations');
 
