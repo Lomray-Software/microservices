@@ -209,8 +209,12 @@ Content-Type: application/json
                     "contentDate": "2023-05-28T13:56:55.360Z",
                     "contentDescription": "contentTitle",
                     "contentCreators": [
-                      "b9b61ca6-761b-4051-84b2-647a2262b78b",
-                      "a5326de3-d04c-425c-8711-0f99fc031c67"
+                      {
+                        "id": "b9b61ca6-761b-4051-84b2-647a2262b78b"
+                      },
+                      {
+                        "id": "a5326de3-d04c-425c-8711-0f99fc031c67"
+                      }
                     ]
                   }
                 }
@@ -281,8 +285,12 @@ Content-Type: application/json
                       "contentDate": "2023-05-28T13:56:55.360Z",
                       "contentDescription": "contentTitle",
                       "contentCreators": [
-                        "b9b61ca6-761b-4051-84b2-647a2262b78b",
-                        "a5326de3-d04c-425c-8711-0f99fc031c67"
+                        {
+                          "id": "b9b61ca6-761b-4051-84b2-647a2262b78b"
+                        },
+                        {
+                          "id": "a5326de3-d04c-425c-8711-0f99fc031c67"
+                        }
                       ]
                     },
                     {
@@ -290,8 +298,12 @@ Content-Type: application/json
                       "contentDate": "2023-05-28T13:56:55.360Z",
                       "contentDescription": "contentTitle",
                       "contentCreators": [
-                        "m9b61ca6-761b-4051-84b2-647a2262b78b",
-                        "z5326de3-d04c-425c-8711-0f99fc031c67"
+                        {
+                          "id": "m9b61ca6-761b-4051-84b2-647a2262b78b"
+                        },
+                        {
+                          "id": "z5326de3-d04c-425c-8711-0f99fc031c67"
+                        }
                       ]
                     },
                     {
@@ -299,8 +311,12 @@ Content-Type: application/json
                       "contentDate": "2023-05-28T13:56:55.360Z",
                       "contentDescription": "contentTitle",
                       "contentCreators": [
-                        "p9b61ca6-761b-4051-84b2-647a2262b78b",
-                        "o5326de3-d04c-425c-8711-0f99fc031c67"
+                        {
+                          "id": "p9b61ca6-761b-4051-84b2-647a2262b78b"
+                        },
+                        {
+                          "id": "o5326de3-d04c-425c-8711-0f99fc031c67"
+                        }
                       ]
                     }
                   ]
@@ -764,5 +780,3 @@ Content-Type: application/json
     }
   }
 }
-
-###
