@@ -25,7 +25,6 @@ const replaceEntities = <TEntity = unknown>(
 
   let updatedOriginalEntities: Record<string, TEntity | unknown>[] = [];
 
-  // Iterate over the original entities
   for (const originalEntity of originalEntities) {
     const key = originalPrimaryKeys.map((primaryKey) => originalEntity[primaryKey]).join('/');
 
