@@ -209,8 +209,12 @@ Content-Type: application/json
                     "contentDate": "2023-05-28T13:56:55.360Z",
                     "contentDescription": "contentTitle",
                     "contentCreators": [
-                      "b9b61ca6-761b-4051-84b2-647a2262b78b",
-                      "a5326de3-d04c-425c-8711-0f99fc031c67"
+                      {
+                        "id": "b9b61ca6-761b-4051-84b2-647a2262b78b"
+                      },
+                      {
+                        "id": "a5326de3-d04c-425c-8711-0f99fc031c67"
+                      }
                     ]
                   }
                 }
@@ -237,7 +241,110 @@ Content-Type: application/json
   }
 }
 
-### View signle type
+### Create single type with the hasMany component for page
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.create",
+  "params": {
+    "fields": {
+      "components": [
+        {
+          "id": "dff2719e-3c57-4248-9408-59af6287a568"
+        }
+      ],
+      "title": "Page single type",
+      "alias": "pageSingleType",
+      "value": {
+        "blogPostPage": {
+          "id": "dff2719e-3c57-4248-9408-59af6287a568",
+          "data": {
+            "header": {
+              "id": "9a7aedb4-4b00-44b3-89a3-a535692d28d6",
+              "data": {
+                "pageHeader": {
+                  "id": "9a7aedb4-4b00-44b3-89a3-a535692d28d6",
+                  "data": {
+                    "headerTitle": "Cars",
+                    "postNumber": 1
+                  }
+                }
+              }
+            },
+            "content": {
+              "id": "e6186469-a9a5-444c-812c-c801c95245b8",
+              "data": {
+                "pageContent": {
+                  "id": "e6186469-a9a5-444c-812c-c801c95245b8",
+                  "data": [
+                    {
+                      "contentTitle": "Green Lamborghini",
+                      "contentDate": "2023-05-28T13:56:55.360Z",
+                      "contentDescription": "contentTitle",
+                      "contentCreators": [
+                        {
+                          "id": "b9b61ca6-761b-4051-84b2-647a2262b78b"
+                        },
+                        {
+                          "id": "a5326de3-d04c-425c-8711-0f99fc031c67"
+                        }
+                      ]
+                    },
+                    {
+                      "contentTitle": "White Lamborghini",
+                      "contentDate": "2023-05-28T13:56:55.360Z",
+                      "contentDescription": "contentTitle",
+                      "contentCreators": [
+                        {
+                          "id": "m9b61ca6-761b-4051-84b2-647a2262b78b"
+                        },
+                        {
+                          "id": "z5326de3-d04c-425c-8711-0f99fc031c67"
+                        }
+                      ]
+                    },
+                    {
+                      "contentTitle": "Blue Lamborghini",
+                      "contentDate": "2023-05-28T13:56:55.360Z",
+                      "contentDescription": "contentTitle",
+                      "contentCreators": [
+                        {
+                          "id": "p9b61ca6-761b-4051-84b2-647a2262b78b"
+                        },
+                        {
+                          "id": "o5326de3-d04c-425c-8711-0f99fc031c67"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "footer": {
+              "id": "78567003-f8cb-4d92-8aab-d7c9dc88bf2e",
+              "data": {
+                "id": "78567003-f8cb-4d92-8aab-d7c9dc88bf2e",
+                "pageFooter": {
+                  "contactUsWithTheEmail": "contact@us.com",
+                  "isThisPostRecommendedByUS": true
+                }
+              }
+            },
+            "options": {
+              "timeZoneId": "America/Los_Angeles",
+              "timeZoneName": "Pacific Daylight Time"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+### View signle type with users (profile) relations
 POST http://127.0.0.1:8001/ms/content
 Accept: application/json
 Content-Type: application/json
@@ -253,7 +360,36 @@ Content-Type: application/json
     },
     "payload": {
       "expand": [
-        "blogPostPage.content.pageContent.contentCreators"
+        {
+          "route": "blogPostPage.content.pageContent.contentCreators",
+          "relations": ["profile"]
+        }
+      ]
+    }
+  }
+}
+
+### View signle type with users atributes
+### NOTE: Provide always primary keys to attributes
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.view",
+  "params": {
+    "query": {
+      "where": {
+        "id": "3cff317c-8ece-45b0-b0bb-0021760f06c2"
+      }
+    },
+    "payload": {
+      "expand": [
+        {
+          "route": "blogPostPage.content.pageContent.contentCreators",
+          "attributes": ["id", "firstName"]
+        }
       ]
     }
   }
@@ -532,6 +668,109 @@ Authorization: Bearer usertokenoooooooooooooooooooooon
     "query": {
       "where": {
         "id": "e21e02ef-cdec-4515-b477-99f05acd0d16"
+      }
+    },
+    "payload": {
+      "expand": [
+        "blogPostPage.content.pageContent.contentCreators"
+      ]
+    }
+  }
+}
+
+### Additional
+### Create single type for page with hasMany
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.create",
+  "params": {
+    "fields": {
+      "components": [
+        {
+          "id": "e5d4c33f-cd63-437a-a76b-bd798121ce15"
+        }
+      ],
+      "title": "Page single type",
+      "alias": "pageSingleTypeNew",
+      "value": {
+        "blogPostPage": {
+          "id": "e5d4c33f-cd63-437a-a76b-bd798121ce15",
+          "data": {
+            "header": {
+              "id": "43edbae4-ec2f-4a32-a477-b1cfc8bb3673",
+              "data": {
+                "pageHeader": {
+                  "id": "43edbae4-ec2f-4a32-a477-b1cfc8bb3673",
+                  "data": {
+                    "headerTitle": "Cars",
+                    "postNumber": 1
+                  }
+                }
+              }
+            },
+            "content": {
+              "id": "cc896aa8-1734-4556-94c1-fcbf849d520c",
+              "data": {
+                "pageContent": {
+                  "id": "cc896aa8-1734-4556-94c1-fcbf849d520c",
+                  "data": [
+                    {
+                      "contentTitle": "Green Lamborghini",
+                      "contentDate": "2023-05-28T13:56:55.360Z",
+                      "contentDescription": "contentTitle1",
+                      "contentCreators": [
+                        "a5326de3-d04c-425c-8711-0f99fc031c67"
+                      ]
+                    },
+                    {
+                      "contentTitle": "Blue Lamborghini",
+                      "contentDate": "2023-05-28T13:56:55.360Z",
+                      "contentDescription": "contentTitle2",
+                      "contentCreators": [
+                        "b9b61ca6-761b-4051-84b2-647a2262b78b"
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "footer": {
+              "id": "1fddf950-159f-419c-b006-eb07a51f7857",
+              "data": {
+                "id": "1fddf950-159f-419c-b006-eb07a51f7857",
+                "pageFooter": {
+                  "contactUsWithTheEmail": "contact@us.com",
+                  "isThisPostRecommendedByUS": true
+                }
+              }
+            },
+            "options": {
+              "timeZoneId": "America/Los_Angeles",
+              "timeZoneName": "Pacific Daylight Time"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+### View signle type
+POST http://127.0.0.1:8001/ms/content
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "single-type.view",
+  "params": {
+    "query": {
+      "where": {
+        "id": "8b4d7fa9-4f61-4f6f-9737-01546cd07b4e"
       }
     },
     "payload": {

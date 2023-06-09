@@ -1,7 +1,13 @@
-interface IExpandRoute {
+interface IExpandRouteInput {
   route: string;
-  microservice: string;
-  entity: string;
+  relations?: string[];
+  attributes?: string[];
 }
 
-export default IExpandRoute;
+interface IExpandRoute extends IExpandRouteInput {
+  microservice: string;
+  entity: string;
+  hasMany?: boolean;
+}
+
+export { IExpandRoute, IExpandRouteInput };

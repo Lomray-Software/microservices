@@ -1,9 +1,9 @@
 import { EntityRepository, getRepository, Repository } from 'typeorm';
 import ComponentEntity from '@entities/component';
 import isComponent from '@helpers/guards/is-component';
-import { IRelationSchema } from '@interfaces/component';
-import IComponentRoute from '@interfaces/component-route';
-import IExpandRoute from '@interfaces/expand-route';
+import type { IRelationSchema } from '@interfaces/component';
+import type IComponentRoute from '@interfaces/component-route';
+import type { IExpandRoute } from '@interfaces/expand-route';
 
 /**
  *  Component repository
@@ -17,6 +17,9 @@ class Component extends Repository<ComponentEntity> {
     componentId,
     componentDataName: inputName,
     route,
+    hasMany,
+    attributes,
+    relations,
   }: IComponentRoute): Promise<IExpandRoute | null> {
     const repository = getRepository(ComponentEntity);
 
@@ -40,6 +43,9 @@ class Component extends Repository<ComponentEntity> {
       route,
       microservice,
       entity,
+      hasMany,
+      relations,
+      attributes,
     };
   }
 

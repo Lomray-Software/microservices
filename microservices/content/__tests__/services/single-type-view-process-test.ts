@@ -28,7 +28,7 @@ describe('services/single-type-view-process', () => {
   });
 
   it('should throw error: incorrect relation routes', async () => {
-    const relations = ['relation/admins'];
+    const relations = [{ route: 'relation/admins' }];
     const service = SingleTypeViewProcess.init({
       // @ts-ignore
       entity: {},
@@ -84,7 +84,7 @@ describe('services/single-type-view-process', () => {
 
     expect(await waitResult(service.expand(adminsRelationMock))).to.throw(
       BaseException,
-      'Failed to get one or more expanded routes according to the passed relationship routes',
+      'Failed to get one or more expanded routes according to the provided relationship routes.',
     );
   });
 
@@ -96,7 +96,7 @@ describe('services/single-type-view-process', () => {
       singleTypeRepository,
     });
 
-    const [route] = adminsRelationMock;
+    const [{ route }] = adminsRelationMock;
 
     const handleRelationsStub = sinon.stub(componentRepository, 'handleRelations');
 
@@ -111,10 +111,10 @@ describe('services/single-type-view-process', () => {
      * that's the reason of usage ts-ignore
      */
     // @ts-ignore
-    const getExpandDataStub = sinon.stub(service, 'getExpandData');
+    const handleExpandStub = sinon.stub(service, 'handleExpand');
 
     // @ts-ignore
-    getExpandDataStub.resolves({ data: adminsMock, routeRef: route } as IExpandData);
+    handleExpandStub.resolves({ data: adminsMock, routeRef: route } as IExpandData);
 
     const adminsSingleType = { ...adminsSingleTypeMock };
 

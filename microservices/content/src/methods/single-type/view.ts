@@ -1,6 +1,7 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { getCustomRepository, getRepository } from 'typeorm';
 import SingleTypeEntity from '@entities/single-type';
+import { IExpandRouteInput } from '@interfaces/expand-route';
 import ComponentRepository from '@repositories/component';
 import SingleTypeRepository from '@repositories/single-type';
 import SingleTypeViewProcess from '@services/single-type-view-process';
@@ -15,7 +16,7 @@ const view = Endpoint.view(
   }),
   async (typeQuery, params) => {
     const { entity } = await Endpoint.defaultHandler.view(typeQuery.toQuery());
-    const relations = params?.payload?.expand as string[];
+    const relations = params?.payload?.expand as IExpandRouteInput[];
 
     if (!relations?.length) {
       return {
@@ -26,14 +27,12 @@ const view = Endpoint.view(
     const componentRepository = getCustomRepository(ComponentRepository);
     const singleTypeRepository = getCustomRepository(SingleTypeRepository);
 
-    const singleTypeViewProcess = SingleTypeViewProcess.init({
-      entity,
-      componentRepository,
-      singleTypeRepository,
-    });
-
     return {
-      entity: await singleTypeViewProcess.expand(relations),
+      entity: await SingleTypeViewProcess.init({
+        entity,
+        componentRepository,
+        singleTypeRepository,
+      }).expand(relations),
     };
   },
 );
