@@ -8,6 +8,7 @@ import CONST from '@constants/index';
 import InputType from '@constants/input-type';
 import schemaObjectTypes from '@constants/schema-object-types';
 import ComponentEntity from '@entities/component';
+import { ISingleTypeValue } from '@entities/single-type';
 import lsfirst from '@helpers/lsfirst';
 import type { IComponentSchema, IRelationSchema } from '@interfaces/component';
 import TSchemaObjectType from '@interfaces/schema-object-type';
@@ -16,8 +17,10 @@ import SingleTypeRepository from '@repositories/single-type';
 
 interface IBuildMetaSchemaParams {
   components: ComponentEntity[];
+  value: ISingleTypeValue;
   singleTypeAlias?: string;
   isNested?: boolean;
+  parentId?: string;
 }
 
 export interface ISingleTypeSchemaParams {
@@ -38,6 +41,12 @@ class SingleTypeMeta {
    * @protected
    */
   protected readonly singleTypeRepository: ISingleTypeSchemaParams['singleTypeRepository'];
+
+  /**
+   * Cache
+   * Uses: cache component names
+   */
+  protected cache: Map<string, string> = new Map();
 
   /**
    * @constructor
@@ -73,8 +82,10 @@ class SingleTypeMeta {
    */
   private async buildMetaSchema({
     components,
-    isNested,
+    isNested = false,
     singleTypeAlias = 'UnknownAlias',
+    value,
+    parentId,
   }: IBuildMetaSchemaParams): Promise<SchemaObject> {
     const result: SchemaObject = {};
 
@@ -84,18 +95,10 @@ class SingleTypeMeta {
       const prefix = isNested ? '' : 'DynamicModel';
       const aliasKey = `${prefix}${ucfirst(singleTypeAlias)}`;
 
-      const newProperties = {
-        type: 'object',
-        properties: {
-          [alias]: {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-              data: { type: 'object', properties: {} },
-            },
-          },
-        },
-      };
+      /**
+       * Collect meta
+       */
+      let newProperties = this.buildNewProperties(alias);
 
       for (const field of schema) {
         const { type, name } = field;
@@ -115,35 +118,54 @@ class SingleTypeMeta {
           /**
            * Extract ref from component
            */
-          const { id: inputId } = field as IComponentSchema;
+          const { id } = field as IComponentSchema;
 
-          const nestedCustomComponents: ComponentEntity[] =
-            await this.componentRepository.getChildrenComponentById(inputId);
+          const childrenComponents = await this.componentRepository.getChildrenComponentById(id);
 
-          if (!nestedCustomComponents?.length) {
+          if (!childrenComponents?.length) {
             continue;
           }
 
-          const nestedData = await this.buildMetaSchema({
-            components: nestedCustomComponents,
-            isNested: true,
-            singleTypeAlias: alias,
-          });
+          /**
+           * Cache component name
+           */
+          if (!value?.[alias]) {
+            this.cacheComponentName(value, alias, parentId);
+          }
 
           /**
-           * Extracted component from ref
+           * Default single type value for selecting
+           * Uses if component name was override
            */
-          const extractedComponent = nestedData?.properties?.[0];
+          const singleTypeComponentAlias = this.cache.get(alias) || alias;
+
+          if (!value?.[singleTypeComponentAlias]?.data) {
+            throw new BaseException({
+              status: 400,
+              message: 'Wrong single type value',
+            });
+          }
+
+          const nestedData = await this.buildMetaSchema({
+            components: childrenComponents,
+            value: value?.[singleTypeComponentAlias]?.data,
+            singleTypeAlias: singleTypeComponentAlias,
+            parentId: id,
+            isNested: true,
+          });
 
           /**
            * Check if nested component data isn't declared as the refComponent(id) => refComponent(id) => dataComponent
            * If isn't ref component spread nested data to parent component
+           * Works with the current cache
            */
-          if (nestedData?.properties?.[name] && extractedComponent) {
-            newProperties.properties[alias].properties.data.properties = {
-              ...newProperties.properties[alias].properties.data.properties,
+          if (this.isNotRefOnRefComponent(name, nestedData)) {
+            newProperties = this.buildNewProperties(singleTypeComponentAlias);
+            newProperties.properties[singleTypeComponentAlias].properties.data.properties = {
+              ...newProperties.properties[singleTypeComponentAlias].properties.data.properties,
               ...nestedData.properties,
             };
+
             continue;
           }
 
@@ -225,11 +247,11 @@ class SingleTypeMeta {
     /**
      * Get schemas
      */
-    const schemasRequests = singleTypesWithRelations.map(({ components, alias }) =>
+    const schemasRequests = singleTypesWithRelations.map(({ components, alias, value }) =>
       this.buildMetaSchema({
         components,
         singleTypeAlias: alias,
-        isNested: false,
+        value,
       }),
     );
 
@@ -269,6 +291,55 @@ class SingleTypeMeta {
     defaultMetaEndpoint.entities.SingleType.properties.value = refSchema;
 
     return defaultMetaEndpoint;
+  }
+
+  /**
+   * Check is component isn't ref on ref component structure
+   */
+  private isNotRefOnRefComponent(name: string, nestedData: SchemaObject): boolean {
+    return Boolean(
+      nestedData?.properties &&
+        Object.keys(nestedData?.properties).some((key) => key === name || this.cache.has(name)),
+    );
+  }
+
+  /**
+   * Cache alias
+   * NOTE: Uses in name of component in single type was override
+   */
+  private cacheComponentName(
+    currentSingleTypeValue: ISingleTypeValue,
+    alias: string,
+    parentComponentId?: string,
+  ): void {
+    if (!parentComponentId) {
+      return;
+    }
+
+    Object.entries(currentSingleTypeValue).forEach(([key, componentValue]) => {
+      if (componentValue.id !== parentComponentId) {
+        return;
+      }
+
+      this.cache.set(alias, key);
+    });
+  }
+  /**
+   * Returns new properties with the provided alias
+   */
+  private buildNewProperties(alias: string) {
+    return {
+      type: 'object',
+      properties: {
+        [alias]: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            data: { type: 'object', properties: {} },
+          },
+        },
+      },
+    };
   }
 }
 
