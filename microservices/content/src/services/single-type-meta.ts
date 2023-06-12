@@ -112,10 +112,13 @@ class SingleTypeMeta {
         }
 
         if (type === InputType.COMPONENT) {
-          const { id } = field as IComponentSchema;
+          /**
+           * Extract ref from component
+           */
+          const { id: inputId } = field as IComponentSchema;
 
           const nestedCustomComponents: ComponentEntity[] =
-            await this.componentRepository.getChildrenComponentById(id);
+            await this.componentRepository.getChildrenComponentById(inputId);
 
           if (!nestedCustomComponents?.length) {
             continue;
@@ -157,6 +160,9 @@ class SingleTypeMeta {
           continue;
         }
 
+        /**
+         * If is primitive
+         */
         newProperties.properties[alias].properties.data.properties[name] = {
           type: this.getSchemaType(type),
         };
