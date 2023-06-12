@@ -30,7 +30,7 @@ interface IFileMeta {
   size?: number;
   width?: number;
   height?: number;
-  hasWebp: boolean;
+  hasWebp?: boolean;
 }
 
 @JSONSchema({
