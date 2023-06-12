@@ -80,7 +80,8 @@ class SingleTypeMeta {
 
     for (const component of components) {
       const { alias, schema } = component;
-      const prefix = !isNested ? 'DynamicModel' : '';
+
+      const prefix = isNested ? '' : 'DynamicModel';
       const aliasKey = `${prefix}${ucfirst(singleTypeAlias)}`;
 
       const newProperties = {
@@ -120,15 +121,39 @@ class SingleTypeMeta {
             continue;
           }
 
+          const nestedData = await this.buildMetaSchema({
+            components: nestedCustomComponents,
+            isNested: true,
+            singleTypeAlias: alias,
+          });
+
+          /**
+           * Check if nested component data isn't declared as the
+           * refComponent(id) => refComponent(id) => dataComponent
+           */
+          const isNotRefComponent =
+            nestedData?.properties?.[name] &&
+            Object.keys(nestedData?.properties)?.some((key) => key === name);
+
+          /**
+           * If isn't ref component spread nested data to parent component
+           */
+          if (isNotRefComponent) {
+            newProperties.properties[alias].properties.data.properties = {
+              ...newProperties.properties[alias].properties.data.properties,
+              ...nestedData.properties,
+            };
+            continue;
+          }
+
+          /**
+           * If ref component wrap and spread nested
+           */
           newProperties.properties[alias].properties.data.properties[name] = {
             type: 'object',
             properties: {
               id: { type: 'string' },
-              data: await this.buildMetaSchema({
-                components: nestedCustomComponents,
-                isNested: true,
-                singleTypeAlias: alias,
-              }),
+              data: nestedData,
             },
           };
           continue;
