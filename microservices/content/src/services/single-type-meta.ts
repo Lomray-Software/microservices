@@ -80,7 +80,8 @@ class SingleTypeMeta {
 
     for (const component of components) {
       const { alias, schema } = component;
-      const prefix = !isNested ? 'DynamicModel' : '';
+
+      const prefix = isNested ? '' : 'DynamicModel';
       const aliasKey = `${prefix}${ucfirst(singleTypeAlias)}`;
 
       const newProperties = {
@@ -111,29 +112,57 @@ class SingleTypeMeta {
         }
 
         if (type === InputType.COMPONENT) {
-          const { id } = field as IComponentSchema;
+          /**
+           * Extract ref from component
+           */
+          const { id: inputId } = field as IComponentSchema;
 
           const nestedCustomComponents: ComponentEntity[] =
-            await this.componentRepository.getChildrenComponentById(id);
+            await this.componentRepository.getChildrenComponentById(inputId);
 
           if (!nestedCustomComponents?.length) {
             continue;
           }
 
+          const nestedData = await this.buildMetaSchema({
+            components: nestedCustomComponents,
+            isNested: true,
+            singleTypeAlias: alias,
+          });
+
+          /**
+           * Extracted component from ref
+           */
+          const extractedComponent = nestedData?.properties?.[0];
+
+          /**
+           * Check if nested component data isn't declared as the refComponent(id) => refComponent(id) => dataComponent
+           * If isn't ref component spread nested data to parent component
+           */
+          if (nestedData?.properties?.[name] && extractedComponent) {
+            newProperties.properties[alias].properties.data.properties = {
+              ...newProperties.properties[alias].properties.data.properties,
+              ...nestedData.properties,
+            };
+            continue;
+          }
+
+          /**
+           * If ref component wrap and spread nested
+           */
           newProperties.properties[alias].properties.data.properties[name] = {
             type: 'object',
             properties: {
               id: { type: 'string' },
-              data: await this.buildMetaSchema({
-                components: nestedCustomComponents,
-                isNested: true,
-                singleTypeAlias: alias,
-              }),
+              data: nestedData,
             },
           };
           continue;
         }
 
+        /**
+         * If is primitive
+         */
         newProperties.properties[alias].properties.data.properties[name] = {
           type: this.getSchemaType(type),
         };

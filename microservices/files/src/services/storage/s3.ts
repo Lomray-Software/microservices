@@ -80,7 +80,7 @@ class S3Storage extends Abstract {
 
     const listedObjects = await this.s3.listObjectsV2(params).promise();
 
-    if (!listedObjects || !listedObjects.Contents) {
+    if (!listedObjects || !listedObjects.Contents?.length) {
       return;
     }
 
