@@ -1,3 +1,4 @@
+import * as console from 'console';
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { expect } from 'chai';
 import type { SchemaObject } from 'openapi3-ts';
@@ -86,78 +87,84 @@ describe('services/single-type-meta', () => {
         schema2: { $ref: '#/definitions/schema2' },
       },
     });
+  });
 
-    it('should build the meta schema', async () => {
-      const componentRepository = getRepository(ComponentEntity);
-      const components: ComponentEntity[] = [
-        componentRepository.create({
-          id: '1',
-          alias: 'testAlias',
-          schema: [
-            { name: 'field1', title: 'Field 1', type: InputType.TEXT },
-            { name: 'field2', title: 'Field 2', type: InputType.NUMBER },
-          ],
-        }),
-      ];
+  it('should build the meta schema', async () => {
+    const componentRepository = getRepository(ComponentEntity);
+    const value = {};
+    const components: ComponentEntity[] = [
+      componentRepository.create({
+        id: '1',
+        alias: 'testAlias',
+        schema: [
+          { name: 'field1', title: 'Field 1', type: InputType.TEXT },
+          { name: 'field2', title: 'Field 2', type: InputType.NUMBER },
+        ],
+      }),
+    ];
 
-      const result = await singleTypeMeta['buildMetaSchema']({ components, isNested: false });
-
-      const expected: Record<string, SchemaObject> = {
-        DynamicModelUnknownAlias: {
-          type: 'object',
-          properties: {
-            Test: {
-              type: 'object',
-              properties: {
-                id: { type: 'string' },
-                data: {
-                  type: 'object',
-                  properties: {
-                    field1: { type: 'string' },
-                    field2: { type: 'number' },
-                  },
-                },
-              },
-            },
-          },
-        },
-      };
-
-      expect(result).to.deep.equal(expected);
+    const result = await singleTypeMeta['buildMetaSchema']({
+      components,
+      value,
+      isNested: false,
     });
 
-    it('should build the reference schema', () => {
-      const schemaObject: Record<string, SchemaObject> = {
-        DynamicModelUnknownAlias: {
-          type: 'object',
-          properties: {
-            Test: {
-              type: 'object',
-              properties: {
-                id: { type: 'string' },
-                data: {
-                  type: 'object',
-                  properties: {
-                    field1: { type: 'string' },
-                    field2: { type: 'number' },
-                  },
-                },
-              },
-            },
-          },
-        },
-      };
-
-      const result = singleTypeMeta['buildRefSchema'](schemaObject);
-
-      const expected: SchemaObject = {
+    const expected: Record<string, SchemaObject> = {
+      DynamicModelUnknownAlias: {
         type: 'object',
         properties: {
-          Test: { $ref: '#/definitions/DynamicModelUnknownAlias' },
+          testAlias: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              data: {
+                type: 'object',
+                properties: {
+                  field1: { type: 'string' },
+                  field2: { type: 'number' },
+                },
+              },
+            },
+          },
         },
-      };
+      },
+    };
 
-      expect(result).to.deep.equal(expected);
-    });
+    console.log('re', result);
+    expect(result).to.deep.equal(expected);
+  });
+
+  it('should build the reference schema', () => {
+    const schemaObject: Record<string, SchemaObject> = {
+      DynamicModelGreenAlias: {
+        type: 'object',
+        properties: {
+          greenAlias: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              data: {
+                type: 'object',
+                properties: {
+                  field1: { type: 'string' },
+                  field2: { type: 'number' },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const result = singleTypeMeta['buildRefSchema'](schemaObject);
+
+    const expected: SchemaObject = {
+      type: 'object',
+      properties: {
+        greenAlias: { $ref: '#/definitions/DynamicModelGreenAlias' },
+      },
+    };
+
+    expect(result).to.deep.equal(expected);
   });
 });
