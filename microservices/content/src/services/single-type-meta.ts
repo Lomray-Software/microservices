@@ -17,9 +17,11 @@ import SingleTypeRepository from '@repositories/single-type';
 
 interface IBuildMetaSchemaParams {
   components: ComponentEntity[];
+  // Required for components renaming
   value: ISingleTypeValue;
   singleTypeAlias?: string;
   isNested?: boolean;
+  // Ref by id on the parent component
   parentId?: string;
 }
 

@@ -1,4 +1,3 @@
-import * as console from 'console';
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { expect } from 'chai';
 import type { SchemaObject } from 'openapi3-ts';
@@ -105,12 +104,13 @@ describe('services/single-type-meta', () => {
 
     const result = await singleTypeMeta['buildMetaSchema']({
       components,
+      singleTypeAlias: components?.[0].alias,
       value,
       isNested: false,
     });
 
     const expected: Record<string, SchemaObject> = {
-      DynamicModelUnknownAlias: {
+      DynamicModelTestAlias: {
         type: 'object',
         properties: {
           testAlias: {
@@ -130,7 +130,6 @@ describe('services/single-type-meta', () => {
       },
     };
 
-    console.log('re', result);
     expect(result).to.deep.equal(expected);
   });
 
