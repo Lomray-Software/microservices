@@ -133,15 +133,10 @@ class SingleTypeMeta {
           const extractedComponent = nestedData?.properties?.[0];
 
           /**
-           * Check if nested component data isn't declared as the
-           * refComponent(id) => refComponent(id) => dataComponent
-           */
-          const isNotRefComponent = Boolean(nestedData?.properties?.[name] && extractedComponent);
-
-          /**
+           * Check if nested component data isn't declared as the refComponent(id) => refComponent(id) => dataComponent
            * If isn't ref component spread nested data to parent component
            */
-          if (isNotRefComponent) {
+          if (nestedData?.properties?.[name] && extractedComponent) {
             newProperties.properties[alias].properties.data.properties = {
               ...newProperties.properties[alias].properties.data.properties,
               ...nestedData.properties,
