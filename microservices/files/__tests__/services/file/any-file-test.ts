@@ -8,16 +8,15 @@ import FileType from '@constants/file-type';
 import CONST from '@constants/index';
 import File from '@entities/file';
 import type { IRemoteConfig } from '@interfaces/remote-config';
-import Image from '@services/file/image';
+import AnyFile from '@services/file/any-file';
 import StorageFactory from '@services/storage/factory';
 
-describe('services/file/image', () => {
+describe('services/file/any-file', () => {
   const sandbox = sinon.createSandbox();
   const fileData = getRepository(File).create({
     id: 'file_id',
   });
   const processingConfig: IRemoteConfig = {
-    imageProcessingConfig: CONST.IMAGE_PROCESSING_CONFIG,
     storagePathPrefix: CONST.STORAGE_PATH_PREFIX,
   };
 
@@ -29,19 +28,24 @@ describe('services/file/image', () => {
     sandbox.restore();
   });
 
-  it('should successfully save image', async () => {
+  it('should successfully save file', async () => {
     TypeormMock.entityManager.save.resolves(fileData);
     sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: bucketNameMock } });
 
     const storage = await StorageFactory.create();
-    const service = new Image(FileType.image, TypeormMock.entityManager, storage, processingConfig);
+    const service = new AnyFile(
+      FileType.file,
+      TypeormMock.entityManager,
+      storage,
+      processingConfig,
+    );
 
     sandbox.stub(service, <any>'composeData').resolves({
-      fileData: { url: 'url', type: FileType.image },
-      formattedImages: [],
+      fileData: { url: 'url', type: FileType.file },
+      fileBuffer: undefined,
     });
 
-    sandbox.stub(service, <any>'uploadImages');
+    sandbox.stub(service, <any>'uploadFile');
 
     const entity = await service.save('file', 'user_id');
 
@@ -51,15 +55,20 @@ describe('services/file/image', () => {
     expect(file).to.deep.equal({
       userId: 'user_id',
       url: '/',
-      type: FileType.image,
+      type: FileType.file,
     });
   });
 
-  it('should successfully remove image', async () => {
+  it('should successfully remove file', async () => {
     sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: bucketNameMock } });
 
     const storage = await StorageFactory.create();
-    const service = new Image(FileType.image, TypeormMock.entityManager, storage, processingConfig);
+    const service = new AnyFile(
+      FileType.file,
+      TypeormMock.entityManager,
+      storage,
+      processingConfig,
+    );
 
     sandbox.stub(storage, 'delete');
 
@@ -71,19 +80,24 @@ describe('services/file/image', () => {
     expect(file).to.deep.equal(fileData);
   });
 
-  it('should successfully update image', async () => {
+  it('should successfully update file', async () => {
     TypeormMock.entityManager.save.resolves(fileData);
     sandbox.stub(RemoteConfig, 'get').resolves({ s3: { bucketName: bucketNameMock } });
 
     const storage = await StorageFactory.create();
-    const service = new Image(FileType.image, TypeormMock.entityManager, storage, processingConfig);
+    const service = new AnyFile(
+      FileType.file,
+      TypeormMock.entityManager,
+      storage,
+      processingConfig,
+    );
 
     sandbox.stub(service, <any>'composeData').resolves({
-      fileData: { url: 'url', type: FileType.image },
-      formattedImages: [],
+      fileData: { url: 'url', type: FileType.file },
+      fileBuffer: undefined,
     });
 
-    sandbox.stub(service, <any>'uploadImages');
+    sandbox.stub(service, <any>'uploadFile');
 
     sandbox.stub(storage, 'delete');
 
@@ -95,7 +109,7 @@ describe('services/file/image', () => {
     expect(fileEntity).to.deep.equal({
       id: 'file_id',
       url: 'url',
-      type: FileType.image,
+      type: FileType.file,
     });
   });
 });

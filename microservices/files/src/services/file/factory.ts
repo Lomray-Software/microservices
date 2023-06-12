@@ -4,6 +4,7 @@ import FileType from '@constants/file-type';
 import { IRemoteConfig } from '@interfaces/remote-config';
 import StorageFactory from '@services/storage/factory';
 import Abstract from './abstract';
+import AnyFile from './any-file';
 import Image from './image';
 
 /**
@@ -24,7 +25,7 @@ class Factory {
       case FileType.video:
       case FileType.file:
       default:
-        throw new Error('Not implemented');
+        return new AnyFile(type, manager, storage, config);
     }
   }
 }
