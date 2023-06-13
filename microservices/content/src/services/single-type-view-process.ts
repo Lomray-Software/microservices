@@ -57,7 +57,6 @@ class SingleTypeViewProcess {
    */
   public async expand(relations: IExpandRouteInput[]): Promise<SingleTypeEntity> {
     const expandRoutes = await this.constructExpandRoutes(relations);
-
     const expandRequests = expandRoutes.map((expandRoute) => this.handleExpand(expandRoute));
 
     await Promise.all(expandRequests);
@@ -69,15 +68,16 @@ class SingleTypeViewProcess {
    * Returns entity with an expanded data
    */
   private async handleExpand({
-    route,
+    name,
     entity,
     microservice,
     hasMany,
     attributes,
     relations,
+    isOptional,
   }: IExpandRoute): Promise<void> {
-    const property = getExpandRouteProperties(route).properties.pop();
-    const data = this.singleTypeRepository.getDataAtPath(this.entity, route, hasMany);
+    const property = getExpandRouteProperties(name).properties.pop();
+    const data = this.singleTypeRepository.getDataAtPath(this.entity, name, hasMany);
 
     /**
      * If no data for expand return original single type
@@ -106,6 +106,7 @@ class SingleTypeViewProcess {
         entity,
         attributes,
         relations,
+        isOptional,
       );
     } else {
       entitiesResult = await SingleTypeRepository.getMicroserviceData(
@@ -114,13 +115,14 @@ class SingleTypeViewProcess {
         entity,
         attributes,
         relations,
+        isOptional,
       );
     }
 
     this.singleTypeRepository.setDataAtPath({
       data: entitiesResult,
       singleType: this.entity,
-      path: route,
+      path: name,
       hasMany,
     });
   }
@@ -148,7 +150,7 @@ class SingleTypeViewProcess {
    * Construct component routes
    */
   private constructComponentRoutes(relations: IExpandRouteInput[]): IComponentRoute[] {
-    return relations.map(({ route: relation, ...restExpandRouteData }) => {
+    return relations.map(({ name: relation, ...restExpandRouteData }) => {
       if (!relation) {
         throw new BaseException({ status: 400, message: 'Provided route is invalid.' });
       }
@@ -183,7 +185,7 @@ class SingleTypeViewProcess {
         ...restExpandRouteData,
         componentId,
         componentDataName,
-        route: relation,
+        name: relation,
         hasMany,
       };
     });

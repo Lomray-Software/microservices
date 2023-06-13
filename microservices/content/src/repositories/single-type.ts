@@ -92,6 +92,7 @@ class SingleType extends Repository<SingleTypeEntity> {
     entity: string,
     attributes?: string[],
     relations?: string[],
+    isOptional = false,
   ): Promise<T[]> {
     const query = {
       ...(attributes ? { attributes } : {}),
@@ -103,7 +104,7 @@ class SingleType extends Repository<SingleTypeEntity> {
 
     const { result, error } = await Api.get()[microservice][entity].list({ query });
 
-    if (error || !result?.list) {
+    if ((error || !result?.list) && !isOptional) {
       const errorMsg = `Failed to get data for expand entity in ${microservice} microservice of ${entity} entity`;
 
       Log.error(errorMsg, error);
@@ -115,7 +116,7 @@ class SingleType extends Repository<SingleTypeEntity> {
       });
     }
 
-    return result?.list;
+    return result?.list ?? [];
   }
 }
 

@@ -16,10 +16,11 @@ class Component extends Repository<ComponentEntity> {
   public async handleRelations({
     componentId,
     componentDataName: inputName,
-    route,
+    name,
     hasMany,
     attributes,
     relations,
+    isOptional,
   }: IComponentRoute): Promise<IExpandRoute | null> {
     const repository = getRepository(ComponentEntity);
 
@@ -29,7 +30,9 @@ class Component extends Repository<ComponentEntity> {
       return null;
     }
 
-    const input = component.schema?.find(({ name }) => name === inputName) as IRelationSchema;
+    const input = component.schema?.find(
+      ({ name: cName }) => cName === inputName,
+    ) as IRelationSchema;
 
     if (!input) {
       return null;
@@ -40,12 +43,13 @@ class Component extends Repository<ComponentEntity> {
     } = input;
 
     return {
-      route,
+      name,
       microservice,
       entity,
       hasMany,
       relations,
       attributes,
+      isOptional,
     };
   }
 

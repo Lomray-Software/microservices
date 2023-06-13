@@ -28,7 +28,7 @@ describe('services/single-type-view-process', () => {
   });
 
   it('should throw error: incorrect relation routes', async () => {
-    const relations = [{ route: 'relation/admins' }];
+    const relations = [{ name: 'relation/admins' }];
     const service = SingleTypeViewProcess.init({
       // @ts-ignore
       entity: {},
@@ -96,12 +96,12 @@ describe('services/single-type-view-process', () => {
       singleTypeRepository,
     });
 
-    const [{ route }] = adminsRelationMock;
+    const [{ name }] = adminsRelationMock;
 
     const handleRelationsStub = sinon.stub(componentRepository, 'handleRelations');
 
     handleRelationsStub.resolves({
-      route,
+      name,
       microservice: 'users',
       entity: 'user',
     });
@@ -114,7 +114,7 @@ describe('services/single-type-view-process', () => {
     const handleExpandStub = sinon.stub(service, 'handleExpand');
 
     // @ts-ignore
-    handleExpandStub.resolves({ data: adminsMock, routeRef: route } as IExpandData);
+    handleExpandStub.resolves({ data: adminsMock, routeRef: name } as IExpandData);
 
     const adminsSingleType = { ...adminsSingleTypeMock };
 

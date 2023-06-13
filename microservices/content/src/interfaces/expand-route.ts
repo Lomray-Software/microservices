@@ -1,5 +1,6 @@
 interface IExpandRouteInput {
-  route: string;
+  name: string;
+  isOptional?: boolean;
   relations?: string[];
   attributes?: string[];
 }
