@@ -1,6 +1,7 @@
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import SingleTypeEntity from '@entities/single-type';
 import getExpandRouteProperties from '@helpers/get-expand-route-properties';
+import messages from '@helpers/validators/messages';
 import IComponentRoute from '@interfaces/component-route';
 import { IExpandRoute, IExpandRouteInput } from '@interfaces/expand-route';
 import ComponentRepository from '@repositories/component';
@@ -161,7 +162,7 @@ class SingleTypeViewProcess {
       if (!componentAlias || !componentDataName) {
         throw new BaseException({
           status: 400,
-          message: 'Failed to get relation data. Incorrectly built relation routes.',
+          message: messages.getNotFoundMessage('Incorrectly built relation routes. Relation data'),
         });
       }
 
