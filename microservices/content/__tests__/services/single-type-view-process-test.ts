@@ -38,7 +38,7 @@ describe('services/single-type-view-process', () => {
 
     expect(await waitResult(service.expand(relations))).to.throw(
       BaseException,
-      'Failed to get relation data. Incorrectly built relation routes',
+      "Incorrectly built relation routes. Relation data isn't found.",
     );
   });
 
