@@ -348,7 +348,7 @@ Content-Type: application/json
     "payload": {
       "expand": [
         {
-          "route": "blogPostPage.content.pageContent.contentCreators",
+          "route": "blogPostPage.pageContent.contentCreators",
           "attributes": ["id", "firstName"]
         }
       ]
@@ -633,7 +633,7 @@ Authorization: Bearer usertokenoooooooooooooooooooooon
     },
     "payload": {
       "expand": [
-        "blogPostPage.content.pageContent.contentCreators"
+        "blogPostPage.pageContent.contentCreators"
       ]
     }
   }
@@ -736,7 +736,7 @@ Content-Type: application/json
     },
     "payload": {
       "expand": [
-        "blogPostPage.content.pageContent.contentCreators"
+        "blogPostPage.pageContent.contentCreators"
       ]
     }
   }
