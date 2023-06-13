@@ -1,13 +1,14 @@
 import ucfirst from '@lomray/client-helpers/helpers/ucfirst';
 import { IMicroserviceMeta, MicroserviceMeta } from '@lomray/microservice-helpers';
-import { BaseException } from '@lomray/microservice-nodejs-lib';
 import type { AbstractMicroservice } from '@lomray/microservice-nodejs-lib';
+import { BaseException } from '@lomray/microservice-nodejs-lib';
 import _ from 'lodash';
 import type { SchemaObject } from 'openapi3-ts';
 import CONST from '@constants/index';
 import InputType from '@constants/input-type';
 import schemaObjectTypes from '@constants/schema-object-types';
 import ComponentEntity from '@entities/component';
+import { ISingleTypeValue } from '@entities/single-type';
 import lsfirst from '@helpers/lsfirst';
 import type { IComponentSchema, IRelationSchema } from '@interfaces/component';
 import TSchemaObjectType from '@interfaces/schema-object-type';
@@ -16,8 +17,12 @@ import SingleTypeRepository from '@repositories/single-type';
 
 interface IBuildMetaSchemaParams {
   components: ComponentEntity[];
+  // Required for components renaming
+  value?: ISingleTypeValue;
   singleTypeAlias?: string;
   isNested?: boolean;
+  // Ref by id on the parent component
+  parentId?: string;
 }
 
 export interface ISingleTypeSchemaParams {
@@ -73,39 +78,33 @@ class SingleTypeMeta {
    */
   private async buildMetaSchema({
     components,
-    isNested,
+    isNested = false,
     singleTypeAlias = 'UnknownAlias',
+    value,
+    parentId,
   }: IBuildMetaSchemaParams): Promise<SchemaObject> {
     const result: SchemaObject = {};
 
     for (const component of components) {
-      const { alias, schema } = component;
+      const { alias: componentAlias, schema } = component;
 
       const prefix = isNested ? '' : 'DynamicModel';
       const aliasKey = `${prefix}${ucfirst(singleTypeAlias)}`;
 
-      const newProperties = {
-        type: 'object',
-        properties: {
-          [alias]: {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-              data: { type: 'object', properties: {} },
-            },
-          },
-        },
-      };
+      /**
+       * Collect meta
+       */
+      const metaSchema = this.buildMeta(componentAlias);
 
-      for (const field of schema) {
-        const { type, name } = field;
+      for (const input of schema) {
+        const { type, name: inputName } = input;
 
         if (type === InputType.RELATION) {
           const {
             relation: { microservice, entity },
-          } = field as IRelationSchema;
+          } = input as IRelationSchema;
 
-          newProperties.properties[alias].properties.data.properties[name] = {
+          metaSchema.properties[componentAlias].properties.data.properties[inputName] = {
             $ref: this.makeRef(microservice, entity),
           };
           continue;
@@ -115,47 +114,47 @@ class SingleTypeMeta {
           /**
            * Extract ref from component
            */
-          const { id: inputId } = field as IComponentSchema;
+          const { id: inputId } = input as IComponentSchema;
 
-          const nestedCustomComponents: ComponentEntity[] =
-            await this.componentRepository.getChildrenComponentById(inputId);
+          const childrenComponents = await this.componentRepository.getChildrenComponentById(
+            inputId,
+          );
 
-          if (!nestedCustomComponents?.length) {
+          if (!childrenComponents?.length) {
             continue;
           }
 
-          const nestedData = await this.buildMetaSchema({
-            components: nestedCustomComponents,
+          const componentNames: { currentAlias: string; singleTypeKey?: string } = {
+            currentAlias: componentAlias,
+          };
+
+          /**
+           * Find custom component name in single type schema
+           * @TODO: Investigate rename
+           */
+          if (value && !value?.[inputName]) {
+            Object.entries(value).forEach(([key, componentSchema]: [string, IComponentSchema]) => {
+              if (componentSchema.id !== parentId) {
+                return;
+              }
+
+              componentNames.singleTypeKey = key;
+            });
+          }
+
+          const nestedSchema = await this.buildMetaSchema({
+            components: childrenComponents,
+            value: value?.[componentAlias]?.data,
+            singleTypeAlias: componentAlias,
+            parentId: inputId,
             isNested: true,
-            singleTypeAlias: alias,
           });
 
-          /**
-           * Extracted component from ref
-           */
-          const extractedComponent = nestedData?.properties?.[0];
-
-          /**
-           * Check if nested component data isn't declared as the refComponent(id) => refComponent(id) => dataComponent
-           * If isn't ref component spread nested data to parent component
-           */
-          if (nestedData?.properties?.[name] && extractedComponent) {
-            newProperties.properties[alias].properties.data.properties = {
-              ...newProperties.properties[alias].properties.data.properties,
-              ...nestedData.properties,
-            };
-            continue;
-          }
-
-          /**
-           * If ref component wrap and spread nested
-           */
-          newProperties.properties[alias].properties.data.properties[name] = {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-              data: nestedData,
-            },
+          metaSchema.properties[componentAlias].properties.data.properties = {
+            // Primitive data   inputs (stored in the component relations with the native name)
+            ...metaSchema.properties[componentAlias].properties.data.properties,
+            // Reference (components) data inputs
+            ...nestedSchema?.properties,
           };
           continue;
         }
@@ -163,12 +162,12 @@ class SingleTypeMeta {
         /**
          * If is primitive
          */
-        newProperties.properties[alias].properties.data.properties[name] = {
+        metaSchema.properties[componentAlias].properties.data.properties[inputName] = {
           type: this.getSchemaType(type),
         };
       }
 
-      _.merge(result, isNested ? newProperties : { [aliasKey]: newProperties });
+      _.merge(result, isNested ? metaSchema : { [aliasKey]: metaSchema });
     }
 
     return result;
@@ -225,11 +224,11 @@ class SingleTypeMeta {
     /**
      * Get schemas
      */
-    const schemasRequests = singleTypesWithRelations.map(({ components, alias }) =>
+    const schemasRequests = singleTypesWithRelations.map(({ components, alias, value }) =>
       this.buildMetaSchema({
         components,
         singleTypeAlias: alias,
-        isNested: false,
+        value,
       }),
     );
 
@@ -269,6 +268,24 @@ class SingleTypeMeta {
     defaultMetaEndpoint.entities.SingleType.properties.value = refSchema;
 
     return defaultMetaEndpoint;
+  }
+
+  /**
+   * Returns new properties with the provided alias
+   */
+  private buildMeta(alias: string) {
+    return {
+      type: 'object',
+      properties: {
+        [alias]: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            data: { type: 'object', properties: {} },
+          },
+        },
+      },
+    };
   }
 }
 
