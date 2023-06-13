@@ -1,7 +1,7 @@
 import ucfirst from '@lomray/client-helpers/helpers/ucfirst';
 import { IMicroserviceMeta, MicroserviceMeta } from '@lomray/microservice-helpers';
-import { BaseException } from '@lomray/microservice-nodejs-lib';
 import type { AbstractMicroservice } from '@lomray/microservice-nodejs-lib';
+import { BaseException } from '@lomray/microservice-nodejs-lib';
 import _ from 'lodash';
 import type { SchemaObject } from 'openapi3-ts';
 import CONST from '@constants/index';
@@ -18,7 +18,7 @@ import SingleTypeRepository from '@repositories/single-type';
 interface IBuildMetaSchemaParams {
   components: ComponentEntity[];
   // Required for components renaming
-  value: ISingleTypeValue;
+  value?: ISingleTypeValue;
   singleTypeAlias?: string;
   isNested?: boolean;
   // Ref by id on the parent component
@@ -43,12 +43,6 @@ class SingleTypeMeta {
    * @protected
    */
   protected readonly singleTypeRepository: ISingleTypeSchemaParams['singleTypeRepository'];
-
-  /**
-   * Cache
-   * Uses: cache component names
-   */
-  protected cache: Map<string, string> = new Map();
 
   /**
    * @constructor
@@ -100,7 +94,7 @@ class SingleTypeMeta {
       /**
        * Collect meta
        */
-      const metaSchema = this.buildNewProperties(componentAlias);
+      const metaSchema = this.buildMeta(componentAlias);
 
       for (const input of schema) {
         const { type, name: inputName } = input;
@@ -120,44 +114,44 @@ class SingleTypeMeta {
           /**
            * Extract ref from component
            */
-          const { id } = input as IComponentSchema;
+          const { id: inputId } = input as IComponentSchema;
 
-          const childrenComponents = await this.componentRepository.getChildrenComponentById(id);
+          const childrenComponents = await this.componentRepository.getChildrenComponentById(
+            inputId,
+          );
 
           if (!childrenComponents?.length) {
             continue;
           }
 
-          /**
-           * Cache component name
-           */
-          if (!value?.[componentAlias]) {
-            this.cacheComponentName(value, componentAlias, parentId);
-          }
+          const componentNames: { currentAlias: string; singleTypeKey?: string } = {
+            currentAlias: componentAlias,
+          };
 
           /**
-           * Default single type value for selecting
-           * Uses if component name was override
+           * Find custom component name in single type schema
+           * @TODO: Investigate rename
            */
-          const singleTypeComponentAlias = this.cache.get(componentAlias) || componentAlias;
+          if (value && !value?.[inputName]) {
+            Object.entries(value).forEach(([key, componentSchema]: [string, IComponentSchema]) => {
+              if (componentSchema.id !== parentId) {
+                return;
+              }
 
-          if (!value?.[singleTypeComponentAlias]?.data) {
-            throw new BaseException({
-              status: 400,
-              message: 'Wrong single type value',
+              componentNames.singleTypeKey = key;
             });
           }
 
           const nestedSchema = await this.buildMetaSchema({
             components: childrenComponents,
-            value: value?.[singleTypeComponentAlias]?.data,
-            singleTypeAlias: singleTypeComponentAlias,
-            parentId: id,
+            value: value?.[componentAlias]?.data,
+            singleTypeAlias: componentAlias,
+            parentId: inputId,
             isNested: true,
           });
 
           metaSchema.properties[componentAlias].properties.data.properties = {
-            // Primitive data inputs
+            // Primitive data   inputs (stored in the component relations with the native name)
             ...metaSchema.properties[componentAlias].properties.data.properties,
             // Reference (components) data inputs
             ...nestedSchema?.properties,
@@ -175,8 +169,6 @@ class SingleTypeMeta {
 
       _.merge(result, isNested ? metaSchema : { [aliasKey]: metaSchema });
     }
-
-    this.cache.clear();
 
     return result;
   }
@@ -279,30 +271,9 @@ class SingleTypeMeta {
   }
 
   /**
-   * Cache alias
-   * NOTE: Uses in name of component in single type was override
-   */
-  private cacheComponentName(
-    currentSingleTypeValue: ISingleTypeValue,
-    alias: string,
-    parentComponentId?: string,
-  ): void {
-    if (!parentComponentId) {
-      return;
-    }
-
-    Object.entries(currentSingleTypeValue).forEach(([key, componentValue]) => {
-      if (componentValue.id !== parentComponentId) {
-        return;
-      }
-
-      this.cache.set(alias, key);
-    });
-  }
-  /**
    * Returns new properties with the provided alias
    */
-  private buildNewProperties(alias: string) {
+  private buildMeta(alias: string) {
     return {
       type: 'object',
       properties: {
