@@ -92,7 +92,7 @@ class SingleTypeMeta {
     const result: SchemaObject = {};
 
     for (const component of components) {
-      const { alias, schema } = component;
+      const { alias: componentAlias, schema } = component;
 
       const prefix = isNested ? '' : 'DynamicModel';
       const aliasKey = `${prefix}${ucfirst(singleTypeAlias)}`;
@@ -100,17 +100,17 @@ class SingleTypeMeta {
       /**
        * Collect meta
        */
-      let newProperties = this.buildNewProperties(alias);
+      const metaSchema = this.buildNewProperties(componentAlias);
 
-      for (const field of schema) {
-        const { type, name } = field;
+      for (const input of schema) {
+        const { type, name: inputName } = input;
 
         if (type === InputType.RELATION) {
           const {
             relation: { microservice, entity },
-          } = field as IRelationSchema;
+          } = input as IRelationSchema;
 
-          newProperties.properties[alias].properties.data.properties[name] = {
+          metaSchema.properties[componentAlias].properties.data.properties[inputName] = {
             $ref: this.makeRef(microservice, entity),
           };
           continue;
@@ -120,7 +120,7 @@ class SingleTypeMeta {
           /**
            * Extract ref from component
            */
-          const { id } = field as IComponentSchema;
+          const { id } = input as IComponentSchema;
 
           const childrenComponents = await this.componentRepository.getChildrenComponentById(id);
 
@@ -131,15 +131,15 @@ class SingleTypeMeta {
           /**
            * Cache component name
            */
-          if (!value?.[alias]) {
-            this.cacheComponentName(value, alias, parentId);
+          if (!value?.[componentAlias]) {
+            this.cacheComponentName(value, componentAlias, parentId);
           }
 
           /**
            * Default single type value for selecting
            * Uses if component name was override
            */
-          const singleTypeComponentAlias = this.cache.get(alias) || alias;
+          const singleTypeComponentAlias = this.cache.get(componentAlias) || componentAlias;
 
           if (!value?.[singleTypeComponentAlias]?.data) {
             throw new BaseException({
@@ -148,7 +148,7 @@ class SingleTypeMeta {
             });
           }
 
-          const nestedData = await this.buildMetaSchema({
+          const nestedSchema = await this.buildMetaSchema({
             components: childrenComponents,
             value: value?.[singleTypeComponentAlias]?.data,
             singleTypeAlias: singleTypeComponentAlias,
@@ -156,30 +156,11 @@ class SingleTypeMeta {
             isNested: true,
           });
 
-          /**
-           * Check if nested component data isn't declared as the refComponent(id) => refComponent(id) => dataComponent
-           * If isn't ref component spread nested data to parent component
-           * Works with the current cache
-           */
-          if (this.isNotRefOnRefComponent(name, nestedData)) {
-            newProperties = this.buildNewProperties(singleTypeComponentAlias);
-            newProperties.properties[singleTypeComponentAlias].properties.data.properties = {
-              ...newProperties.properties[singleTypeComponentAlias].properties.data.properties,
-              ...nestedData.properties,
-            };
-
-            continue;
-          }
-
-          /**
-           * If ref component wrap and spread nested
-           */
-          newProperties.properties[alias].properties.data.properties[name] = {
-            type: 'object',
-            properties: {
-              id: { type: 'string' },
-              data: nestedData,
-            },
+          metaSchema.properties[componentAlias].properties.data.properties = {
+            // Primitive data inputs
+            ...metaSchema.properties[componentAlias].properties.data.properties,
+            // Reference (components) data inputs
+            ...nestedSchema?.properties,
           };
           continue;
         }
@@ -187,13 +168,15 @@ class SingleTypeMeta {
         /**
          * If is primitive
          */
-        newProperties.properties[alias].properties.data.properties[name] = {
+        metaSchema.properties[componentAlias].properties.data.properties[inputName] = {
           type: this.getSchemaType(type),
         };
       }
 
-      _.merge(result, isNested ? newProperties : { [aliasKey]: newProperties });
+      _.merge(result, isNested ? metaSchema : { [aliasKey]: metaSchema });
     }
+
+    this.cache.clear();
 
     return result;
   }
@@ -293,16 +276,6 @@ class SingleTypeMeta {
     defaultMetaEndpoint.entities.SingleType.properties.value = refSchema;
 
     return defaultMetaEndpoint;
-  }
-
-  /**
-   * Check is component isn't ref on ref component structure
-   */
-  private isNotRefOnRefComponent(name: string, nestedData: SchemaObject): boolean {
-    return Boolean(
-      nestedData?.properties &&
-        Object.keys(nestedData?.properties).some((key) => key === name || this.cache.has(name)),
-    );
   }
 
   /**
