@@ -140,19 +140,19 @@ Content-Type: application/json
       "schema": [
         {
           "id": "9a7aedb4-4b00-44b3-89a3-a535692d28d6",
-          "name": "header",
+          "name": "pageHeader",
           "type": "component",
           "hasMany": false
         },
         {
           "id": "e6186469-a9a5-444c-812c-c801c95245b8",
-          "name": "content",
+          "name": "pageContent",
           "type": "component",
           "hasMany": false
         },
         {
           "id": "78567003-f8cb-4d92-8aab-d7c9dc88bf2e",
-          "name": "footer",
+          "name": "pageFooter",
           "type": "component",
           "hasMany": false
         },
@@ -187,47 +187,34 @@ Content-Type: application/json
         "blogPostPage": {
           "id": "dff2719e-3c57-4248-9408-59af6287a568",
           "data": {
-            "header": {
+            "pageHeader": {
               "id": "9a7aedb4-4b00-44b3-89a3-a535692d28d6",
               "data": {
-                "pageHeader": {
-                  "id": "9a7aedb4-4b00-44b3-89a3-a535692d28d6",
-                  "data": {
-                    "headerTitle": "Cars",
-                    "postNumber": 1
-                  }
-                }
+                "headerTitle": "Cars",
+                "postNumber": 1
               }
             },
-            "content": {
+            "pageContent": {
               "id": "e6186469-a9a5-444c-812c-c801c95245b8",
               "data": {
-                "pageContent": {
-                  "id": "e6186469-a9a5-444c-812c-c801c95245b8",
-                  "data": {
-                    "contentTitle": "Green Lamborghini",
-                    "contentDate": "2023-05-28T13:56:55.360Z",
-                    "contentDescription": "contentTitle",
-                    "contentCreators": [
-                      {
-                        "id": "b9b61ca6-761b-4051-84b2-647a2262b78b"
-                      },
-                      {
-                        "id": "a5326de3-d04c-425c-8711-0f99fc031c67"
-                      }
-                    ]
+                "contentTitle": "Green Lamborghini",
+                "contentDate": "2023-05-28T13:56:55.360Z",
+                "contentDescription": "contentTitle",
+                "contentCreators": [
+                  {
+                    "id": "b9b61ca6-761b-4051-84b2-647a2262b78b"
+                  },
+                  {
+                    "id": "a5326de3-d04c-425c-8711-0f99fc031c67"
                   }
-                }
+                ]
               }
             },
-            "footer": {
+            "pageFooter": {
               "id": "78567003-f8cb-4d92-8aab-d7c9dc88bf2e",
               "data": {
-                "id": "78567003-f8cb-4d92-8aab-d7c9dc88bf2e",
-                "pageFooter": {
-                  "contactUsWithTheEmail": "contact@us.com",
-                  "isThisPostRecommendedByUS": true
-                }
+                "contactUsWithTheEmail": "contact@us.com",
+                "isThisPostRecommendedByUS": true
               }
             },
             "options": {
@@ -262,80 +249,54 @@ Content-Type: application/json
         "blogPostPage": {
           "id": "dff2719e-3c57-4248-9408-59af6287a568",
           "data": {
-            "header": {
+            "pageHeader": {
               "id": "9a7aedb4-4b00-44b3-89a3-a535692d28d6",
               "data": {
-                "pageHeader": {
-                  "id": "9a7aedb4-4b00-44b3-89a3-a535692d28d6",
-                  "data": {
-                    "headerTitle": "Cars",
-                    "postNumber": 1
-                  }
-                }
+                "headerTitle": "Cars",
+                "postNumber": 1
               }
             },
-            "content": {
+            "pageContent": {
               "id": "e6186469-a9a5-444c-812c-c801c95245b8",
-              "data": {
-                "pageContent": {
-                  "id": "e6186469-a9a5-444c-812c-c801c95245b8",
-                  "data": [
+              "data": [
+                {
+                  "contentTitle": "Green Lamborghini",
+                  "contentDate": "2023-05-28T13:56:55.360Z",
+                  "contentDescription": "contentTitle",
+                  "contentCreators": [
                     {
-                      "contentTitle": "Green Lamborghini",
-                      "contentDate": "2023-05-28T13:56:55.360Z",
-                      "contentDescription": "contentTitle",
-                      "contentCreators": [
-                        {
-                          "id": "b9b61ca6-761b-4051-84b2-647a2262b78b"
-                        },
-                        {
-                          "id": "a5326de3-d04c-425c-8711-0f99fc031c67"
-                        }
-                      ]
+                      "id": "b9b61ca6-761b-4051-84b2-647a2262b78b"
                     },
                     {
-                      "contentTitle": "White Lamborghini",
-                      "contentDate": "2023-05-28T13:56:55.360Z",
-                      "contentDescription": "contentTitle",
-                      "contentCreators": [
-                        {
-                          "id": "m9b61ca6-761b-4051-84b2-647a2262b78b"
-                        },
-                        {
-                          "id": "z5326de3-d04c-425c-8711-0f99fc031c67"
-                        }
-                      ]
+                      "id": "a5326de3-d04c-425c-8711-0f99fc031c67"
+                    }
+                  ]
+                },
+                {
+                  "contentTitle": "Green Lamborghini",
+                  "contentDate": "2023-05-28T13:56:55.360Z",
+                  "contentDescription": "contentTitle",
+                  "contentCreators": [
+                    {
+                      "id": "b9b61ca6-761b-4051-84b2-647a2262b78b"
                     },
                     {
-                      "contentTitle": "Blue Lamborghini",
-                      "contentDate": "2023-05-28T13:56:55.360Z",
-                      "contentDescription": "contentTitle",
-                      "contentCreators": [
-                        {
-                          "id": "p9b61ca6-761b-4051-84b2-647a2262b78b"
-                        },
-                        {
-                          "id": "o5326de3-d04c-425c-8711-0f99fc031c67"
-                        }
-                      ]
+                      "id": "a5326de3-d04c-425c-8711-0f99fc031c67"
                     }
                   ]
                 }
-              }
-            },
-            "footer": {
-              "id": "78567003-f8cb-4d92-8aab-d7c9dc88bf2e",
-              "data": {
+              ],
+              "pageFooter": {
                 "id": "78567003-f8cb-4d92-8aab-d7c9dc88bf2e",
-                "pageFooter": {
+                "data": {
                   "contactUsWithTheEmail": "contact@us.com",
                   "isThisPostRecommendedByUS": true
                 }
+              },
+              "options": {
+                "timeZoneId": "America/Los_Angeles",
+                "timeZoneName": "Pacific Daylight Time"
               }
-            },
-            "options": {
-              "timeZoneId": "America/Los_Angeles",
-              "timeZoneName": "Pacific Daylight Time"
             }
           }
         }
