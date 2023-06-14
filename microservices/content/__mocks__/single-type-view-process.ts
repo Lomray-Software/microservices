@@ -1,4 +1,4 @@
-const adminsRelationMock = [{ route: 'blog.admins' }];
+const adminsRelationMock = [{ name: 'blog.admins' }];
 
 const adminsSingleTypeMock = {
   alias: 'blog',
