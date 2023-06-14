@@ -7,7 +7,7 @@ const replaceEntities = <TEntity = unknown>(
   updatedEntities: Record<string, TEntity>[],
   isShouldRemoveNotMatchingRecord = true,
 ): Record<string, TEntity | unknown>[] => {
-  if (!updatedEntities.length) {
+  if (!updatedEntities.length || !originalEntities.length) {
     return originalEntities;
   }
 
