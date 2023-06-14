@@ -98,7 +98,7 @@ class SingleType extends Repository<SingleTypeEntity> {
       ...(attributes ? { attributes } : {}),
       ...(relations ? { relations } : {}),
       where: {
-        or: Array.isArray(entities) ? entities : [entities],
+        or: (Array.isArray(entities) ? entities : [entities]).filter(Boolean),
       },
     };
 

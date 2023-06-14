@@ -94,30 +94,18 @@ class SingleTypeViewProcess {
     }
 
     const expandEntityData: Record<string, unknown>[] = Array.isArray(data) ? data : [data];
+    const entities = hasMany
+      ? this.extractDataByProperty(expandEntityData, property)
+      : expandEntityData;
 
-    let entitiesResult: unknown[];
-
-    if (hasMany) {
-      const entitiesIds = this.extractDataByProperty(expandEntityData, property);
-
-      entitiesResult = await SingleTypeRepository.getMicroserviceData(
-        entitiesIds,
-        microservice,
-        entity,
-        attributes,
-        relations,
-        isOptional,
-      );
-    } else {
-      entitiesResult = await SingleTypeRepository.getMicroserviceData(
-        expandEntityData,
-        microservice,
-        entity,
-        attributes,
-        relations,
-        isOptional,
-      );
-    }
+    const entitiesResult: unknown[] = await SingleTypeRepository.getMicroserviceData(
+      entities,
+      microservice,
+      entity,
+      attributes,
+      relations,
+      isOptional,
+    );
 
     this.singleTypeRepository.setDataAtPath({
       data: entitiesResult,
