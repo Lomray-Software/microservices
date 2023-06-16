@@ -9,7 +9,7 @@ import remoteConfig from '@config/remote';
 const webhook =
   (): RequestHandler =>
   async (req, res, next): Promise<Response | void> => {
-    const { url, method, body, headers } = req;
+    const { url, method, body, headers, query } = req;
     const { webhookUrl } = await remoteConfig();
 
     if (!webhookUrl) {
@@ -25,7 +25,7 @@ const webhook =
     }
 
     const { groups } =
-      new RegExp(`${webhookUrl as string}(?<methodUrl>[^/]+)/?(?<authToken>[^/]+)?`).exec(url) ||
+      new RegExp(`${webhookUrl as string}(?<methodUrl>[^/]+)/?(?<authToken>[^/?]+)?`).exec(url) ||
       {};
 
     if (!groups) {
@@ -44,6 +44,7 @@ const webhook =
       params: {
         body,
         rawBody: req['rawBody'],
+        query,
       },
     };
 
