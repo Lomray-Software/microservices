@@ -16,28 +16,28 @@ class File implements EntitySubscriberInterface<FileModel> {
   /**
    * This subscriber only for file entity
    */
-  listenTo(): typeof FileModel {
+  public listenTo(): typeof FileModel {
     return FileModel;
   }
 
   /**
    * 1. Trigger create event
    */
-  afterInsert(event: InsertEvent<FileModel>): void {
+  public afterInsert(event: InsertEvent<FileModel>): void {
     void Microservice.eventPublish(Event.FileCreate, { entity: event.entity });
   }
 
   /**
    * 1. Trigger update event
    */
-  afterUpdate(event: UpdateEvent<FileModel>): void {
+  public afterUpdate(event: UpdateEvent<FileModel>): void {
     void Microservice.eventPublish(Event.FileUpdate, { entity: event.databaseEntity });
   }
 
   /**
    * Get relation entities for pass full file data to event
    */
-  async beforeRemove({ entity, manager }: RemoveEvent<FileModel>): Promise<void> {
+  public async beforeRemove({ entity, manager }: RemoveEvent<FileModel>): Promise<void> {
     if (!entity) {
       return;
     }
@@ -49,7 +49,7 @@ class File implements EntitySubscriberInterface<FileModel> {
    * 1. Refresh order column for file entities
    * 2. Trigger remove event
    */
-  async afterRemove({
+  public async afterRemove({
     entity: ent,
     databaseEntity,
     manager,

@@ -98,7 +98,6 @@ describe('services/file/any-file', () => {
     });
 
     sandbox.stub(service, <any>'uploadFile');
-
     sandbox.stub(storage, 'delete');
 
     const entity = await service.update(fileData, 'file');
