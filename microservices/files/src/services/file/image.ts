@@ -27,6 +27,7 @@ class Image extends Abstract {
       const fileRepository = transactionManager.getRepository(File);
       const fileEntity = await fileRepository.save(
         fileRepository.create({ userId, alt, url: '/', type: FileType.image }),
+        { listeners: false },
       );
 
       const { fileData, images } = await this.composeData(file, fileEntity.id);

@@ -49,9 +49,10 @@ const update = Endpoint.custom(
     }
 
     const service = await Factory.create(fileEntity.type, manager);
+    const entity = await service.update(fileEntity, file, alt);
 
     return {
-      entity: await FilePostProcess.handle(await service.update(fileEntity, file, alt), payload),
+      entity: await FilePostProcess.handle(entity, payload),
     };
   },
 );

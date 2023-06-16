@@ -23,6 +23,7 @@ class AnyFile extends Abstract {
       const fileRepository = transactionManager.getRepository(File);
       const fileEntity = await fileRepository.save(
         fileRepository.create({ userId, alt, url: '/', type: this.type }),
+        { listeners: false },
       );
 
       const { fileData, fileBuffer } = await this.composeData(file, fileEntity.id);

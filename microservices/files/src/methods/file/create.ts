@@ -40,9 +40,10 @@ const create = Endpoint.custom(
   }),
   async ({ type, file, userId, alt, payload }) => {
     const service = await Factory.create(type, getManager());
+    const entity = await service.save(file, userId, alt);
 
     return {
-      entity: await FilePostProcess.handle(await service.save(file, userId, alt), payload),
+      entity: await FilePostProcess.handle(entity, payload),
     };
   },
 );
