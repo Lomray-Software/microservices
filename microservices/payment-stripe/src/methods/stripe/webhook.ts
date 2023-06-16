@@ -11,6 +11,11 @@ class WebhookInput {
 
   @IsString()
   rawBody: string;
+
+  @IsObject()
+  query: {
+    id: string; // webhook id
+  };
 }
 
 class WebhookOutput {
@@ -24,17 +29,18 @@ const webhook = Endpoint.custom(
   () => ({
     input: WebhookInput,
     output: WebhookOutput,
-    description: 'Get stripe webhooks handler',
+    description: 'Handling and processing stripe webhooks.',
   }),
-  async ({ rawBody, payload }) => {
-    const { webhookKey } = await remoteConfig();
+  async ({ rawBody, query, payload }) => {
+    const { webhookKeys } = await remoteConfig();
+    const webhookKey = webhookKeys?.[query?.id];
 
     if (!webhookKey) {
-      throw new Error('Webhook key is not provided');
+      throw new Error(`Webhook key is not provided for id: ${query.id}`);
     }
 
     if (!payload?.headers?.['stripe-signature']) {
-      throw new Error('Stripe signature is mot provided');
+      throw new Error('Stripe signature is mot provided.');
     }
 
     const service = await Factory.create(getManager());

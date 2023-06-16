@@ -6,7 +6,7 @@ const defaultConfig: IRemoteConfig = {
   paymentMethods: CONST.MS_PAYMENT_METHODS,
   apiKey: CONST.MS_API_KEY,
   config: CONST.MS_CONFIG,
-  webhookKey: CONST.MS_WEBHOOK_KEY,
+  webhookKeys: CONST.MS_WEBHOOK_KEYS,
   payoutCoeff: CONST.MS_PAYOUT_COEFF,
   fees: JSON.parse(CONST.MS_FEES),
 };
