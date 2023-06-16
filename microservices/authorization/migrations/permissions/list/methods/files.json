@@ -219,7 +219,6 @@
     "method": "file.create-empty",
     "description": "Create empty file",
     "allowGroup": [
-      "user",
       "admin"
     ],
     "denyGroup": [],
