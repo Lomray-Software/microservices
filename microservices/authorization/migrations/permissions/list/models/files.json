@@ -446,24 +446,6 @@
   },
   {
     "microservice": "files",
-    "alias": "files.CreateRequestParams.59fb6dc97e65c5661e87220713b512eb",
-    "title": "Create Request Params",
-    "schema": {
-      "fields": "files.File"
-    },
-    "createdAt": "2023-01-27T14:10:08.321Z"
-  },
-  {
-    "microservice": "files",
-    "alias": "files.CreateOutputParams.a1d4fea78f4e098f7d0b186c2ae4e7d2",
-    "title": "Create Output Params",
-    "schema": {
-      "entity": "files.File"
-    },
-    "createdAt": "2023-01-27T14:10:08.321Z"
-  },
-  {
-    "microservice": "files",
     "alias": "files.ViewOutputParams.6ec4a0f5dbdd91e9a8a32d93d00fef17",
     "title": "View Output Params",
     "schema": {
@@ -645,5 +627,54 @@
       "entities": "files.Folder"
     },
     "createdAt": "2023-02-02T16:27:17.146Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.FileCreateEmptyInput",
+    "title": "File Create Empty Input",
+    "schema": {
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "fileName": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "alt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-06-16T11:57:02.073Z"
+  },
+  {
+    "microservice": "files",
+    "alias": "files.FileCreateEmptyOutput",
+    "title": "File Create Empty Output",
+    "schema": {
+      "entity": "files.File"
+    },
+    "createdAt": "2023-06-16T11:57:02.073Z"
   }
 ]

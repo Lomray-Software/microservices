@@ -48,7 +48,7 @@
   {
     "microservice": "payment-stripe",
     "method": "stripe.webhook",
-    "description": "Get stripe webhooks handler",
+    "description": "Handling and processing stripe webhooks.",
     "allowGroup": [
       "webhook"
     ],
