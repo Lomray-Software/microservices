@@ -15,7 +15,7 @@ const webhook =
     if (!webhookUrl) {
       Log.error('Webhook url is not provided');
 
-      return res.status(500).json({ error: 'Webhook url is not provided' });
+      return res.status(500).json({ error: 'Webhook url is not provided.' });
     }
 
     if (!['post', 'get'].includes(method.toLowerCase())) {
@@ -38,13 +38,14 @@ const webhook =
 
     req.url = '/';
     req.method = 'post';
+    req['forceStatus'] = true; // set response error status
     headers.authorization = authToken ? `Bearer ${authToken}` : undefined;
     req.body = {
       method: methodUrl,
       params: {
         body,
         rawBody: req['rawBody'],
-        query,
+        query: query ?? {},
       },
     };
 
