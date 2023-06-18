@@ -1077,7 +1077,11 @@ class Stripe extends Abstract {
   /**
    * Create transfer for connected account
    */
-  public async createTransfer(entityId: string, userId: string, payoutCoeff: number) {
+  public async createTransfer(
+    entityId: string,
+    userId: string,
+    payoutCoeff: number,
+  ): Promise<void> {
     const transfer = await this.getTransferInfo(entityId, userId);
     const product = await this.productRepository.findOne({ entityId });
 
@@ -1099,7 +1103,7 @@ class Stripe extends Abstract {
       transactionId: id,
       userId: transfer.userId,
       entityId,
-      amount: transfer.amount,
+      amount: transfer.amount * payoutCoeff,
       type: TransactionType.DEBIT,
       status: TransactionStatus.INITIAL,
       product: {
