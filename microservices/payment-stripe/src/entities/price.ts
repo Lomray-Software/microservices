@@ -1,6 +1,16 @@
+import { IsTypeormDate } from '@lomray/microservice-helpers';
 import { IsNumber, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import Product from '@entities/product';
 
 @JSONSchema({
@@ -30,6 +40,14 @@ class Price {
   @Column({ type: 'int' })
   @IsNumber()
   unitAmount: number;
+
+  @IsTypeormDate()
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @IsTypeormDate()
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @ManyToOne('Product', 'price')
   @JoinColumn({ name: 'productId' })
