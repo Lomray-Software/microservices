@@ -1853,13 +1853,6 @@
   },
   {
     "microservice": "payment-stripe",
-    "alias": "payment-stripe.Transactions",
-    "title": "Transactions",
-    "schema": {},
-    "createdAt": "2023-05-26T11:01:39.186Z"
-  },
-  {
-    "microservice": "payment-stripe",
     "alias": "payment-stripe.SetDefaultPaymentMethodInput",
     "title": "Set Default Payment Method Input",
     "schema": {
