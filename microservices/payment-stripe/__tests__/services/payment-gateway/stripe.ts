@@ -3,6 +3,7 @@ import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { Stripe as StripeTypes } from 'stripe';
+import { cardMock } from '@__mocks__/card';
 import messages from '@__mocks__/messages';
 import {
   accountLinkMock,
@@ -12,6 +13,7 @@ import {
   customerMock,
 } from '@__mocks__/stripe';
 import StripeAccountTypes from '@constants/stripe-account-types';
+import StripePaymentMethods from '@constants/stripe-payment-methods';
 import TransactionRole from '@constants/transaction-role';
 import OriginalStripe from '@services/payment-gateway/stripe';
 
@@ -33,6 +35,7 @@ describe('services/payment-gateway/stripe', () => {
       del: () => ({
         deleted: isDeletedCustomer,
       }),
+      update: () => customerMock,
     },
     accountLinks: {
       create: () => accountLinkMock,
@@ -318,5 +321,57 @@ describe('services/payment-gateway/stripe', () => {
         },
       }),
     ).to.deep.equal(expectedResult);
+  });
+
+  it('should correctly set payment method', async () => {
+    StripeInstanceParamStub.value(stripeMock());
+    TypeormMock.entityManager.findOne.resolves({
+      ...cardMock,
+      params: { paymentMethodId: 'payment-method-id' },
+      customer: userMock,
+    });
+
+    const isSet = await service.setDefaultPaymentMethod(
+      userMock.userId,
+      'card-id',
+      StripePaymentMethods.CARD,
+    );
+
+    expect(isSet).to.true;
+  });
+
+  it("should throw error: provided entity isn't payment method", async () => {
+    TypeormMock.entityManager.findOne.resolves({
+      ...cardMock,
+      customer: userMock,
+    });
+
+    expect(
+      await waitResult(
+        service.setDefaultPaymentMethod(userMock.userId, 'card-id', StripePaymentMethods.CARD),
+      ),
+    ).to.throw("Provided entity isn't payment method.");
+  });
+
+  it("should throw error: related payment method customer isn't found.", async () => {
+    TypeormMock.entityManager.findOne.resolves({
+      ...cardMock,
+    });
+
+    expect(
+      await waitResult(
+        service.setDefaultPaymentMethod(userMock.userId, 'card-id', StripePaymentMethods.CARD),
+      ),
+    ).to.throw("Related payment method customer isn't found.");
+  });
+
+  it("should throw error: related payment method customer isn't found.", async () => {
+    TypeormMock.entityManager.findOne.resolves(undefined);
+
+    expect(
+      await waitResult(
+        service.setDefaultPaymentMethod(userMock.userId, 'card-id', StripePaymentMethods.CARD),
+      ),
+    ).to.throw("Provided payment method isn't found.");
   });
 });
