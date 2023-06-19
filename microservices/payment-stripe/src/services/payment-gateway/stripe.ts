@@ -46,6 +46,7 @@ interface IPaymentIntentParams {
   feesPayer?: TransactionRole;
   cardId?: string;
   title?: string;
+  // Original application fee
   applicationPaymentPercent?: number;
   entityId?: string;
   // Additional fee that should pay one of the transaction contributor
@@ -854,13 +855,59 @@ class Stripe extends Abstract {
      * Handle if it's first customer payment method
      */
     if (attachedCardsCount === 0) {
-      await this.setDefaultPaymentMethod(customerId, paymentMethodId);
+      await this.updateCustomerDefaultPaymentMethod(customerId, paymentMethodId);
     }
 
     void Microservice.eventPublish(Event.SetupIntentSucceeded, {
       ...cardParams,
       cardId: savedCard.id,
     });
+  }
+
+  /**
+   * Set default payment method for customer
+   * NOTE: entity it's card or bank account
+   */
+  public async setDefaultPaymentMethod(
+    userId: string,
+    entityId: string,
+    type: StripePaymentMethods.CARD | StripePaymentMethods.BANKCONTACT,
+  ): Promise<boolean> {
+    if (type === StripePaymentMethods.BANKCONTACT) {
+      throw new BaseException({ status: 501, message: "Isn't implemented" });
+    }
+
+    const repositoryMap = {
+      [StripePaymentMethods.CARD]: this.cardRepository,
+      [StripePaymentMethods.BANKCONTACT]: this.bankAccountRepository,
+    };
+
+    const paymentMethod = await repositoryMap[type].findOne(entityId, { relations: ['customer'] });
+
+    if (!paymentMethod) {
+      throw new BaseException({
+        status: 404,
+        message: messages.getNotFoundMessage('Provide payment method'),
+      });
+    }
+
+    if (!paymentMethod.customer) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Related payment method customer'),
+      });
+    }
+
+    if (!paymentMethod.params?.paymentMethodId) {
+      throw new BaseException({ status: 400, message: "Provided entity isn't payment method" });
+    }
+
+    await this.updateCustomerDefaultPaymentMethod(
+      paymentMethod.customer.customerId,
+      paymentMethod.params.paymentMethodId,
+    );
+
+    return true;
   }
 
   /**
@@ -1635,7 +1682,7 @@ class Stripe extends Abstract {
   /**
    * Set default payment method
    */
-  private async setDefaultPaymentMethod(
+  private async updateCustomerDefaultPaymentMethod(
     customerId: string,
     paymentMethodId: string,
   ): Promise<void> {
