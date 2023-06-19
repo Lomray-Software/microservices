@@ -5,13 +5,14 @@ import sinon from 'sinon';
 import { Stripe as StripeTypes } from 'stripe';
 import messages from '@__mocks__/messages';
 import {
-  customerMock,
-  accountMock,
   accountLinkMock,
-  clientSecretMock,
+  accountMock,
   balancesMock,
+  clientSecretMock,
+  customerMock,
 } from '@__mocks__/stripe';
 import StripeAccountTypes from '@constants/stripe-account-types';
+import TransactionRole from '@constants/transaction-role';
 import OriginalStripe from '@services/payment-gateway/stripe';
 
 describe('services/payment-gateway/stripe', () => {
@@ -263,5 +264,59 @@ describe('services/payment-gateway/stripe', () => {
     expect(await waitResult(service.removeCustomer(userMock.userId))).to.throw(
       messages.customerIsNotFound,
     );
+  });
+
+  it('should correctly compute payment intent fees', async () => {
+    const expectedResult = {
+      applicationUnitFee: 0,
+      paymentProviderUnitFee: 61,
+      receiverUnitRevenue: 1000,
+      userUnitAmount: 1061,
+    };
+
+    expect(
+      await service.getPaymentIntentFees({
+        feesPayer: TransactionRole.SENDER,
+        entityUnitCost: 1000,
+      }),
+    ).to.deep.equal(expectedResult);
+  });
+
+  it('should correctly compute payment intent fees with application fees', async () => {
+    const expectedResult = {
+      applicationUnitFee: 30,
+      paymentProviderUnitFee: 62,
+      receiverUnitRevenue: 1000,
+      userUnitAmount: 1092,
+    };
+
+    expect(
+      await service.getPaymentIntentFees({
+        feesPayer: TransactionRole.SENDER,
+        entityUnitCost: 1000,
+        applicationPaymentPercent: 3,
+      }),
+    ).to.deep.equal(expectedResult);
+  });
+
+  it('should correctly compute payment intent fees with application  and receiver additional fees', async () => {
+    const expectedResult = {
+      applicationUnitFee: 30,
+      paymentProviderUnitFee: 62,
+      receiverUnitRevenue: 940,
+      userUnitAmount: 1092,
+    };
+
+    expect(
+      await service.getPaymentIntentFees({
+        feesPayer: TransactionRole.SENDER,
+        entityUnitCost: 1000,
+        applicationPaymentPercent: 3,
+        additionalFeesPercent: {
+          receiver: 6,
+          sender: 0,
+        },
+      }),
+    ).to.deep.equal(expectedResult);
   });
 });
