@@ -720,5 +720,18 @@
     "modelIn": "payment-stripe.BalanceInput",
     "modelOut": "payment-stripe.BalanceOutput",
     "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "stripe.set-default-payment-method",
+    "description": "Sets default payment method",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-06-19T00:01:07.758Z",
+    "modelIn": "payment-stripe.SetDefaultPaymentMethodInput",
+    "modelOut": "payment-stripe.SetDefaultPaymentMethodOutput",
+    "methodFilters": []
   }
 ]
