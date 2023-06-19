@@ -874,7 +874,7 @@ class Stripe extends Abstract {
     type: StripePaymentMethods.CARD | StripePaymentMethods.BANKCONTACT,
   ): Promise<boolean> {
     if (type === StripePaymentMethods.BANKCONTACT) {
-      throw new BaseException({ status: 501, message: "Isn't implemented" });
+      throw new BaseException({ status: 501, message: "Isn't implemented." });
     }
 
     const repositoryMap = {
@@ -887,7 +887,7 @@ class Stripe extends Abstract {
     if (!paymentMethod) {
       throw new BaseException({
         status: 404,
-        message: messages.getNotFoundMessage('Provide payment method'),
+        message: messages.getNotFoundMessage('Provided payment method'),
       });
     }
 
@@ -899,7 +899,7 @@ class Stripe extends Abstract {
     }
 
     if (!paymentMethod.params?.paymentMethodId) {
-      throw new BaseException({ status: 400, message: "Provided entity isn't payment method" });
+      throw new BaseException({ status: 400, message: "Provided entity isn't payment method." });
     }
 
     await this.updateCustomerDefaultPaymentMethod(
