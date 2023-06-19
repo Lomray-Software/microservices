@@ -9,13 +9,13 @@ import remoteConfig from '@config/remote';
 const webhook =
   (): RequestHandler =>
   async (req, res, next): Promise<Response | void> => {
-    const { url, method, body, headers } = req;
+    const { url, method, body, headers, query } = req;
     const { webhookUrl } = await remoteConfig();
 
     if (!webhookUrl) {
       Log.error('Webhook url is not provided');
 
-      return res.status(500).json({ error: 'Webhook url is not provided' });
+      return res.status(500).json({ error: 'Webhook url is not provided.' });
     }
 
     if (!['post', 'get'].includes(method.toLowerCase())) {
@@ -25,7 +25,7 @@ const webhook =
     }
 
     const { groups } =
-      new RegExp(`${webhookUrl as string}(?<methodUrl>[^/]+)/?(?<authToken>[^/]+)?`).exec(url) ||
+      new RegExp(`${webhookUrl as string}(?<methodUrl>[^/]+)/?(?<authToken>[^/?]+)?`).exec(url) ||
       {};
 
     if (!groups) {
@@ -38,12 +38,14 @@ const webhook =
 
     req.url = '/';
     req.method = 'post';
+    req['forceStatus'] = true; // set response error status
     headers.authorization = authToken ? `Bearer ${authToken}` : undefined;
     req.body = {
       method: methodUrl,
       params: {
         body,
         rawBody: req['rawBody'],
+        query: query ?? {},
       },
     };
 

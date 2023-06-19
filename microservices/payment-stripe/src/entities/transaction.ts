@@ -1,7 +1,15 @@
-import { IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
+import { IsTypeormDate, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
 import { Allow, IsEnum, IsNumber, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionRole from '@constants/transaction-role';
@@ -123,6 +131,14 @@ class Transaction {
   @IsObject()
   @IsUndefinable()
   params: IParams;
+
+  @IsTypeormDate()
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @IsTypeormDate()
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @ManyToOne('Product', 'transactions')
   @JoinColumn({

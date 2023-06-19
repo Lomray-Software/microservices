@@ -217,15 +217,14 @@
   {
     "microservice": "files",
     "method": "file.create-empty",
-    "description": "Create a new File",
+    "description": "Create empty file",
     "allowGroup": [
-      "user",
       "admin"
     ],
     "denyGroup": [],
     "createdAt": "2022-05-24T07:24:43.479Z",
-    "modelIn": "files.CreateRequestParams.59fb6dc97e65c5661e87220713b512eb",
-    "modelOut": "files.CreateOutputParams.a1d4fea78f4e098f7d0b186c2ae4e7d2",
+    "modelIn": "files.FileCreateEmptyInput",
+    "modelOut": "files.FileCreateEmptyOutput",
     "methodFilters": []
   },
   {

@@ -1,7 +1,15 @@
-import { IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  OneToMany,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import Price from '@entities/price';
 import Transaction from '@entities/transaction';
 
@@ -34,6 +42,14 @@ class Product {
   @IsNullable()
   @IsUndefinable()
   userId: string | null;
+
+  @IsTypeormDate()
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @IsTypeormDate()
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @OneToMany('Price', 'product')
   price: Price;
