@@ -413,50 +413,69 @@ class Stripe extends Abstract {
 
   /**
    * Get the webhook from stripe and handle deciding on type of event
+   * NOTE: If handlers can be used for connect and master account - wrap it in handlers callbacks
+   * Example (eventType could be 'connect', 'account' or other):
+   * const fullWebhookEventName = {
+   *  [firstEventType]: firstCallback,
+   *  [secondEventType]: secondCallback
+   * }
    */
-  public handleWebhookEvent(payload: string, signature: string, webhookKey: string): void {
+  public handleWebhookEvent(
+    payload: string,
+    signature: string,
+    webhookKey: string,
+    webhookType: string,
+  ): void {
     const event = this.sdk.webhooks.constructEvent(payload, signature, webhookKey);
 
     switch (event.type) {
+      /**
+       * Checkout session events
+       */
       case 'checkout.session.completed':
         void this.handleTransactionCompleted(event);
         break;
 
       /**
-       * Connect account events
+       * Account events
        */
       case 'account.updated':
-        void this.handleAccountUpdated(event);
+        const accountUpdatedHandlers = {
+          connect: this.handleAccountUpdated(event),
+        };
+
+        void accountUpdatedHandlers?.[webhookType];
         break;
 
       case 'account.external_account.created':
-        void this.handleExternalAccountCreate(event);
+        const accountExternalAccountCreatedHandlers = {
+          connect: this.handleExternalAccountCreated(event),
+        };
+
+        void accountExternalAccountCreatedHandlers?.[webhookType];
         break;
 
       case 'account.external_account.updated':
-        void this.handleExternalAccountUpdated(event);
+        const accountExternalAccountUpdatedHandlers = {
+          connect: this.handleExternalAccountUpdated(event),
+        };
+
+        void accountExternalAccountUpdatedHandlers?.[webhookType];
         break;
 
       case 'account.external_account.deleted':
-        void this.handleExternalAccountDeleted(event);
+        const accountExternalAccountDeletedHandlers = {
+          connect: this.handleExternalAccountDeleted(event),
+        };
+
+        void accountExternalAccountDeletedHandlers?.[webhookType];
         break;
 
       /**
-       * Shared events
+       * Payment method events
        */
       case 'setup_intent.succeeded':
         void this.handleSetupIntentSucceed(event);
-        break;
-
-      case 'payment_intent.processing':
-      case 'payment_intent.payment_failed':
-      case 'payment_intent.succeeded':
-        void this.handlePaymentIntent(event);
-        break;
-
-      case 'charge.refund.updated':
-      case 'charge.refunded':
-        void this.handleChargeRefund(event);
         break;
 
       case 'payment_method.updated':
@@ -468,6 +487,23 @@ class Stripe extends Abstract {
         void this.handlePaymentMethodDetached(event);
         break;
 
+      /**
+       * Payment events
+       */
+      case 'payment_intent.processing':
+      case 'payment_intent.payment_failed':
+      case 'payment_intent.succeeded':
+        void this.handlePaymentIntent(event);
+        break;
+
+      case 'charge.refund.updated':
+      case 'charge.refunded':
+        void this.handleChargeRefund(event);
+        break;
+
+      /**
+       * Customer events
+       */
       case 'customer.updated':
         void this.handleCustomerUpdated(event);
         break;
@@ -898,7 +934,7 @@ class Stripe extends Abstract {
    * Handles connect account create
    * NOTES: Connect account event
    */
-  public async handleExternalAccountCreate(event: StripeSdk.Event): Promise<void> {
+  public async handleExternalAccountCreated(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
     const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
 
