@@ -21,7 +21,6 @@ import InstantPayout from '@methods/stripe/instant-payout';
 import PaymentIntentFees from '@methods/stripe/payment-intent-fees';
 import Payout from '@methods/stripe/payout';
 import Refund from '@methods/stripe/refund';
-import SetDefaultPaymentMethod from '@methods/stripe/set-default-payment-method';
 import SetupIntent from '@methods/stripe/setup-intent';
 import WebhookHandler from '@methods/stripe/webhook';
 import CrudTransaction from '@methods/transaction/crud';
@@ -53,7 +52,6 @@ export default (ms: Microservice): void => {
       'payment-intent-fees': PaymentIntentFees,
       'connect-account-link': ConnectAccountLink,
       'instant-payout': InstantPayout,
-      'set-default-payment-method': SetDefaultPaymentMethod,
       webhook: WebhookHandler,
       payout: Payout,
       refund: Refund,
