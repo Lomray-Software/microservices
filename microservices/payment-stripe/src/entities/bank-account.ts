@@ -55,10 +55,10 @@ class BankAccount {
   @Length(1, 100)
   bankName: string | null;
 
-  @Column({ type: 'varchar', length: 100, default: '' })
+  @Column({ type: 'varchar', length: 100, default: null })
   @IsUndefinable()
   @Length(1, 100)
-  holderName: string;
+  holderName: string | null;
 
   @JSONSchema({
     description: "If it's the first attached user bank account it should be default",
