@@ -283,3 +283,16 @@ Content-Type: application/json
     }
   }
 }
+
+### Remove customer
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "customer.remove",
+  "params": {
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3"
+  }
+}
