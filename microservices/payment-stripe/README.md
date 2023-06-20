@@ -81,6 +81,7 @@ Rebuild: 1
 ### <a id="memory-usage"></a>STRIPE:
 
 Run stripe cli for test dev env:
+
 ```bash
 stripe listen --forward-to 'http://localhost:3005/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=connect'
 ```
