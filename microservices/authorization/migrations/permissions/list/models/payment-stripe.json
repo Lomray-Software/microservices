@@ -1850,56 +1850,5 @@
       }
     },
     "createdAt": "2023-06-06T09:54:26.730Z"
-  },
-  {
-    "microservice": "payment-stripe",
-    "alias": "payment-stripe.SetDefaultPaymentMethodInput",
-    "title": "Set Default Payment Method Input",
-    "schema": {
-      "userId": {
-        "in": {
-          "admin": "allow",
-          "user": {
-            "condition": "Fields: user owner"
-          }
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
-      "entityId": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
-      "type": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      }
-    },
-    "createdAt": "2023-06-19T00:01:07.758Z"
-  },
-  {
-    "microservice": "payment-stripe",
-    "alias": "payment-stripe.SetDefaultPaymentMethodOutput",
-    "title": "Set Default Payment Method Output",
-    "schema": {
-      "isSet": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      }
-    },
-    "createdAt": "2023-06-19T00:01:07.758Z"
   }
 ]
