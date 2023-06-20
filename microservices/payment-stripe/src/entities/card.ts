@@ -87,10 +87,10 @@ class Card {
   @Length(1, 20)
   brand: string;
 
-  @Column({ type: 'varchar', length: 100, default: null })
+  @Column({ type: 'varchar', length: 100, default: '' })
   @IsUndefinable()
   @Length(1, 100)
-  holderName: string | null;
+  holderName: string;
 
   @Column({ type: 'boolean', default: false })
   @IsBoolean()
