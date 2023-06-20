@@ -13,7 +13,9 @@ import Factory from '@services/payment-gateway/factory';
 class Card {
   /**
    * Handle create
-   * NOTE: Card should be created from setup intent succeed
+   * NOTES:
+   * 1. Card should be created from setup intent succeed
+   * 2. Should be called after insert
    */
   public static async handleCreate(entity: CardEntity, manager: EntityManager): Promise<void> {
     if (!entity.params.paymentMethodId) {
@@ -29,11 +31,14 @@ class Card {
      */
     const cardsCount = await cardRepository
       .createQueryBuilder('card')
-      .where('card.params.paymentMethodId IS NOT NULL')
-      .andWhere('card.userId = :userId', { userId: entity.userId })
+      .where('card.userId = :userId', { userId: entity.userId })
+      .andWhere("card.params ->> 'paymentMethodId' IS NOT NULL")
       .getCount();
 
-    if (cardsCount !== 0) {
+    /**
+     * Card count will contain current card
+     */
+    if (cardsCount > 1) {
       return;
     }
 
