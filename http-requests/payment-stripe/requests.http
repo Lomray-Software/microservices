@@ -9,7 +9,9 @@ Content-Type: application/json
   "id": "1",
   "method": "customer.create",
   "params": {
-    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3"
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
+    "name": "John",
+    "email": "john@doe.com"
   }
 }
 
@@ -22,7 +24,9 @@ Content-Type: application/json
   "id": "1",
   "method": "customer.create",
   "params": {
-    "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3"
+    "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "name": "mike",
+    "email": "mike@blue.com"
   }
 }
 
@@ -49,7 +53,7 @@ Content-Type: application/json
   "method": "stripe.connect-account",
   "params": {
     "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
-    "email": "receiver@gmail.com",
+    "email": "r111eceiver@gmail.com",
     "accountType": "standard",
     "refreshUrl": "https://example.com",
     "returnUrl": "https://example.com"

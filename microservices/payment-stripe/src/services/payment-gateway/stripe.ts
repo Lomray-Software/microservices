@@ -196,11 +196,8 @@ class Stripe extends Abstract {
   /**
    * Create Customer entity
    */
-  public async createCustomer(userId: string): Promise<Customer> {
-    /**
-     * @TODO: get users name, email and pass it into customer
-     */
-    const { id }: StripeSdk.Customer = await this.sdk.customers.create();
+  public async createCustomer(userId: string, email?: string, name?: string): Promise<Customer> {
+    const { id }: StripeSdk.Customer = await this.sdk.customers.create({ name, email });
 
     return super.createCustomer(userId, id);
   }
@@ -372,7 +369,6 @@ class Stripe extends Abstract {
         settings: {
           payouts: {
             // eslint-disable-next-line camelcase
-            debit_negative_balances: false,
             schedule: { interval: 'manual' },
           },
         },
