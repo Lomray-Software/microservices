@@ -119,7 +119,11 @@ class Card {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne('Customer', 'cards')
+  /**
+   * Should be deleted cascade
+   * NOTE: Uses in integration tests
+   */
+  @ManyToOne('Customer', 'cards', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   customer: Customer;
 }

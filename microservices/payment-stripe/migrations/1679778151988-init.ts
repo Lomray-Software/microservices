@@ -43,10 +43,10 @@ export default class init1679778151988 implements MigrationInterface {
       `ALTER TABLE "customer" ADD CONSTRAINT "customer(uq):userId" UNIQUE ("userId")`,
     );
     await queryRunner.query(
-      `ALTER TABLE "card" ADD CONSTRAINT "card(fk):userId" FOREIGN KEY ("userId") REFERENCES "customer"("userId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "card" ADD CONSTRAINT "card(fk):userId" FOREIGN KEY ("userId") REFERENCES "customer"("userId") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `ALTER TABLE "bank_account" ADD CONSTRAINT "bank_account(fk):userId" FOREIGN KEY ("userId") REFERENCES "customer"("userId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "bank_account" ADD CONSTRAINT "bank_account(fk):userId" FOREIGN KEY ("userId") REFERENCES "customer"("userId") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
       `ALTER TABLE "price" ADD CONSTRAINT "price(fk):productId_productId" FOREIGN KEY ("productId") REFERENCES "product"("productId") ON DELETE NO ACTION ON UPDATE NO ACTION`,

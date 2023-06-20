@@ -87,7 +87,11 @@ class BankAccount {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne('Customer', 'bankAccounts')
+  /**
+   * Should be deleted cascade
+   * NOTE: Uses in integration tests
+   */
+  @ManyToOne('Customer', 'bankAccounts', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   customer: Customer;
 }
