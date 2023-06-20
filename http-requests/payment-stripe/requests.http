@@ -263,3 +263,23 @@ Content-Type: application/json
     "holderName": "Mike"
   }
 }
+
+### Update default payment method (card)
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "card.update",
+  "params": {
+    "fields": {
+      "isDefault": true
+    },
+    "query": {
+      "where": {
+        "id": "8fb91f11-db33-4054-80f4-d10e966e9d75"
+      }
+    }
+  }
+}
