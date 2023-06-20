@@ -474,26 +474,13 @@ class Stripe extends Abstract {
 
   /**
    * Handles payment method detach
+   * NOTE: Card and other payment methods should be removed in according subscribers
    */
-  public async handlePaymentMethodDetached(event: StripeSdk.Event): Promise<void> {
-    const { id } = event.data.object as StripeSdk.PaymentMethod;
-
-    const card = await this.cardRepository
-      .createQueryBuilder('card')
-      .where("card.params->>'paymentMethodId' = :value", { value: id })
-      .getOne();
-
-    if (!card) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Payment method'),
-      });
-    }
-
-    await this.cardRepository.remove(card);
+  public handlePaymentMethodDetached(event: StripeSdk.Event): void {
+    const { id: paymentMethodId } = event.data.object as StripeSdk.PaymentMethod;
 
     void Microservice.eventPublish(Event.PaymentMethodRemoved, {
-      cardId: card.id,
+      paymentMethodId,
     });
   }
 
@@ -831,12 +818,7 @@ class Stripe extends Abstract {
       card: { brand, last4: lastDigits, exp_month: expMonth, exp_year: expYear, funding },
     } = paymentMethod;
 
-    const { userId, customerId } = customer;
-
-    /**
-     * Get attached cards count
-     */
-    const attachedCardsCount = await this.cardRepository.count({ userId });
+    const { userId } = customer;
 
     const cardParams = {
       lastDigits,
@@ -851,63 +833,10 @@ class Stripe extends Abstract {
       params: { isApproved: true, paymentMethodId },
     });
 
-    /**
-     * Handle if it's first customer payment method
-     */
-    if (attachedCardsCount === 0) {
-      await this.updateCustomerDefaultPaymentMethod(customerId, paymentMethodId);
-    }
-
     void Microservice.eventPublish(Event.SetupIntentSucceeded, {
       ...cardParams,
       cardId: savedCard.id,
     });
-  }
-
-  /**
-   * Set default payment method for customer
-   * NOTE: entity it's card or bank account
-   */
-  public async setDefaultPaymentMethod(
-    userId: string,
-    entityId: string,
-    type: StripePaymentMethods.CARD | StripePaymentMethods.BANKCONTACT,
-  ): Promise<boolean> {
-    if (type === StripePaymentMethods.BANKCONTACT) {
-      throw new BaseException({ status: 501, message: "Isn't implemented." });
-    }
-
-    const repositoryMap = {
-      [StripePaymentMethods.CARD]: this.cardRepository,
-      [StripePaymentMethods.BANKCONTACT]: this.bankAccountRepository,
-    };
-
-    const paymentMethod = await repositoryMap[type].findOne(entityId, { relations: ['customer'] });
-
-    if (!paymentMethod) {
-      throw new BaseException({
-        status: 404,
-        message: messages.getNotFoundMessage('Provided payment method'),
-      });
-    }
-
-    if (!paymentMethod.customer) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Related payment method customer'),
-      });
-    }
-
-    if (!paymentMethod.params?.paymentMethodId) {
-      throw new BaseException({ status: 400, message: "Provided entity isn't payment method." });
-    }
-
-    await this.updateCustomerDefaultPaymentMethod(
-      paymentMethod.customer.customerId,
-      paymentMethod.params.paymentMethodId,
-    );
-
-    return true;
   }
 
   /**
@@ -1362,6 +1291,33 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Set default customer payment method
+   */
+  public async setDefaultCustomerPaymentMethod(
+    customerId: string,
+    paymentMethodId: string,
+  ): Promise<boolean> {
+    const customer = await this.sdk.customers.update(customerId, {
+      // eslint-disable-next-line camelcase
+      invoice_settings: {
+        // eslint-disable-next-line camelcase
+        default_payment_method: paymentMethodId,
+      },
+    });
+
+    return customer.invoice_settings.default_payment_method === paymentMethodId;
+  }
+
+  /**
+   * Set default customer payment method
+   */
+  public async removeCustomerPaymentMethod(paymentMethodId: string): Promise<boolean> {
+    await this.sdk.paymentMethods.detach(paymentMethodId);
+
+    return true;
+  }
+
+  /**
    * Returns receiver payment amount
    * NOTES: How much end user will get after fees from transaction
    * 1. Stable unit - stable amount that payment provider charges
@@ -1677,22 +1633,6 @@ class Stripe extends Abstract {
       id: bankAccount?.params?.bankAccountId,
       isInstantPayoutAllow: Boolean(bankAccount?.isInstantPayoutAllowed),
     };
-  }
-
-  /**
-   * Set default payment method
-   */
-  private async updateCustomerDefaultPaymentMethod(
-    customerId: string,
-    paymentMethodId: string,
-  ): Promise<void> {
-    await this.sdk.customers.update(customerId, {
-      // eslint-disable-next-line camelcase
-      invoice_settings: {
-        // eslint-disable-next-line camelcase
-        default_payment_method: paymentMethodId,
-      },
-    });
   }
 }
 
