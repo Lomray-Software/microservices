@@ -947,6 +947,22 @@
         "out": {
           "user": "allow"
         }
+      },
+      "name": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "email": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
       }
     },
     "createdAt": "2023-05-26T15:01:39.186Z"
