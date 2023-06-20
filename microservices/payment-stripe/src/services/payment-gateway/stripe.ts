@@ -422,12 +422,11 @@ class Stripe extends Abstract {
         void this.handleTransactionCompleted(event);
         break;
 
+      /**
+       * Connect account events
+       */
       case 'account.updated':
         void this.handleAccountUpdated(event);
-        break;
-
-      case 'setup_intent.succeeded':
-        void this.handleSetupIntentSucceed(event);
         break;
 
       case 'account.external_account.created':
@@ -440,6 +439,13 @@ class Stripe extends Abstract {
 
       case 'account.external_account.deleted':
         void this.handleExternalAccountDeleted(event);
+        break;
+
+      /**
+       * Shared events
+       */
+      case 'setup_intent.succeeded':
+        void this.handleSetupIntentSucceed(event);
         break;
 
       case 'payment_intent.processing':
@@ -837,7 +843,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles connect account update
-   * NOTE: Should be called when webhook triggers
+   * NOTE: Connect account event
    */
   public async handleExternalAccountUpdated(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
@@ -890,7 +896,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles connect account create
-   * NOTE: Should be called when webhook triggers
+   * NOTES: Connect account event
    */
   public async handleExternalAccountCreate(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
@@ -957,7 +963,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles connect account deleted
-   * NOTE: Should be called when webhook triggers
+   * NOTE: Connect account event
    */
   public async handleExternalAccountDeleted(event: StripeSdk.Event): Promise<void> {
     const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
@@ -986,6 +992,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles customer update
+   * NOTE: Connect account event
    */
   public async handleAccountUpdated(event: StripeSdk.Event) {
     /* eslint-disable camelcase */
