@@ -1,4 +1,4 @@
-import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsBoolean, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
@@ -88,6 +88,7 @@ class Card {
   brand: string;
 
   @Column({ type: 'varchar', length: 100, default: null })
+  @IsNullable()
   @IsUndefinable()
   @Length(1, 100)
   holderName: string | null;
