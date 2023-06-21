@@ -47,6 +47,22 @@
           "user": "allow"
         }
       },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "product": "payment-stripe.Product"
     },
     "createdAt": "2023-05-26T15:01:39.186Z"
@@ -81,6 +97,22 @@
         },
         "out": {
           "user": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
         }
       },
       "price": "payment-stripe.Price",
@@ -206,6 +238,22 @@
         },
         "out": {
           "user": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
         }
       },
       "customer": "payment-stripe.Customer",
@@ -338,6 +386,22 @@
         },
         "out": {
           "user": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
         }
       },
       "transactions": "payment-stripe.Transaction",
@@ -879,6 +943,22 @@
             "condition": "Fields: user owner"
           },
           "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "name": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "email": {
+        "in": {
+          "user": "allow"
         },
         "out": {
           "user": "allow"
