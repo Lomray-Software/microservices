@@ -22,21 +22,6 @@ const syncPermissions = async () => {
     id: '199',
     method: 'service.sync-metadata',
     params: {
-      defaultSchemaRoles: ['admin'],
-      defaultAllowGroup: ['admin'],
-      commonModelAliases: [
-        'CountRequestParams',
-        'CountOutputParams',
-        'ListRequestParams',
-        'ViewRequestParams',
-        'RemoveRequestParams',
-        'RestoreRequestParams',
-        'MicroserviceMetaOutput',
-        'RemoteConfigOutput',
-        'ClientRegisterMiddlewareInput',
-        'ClientRegisterMiddlewareOutput',
-        'RemoteConfigOutput',
-      ],
       payload: {
         isInternal: true,
       },

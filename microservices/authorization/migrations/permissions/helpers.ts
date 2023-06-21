@@ -148,7 +148,7 @@ const importMethodsPermissions = async (
 const getModelRecords = async (repo: Repository<any>) => {
   const records = getDumpEntitiesInFiles(DUMP_PATH_MODELS);
   const singleTypePredicate = { alias: 'content.SingleType' };
-  const singleTypeRecord = _.find(records, { alias: singleTypePredicate });
+  const singleTypeRecord = _.find(records, singleTypePredicate);
 
   // keep original single type value schema object
   if (singleTypeRecord) {
