@@ -76,8 +76,6 @@ That is all. **Don't forget install npm dependencies**
 __Run on typescript__: ~200 MB PEAK / ~160 MB  
 __Run on JS__: ~110 MB PEAK / ~80 MB
 
-Rebuild: 1
-
 ### <a id="memory-usage"></a>STRIPE:
 
 Run stripe cli for test dev env:
@@ -85,3 +83,5 @@ Run stripe cli for test dev env:
 ```bash
 stripe listen --forward-to 'http://localhost:3005/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=connect'
 ```
+
+Rebuild: 1
