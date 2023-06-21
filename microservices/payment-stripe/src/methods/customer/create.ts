@@ -8,6 +8,12 @@ import Factory from '@services/payment-gateway/factory';
 class CustomerCreateInput {
   @IsString()
   userId: string;
+
+  @IsString()
+  email: string;
+
+  @IsString()
+  name: string;
 }
 
 class CustomerCreateOutput {
@@ -25,11 +31,11 @@ const create = Endpoint.custom(
     output: CustomerCreateOutput,
     description: 'Create new customer',
   }),
-  async ({ userId }) => {
+  async ({ userId, email, name }) => {
     const service = await Factory.create(getManager());
 
     return {
-      entity: await service.createCustomer(userId),
+      entity: await service.createCustomer(userId, email, name),
     };
   },
 );

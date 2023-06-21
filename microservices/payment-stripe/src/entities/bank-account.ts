@@ -1,4 +1,4 @@
-import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsBoolean, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
@@ -56,6 +56,7 @@ class BankAccount {
   bankName: string | null;
 
   @Column({ type: 'varchar', length: 100, default: null })
+  @IsNullable()
   @IsUndefinable()
   @Length(1, 100)
   holderName: string | null;
@@ -86,7 +87,11 @@ class BankAccount {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne('Customer', 'bankAccounts')
+  /**
+   * Should be deleted cascade
+   * NOTE: Uses in integration tests
+   */
+  @ManyToOne('Customer', 'bankAccounts', { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   customer: Customer;
 }

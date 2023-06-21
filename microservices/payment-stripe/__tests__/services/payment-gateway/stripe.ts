@@ -2,17 +2,25 @@ import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { Stripe as StripeTypes } from 'stripe';
+import StripeSdk, { Stripe as StripeTypes } from 'stripe';
+import { cardMock } from '@__mocks__/card';
 import messages from '@__mocks__/messages';
 import {
-  customerMock,
-  accountMock,
   accountLinkMock,
-  clientSecretMock,
+  accountMock,
   balancesMock,
+  clientSecretMock,
+  customerMock,
+  paymentMethodId,
 } from '@__mocks__/stripe';
 import StripeAccountTypes from '@constants/stripe-account-types';
+import TransactionRole from '@constants/transaction-role';
 import OriginalStripe from '@services/payment-gateway/stripe';
+
+interface IStripeMockParams {
+  isDeletedCustomer?: boolean;
+  customersUpdateResult?: Partial<StripeSdk.Customer>;
+}
 
 describe('services/payment-gateway/stripe', () => {
   const sandbox = sinon.createSandbox();
@@ -25,13 +33,21 @@ describe('services/payment-gateway/stripe', () => {
     userId: 'user-id',
     params: { accountId: accountMock.id },
   };
+  const defaultStripeMockParams = {
+    isDeletedCustomer: true,
+    customersUpdateResult: customerMock,
+  };
 
-  const stripeMock = (isDeletedCustomer = true) => ({
+  const stripeMock = ({
+    isDeletedCustomer,
+    customersUpdateResult,
+  }: IStripeMockParams = defaultStripeMockParams) => ({
     customers: {
       create: () => customerMock,
       del: () => ({
         deleted: isDeletedCustomer,
       }),
+      update: () => customersUpdateResult,
     },
     accountLinks: {
       create: () => accountLinkMock,
@@ -220,7 +236,7 @@ describe('services/payment-gateway/stripe', () => {
   });
 
   it("shouldn't remove customer cause stripe remove failed", async () => {
-    StripeInstanceParamStub.value(stripeMock(false));
+    StripeInstanceParamStub.value(stripeMock({ isDeletedCustomer: false }));
     TypeormMock.entityManager.findOne.resolves(userMock);
 
     const isRemoved = await service.removeCustomer(userMock.userId);
@@ -263,5 +279,102 @@ describe('services/payment-gateway/stripe', () => {
     expect(await waitResult(service.removeCustomer(userMock.userId))).to.throw(
       messages.customerIsNotFound,
     );
+  });
+
+  it('should correctly compute payment intent fees', async () => {
+    const expectedResult = {
+      applicationUnitFee: 0,
+      paymentProviderUnitFee: 61,
+      receiverUnitRevenue: 1000,
+      userUnitAmount: 1061,
+    };
+
+    expect(
+      await service.getPaymentIntentFees({
+        feesPayer: TransactionRole.SENDER,
+        entityUnitCost: 1000,
+      }),
+    ).to.deep.equal(expectedResult);
+  });
+
+  it('should correctly compute payment intent fees with application fees', async () => {
+    const expectedResult = {
+      applicationUnitFee: 30,
+      paymentProviderUnitFee: 62,
+      receiverUnitRevenue: 1000,
+      userUnitAmount: 1092,
+    };
+
+    expect(
+      await service.getPaymentIntentFees({
+        feesPayer: TransactionRole.SENDER,
+        entityUnitCost: 1000,
+        applicationPaymentPercent: 3,
+      }),
+    ).to.deep.equal(expectedResult);
+  });
+
+  it('should correctly compute payment intent fees with application  and receiver additional fees', async () => {
+    const expectedResult = {
+      applicationUnitFee: 30,
+      paymentProviderUnitFee: 62,
+      receiverUnitRevenue: 940,
+      userUnitAmount: 1092,
+    };
+
+    expect(
+      await service.getPaymentIntentFees({
+        feesPayer: TransactionRole.SENDER,
+        entityUnitCost: 1000,
+        applicationPaymentPercent: 3,
+        additionalFeesPercent: {
+          receiver: 6,
+          sender: 0,
+        },
+      }),
+    ).to.deep.equal(expectedResult);
+  });
+
+  it('should correctly set payment method', async () => {
+    StripeInstanceParamStub.value(
+      stripeMock({
+        customersUpdateResult: {
+          ...customerMock,
+          // eslint-disable-next-line camelcase
+          invoice_settings: {
+            // eslint-disable-next-line camelcase
+            default_payment_method: paymentMethodId,
+          },
+        } as StripeSdk.Customer,
+      }),
+    );
+    TypeormMock.entityManager.findOne.resolves({
+      ...cardMock,
+      params: { paymentMethodId },
+      customer: userMock,
+    });
+
+    const isSet = await service.setDefaultCustomerPaymentMethod(
+      userMock.customerId as string,
+      'payment-method-id',
+    );
+
+    expect(isSet).to.true;
+  });
+
+  it("shouldn't correctly set payment method", async () => {
+    StripeInstanceParamStub.value(stripeMock());
+    TypeormMock.entityManager.findOne.resolves({
+      ...cardMock,
+      params: { paymentMethodId },
+      customer: userMock,
+    });
+
+    const isSet = await service.setDefaultCustomerPaymentMethod(
+      userMock.customerId as string,
+      'payment-method-id',
+    );
+
+    expect(isSet).to.false;
   });
 });

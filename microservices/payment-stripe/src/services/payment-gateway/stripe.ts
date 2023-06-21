@@ -46,6 +46,7 @@ interface IPaymentIntentParams {
   feesPayer?: TransactionRole;
   cardId?: string;
   title?: string;
+  // Original application fee
   applicationPaymentPercent?: number;
   entityId?: string;
   // Additional fee that should pay one of the transaction contributor
@@ -195,11 +196,8 @@ class Stripe extends Abstract {
   /**
    * Create Customer entity
    */
-  public async createCustomer(userId: string): Promise<Customer> {
-    /**
-     * @TODO: get users name, email and pass it into customer
-     */
-    const { id }: StripeSdk.Customer = await this.sdk.customers.create();
+  public async createCustomer(userId: string, email?: string, name?: string): Promise<Customer> {
+    const { id }: StripeSdk.Customer = await this.sdk.customers.create({ name, email });
 
     return super.createCustomer(userId, id);
   }
@@ -371,7 +369,6 @@ class Stripe extends Abstract {
         settings: {
           payouts: {
             // eslint-disable-next-line camelcase
-            debit_negative_balances: false,
             schedule: { interval: 'manual' },
           },
         },
@@ -416,44 +413,69 @@ class Stripe extends Abstract {
 
   /**
    * Get the webhook from stripe and handle deciding on type of event
+   * NOTE: If handlers can be used for connect and master account - wrap it in handlers callbacks
+   * Example (eventType could be 'connect', 'account' or other):
+   * const fullWebhookEventName = {
+   *  [firstEventType]: firstCallback,
+   *  [secondEventType]: secondCallback
+   * }
    */
-  public handleWebhookEvent(payload: string, signature: string, webhookKey: string): void {
+  public handleWebhookEvent(
+    payload: string,
+    signature: string,
+    webhookKey: string,
+    webhookType: string,
+  ): void {
     const event = this.sdk.webhooks.constructEvent(payload, signature, webhookKey);
 
     switch (event.type) {
+      /**
+       * Checkout session events
+       */
       case 'checkout.session.completed':
         void this.handleTransactionCompleted(event);
         break;
 
+      /**
+       * Account events
+       */
       case 'account.updated':
-        void this.handleAccountUpdated(event);
-        break;
+        const accountUpdatedHandlers = {
+          connect: this.handleAccountUpdated(event),
+        };
 
-      case 'setup_intent.succeeded':
-        void this.handleSetupIntentSucceed(event);
+        void accountUpdatedHandlers?.[webhookType];
         break;
 
       case 'account.external_account.created':
-        void this.handleExternalAccountCreate(event);
+        const accountExternalAccountCreatedHandlers = {
+          connect: this.handleExternalAccountCreated(event),
+        };
+
+        void accountExternalAccountCreatedHandlers?.[webhookType];
         break;
 
       case 'account.external_account.updated':
-        void this.handleExternalAccountUpdated(event);
+        const accountExternalAccountUpdatedHandlers = {
+          connect: this.handleExternalAccountUpdated(event),
+        };
+
+        void accountExternalAccountUpdatedHandlers?.[webhookType];
         break;
 
       case 'account.external_account.deleted':
-        void this.handleExternalAccountDeleted(event);
+        const accountExternalAccountDeletedHandlers = {
+          connect: this.handleExternalAccountDeleted(event),
+        };
+
+        void accountExternalAccountDeletedHandlers?.[webhookType];
         break;
 
-      case 'payment_intent.processing':
-      case 'payment_intent.payment_failed':
-      case 'payment_intent.succeeded':
-        void this.handlePaymentIntent(event);
-        break;
-
-      case 'charge.refund.updated':
-      case 'charge.refunded':
-        void this.handleChargeRefund(event);
+      /**
+       * Payment method events
+       */
+      case 'setup_intent.succeeded':
+        void this.handleSetupIntentSucceed(event);
         break;
 
       case 'payment_method.updated':
@@ -465,6 +487,23 @@ class Stripe extends Abstract {
         void this.handlePaymentMethodDetached(event);
         break;
 
+      /**
+       * Payment events
+       */
+      case 'payment_intent.processing':
+      case 'payment_intent.payment_failed':
+      case 'payment_intent.succeeded':
+        void this.handlePaymentIntent(event);
+        break;
+
+      case 'charge.refund.updated':
+      case 'charge.refunded':
+        void this.handleChargeRefund(event);
+        break;
+
+      /**
+       * Customer events
+       */
       case 'customer.updated':
         void this.handleCustomerUpdated(event);
         break;
@@ -473,26 +512,13 @@ class Stripe extends Abstract {
 
   /**
    * Handles payment method detach
+   * NOTE: Card and other payment methods should be removed in according subscribers
    */
-  public async handlePaymentMethodDetached(event: StripeSdk.Event): Promise<void> {
-    const { id } = event.data.object as StripeSdk.PaymentMethod;
-
-    const card = await this.cardRepository
-      .createQueryBuilder('card')
-      .where("card.params->>'paymentMethodId' = :value", { value: id })
-      .getOne();
-
-    if (!card) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Payment method'),
-      });
-    }
-
-    await this.cardRepository.remove(card);
+  public handlePaymentMethodDetached(event: StripeSdk.Event): void {
+    const { id: paymentMethodId } = event.data.object as StripeSdk.PaymentMethod;
 
     void Microservice.eventPublish(Event.PaymentMethodRemoved, {
-      cardId: card.id,
+      paymentMethodId,
     });
   }
 
@@ -830,12 +856,7 @@ class Stripe extends Abstract {
       card: { brand, last4: lastDigits, exp_month: expMonth, exp_year: expYear, funding },
     } = paymentMethod;
 
-    const { userId, customerId } = customer;
-
-    /**
-     * Get attached cards count
-     */
-    const attachedCardsCount = await this.cardRepository.count({ userId });
+    const { userId } = customer;
 
     const cardParams = {
       lastDigits,
@@ -850,13 +871,6 @@ class Stripe extends Abstract {
       params: { isApproved: true, paymentMethodId },
     });
 
-    /**
-     * Handle if it's first customer payment method
-     */
-    if (attachedCardsCount === 0) {
-      await this.setDefaultPaymentMethod(customerId, paymentMethodId);
-    }
-
     void Microservice.eventPublish(Event.SetupIntentSucceeded, {
       ...cardParams,
       cardId: savedCard.id,
@@ -865,7 +879,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles connect account update
-   * NOTE: Should be called when webhook triggers
+   * NOTE: Connect account event
    */
   public async handleExternalAccountUpdated(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
@@ -918,9 +932,9 @@ class Stripe extends Abstract {
 
   /**
    * Handles connect account create
-   * NOTE: Should be called when webhook triggers
+   * NOTES: Connect account event
    */
-  public async handleExternalAccountCreate(event: StripeSdk.Event): Promise<void> {
+  public async handleExternalAccountCreated(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
     const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
 
@@ -985,7 +999,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles connect account deleted
-   * NOTE: Should be called when webhook triggers
+   * NOTE: Connect account event
    */
   public async handleExternalAccountDeleted(event: StripeSdk.Event): Promise<void> {
     const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
@@ -1014,6 +1028,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles customer update
+   * NOTE: Connect account event
    */
   public async handleAccountUpdated(event: StripeSdk.Event) {
     /* eslint-disable camelcase */
@@ -1312,6 +1327,33 @@ class Stripe extends Abstract {
    */
   public fromSmallestCurrencyUnit(amount: number): number {
     return amount / 100;
+  }
+
+  /**
+   * Set default customer payment method
+   */
+  public async setDefaultCustomerPaymentMethod(
+    customerId: string,
+    paymentMethodId: string,
+  ): Promise<boolean> {
+    const customer = await this.sdk.customers.update(customerId, {
+      // eslint-disable-next-line camelcase
+      invoice_settings: {
+        // eslint-disable-next-line camelcase
+        default_payment_method: paymentMethodId,
+      },
+    });
+
+    return customer.invoice_settings.default_payment_method === paymentMethodId;
+  }
+
+  /**
+   * Set default customer payment method
+   */
+  public async removeCustomerPaymentMethod(paymentMethodId: string): Promise<boolean> {
+    await this.sdk.paymentMethods.detach(paymentMethodId);
+
+    return true;
   }
 
   /**
@@ -1630,22 +1672,6 @@ class Stripe extends Abstract {
       id: bankAccount?.params?.bankAccountId,
       isInstantPayoutAllow: Boolean(bankAccount?.isInstantPayoutAllowed),
     };
-  }
-
-  /**
-   * Set default payment method
-   */
-  private async setDefaultPaymentMethod(
-    customerId: string,
-    paymentMethodId: string,
-  ): Promise<void> {
-    await this.sdk.customers.update(customerId, {
-      // eslint-disable-next-line camelcase
-      invoice_settings: {
-        // eslint-disable-next-line camelcase
-        default_payment_method: paymentMethodId,
-      },
-    });
   }
 }
 

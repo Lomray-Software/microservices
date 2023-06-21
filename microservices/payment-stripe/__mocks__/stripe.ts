@@ -8,7 +8,12 @@ const customerMock = {
   id: 'cus_NshmwHkITU8Egm',
   object: 'customer',
   description: 'Mike',
-};
+  // eslint-disable-next-line camelcase
+  invoice_settings: {
+    // eslint-disable-next-line camelcase
+    default_payment_method: null,
+  },
+} as StripeSdk.Customer;
 
 const accountMock = {
   id: accountIdMock,
@@ -30,4 +35,13 @@ const balancesMock: StripeSdk.Balance = {
   available: [{ currency: 'usd', amount: 1000 }],
 };
 
-export { customerMock, clientSecretMock, accountMock, accountLinkMock, balancesMock };
+const paymentMethodId = 'payment-method-id';
+
+export {
+  customerMock,
+  clientSecretMock,
+  accountMock,
+  accountLinkMock,
+  balancesMock,
+  paymentMethodId,
+};
