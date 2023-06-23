@@ -1,12 +1,11 @@
-import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
+import { Endpoint } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsObject, IsString } from 'class-validator';
+import { IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import Card from '@entities/card';
-import { ICardParams } from '@services/payment-gateway/abstract';
 import Factory from '@services/payment-gateway/factory';
 
-class CardAddInput implements ICardParams {
+class CardAddInput {
   @IsString()
   userId: string;
 
@@ -14,29 +13,10 @@ class CardAddInput implements ICardParams {
   expired: string;
 
   @IsString()
-  lastDigits: string;
+  digits: string;
 
   @IsString()
-  funding: string;
-
-  @IsString()
-  brand: string;
-
-  @IsUndefinable()
-  @IsString()
-  holderName?: string;
-
-  @IsUndefinable()
-  @IsString()
-  cardId?: string;
-
-  @IsUndefinable()
-  @IsString()
-  paymentMethodId?: string;
-
-  @IsBoolean()
-  @IsUndefinable()
-  isDefault?: boolean;
+  cvc: string;
 }
 
 class CardAddOutput {
@@ -50,31 +30,11 @@ class CardAddOutput {
  */
 const add = Endpoint.custom(
   () => ({ input: CardAddInput, output: CardAddOutput, description: 'Add new card' }),
-  async ({
-    userId,
-    lastDigits,
-    funding,
-    brand,
-    cardId,
-    isDefault,
-    expired,
-    paymentMethodId,
-    holderName,
-  }) => {
+  async ({ userId, digits, cvc, expired }) => {
     const service = await Factory.create(getManager());
 
     return {
-      entity: await service.addCard({
-        userId,
-        lastDigits,
-        funding,
-        brand,
-        cardId,
-        isDefault,
-        expired,
-        paymentMethodId,
-        holderName,
-      }),
+      entity: await service.addCard(userId, expired, digits, cvc),
     };
   },
 );

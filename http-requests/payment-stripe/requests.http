@@ -258,13 +258,9 @@ Content-Type: application/json
   "method": "card.add",
   "params": {
     "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
-    "lastDigits": "4242",
-    "funding": "debit",
-    "brand": "visa",
-    "cardId": "card_1NGKp9FpQjUWTpHeEuDGafzZ",
+    "digits": "4242424242424242",
     "expired": "01/27",
-    "paymentMethodId": "pm_1NEUkM2eZvKYlo2CnpSkjojl",
-    "holderName": "Mike"
+    "cvc": "242"
   }
 }
 
