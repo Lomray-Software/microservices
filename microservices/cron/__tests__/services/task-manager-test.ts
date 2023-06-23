@@ -22,6 +22,12 @@ describe('services/task-manager', () => {
       },
     },
   });
+  const task2 = taskRepository.create({
+    ...task,
+    payload: {
+      allowErrorCodes: [-1],
+    },
+  });
   const tasks = [task];
 
   beforeEach(() => {
@@ -185,7 +191,7 @@ describe('services/task-manager', () => {
     }
   });
 
-  it('should correctly execute task: error response', async () => {
+  it('should correctly handle execute task error: error response', async () => {
     const scheduleStub = sandbox.stub(schedule, 'scheduleJob');
     const sendStub = sandbox.stub(ms, 'sendRequest').resolves(
       new MicroserviceResponse({
@@ -210,6 +216,34 @@ describe('services/task-manager', () => {
       status: 0,
     });
     expect(status).to.equal(TaskStatus.error);
+    expect(taskId).to.equal(task.id);
+  });
+
+  it('should correctly handle execute task: error response allow code', async () => {
+    const scheduleStub = sandbox.stub(schedule, 'scheduleJob');
+    const sendStub = sandbox.stub(ms, 'sendRequest').resolves(
+      new MicroserviceResponse({
+        error: new BaseException({ code: -1, message: 'Job error' }),
+      }),
+    );
+
+    TaskManager.get().runTasks([task2]);
+
+    const callback = scheduleStub.firstCall.lastArg;
+
+    await callback();
+
+    const [, { response, status, taskId }] = TypeormMock.entityManager.save.lastCall.args;
+
+    expect(TypeormMock.entityManager.save).to.calledTwice;
+    expect(sendStub).to.calledOnce;
+    expect(response).to.deep.equal({
+      code: -1,
+      message: 'Job error',
+      service: 'unknown',
+      status: 0,
+    });
+    expect(status).to.equal(TaskStatus.success);
     expect(taskId).to.equal(task.id);
   });
 });

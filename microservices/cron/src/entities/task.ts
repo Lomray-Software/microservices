@@ -46,6 +46,7 @@ class Task {
     params?: Record<string, any>;
     options?: Partial<IInnerRequestParams>;
     responseTemplate?: string; // lodash template
+    allowErrorCodes?: number[]; // e.g. [-33485] - skip entity not found error
   };
 
   @IsTypeormDate()

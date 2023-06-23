@@ -22,6 +22,7 @@
           }
         }
       },
+      "allowErrorCodes": [-33485],
       "responseTemplate": "<%= `deleted: ${deleted.length}` %>"
     }
   },
@@ -48,6 +49,7 @@
           }
         }
       },
+      "allowErrorCodes": [-33485],
       "responseTemplate": "<%= `deleted: ${deleted.length}` %>"
     }
   }
