@@ -19,17 +19,13 @@ import Price from '@entities/price';
 import Product from '@entities/product';
 import Transaction from '@entities/transaction';
 import composeBalance from '@helpers/compose-balance';
+import fromExpirationDate from '@helpers/formatters/from-expiration-date';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
-import Abstract, {
-  IBankAccountParams,
-  ICardParams,
-  IPriceParams,
-  IProductParams,
-} from './abstract';
+import Abstract, { IBankAccountParams, IPriceParams, IProductParams } from './abstract';
 
 export interface IStripeProductParams extends IProductParams {
   name: string;
@@ -124,11 +120,57 @@ type TAvailablePaymentMethods =
 class Stripe extends Abstract {
   /**
    * Add new card
-   * NOTES: Usage example - integration tests
-   * @TODO: Integrate with stripe
+   * NOTES:
+   * 1. Usage example - only in integration tests
+   * 2. Use setup intent for livemode
    */
-  public async addCard({ cardId, paymentMethodId, ...rest }: ICardParams): Promise<Card> {
-    const card = this.cardRepository.create({ ...rest, params: { cardId, paymentMethodId } });
+  public async addCard(
+    userId: string,
+    expired: string,
+    digits: string,
+    cvc: string,
+  ): Promise<Card> {
+    const customer = await this.customerRepository.findOne({ where: { userId } });
+
+    if (!customer) {
+      throw new BaseException({ status: 500, message: messages.getNotFoundMessage('Customer') });
+    }
+
+    const { year, month } = fromExpirationDate(expired);
+
+    /**
+     * Create card as the payment method
+     */
+    const { id, card: stripeCard } = await this.sdk.paymentMethods.create({
+      type: 'card',
+      card: {
+        number: digits,
+        // eslint-disable-next-line camelcase
+        exp_month: month,
+        // eslint-disable-next-line camelcase
+        exp_year: year,
+        cvc,
+      },
+    });
+
+    /**
+     * Attach card to customer
+     */
+    await this.sdk.paymentMethods.attach(id, {
+      customer: customer.customerId,
+    });
+
+    /**
+     * Validate and save card
+     */
+    const card = this.cardRepository.create({
+      expired,
+      userId,
+      funding: stripeCard?.funding,
+      brand: stripeCard?.brand,
+      lastDigits: stripeCard?.last4,
+      params: { paymentMethodId: id },
+    });
 
     const errors = await validate(card, {
       whitelist: true,
