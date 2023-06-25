@@ -614,23 +614,7 @@
           "admin": "allow"
         }
       },
-      "lastDigits": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
-      "funding": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
-      "brand": {
+      "digits": {
         "in": {
           "admin": "allow"
         },
@@ -646,31 +630,7 @@
           "admin": "allow"
         }
       },
-      "holderName": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
-      "cardId": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
-      "paymentMethodId": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
-      "isDefault": {
+      "cvc": {
         "in": {
           "admin": "allow"
         },
