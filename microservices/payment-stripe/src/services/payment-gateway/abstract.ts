@@ -125,7 +125,12 @@ abstract class Abstract {
   /**
    * Add new card
    */
-  public abstract addCard(params: ICardParams): Promise<Card>;
+  public abstract addCard(
+    userId: string,
+    expired: string,
+    digits: string,
+    cvc: string,
+  ): Promise<Card>;
 
   /**
    * Add new bank account

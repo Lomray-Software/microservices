@@ -33,15 +33,19 @@ class Card {
       .createQueryBuilder('card')
       .where('card.userId = :userId', { userId: entity.userId })
       .andWhere("card.params ->> 'paymentMethodId' IS NOT NULL")
+      .andWhere('card.isDefault = :isDefault', { isDefault: true })
       .getCount();
 
     /**
      * Card count will contain current card
      */
-    if (cardsCount > 1) {
+    if (cardsCount) {
       return;
     }
 
+    /**
+     * If 0 cards with the required params for payment method
+     */
     const customer = await customerRepository.findOne({ userId: entity.userId });
 
     if (!customer) {
@@ -60,6 +64,7 @@ class Card {
       });
     }
 
+    entity.isDefault = true;
     await cardRepository.save(entity, { listeners: false });
   }
 
