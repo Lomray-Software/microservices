@@ -2,6 +2,8 @@ import { BaseException } from '@lomray/microservice-nodejs-lib';
 import StripeSdk, { Stripe as StripeTypes } from 'stripe';
 import { EntityManager, Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
+import HolderType from '@constants/holder-type';
+import StripeAccountTypes from '@constants/stripe-account-types';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
@@ -26,10 +28,10 @@ export interface ICardParams {
 
 export interface IBankAccountParams {
   userId: string;
-  lastDigits: string;
-  holderName?: string | null;
-  bankName?: string | null;
-  bankAccountId?: string;
+  accountHolderName: string;
+  accountHolderType: HolderType;
+  routingNumber: string;
+  accountNumber: string;
 }
 
 export interface IPriceParams {
@@ -102,6 +104,27 @@ abstract class Abstract {
    * @protected
    */
   protected readonly methods: string[];
+
+  /**
+   * Connect account types capabilities
+   */
+  protected connectAccountCapabilities: Record<
+    StripeAccountTypes,
+    StripeTypes.AccountCreateParams.Capabilities | null
+  > = {
+    [StripeAccountTypes.CUSTOM]: {
+      // eslint-disable-next-line camelcase
+      card_payments: {
+        requested: true,
+      },
+      // eslint-disable-next-line camelcase
+      transfers: {
+        requested: true,
+      },
+    },
+    [StripeAccountTypes.STANDARD]: null,
+    [StripeAccountTypes.EXPRESS]: null,
+  };
 
   /**
    * @constructor
