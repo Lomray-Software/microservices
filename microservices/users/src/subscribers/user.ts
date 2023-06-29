@@ -30,6 +30,8 @@ class User implements EntitySubscriberInterface<UserEntity> {
       entity.username = entity.id.replace(/-/g, '');
     }
 
+    void Microservice.eventPublish(UsersEvents.UserCreate, entity);
+
     return Promise.all([
       userRepository.update({ id: entity.id }, { username: entity.username }),
       profileRepository.save(profileRepository.create({ userId: entity.id })),
@@ -58,6 +60,11 @@ class User implements EntitySubscriberInterface<UserEntity> {
       ]);
 
       void Microservice.eventPublish(UsersEvents.UserRemove, { entity: event.entity });
+    } else {
+      /**
+       * If user data were updated
+       */
+      void Microservice.eventPublish(UsersEvents.UserUpdate, event.entity);
     }
   }
 
