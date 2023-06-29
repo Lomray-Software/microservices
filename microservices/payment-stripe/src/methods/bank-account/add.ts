@@ -1,31 +1,26 @@
-import { Endpoint, IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
+import { Endpoint } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
-import { IsObject, IsString } from 'class-validator';
+import { IsEnum, IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
+import HolderType from '@constants/holder-type';
 import BankAccount from '@entities/bank-account';
-import type { IBankAccountParams } from '@services/payment-gateway/abstract';
 import Factory from '@services/payment-gateway/factory';
 
-class BankAccountAddInput implements IBankAccountParams {
+class BankAccountAddInput {
   @IsString()
   userId: string;
 
   @IsString()
-  lastDigits: string;
+  accountHolderName: string;
+
+  @IsEnum(HolderType)
+  accountHolderType: HolderType;
 
   @IsString()
-  @IsUndefinable()
-  @IsNullable()
-  holderName?: string | null;
+  routingNumber: string;
 
   @IsString()
-  @IsUndefinable()
-  @IsNullable()
-  bankName?: string | null;
-
-  @IsString()
-  @IsUndefinable()
-  bankAccountId?: string;
+  accountNumber: string;
 }
 
 class BankAccountAddOutput {
@@ -43,16 +38,16 @@ const add = Endpoint.custom(
     output: BankAccountAddOutput,
     description: 'Add new bank account',
   }),
-  async ({ userId, bankName, holderName, bankAccountId, lastDigits }) => {
+  async ({ userId, accountHolderName, accountHolderType, accountNumber, routingNumber }) => {
     const service = await Factory.create(getManager());
 
     return {
       entity: await service.addBankAccount({
         userId,
-        bankName,
-        holderName,
-        bankAccountId,
-        lastDigits,
+        accountHolderName,
+        accountHolderType,
+        accountNumber,
+        routingNumber,
       }),
     };
   },
