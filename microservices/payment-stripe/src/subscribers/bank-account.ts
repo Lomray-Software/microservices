@@ -1,4 +1,4 @@
-import { EventSubscriber, EntitySubscriberInterface, InsertEvent } from 'typeorm';
+import { EventSubscriber, EntitySubscriberInterface, InsertEvent, UpdateEvent } from 'typeorm';
 import BankAccountEntity from '@entities/bank-account';
 import BankAccountService from '@services/bank-account';
 
@@ -19,6 +19,16 @@ class BankAccount implements EntitySubscriberInterface<BankAccountEntity> {
    */
   public async afterInsert({ entity, manager }: InsertEvent<BankAccountEntity>): Promise<void> {
     await BankAccountService.handleCreate(entity, manager);
+  }
+
+  /**
+   * Handle bank account update
+   */
+  public async afterUpdate({
+    entity,
+    databaseEntity,
+  }: UpdateEvent<BankAccountEntity>): Promise<void> {
+    await BankAccountService.handleUpdate(databaseEntity, entity as BankAccountEntity);
   }
 }
 

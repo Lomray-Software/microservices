@@ -1,8 +1,9 @@
 import { BaseException } from '@lomray/microservice-nodejs-lib';
-import { EntityManager } from 'typeorm';
+import { EntityManager, getManager } from 'typeorm';
 import BankAccountEntity from '@entities/bank-account';
 import CustomerEntity from '@entities/customer';
 import messages from '@helpers/validators/messages';
+import Factory from '@services/payment-gateway/factory';
 
 /**
  * Bank account service
@@ -52,13 +53,32 @@ class BankAccount {
     await bankAccountRepository.save(entity, { listeners: false });
   }
 
-  // /**
-  //  * Handle update bank account
-  //  */
-  // public static async handleUpdate(
-  //   entity: BankAccountEntity,
-  //   manager: EntityManager,
-  // ): Promise<void> {}
+  /**
+   * Handle update bank account
+   * Sets default bank account
+   */
+  public static async handleUpdate(
+    databaseEntity: BankAccountEntity,
+    entity: BankAccountEntity,
+  ): Promise<void> {
+    /**
+     * Is bank account is the external account and if is default updated
+     */
+    if (!entity.params.bankAccountId || databaseEntity.isDefault === entity.isDefault) {
+      return;
+    }
+
+    if (!entity.isDefault) {
+      throw new BaseException({
+        status: 500,
+        message: "Bank account can't be set manually to default",
+      });
+    }
+
+    const service = await Factory.create(getManager());
+
+    await service.setDefaultExternalAccount(entity.params.bankAccountId);
+  }
 }
 
 export default BankAccount;
