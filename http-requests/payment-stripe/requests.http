@@ -43,7 +43,7 @@ Content-Type: application/json
   }
 }
 
-### Step 4. Connect accout (Setup bank account)
+### Step 4.1 Connect accout (Setup custom bank account)
 POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
@@ -54,6 +54,40 @@ Content-Type: application/json
   "params": {
     "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
     "email": "r111eceiver@gmail.com",
+    "accountType": "standard",
+    "refreshUrl": "https://example.com",
+    "returnUrl": "https://example.com"
+  }
+}
+
+### Step 4.2 Connect accout (Setup express bank account)
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.connect-account",
+  "params": {
+    "userId": "n1w11ss1-17f8-4501-9de2-a6e775ea1111",
+    "email": "eeeeee@gmail.com",
+    "accountType": "express",
+    "refreshUrl": "https://example.com",
+    "returnUrl": "https://example.com"
+  }
+}
+
+### Step 4.3 Connect accout (Setup standard bank account)
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.connect-account",
+  "params": {
+    "userId": "cu11f8f1-17f8-4501-9de2-a6e775ea39f3",
+    "email": "cus11@gmail.com",
     "accountType": "standard",
     "refreshUrl": "https://example.com",
     "returnUrl": "https://example.com"
@@ -200,7 +234,7 @@ Content-Type: application/json
   "id": "1",
   "method": "stripe.connect-account-link",
   "params": {
-    "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "userId": "t1111ss1-17f8-4501-9de2-a6e775ea1111",
     "refreshUrl": "https://example.com",
     "returnUrl": "https://example.com"
   }
@@ -257,7 +291,7 @@ Content-Type: application/json
   "id": "1",
   "method": "card.add",
   "params": {
-    "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "userId": "31111111-17f8-4501-9de2-a6e775ea39f3",
     "digits": "4242424242424242",
     "expired": "01/27",
     "cvc": "242"
@@ -297,6 +331,23 @@ Content-Type: application/json
   }
 }
 
+### Add additional bank account with the verification trigger
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "bank-account.add",
+  "params": {
+    "userId": "iiw11ss1-17f8-4501-9de2-a6e775ea1111",
+    "accountHolderName": "new new",
+    "accountHolderType": "individual",
+    "routingNumber": "110000000",
+    "accountNumber": "000999999991"
+  }
+}
+
 ### Add additional bank account
 POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
@@ -306,10 +357,10 @@ Content-Type: application/json
   "id": "1",
   "method": "bank-account.add",
   "params": {
-    "userId": "cusaf8f1-17f8-4501-9de2-a6e775ea39f3",
-    "accountHolderName": "new11 mike",
+    "userId": "oow11ss1-17f8-4501-9de2-a6e775ea1111",
+    "accountHolderName": "new new",
     "accountHolderType": "individual",
     "routingNumber": "110000000",
-    "accountNumber": "000999999991"
+    "accountNumber": "000123456789"
   }
 }
