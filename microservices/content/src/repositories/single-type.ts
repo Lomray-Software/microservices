@@ -49,7 +49,7 @@ class SingleType extends Repository<SingleTypeEntity> {
       }
 
       if (hasMany) {
-        return (value = this.replaceRelationIdsOnEntities(data, value, property));
+        return (value = this.replaceRelationIdsOnEntities(data, value, property)!);
       }
 
       value[property] = data;
@@ -63,17 +63,14 @@ class SingleType extends Repository<SingleTypeEntity> {
     data: unknown[],
     value: ISingleTypeValue,
     property: string,
-  ): ISingleTypeValue {
+  ): ISingleTypeValue | void {
     if (!Array.isArray(value)) {
       return value;
     }
 
-    return value.map((input) => {
+    value.forEach((input) => {
       if (!input.hasOwnProperty(property)) {
-        throw new BaseException({
-          status: 500,
-          message: `Invalid object format. "${property}" property does not exist in "value" objects.`,
-        });
+        return;
       }
 
       input[property] = replaceEntities(
