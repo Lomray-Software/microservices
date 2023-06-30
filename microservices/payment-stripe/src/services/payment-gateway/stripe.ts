@@ -21,6 +21,7 @@ import Transaction from '@entities/transaction';
 import composeBalance from '@helpers/compose-balance';
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
+import getIsStripeBankAccount from '@helpers/get-is-stripe-bank-account';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
@@ -191,15 +192,70 @@ class Stripe extends Abstract {
 
   /**
    * Add bank account
-   * NOTE: Usage example - integration tests
-   * @TODO: Integrate with stripe
+   * NOTES: Eligible to the customers with the custom connect account
    */
   public async addBankAccount({
-    bankAccountId,
-    ...rest
+    userId,
+    accountHolderName,
+    accountNumber,
+    routingNumber,
+    accountHolderType,
   }: IBankAccountParams): Promise<BankAccount> {
+    const customer = await this.customerRepository.findOne({
+      where: {
+        userId,
+      },
+    });
+
+    if (!customer) {
+      throw new BaseException({ status: 404, message: messages.getNotFoundMessage('Customer') });
+    }
+
+    if (!customer.params.accountId || !customer.params.accountType) {
+      throw new BaseException({ status: 400, message: "User don't have setup connect account." });
+    }
+
+    if (customer.params.accountType !== StripeAccountTypes.CUSTOM) {
+      throw new BaseException({
+        status: 400,
+        message: `Add manually bank account isn't allowed for connect account with type ${customer.params.accountType}.`,
+      });
+    }
+
+    /* eslint-disable camelcase */
+    const { id: bankAccountTokenId } = await this.sdk.tokens.create({
+      bank_account: {
+        country: 'US',
+        currency: 'usd',
+        account_holder_name: accountHolderName,
+        account_holder_type: accountHolderType,
+        routing_number: routingNumber,
+        account_number: accountNumber,
+      },
+    });
+
+    const externalAccount = await this.sdk.accounts.createExternalAccount(
+      customer.params.accountId,
+      {
+        external_account: bankAccountTokenId,
+      },
+    );
+
+    /* eslint-enable camelcase */
+    if (!getIsStripeBankAccount(externalAccount)) {
+      throw new BaseException({
+        status: 500,
+        message: 'Failed to setup bank account. Invalid external account type.',
+      });
+    }
+
+    const { id: bankAccountId, bank_name: bankName, last4: lastDigits } = externalAccount;
+
     const bankAccount = this.bankAccountRepository.create({
-      ...rest,
+      userId,
+      lastDigits,
+      bankName,
+      holderName: accountHolderName,
       params: { bankAccountId },
     });
 
@@ -408,6 +464,9 @@ class Stripe extends Abstract {
         type: accountType,
         country: 'US',
         email,
+        ...(this.connectAccountCapabilities?.[accountType]
+          ? { capabilities: { ...this.connectAccountCapabilities[accountType] } }
+          : {}),
         settings: {
           payouts: {
             // eslint-disable-next-line camelcase
@@ -930,6 +989,13 @@ class Stripe extends Abstract {
     if (!this.isExternalAccountIsBankAccount(externalAccount)) {
       const card = await this.getCardById(externalAccount.id);
 
+      if (!card) {
+        throw new BaseException({
+          status: 500,
+          message: messages.getNotFoundMessage('Card'),
+        });
+      }
+
       const {
         last4: lastDigits,
         brand,
@@ -947,12 +1013,19 @@ class Stripe extends Abstract {
       card.funding = funding;
       card.isInstantPayoutAllowed = this.isAllowedInstantPayout(availablePayoutMethods);
 
-      await this.cardRepository.save(card);
+      await this.cardRepository.save(card, { listeners: false });
 
       return;
     }
 
     const bankAccount = await this.getBankAccountById(externalAccount.id);
+
+    if (!bankAccount) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('External Account update. Bank account'),
+      });
+    }
 
     const {
       last4: lastDigits,
@@ -968,7 +1041,7 @@ class Stripe extends Abstract {
     bankAccount.bankName = bankName;
     bankAccount.isInstantPayoutAllowed = this.isAllowedInstantPayout(availablePayoutMethods);
 
-    await this.bankAccountRepository.save(bankAccount);
+    await this.bankAccountRepository.save(bankAccount, { listeners: false });
     /* eslint-enable camelcase */
   }
 
@@ -992,6 +1065,15 @@ class Stripe extends Abstract {
     const { userId } = await this.getCustomerByAccountId(this.extractId(externalAccount.account));
 
     if (!this.isExternalAccountIsBankAccount(externalAccount)) {
+      /**
+       * Check if this card as the external account exist
+       * Cause card can be added manually or from onboarding process
+       * @TODO: simplify
+       */
+      if (await this.getCardById(externalAccount.id)) {
+        return;
+      }
+
       const {
         id: cardId,
         last4: lastDigits,
@@ -1014,6 +1096,15 @@ class Stripe extends Abstract {
         params: { cardId },
       });
 
+      return;
+    }
+
+    /**
+     * Check if this bank account as the external account exist
+     * Cause bank account can be added manually or from onboarding process
+     * @TODO: simplify
+     */
+    if (await this.getBankAccountById(externalAccount.id)) {
       return;
     }
 
@@ -1058,12 +1149,26 @@ class Stripe extends Abstract {
     if (!this.isExternalAccountIsBankAccount(externalAccount)) {
       const card = await this.getCardById(externalAccountId);
 
+      if (!card) {
+        throw new BaseException({
+          status: 500,
+          message: messages.getNotFoundMessage('Card'),
+        });
+      }
+
       await this.cardRepository.remove(card);
 
       return;
     }
 
     const bankAccount = await this.getBankAccountById(externalAccountId);
+
+    if (!bankAccount) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Bank account'),
+      });
+    }
 
     await this.bankAccountRepository.remove(bankAccount);
   }
@@ -1399,6 +1504,58 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Set default customer connect account external account
+   */
+  public async setDefaultExternalAccount(externalAccountId: string): Promise<boolean> {
+    /**
+     * @TODO: integrate cards as the external accounts
+     */
+    if (!externalAccountId.startsWith('ba')) {
+      return false;
+    }
+
+    const bankAccount = await this.bankAccountRepository
+      .createQueryBuilder('bankAccount')
+      .leftJoinAndSelect('bankAccount.customer', 'customer')
+      .where("bankAccount.params ->> 'bankAccountId' = :bankAccountId", {
+        bankAccountId: externalAccountId,
+      })
+      .getOne();
+
+    console.log('bankAccount', bankAccount);
+
+    if (!bankAccount) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Bank account'),
+      });
+    }
+
+    if (!bankAccount.customer) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Customer'),
+      });
+    }
+
+    if (!bankAccount.customer.params.accountId) {
+      throw new BaseException({
+        status: 500,
+        message: "User don't have related connect account",
+      });
+    }
+
+    await this.sdk.accounts.updateExternalAccount(
+      bankAccount.customer.params.accountId,
+      externalAccountId,
+      // eslint-disable-next-line camelcase
+      { default_for_currency: true },
+    );
+
+    return true;
+  }
+
+  /**
    * Returns receiver payment amount
    * NOTES: How much end user will get after fees from transaction
    * 1. Stable unit - stable amount that payment provider charges
@@ -1584,7 +1741,7 @@ class Stripe extends Abstract {
   private async getCustomerByAccountId(accountId: string): Promise<Customer> {
     const customer = await this.customerRepository
       .createQueryBuilder('customer')
-      .where("customer.params->>'accountId' = :value", { value: accountId })
+      .where("customer.params ->> 'accountId' = :accountId", { accountId })
       .getOne();
 
     if (!customer) {
@@ -1601,40 +1758,22 @@ class Stripe extends Abstract {
    * Returns card by card id
    * NOTE: Uses to search related connect account (external account) data
    */
-  private async getCardById(cardId: string): Promise<Card> {
-    const card = await this.cardRepository
+  private getCardById(cardId: string): Promise<Card | undefined> {
+    return this.cardRepository
       .createQueryBuilder('card')
-      .where("card.params->>'cardId' = :value", { value: cardId })
+      .where("card.params ->> 'cardId' = :cardId", { cardId })
       .getOne();
-
-    if (!card) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Card'),
-      });
-    }
-
-    return card;
   }
 
   /**
    * Returns bank account by bank account id
    * NOTE: Uses to search related connect account (external account) data
    */
-  private async getBankAccountById(bankAccountId: string): Promise<BankAccount> {
-    const bankAccount = await this.bankAccountRepository
+  private getBankAccountById(bankAccountId: string): Promise<BankAccount | undefined> {
+    return this.bankAccountRepository
       .createQueryBuilder('bankAccount')
-      .where("bankAccount.params->>'bankAccountId' = :value", { value: bankAccountId })
+      .where("bankAccount.params ->> 'bankAccountId' = :bankAccountId", { bankAccountId })
       .getOne();
-
-    if (!bankAccount) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Bank account'),
-      });
-    }
-
-    return bankAccount;
   }
 
   /**
