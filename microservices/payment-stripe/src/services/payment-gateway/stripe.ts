@@ -114,7 +114,7 @@ type TAvailablePaymentMethods =
   | StripeSdk.BankAccount.AvailablePayoutMethod[]
   | null;
 
-interface IPaymentIntentEventName {
+interface IPaymentIntentEvent {
   success: Event;
   inProcess: Event;
   error: Event;
@@ -127,7 +127,7 @@ class Stripe extends Abstract {
   /**
    * Payment intent event name
    */
-  private paymentIntentEventName: IPaymentIntentEventName = {
+  private paymentIntentEventName: IPaymentIntentEvent = {
     [TransactionStatus.SUCCESS]: Event.PaymentIntentSuccess,
     [TransactionStatus.IN_PROCESS]: Event.PaymentIntentInProcess,
     [TransactionStatus.ERROR]: Event.PaymentIntentError,
