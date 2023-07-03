@@ -114,10 +114,25 @@ type TAvailablePaymentMethods =
   | StripeSdk.BankAccount.AvailablePayoutMethod[]
   | null;
 
+interface IPaymentIntentEvent {
+  success: Event;
+  inProcess: Event;
+  error: Event;
+}
+
 /**
  * Stripe payment provider
  */
 class Stripe extends Abstract {
+  /**
+   * Payment intent event name
+   */
+  private paymentIntentEventName: IPaymentIntentEvent = {
+    [TransactionStatus.SUCCESS]: Event.PaymentIntentSuccess,
+    [TransactionStatus.IN_PROCESS]: Event.PaymentIntentInProcess,
+    [TransactionStatus.ERROR]: Event.PaymentIntentError,
+  };
+
   /**
    * Add new card
    * NOTES:
@@ -281,6 +296,7 @@ class Stripe extends Abstract {
 
       case StripeTransactionStatus.ERROR:
       case StripeTransactionStatus.PAYMENT_FAILED:
+      case StripeTransactionStatus.CANCELED:
         return TransactionStatus.ERROR;
 
       case StripeTransactionStatus.NO_PAYMENT_REQUIRED:
@@ -589,13 +605,14 @@ class Stripe extends Abstract {
     /**
      * Update cards default statuses on change default card for charge
      */
-    const saveCardRequests = cards.map((card) => {
-      card.isDefault = card.params.paymentMethodId === invoiceSettings.default_payment_method;
 
-      return this.cardRepository.save(card);
-    });
+    await Promise.all(
+      cards.map((card) => {
+        card.isDefault = card.params.paymentMethodId === invoiceSettings.default_payment_method;
 
-    await Promise.all(saveCardRequests);
+        return this.cardRepository.save(card);
+      }),
+    );
 
     /**
      * If customer has default payment method, and it's exist in stripe
@@ -605,6 +622,7 @@ class Stripe extends Abstract {
     }
 
     customer.params.hasDefaultPaymentMethod = Boolean(invoiceSettings.default_payment_method);
+
     await this.customerRepository.save(customer);
   }
 
@@ -684,13 +702,15 @@ class Stripe extends Abstract {
       });
     }
 
-    const saveRequests = transactions.map((transaction) => {
-      transaction.status = this.getStatus(`refund_${status}` as unknown as StripeTransactionStatus);
+    await Promise.all(
+      transactions.map((transaction) => {
+        transaction.status = this.getStatus(
+          `refund_${status}` as unknown as StripeTransactionStatus,
+        );
 
-      return this.transactionRepository.save(transaction);
-    });
-
-    await Promise.all(saveRequests);
+        return this.transactionRepository.save(transaction);
+      }),
+    );
   }
 
   /**
@@ -708,23 +728,38 @@ class Stripe extends Abstract {
       });
     }
 
-    const saveRequests = transactions.map((transaction) => {
-      if (status === StripeTransactionStatus.SUCCEEDED) {
-        /**
-         * @TODO: charges property MUST exist is paymentIntent, check stripe sdk version
-         */
-        transaction.params.transferId = this.extractTransferIdFromPaymentIntent(
-          // @ts-ignore
-          rest?.charges?.data as StripeSdk.Charge[],
-        );
+    const savedTransactions = await Promise.all(
+      transactions.map((transaction) => {
+        if (status === StripeTransactionStatus.SUCCEEDED) {
+          /**
+           * @TODO: charges property MUST exist is paymentIntent, check stripe sdk version
+           */
+          transaction.params.transferId = this.extractTransferIdFromPaymentIntent(
+            // @ts-ignore
+            rest?.charges?.data as StripeSdk.Charge[],
+          );
+        }
+
+        transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
+
+        return this.transactionRepository.save(transaction);
+      }),
+    );
+
+    for (const transaction of savedTransactions) {
+      const transactionStatus = this.getStatus(status as unknown as StripeTransactionStatus);
+
+      const eventName = this.paymentIntentEventName?.[transactionStatus];
+
+      if (!eventName) {
+        return;
       }
 
-      transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
-
-      return this.transactionRepository.save(transaction);
-    });
-
-    await Promise.all(saveRequests);
+      void Microservice.eventPublish(eventName as Event, {
+        transactionStatus,
+        transaction,
+      });
+    }
   }
 
   /**
