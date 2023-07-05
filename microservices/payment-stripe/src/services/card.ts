@@ -152,26 +152,29 @@ class Card {
   /**
    * Handle remove card if it's payment method
    */
-  public static async handleRemove(entity: CardEntity, manager: EntityManager): Promise<void> {
+  public static async handleRemove(
+    databaseEntity: CardEntity,
+    manager: EntityManager,
+  ): Promise<void> {
     const cardRepository = manager.getRepository(CardEntity);
     const service = await Factory.create(getManager());
 
     /**
      * Card isn't payment method
      */
-    if (!entity.params.paymentMethodId) {
+    if (!databaseEntity.params.paymentMethodId) {
       return;
     }
 
     const {
       params: { paymentMethodId },
       userId,
-    } = entity;
+    } = databaseEntity;
 
     const card = await cardRepository
       .createQueryBuilder('card')
       .where('card.userId = :userId', { userId })
-      .andWhere('card.params.paymentMethodId = :paymentMethodId', { paymentMethodId })
+      .andWhere("card.params ->> 'paymentMethodId' = :paymentMethodId", { paymentMethodId })
       .getOne();
 
     if (!card) {
@@ -187,7 +190,7 @@ class Card {
       });
     }
 
-    await cardRepository.remove(card);
+    await cardRepository.remove(card, { listeners: false });
   }
 }
 
