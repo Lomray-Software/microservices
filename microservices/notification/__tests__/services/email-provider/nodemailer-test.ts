@@ -2,6 +2,7 @@ import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { expect } from 'chai';
 import { Transporter } from 'nodemailer';
 import sinon from 'sinon';
+import { messageIdMock, paramsMock, defaultEmailFromMock } from '@__mocks__/email';
 import EmailProvider from '@constants/email-provider';
 import Message from '@entities/message';
 import Nodemailer from '@services/email-provider/nodemailer';
@@ -9,20 +10,6 @@ import Nodemailer from '@services/email-provider/nodemailer';
 describe('services/email-provider/nodemailer', () => {
   const sandbox = sinon.createSandbox();
   const repository = TypeormMock.entityManager.getRepository(Message);
-
-  /**
-   * Mocks
-   */
-  const messageIdMock = 'email-message-id';
-  const defaultEmailFromMock = 'default@email.com';
-  const paramsMock = {
-    from: 'from@email.com',
-    to: ['to@email.com', 'another@email.com'],
-    replyTo: undefined,
-    subject: 'Subject',
-    text: 'Text',
-    html: '<strong>Html</strong>',
-  };
 
   beforeEach(() => {
     TypeormMock.sandbox.reset();
