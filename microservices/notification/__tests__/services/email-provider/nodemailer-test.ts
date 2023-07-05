@@ -10,41 +10,82 @@ describe('services/email-provider/nodemailer', () => {
   const sandbox = sinon.createSandbox();
   const repository = TypeormMock.entityManager.getRepository(Message);
 
+  /**
+   * Mocks
+   */
+  const messageIdMock = 'email-message-id';
+  const defaultEmailFromMock = 'default@email.com';
+  const paramsMock = {
+    from: 'from@email.com',
+    to: ['to@email.com', 'another@email.com'],
+    replyTo: undefined,
+    subject: 'Subject',
+    text: 'Text',
+    html: '<strong>Html</strong>',
+  };
+
   afterEach(() => {
     sandbox.restore();
   });
 
   it('should successful create simple email provider', async () => {
-    const messageId = 'email-message-id';
-    const defaultEmailFrom = 'default@email.com';
-    const params = {
-      from: 'from@email.com',
-      to: ['to@email.com', 'another@email.com'],
-      replyTo: undefined,
-      subject: 'Subject',
-      text: 'Text',
-      html: '<strong>Html</strong>',
-    };
-    const sendMail = sandbox.stub().resolves({ messageId });
+    const sendMail = sandbox.stub().resolves({ messageId: messageIdMock });
     const service = new Nodemailer(
       EmailProvider.SIMPLE,
       { sendMail } as unknown as Transporter,
       repository,
       {
-        defaultEmailFrom,
+        defaultEmailFrom: defaultEmailFromMock,
       },
     );
 
-    const isSent = await service.send(params);
+    const isSent = await service.send(paramsMock);
 
     const [, message] = TypeormMock.entityManager.save.firstCall.args;
 
     expect(isSent).to.ok;
-    expect(sendMail).to.calledOnceWith(params);
+    expect(sendMail).to.calledOnceWith(paramsMock);
     expect(message).to.deep.equal({
-      from: 'from@email.com',
+      from: paramsMock.from,
       params: {
-        messageId: 'email-message-id',
+        messageId: messageIdMock,
+      },
+      subject: 'Subject',
+      text: 'Text',
+      to: 'to@email.com, another@email.com',
+      type: 'email',
+    });
+  });
+
+  it('should successful send message with the attachment', async () => {
+    const sendMail = sandbox.stub().resolves({ messageId: messageIdMock });
+    const service = new Nodemailer(
+      EmailProvider.SIMPLE,
+      { sendMail } as unknown as Transporter,
+      repository,
+      {
+        defaultEmailFrom: defaultEmailFromMock,
+      },
+    );
+
+    const attachments = [
+      {
+        encoding: 'base64',
+        content: Buffer.from('PDF').toString('base64'),
+        filename: 'mock.pdf',
+      },
+    ];
+
+    const isSent = await service.send({ ...paramsMock, attachments });
+
+    const [, message] = TypeormMock.entityManager.save.firstCall.args;
+
+    expect(isSent).to.ok;
+    expect(sendMail).to.calledOnceWith({ ...paramsMock, attachments });
+    expect(message).to.deep.equal({
+      from: paramsMock.from,
+      params: {
+        messageId: messageIdMock,
       },
       subject: 'Subject',
       text: 'Text',

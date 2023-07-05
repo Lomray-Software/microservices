@@ -21,7 +21,7 @@ class Nodemailer extends Abstract {
       subject,
       text,
       html,
-      attachments,
+      ...(attachments ? { attachments } : {}),
     });
 
     Log.info(`Email message sent: ${to.join(', ')}`, info);
