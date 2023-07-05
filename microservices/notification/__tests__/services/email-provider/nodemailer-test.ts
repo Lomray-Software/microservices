@@ -24,6 +24,10 @@ describe('services/email-provider/nodemailer', () => {
     html: '<strong>Html</strong>',
   };
 
+  beforeEach(() => {
+    TypeormMock.sandbox.reset();
+  });
+
   afterEach(() => {
     sandbox.restore();
   });
@@ -43,6 +47,8 @@ describe('services/email-provider/nodemailer', () => {
 
     const [, message] = TypeormMock.entityManager.save.firstCall.args;
 
+    expect(TypeormMock.entityManager.save).to.calledOnce;
+    expect(TypeormMock.entityManager.create).to.calledOnce;
     expect(isSent).to.ok;
     expect(sendMail).to.calledOnceWith(paramsMock);
     expect(message).to.deep.equal({
@@ -80,6 +86,8 @@ describe('services/email-provider/nodemailer', () => {
 
     const [, message] = TypeormMock.entityManager.save.firstCall.args;
 
+    expect(TypeormMock.entityManager.save).to.calledOnce;
+    expect(TypeormMock.entityManager.create).to.calledOnce;
     expect(isSent).to.ok;
     expect(sendMail).to.calledOnceWith({ ...paramsMock, attachments });
     expect(message).to.deep.equal({
@@ -91,6 +99,7 @@ describe('services/email-provider/nodemailer', () => {
       text: 'Text',
       to: 'to@email.com, another@email.com',
       type: 'email',
+      attachments,
     });
   });
 });
