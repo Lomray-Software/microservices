@@ -33,6 +33,7 @@ class Nodemailer extends Abstract {
       text: text || html,
       subject,
       params: info,
+      attachments,
     });
 
     await this.messageRepository.save(message);

@@ -1,13 +1,8 @@
 import nodemailer from 'nodemailer';
-import { Attachment } from 'nodemailer/lib/mailer';
 import { Repository } from 'typeorm';
 import EmailProvider from '@constants/email-provider';
 import Message from '@entities/message';
-
-/**
- * Attachment
- */
-export interface IAttachment extends Pick<Attachment, 'filename' | 'encoding' | 'content'> {}
+import type { IAttachment } from '@entities/message';
 
 /**
  * Email params
