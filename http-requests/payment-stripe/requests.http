@@ -296,3 +296,20 @@ Content-Type: application/json
     "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3"
   }
 }
+
+### Remove card
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "card.remove",
+  "params": {
+    "query": {
+      "where": {
+        "id": "0768006a-ca95-4c30-ae40-a3d9d7b249ea"
+      }
+    }
+  }
+}

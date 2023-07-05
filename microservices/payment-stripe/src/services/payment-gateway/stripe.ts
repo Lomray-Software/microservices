@@ -1619,7 +1619,7 @@ class Stripe extends Abstract {
   private async getCustomerByAccountId(accountId: string): Promise<Customer> {
     const customer = await this.customerRepository
       .createQueryBuilder('customer')
-      .where("customer.params->>'accountId' = :value", { value: accountId })
+      .where("customer.params ->> 'accountId' = :value", { accountId })
       .getOne();
 
     if (!customer) {
@@ -1639,7 +1639,7 @@ class Stripe extends Abstract {
   private async getCardById(cardId: string): Promise<Card> {
     const card = await this.cardRepository
       .createQueryBuilder('card')
-      .where("card.params->>'cardId' = :value", { value: cardId })
+      .where("card.params ->> 'cardId' = :cardId", { cardId })
       .getOne();
 
     if (!card) {
@@ -1659,7 +1659,7 @@ class Stripe extends Abstract {
   private async getBankAccountById(bankAccountId: string): Promise<BankAccount> {
     const bankAccount = await this.bankAccountRepository
       .createQueryBuilder('bankAccount')
-      .where("bankAccount.params->>'bankAccountId' = :value", { value: bankAccountId })
+      .where("bankAccount.params ->> 'bankAccountId' = :bankAccountId", { bankAccountId })
       .getOne();
 
     if (!bankAccount) {
