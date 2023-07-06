@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import { Repository } from 'typeorm';
 import EmailProvider from '@constants/email-provider';
 import Message from '@entities/message';
-import type { IAttachment } from '@entities/message';
+import type IAttachment from '@interfaces/message-attachment';
 
 /**
  * Email params
