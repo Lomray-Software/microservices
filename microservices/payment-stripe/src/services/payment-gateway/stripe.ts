@@ -1619,7 +1619,7 @@ class Stripe extends Abstract {
   private async getCustomerByAccountId(accountId: string): Promise<Customer> {
     const customer = await this.customerRepository
       .createQueryBuilder('customer')
-      .where("customer.params ->> 'accountId' = :value", { accountId })
+      .where("customer.params ->> 'accountId' = :accountId", { accountId })
       .getOne();
 
     if (!customer) {
