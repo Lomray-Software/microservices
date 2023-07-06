@@ -1,15 +1,10 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsArray, IsEnum, IsObject, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { Attachment } from 'nodemailer/lib/mailer';
 import { Entity, Column, CreateDateColumn, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import NotifyType from '@constants/notify-type';
 import type Notice from '@entities/notice';
-
-/**
- * Attachment
- */
-export interface IAttachment extends Pick<Attachment, 'filename' | 'encoding' | 'content'> {}
+import type IAttachment from '@interfaces/message-attachment';
 
 @Entity()
 class Message {
