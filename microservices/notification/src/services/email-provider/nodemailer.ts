@@ -12,7 +12,7 @@ class Nodemailer extends Abstract {
    */
   public async send(params: IEmailParams): Promise<boolean> {
     const { defaultEmailFrom } = this.params;
-    const { from = defaultEmailFrom, to, subject, text, html, replyTo } = params;
+    const { to, subject, text, html, replyTo, attachments, from = defaultEmailFrom } = params;
 
     const info = await this.transporter.sendMail({
       from,
@@ -21,6 +21,7 @@ class Nodemailer extends Abstract {
       subject,
       text,
       html,
+      ...(attachments ? { attachments } : {}),
     });
 
     Log.info(`Email message sent: ${to.join(', ')}`, info);
@@ -32,6 +33,7 @@ class Nodemailer extends Abstract {
       text: text || html,
       subject,
       params: info,
+      attachments,
     });
 
     await this.messageRepository.save(message);
