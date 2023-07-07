@@ -1186,7 +1186,7 @@ class Stripe extends Abstract {
     }
 
     const { id } = await this.sdk.transfers.create({
-      amount: transfer.amount * payoutCoeff,
+      amount: Math.ceil(transfer.amount * payoutCoeff),
       currency: 'usd',
       destination: transfer.destinationUser,
     });
@@ -1195,7 +1195,7 @@ class Stripe extends Abstract {
       transactionId: id,
       userId: transfer.userId,
       entityId,
-      amount: transfer.amount * payoutCoeff,
+      amount: Math.ceil(transfer.amount * payoutCoeff),
       type: TransactionType.DEBIT,
       status: TransactionStatus.INITIAL,
       product: {
