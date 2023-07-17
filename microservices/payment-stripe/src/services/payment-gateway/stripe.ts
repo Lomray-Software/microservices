@@ -478,13 +478,25 @@ class Stripe extends Abstract {
    *  [secondEventType]: secondCallback
    * }
    */
-  public handleWebhookEvent(
+  public async handleWebhookEvent(
     payload: string,
     signature: string,
     webhookKey: string,
     webhookType: string,
-  ): void {
+  ): Promise<void> {
+    const { isLiveMode } = await remoteConfig();
+
+    /**
+     * Build event
+     */
     const event = this.sdk.webhooks.constructEvent(payload, signature, webhookKey);
+
+    /**
+     * Live modes should be similar
+     */
+    if (event.livemode !== isLiveMode) {
+      return;
+    }
 
     switch (event.type) {
       /**
@@ -565,6 +577,9 @@ class Stripe extends Abstract {
       case 'customer.updated':
         void this.handleCustomerUpdated(event);
         break;
+      case 'customer.created':
+        void this.handleCustomerCreated(event);
+        break;
     }
   }
 
@@ -578,6 +593,14 @@ class Stripe extends Abstract {
     void Microservice.eventPublish(Event.PaymentMethodRemoved, {
       paymentMethodId,
     });
+  }
+
+  /**
+   * Handles customer created
+   */
+  public async handleCustomerCreated(event: StripeSdk.Event): Promise<void> {
+    console.log('event', event);
+    await Promise.resolve(undefined);
   }
 
   /**
@@ -722,10 +745,11 @@ class Stripe extends Abstract {
     const transactions = await this.transactionRepository.find({ transactionId: id });
 
     if (!transactions.length) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Debit or credit transaction'),
-      });
+      return;
+      // throw new BaseException({
+      //   status: 500,
+      //   message: messages.getNotFoundMessage('Debit or credit transaction'),
+      // });
     }
 
     const savedTransactions = await Promise.all(
