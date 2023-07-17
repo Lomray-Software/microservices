@@ -13,4 +13,5 @@ export interface IRemoteConfig {
   paymentMethods?: string[];
   apiKey?: string;
   config?: Stripe.StripeConfig;
+  isLiveMode?: boolean;
 }

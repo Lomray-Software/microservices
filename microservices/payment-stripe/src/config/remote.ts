@@ -9,6 +9,7 @@ const defaultConfig: IRemoteConfig = {
   webhookKeys: CONST.MS_WEBHOOK_KEYS,
   payoutCoeff: CONST.MS_PAYOUT_COEFF,
   fees: JSON.parse(CONST.MS_FEES),
+  isLiveMode: CONST.IS_LIVE_MODE,
 };
 
 /**

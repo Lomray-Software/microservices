@@ -12,6 +12,7 @@ const constants = {
   MS_WEBHOOK_KEYS: JSON.parse(process.env.MS_WEBHOOK_KEYS ?? '{}'),
   MS_PAYOUT_COEFF: Number(process.env.MS_PAYOUT_COEFF) ?? 0.3,
   MS_FEES: process.env.MS_FEES ?? '{ "stableUnit": 30, "paymentPercent": 2.9 }',
+  IS_LIVE_MODE: process.env.IS_LIVE_MODE === 'true' || false,
 };
 
 export default constants;
