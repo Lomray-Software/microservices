@@ -734,11 +734,10 @@ class Stripe extends Abstract {
     const transactions = await this.transactionRepository.find({ transactionId: id });
 
     if (!transactions.length) {
-      return;
-      // throw new BaseException({
-      //   status: 500,
-      //   message: messages.getNotFoundMessage('Debit or credit transaction'),
-      // });
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Debit or credit transaction'),
+      });
     }
 
     const savedTransactions = await Promise.all(
