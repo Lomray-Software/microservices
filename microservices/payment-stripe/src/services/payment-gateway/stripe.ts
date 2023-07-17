@@ -577,9 +577,6 @@ class Stripe extends Abstract {
       case 'customer.updated':
         void this.handleCustomerUpdated(event);
         break;
-      case 'customer.created':
-        void this.handleCustomerCreated(event);
-        break;
     }
   }
 
@@ -593,14 +590,6 @@ class Stripe extends Abstract {
     void Microservice.eventPublish(Event.PaymentMethodRemoved, {
       paymentMethodId,
     });
-  }
-
-  /**
-   * Handles customer created
-   */
-  public async handleCustomerCreated(event: StripeSdk.Event): Promise<void> {
-    console.log('event', event);
-    await Promise.resolve(undefined);
   }
 
   /**
