@@ -264,6 +264,20 @@ Content-Type: application/json
   }
 }
 
+### Add card via token
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "card.add",
+  "params": {
+    "userId": "1b0be2e8-1013-4be8-8e7f-a27c4b0a5e46",
+    "token": "tok_visa"
+  }
+}
+
 ### Update default payment method (card)
 POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json

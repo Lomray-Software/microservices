@@ -614,7 +614,7 @@
           "admin": "allow"
         }
       },
-      "digits": {
+      "token": {
         "in": {
           "admin": "allow"
         },
@@ -623,6 +623,14 @@
         }
       },
       "expired": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "digits": {
         "in": {
           "admin": "allow"
         },

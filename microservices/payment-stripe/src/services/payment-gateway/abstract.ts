@@ -14,14 +14,10 @@ import messages from '@helpers/validators/messages';
 
 export interface ICardParams {
   userId: string;
-  lastDigits: string;
-  expired: string;
-  funding: string;
-  brand: string;
-  holderName?: string;
-  isDefault?: boolean;
-  cardId?: string;
-  paymentMethodId?: string;
+  token?: string;
+  expired?: string;
+  digits?: string;
+  cvc?: string;
 }
 
 export interface IBankAccountParams {
@@ -125,12 +121,7 @@ abstract class Abstract {
   /**
    * Add new card
    */
-  public abstract addCard(
-    userId: string,
-    expired: string,
-    digits: string,
-    cvc: string,
-  ): Promise<Card>;
+  public abstract addCard(params: ICardParams): Promise<Card>;
 
   /**
    * Add new bank account

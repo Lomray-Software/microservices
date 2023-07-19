@@ -25,7 +25,12 @@ import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
-import Abstract, { IBankAccountParams, IPriceParams, IProductParams } from './abstract';
+import Abstract, {
+  IBankAccountParams,
+  ICardParams,
+  IPriceParams,
+  IProductParams,
+} from './abstract';
 
 export interface IStripeProductParams extends IProductParams {
   name: string;
@@ -120,6 +125,10 @@ interface IPaymentIntentEvent {
   error: Event;
 }
 
+type TCardData =
+  | StripeSdk.PaymentMethodCreateParams.Card1
+  | StripeSdk.PaymentMethodCreateParams.Card2;
+
 /**
  * Stripe payment provider
  */
@@ -138,35 +147,34 @@ class Stripe extends Abstract {
    * NOTES:
    * 1. Usage example - only in integration tests
    * 2. Use setup intent for livemode
+   * 3. For creating card manually with the sensitive data such as digits, cvc. Platform
+   * account must be eligible for PCI (Payment Card Industry Data Security Standards)
    */
-  public async addCard(
-    userId: string,
-    expired: string,
-    digits: string,
-    cvc: string,
-  ): Promise<Card> {
-    const customer = await this.customerRepository.findOne({ where: { userId } });
+  public async addCard(params: ICardParams): Promise<Card> {
+    const customer = await this.customerRepository.findOne({ where: { userId: params.userId } });
 
     if (!customer) {
       throw new BaseException({ status: 500, message: messages.getNotFoundMessage('Customer') });
     }
 
-    const { year, month } = fromExpirationDate(expired);
+    const cardData = this.buildCardData(params);
+
+    if (!cardData) {
+      throw new BaseException({ status: 400, message: 'Provided card data is invalid.' });
+    }
 
     /**
      * Create card as the payment method
      */
     const { id, card: stripeCard } = await this.sdk.paymentMethods.create({
       type: 'card',
-      card: {
-        number: digits,
-        // eslint-disable-next-line camelcase
-        exp_month: month,
-        // eslint-disable-next-line camelcase
-        exp_year: year,
-        cvc,
-      },
+      card: cardData,
+      expand: ['card'],
     });
+
+    if (!stripeCard?.exp_month || !stripeCard?.exp_year) {
+      throw new BaseException({ status: 500, message: 'Failed to get card expiration date.' });
+    }
 
     /**
      * Attach card to customer
@@ -179,8 +187,8 @@ class Stripe extends Abstract {
      * Validate and save card
      */
     const card = this.cardRepository.create({
-      expired,
-      userId,
+      expired: toExpirationDate(stripeCard.exp_month, stripeCard.exp_year),
+      userId: params.userId,
       funding: stripeCard?.funding,
       brand: stripeCard?.brand,
       lastDigits: stripeCard?.last4,
@@ -1748,6 +1756,30 @@ class Stripe extends Abstract {
     return {
       id: bankAccount?.params?.bankAccountId,
       isInstantPayoutAllow: Boolean(bankAccount?.isInstantPayoutAllowed),
+    };
+  }
+
+  /**
+   * Build card data
+   */
+  private buildCardData({ cvc, expired, digits, token }: ICardParams): TCardData | undefined {
+    if (token) {
+      return { token };
+    }
+
+    if (!expired || !digits || !cvc) {
+      return;
+    }
+
+    const { year, month } = fromExpirationDate(expired);
+
+    return {
+      // eslint-disable-next-line camelcase
+      exp_month: month,
+      // eslint-disable-next-line camelcase
+      exp_year: year,
+      cvc,
+      number: digits,
     };
   }
 }
