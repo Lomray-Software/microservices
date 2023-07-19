@@ -1,22 +1,32 @@
-import { Endpoint } from '@lomray/microservice-helpers';
+import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
 import { IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import Card from '@entities/card';
+import type { ICardParams } from '@services/payment-gateway/abstract';
 import Factory from '@services/payment-gateway/factory';
 
-class CardAddInput {
+class CardAddInput implements ICardParams {
   @IsString()
   userId: string;
 
+  // Card token from stripe
   @IsString()
-  expired: string;
+  @IsUndefinable()
+  token?: string;
+
+  // Manually collected card data
+  @IsString()
+  @IsUndefinable()
+  expired?: string;
 
   @IsString()
-  digits: string;
+  @IsUndefinable()
+  digits?: string;
 
   @IsString()
-  cvc: string;
+  @IsUndefinable()
+  cvc?: string;
 }
 
 class CardAddOutput {
@@ -30,11 +40,11 @@ class CardAddOutput {
  */
 const add = Endpoint.custom(
   () => ({ input: CardAddInput, output: CardAddOutput, description: 'Add new card' }),
-  async ({ userId, digits, cvc, expired }) => {
+  async ({ userId, digits, cvc, token, expired }) => {
     const service = await Factory.create(getManager());
 
     return {
-      entity: await service.addCard(userId, expired, digits, cvc),
+      entity: await service.addCard({ userId, token, expired, digits, cvc }),
     };
   },
 );
