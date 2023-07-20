@@ -725,7 +725,11 @@ class Stripe extends Abstract {
    * Handles payment intent statuses
    */
   public async handlePaymentIntent(event: StripeSdk.Event): Promise<void> {
-    const { id, status, ...rest } = event.data.object as StripeSdk.PaymentIntent;
+    const {
+      id,
+      status,
+      latest_charge: latestCharge,
+    } = event.data.object as StripeSdk.PaymentIntent;
 
     const transactions = await this.transactionRepository.find({ transactionId: id });
 
@@ -738,14 +742,8 @@ class Stripe extends Abstract {
 
     const savedTransactions = await Promise.all(
       transactions.map((transaction) => {
-        if (status === StripeTransactionStatus.SUCCEEDED) {
-          /**
-           * @TODO: charges property MUST exist is paymentIntent, check stripe sdk version
-           */
-          transaction.params.transferId = this.extractTransferIdFromPaymentIntent(
-            // @ts-ignore
-            rest?.charges?.data as StripeSdk.Charge[],
-          );
+        if (!transaction.params.chargeId && latestCharge) {
+          transaction.params.chargeId = this.extractId(latestCharge);
         }
 
         transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
@@ -1263,6 +1261,7 @@ class Stripe extends Abstract {
 
     const {
       params: { paymentMethodId },
+      id: paymentMethodCardId,
     } = await this.getChargingCard(senderCustomer.userId, cardId);
 
     const entityUnitCost = this.toSmallestCurrencyUnit(entityCost);
@@ -1293,9 +1292,8 @@ class Stripe extends Abstract {
       customer: senderCustomer.customerId,
       // How much must sender must pay
       amount: userUnitAmount,
+      application_fee_amount: userUnitAmount - receiverUnitRevenue,
       transfer_data: {
-        // How much must receive end user
-        amount: receiverUnitRevenue,
         destination: receiverAccountId,
       },
     });
@@ -1305,6 +1303,7 @@ class Stripe extends Abstract {
       entityId,
       title,
       paymentMethodId,
+      cardId: paymentMethodCardId,
       transactionId: stripePaymentIntent.id,
       tax: paymentProviderUnitFee,
       fee: applicationUnitFee,
@@ -1348,7 +1347,7 @@ class Stripe extends Abstract {
       });
     }
 
-    if (!debitTransaction.params.transferId) {
+    if (!debitTransaction.params.chargeId) {
       throw new BaseException({
         status: 400,
         message: "Transaction don't have related transfer id and can't be refunded",
@@ -1356,17 +1355,15 @@ class Stripe extends Abstract {
     }
 
     /**
-     * Returns refunds from receiver connect account to platform (application) account
-     */
-    await this.sdk.transfers.createReversal(debitTransaction.params.transferId);
-
-    /**
      * Returns refunds from platform (application) account to sender
      */
+
     /* eslint-disable camelcase */
     await this.sdk.refunds.create({
+      charge: debitTransaction.params.chargeId,
+      reverse_transfer: true,
+      refund_application_fee: false,
       amount: debitTransaction.amount,
-      payment_intent: debitTransaction.transactionId,
     });
 
     /* eslint-enable camelcase */
@@ -1678,24 +1675,6 @@ class Stripe extends Abstract {
     }
 
     return bankAccount;
-  }
-
-  /**
-   * Returns extracted transfer id from succeeded payment intent
-   * NOTE: handles single paymentIntent charge
-   */
-  private extractTransferIdFromPaymentIntent(charges?: StripeSdk.Charge[]): string | undefined {
-    if (!charges || charges.length < 0) {
-      return;
-    }
-
-    const [charge] = charges;
-
-    if (!charge?.transfer) {
-      return;
-    }
-
-    return this.extractId(charge.transfer);
   }
 
   /**
