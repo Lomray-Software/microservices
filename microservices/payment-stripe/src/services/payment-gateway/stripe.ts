@@ -1294,7 +1294,6 @@ class Stripe extends Abstract {
       amount: userUnitAmount,
       application_fee_amount: userUnitAmount - receiverUnitRevenue,
       transfer_data: {
-        // How much must receive end user
         destination: receiverAccountId,
       },
     });
