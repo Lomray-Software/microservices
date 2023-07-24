@@ -125,6 +125,13 @@ interface IPaymentIntentEvent {
   error: Event;
 }
 
+interface IRefundEvent {
+  refunded: Event;
+  refundCanceled: Event;
+  refundFailed: Event;
+  refundInProcess: Event;
+}
+
 type TCardData =
   | StripeSdk.PaymentMethodCreateParams.Card1
   | StripeSdk.PaymentMethodCreateParams.Card2;
@@ -140,6 +147,16 @@ class Stripe extends Abstract {
     [TransactionStatus.SUCCESS]: Event.PaymentIntentSuccess,
     [TransactionStatus.IN_PROCESS]: Event.PaymentIntentInProcess,
     [TransactionStatus.ERROR]: Event.PaymentIntentError,
+  };
+
+  /**
+   * Refund event name
+   */
+  private refundEventName: IRefundEvent = {
+    [TransactionStatus.REFUNDED]: Event.RefundSuccess,
+    [TransactionStatus.REFUND_FAILED]: Event.RefundFailed,
+    [TransactionStatus.REFUND_CANCELED]: Event.RefundCanceled,
+    [TransactionStatus.REFUND_IN_PROCESS]: Event.RefundInProcess,
   };
 
   /**
@@ -710,15 +727,29 @@ class Stripe extends Abstract {
       });
     }
 
-    await Promise.all(
-      transactions.map((transaction) => {
-        transaction.status = this.getStatus(
-          `refund_${status}` as unknown as StripeTransactionStatus,
-        );
+    for (const transaction of transactions) {
+      const transactionStatus = this.getStatus(
+        `refund_${status}` as unknown as StripeTransactionStatus,
+      );
 
-        return this.transactionRepository.save(transaction);
-      }),
-    );
+      transaction.status = transactionStatus;
+
+      /**
+       * Transaction should be updated before event publish
+       */
+      await this.transactionRepository.save(transaction);
+
+      const eventName = this.refundEventName?.[transactionStatus];
+
+      if (!eventName) {
+        return;
+      }
+
+      void Microservice.eventPublish(eventName as Event, {
+        transactionStatus,
+        transaction,
+      });
+    }
   }
 
   /**
