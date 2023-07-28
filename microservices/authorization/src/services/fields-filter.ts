@@ -305,9 +305,8 @@ class FieldsFilter {
    */
   private async getCondition(title: string): Promise<IConditions | undefined> {
     if (!this.cachedConditions[title]) {
-      this.cachedConditions[title] = (
-        await this.conditionRepository.findOne({ title })
-      )?.conditions;
+      this.cachedConditions[title] = (await this.conditionRepository.findOne({ title }))
+        ?.conditions;
     }
 
     return this.cachedConditions[title];
