@@ -46,7 +46,7 @@
 		"permissions:sync:prod": "node lib/migrations/permissions/sync.js"
 	},
 	"dependencies": {
-		"@lomray/microservice-helpers": "^2.5.7",
+		"@lomray/microservice-helpers": "^2.8.0",
 		"axios": "^1.4.0",
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.14.0",
@@ -55,7 +55,7 @@
 		"typeorm": "0.2.41"
 	},
 	"devDependencies": {
-		"@types/lodash": "^4.14.194",
+		"@types/lodash": "^4.14.196",
 		"rollup-plugin-copy": "^3.4.0"
 	},
   "peerDependencies": {

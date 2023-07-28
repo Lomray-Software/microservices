@@ -41,17 +41,17 @@
 	},
 	"dependencies": {
 		"@lomray/cookie": "^0.6.2",
-		"@lomray/microservice-helpers": "^2.5.7",
+		"@lomray/microservice-helpers": "^2.8.0",
 		"class-validator": "^0.14.0",
 		"class-validator-jsonschema": "^5.0.0",
-		"jsonwebtoken": "^9.0.0",
+		"jsonwebtoken": "^9.0.1",
 		"typeorm": "0.2.41",
 		"uuid": "^9.0.0"
 	},
 	"devDependencies": {
 		"@types/cookie": "^0.5.1",
 		"@types/jsonwebtoken": "^9.0.2",
-		"@types/uuid": "^9.0.1"
+		"@types/uuid": "^9.0.2"
 	},
   "peerDependencies": {
     "tslib": "^2.5.0"
