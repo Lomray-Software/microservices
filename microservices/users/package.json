@@ -40,7 +40,7 @@
 		"start:prod": "node --require ./lib/tracer.js ./lib/index.js"
 	},
 	"dependencies": {
-		"@lomray/microservice-helpers": "^2.5.7",
+		"@lomray/microservice-helpers": "^2.8.1",
 		"@lomray/microservices-client-api": "^2.22.0",
 		"bcrypt": "^5.1.0",
 		"class-transformer": "^0.5.1",
@@ -53,11 +53,14 @@
 		"@types/bcrypt": "^5.0.0"
 	},
 	"peerDependencies": {
-		"tslib": "^2.5.0"
+		"tslib": "^2.6.1"
 	},
   "overrides": {
     "typeorm": {
       "xml2js": "0.5.0"
+    },
+    "winston-loki": {
+      "protobufjs": "^7.2.4"
     }
   }
 }

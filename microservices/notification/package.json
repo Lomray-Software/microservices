@@ -40,7 +40,7 @@
   },
 	"dependencies": {
 		"@aws-sdk/client-ses": "^3.345.0",
-    "@lomray/microservice-helpers": "^2.5.7",
+    "@lomray/microservice-helpers": "^2.8.1",
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.14.0",
 		"class-validator-jsonschema": "^5.0.0",
@@ -51,14 +51,17 @@
 		"@types/nodemailer": "^6.4.8"
 	},
   "peerDependencies": {
-    "tslib": "^2.5.0"
+    "tslib": "^2.6.1"
   },
   "overrides": {
     "typeorm": {
       "xml2js": "0.5.0"
     },
     "@aws-sdk/client-ses": {
-      "fast-xml-parser": "4.2.4"
+      "fast-xml-parser": "4.2.5"
+    },
+    "winston-loki": {
+      "protobufjs": "^7.2.4"
     }
   }
 }

@@ -39,7 +39,7 @@
 		"start:prod": "node --require ./lib/tracer.js ./lib/index.js"
 	},
 	"dependencies": {
-		"@lomray/microservice-helpers": "^2.5.7",
+		"@lomray/microservice-helpers": "^2.8.1",
 		"class-validator": "^0.14.0",
 		"class-validator-jsonschema": "^5.0.0",
 		"lodash": "^4.17.21",
@@ -49,11 +49,14 @@
 		"@types/lodash": "^4.14.194"
 	},
   "peerDependencies": {
-    "tslib": "^2.5.0"
+    "tslib": "^2.6.1"
   },
   "overrides": {
     "typeorm": {
       "xml2js": "0.5.0"
+    },
+    "winston-loki": {
+      "protobufjs": "^7.2.4"
     }
   }
 }
