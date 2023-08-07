@@ -5,6 +5,7 @@ import { validate } from 'class-validator';
 import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
 import BalanceType from '@constants/balance-type';
+import CouponDuration from '@constants/coupon-duration';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
@@ -14,6 +15,7 @@ import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
+import Coupon from '@entities/coupon';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
@@ -28,6 +30,7 @@ import TCurrency from '@interfaces/currency';
 import Abstract, {
   IBankAccountParams,
   ICardParams,
+  ICouponParams,
   IPriceParams,
   IProductParams,
 } from './abstract';
@@ -136,6 +139,14 @@ type TCardData =
   | StripeSdk.PaymentMethodCreateParams.Card1
   | StripeSdk.PaymentMethodCreateParams.Card2;
 
+interface IStripeCouponParams extends ICouponParams {
+  currency?: TCurrency;
+}
+
+interface IStripePromoCodeParams {
+  couponId: string;
+  code?: string;
+}
 /**
  * Stripe payment provider
  */
@@ -1790,6 +1801,114 @@ class Stripe extends Abstract {
       exp_year: year,
       cvc,
       number: digits,
+    };
+  }
+
+  public async createCoupon({
+    name,
+    currency,
+    products,
+    percentOff,
+    amountOff,
+    maxRedemptions,
+    duration,
+    durationInMonths,
+  }: IStripeCouponParams): Promise<Coupon> {
+    const couponDiscount = this.validateAndTransformCouponDiscountInput({ percentOff, amountOff });
+    const couponDuration = this.validateAndTransformCouponDurationInput({
+      duration,
+      durationInMonths,
+    });
+
+    const { id } = await this.sdk.coupons.create({
+      name,
+      currency: currency || 'usd',
+      ...couponDiscount,
+      ...couponDuration,
+      // eslint-disable-next-line camelcase
+      applies_to: {
+        products,
+      },
+    });
+
+    return super.createCoupon(
+      {
+        name,
+        products,
+        percentOff,
+        amountOff,
+        maxRedemptions,
+        duration,
+        durationInMonths,
+      },
+      id,
+    );
+  }
+
+  private validateAndTransformCouponDiscountInput({
+    percentOff,
+    amountOff,
+  }: Pick<IStripeCouponParams, 'percentOff' | 'amountOff'>): Pick<
+    StripeSdk.CouponCreateParams,
+    'amount_off' | 'percent_off'
+  > {
+    if (!amountOff && !percentOff) {
+      throw new BaseException({
+        status: 400,
+        message: 'Neither discount amount nor percent provided.',
+      });
+    }
+
+    if (amountOff && percentOff) {
+      throw new BaseException({
+        status: 400,
+        message: 'Cannot provide both amount and percent discount.',
+      });
+    }
+
+    return {
+      // eslint-disable-next-line camelcase
+      amount_off: amountOff,
+      // eslint-disable-next-line camelcase
+      percent_off: percentOff,
+    };
+  }
+
+  private validateAndTransformCouponDurationInput({
+    duration,
+    durationInMonths,
+  }: Pick<IStripeCouponParams, 'duration' | 'durationInMonths'>): Pick<
+    StripeSdk.CouponCreateParams,
+    'duration' | 'duration_in_months'
+  > {
+    {
+      if (duration === CouponDuration.REPEATING && !durationInMonths) {
+        throw new BaseException({
+          status: 400,
+          message: 'If duration is repeating, the number of months the coupon applies.',
+        });
+      }
+    }
+
+    return {
+      duration: duration as StripeSdk.CouponCreateParams.Duration,
+      // eslint-disable-next-line camelcase
+      duration_in_months: durationInMonths,
+    };
+  }
+
+  public async createPromoCode({ couponId, code: userCode }: IStripePromoCodeParams): Promise<{
+    id: string;
+    code: string;
+  }> {
+    const { id, code } = await this.sdk.promotionCodes.create({
+      coupon: couponId,
+      code: userCode,
+    });
+
+    return {
+      id,
+      code,
     };
   }
 }
