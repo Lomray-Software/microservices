@@ -1,11 +1,13 @@
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import StripeSdk, { Stripe as StripeTypes } from 'stripe';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 import { uuid } from 'uuidv4';
+import CouponDuration from '@constants/coupon-duration';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
+import Coupon from '@entities/coupon';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
@@ -55,6 +57,16 @@ export interface IProductParams {
   userId: string;
 }
 
+export interface ICouponParams {
+  name?: string;
+  maxRedemptions?: number;
+  products: string[];
+  duration: CouponDuration;
+  durationInMonths?: number;
+  amountOff?: number;
+  percentOff?: number;
+}
+
 /**
  * Abstract class for payment gateway
  */
@@ -92,6 +104,11 @@ abstract class Abstract {
   /**
    * @protected
    */
+  protected readonly couponRepository: Repository<Coupon>;
+
+  /**
+   * @protected
+   */
   protected readonly sdk: StripeSdk;
 
   /**
@@ -114,6 +131,7 @@ abstract class Abstract {
     this.transactionRepository = manager.getRepository(Transaction);
     this.cardRepository = manager.getRepository(Card);
     this.bankAccountRepository = manager.getRepository(BankAccount);
+    this.couponRepository = manager.getRepository(Coupon);
     this.methods = methods;
     this.sdk = new StripeSdk(apiKey, stripeConfig);
   }
@@ -224,6 +242,32 @@ abstract class Abstract {
     }
 
     return this.createCustomer(userId);
+  }
+
+  /**
+   * Create coupon
+   */
+  protected async createCoupon(params: ICouponParams, couponId: string): Promise<Coupon> {
+    const products = await this.productRepository.find({
+      where: {
+        productId: In(params.products),
+      },
+    });
+
+    if (!products || products.length !== params.products.length) {
+      throw new BaseException({
+        status: 409,
+        message: "One or more products don't exists.",
+      });
+    }
+
+    const coupon = this.couponRepository.create({
+      ...params,
+      couponId,
+      products,
+    });
+
+    return this.couponRepository.save(coupon);
   }
 }
 
