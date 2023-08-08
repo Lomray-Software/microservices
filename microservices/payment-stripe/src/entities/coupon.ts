@@ -30,6 +30,11 @@ class Coupon {
   @Length(1, 8)
   couponId: string;
 
+  @Column({ type: 'varchar', nullable: true, default: null })
+  @IsString()
+  @IsOptional()
+  userId: string | null;
+
   @JSONSchema({
     description: 'Name of the coupon displayed to customers on for instance invoices or receipts',
   })

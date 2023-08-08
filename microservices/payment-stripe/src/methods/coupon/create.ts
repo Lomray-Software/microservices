@@ -18,6 +18,10 @@ import Factory from '@services/payment-gateway/factory';
 class CreateCouponInput {
   @IsString()
   @IsOptional()
+  userId?: string;
+
+  @IsString()
+  @IsOptional()
   name?: string;
 
   @IsString()
