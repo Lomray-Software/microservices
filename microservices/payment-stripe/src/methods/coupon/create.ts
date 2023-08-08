@@ -22,7 +22,7 @@ class CreateCouponInput {
 
   @IsString()
   @IsOptional()
-  currency: TCurrency;
+  currency?: TCurrency;
 
   @IsNumber()
   @IsOptional()
