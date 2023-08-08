@@ -1,5 +1,5 @@
 import { IsTypeormDate } from '@lomray/microservice-helpers';
-import { IsOptional, IsString, Length } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -10,7 +10,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import Coupon from '@entities/coupon';
-import IsValidStripeId from '@helpers/validators/is-stripe-id-valid';
 
 @JSONSchema({
   properties: {
@@ -24,8 +23,6 @@ class PromoCode {
       'Field for storing id of according promo code entity created on payment service side',
   })
   @PrimaryColumn({ type: 'varchar', length: 30 })
-  @IsValidStripeId()
-  @Length(1, 30)
   promoCodeId: string;
 
   @JSONSchema({
