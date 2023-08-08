@@ -74,6 +74,7 @@ interface ICheckoutParams {
   userId: string;
   successUrl: string;
   cancelUrl: string;
+  isAllowPromoCode?: boolean;
 }
 
 interface ICheckoutEvent {
@@ -402,7 +403,7 @@ class Stripe extends Abstract {
    * Create checkout session and return url to redirect user for payment
    */
   public async createCheckout(params: ICheckoutParams): Promise<string | null> {
-    const { priceId, userId, successUrl, cancelUrl } = params;
+    const { priceId, userId, successUrl, cancelUrl, isAllowPromoCode } = params;
 
     const { customerId } = await super.getCustomer(userId);
     const price = await this.priceRepository.findOne({ priceId }, { relations: ['product'] });
@@ -425,6 +426,7 @@ class Stripe extends Abstract {
       customer: customerId,
       success_url: successUrl,
       cancel_url: cancelUrl,
+      allow_promotion_codes: isAllowPromoCode,
     });
     /* eslint-enable camelcase */
 
