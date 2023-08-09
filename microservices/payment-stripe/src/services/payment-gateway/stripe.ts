@@ -1806,7 +1806,11 @@ class Stripe extends Abstract {
     };
   }
 
+  /**
+   * Create stripe coupon
+   */
   public async createCoupon({
+    userId,
     name,
     currency,
     products,
@@ -1835,6 +1839,7 @@ class Stripe extends Abstract {
 
     return super.createCoupon(
       {
+        userId,
         name,
         products,
         percentOff,
@@ -1847,6 +1852,9 @@ class Stripe extends Abstract {
     );
   }
 
+  /**
+   * Validate and transform coupon discount input
+   */
   private validateAndTransformCouponDiscountInput({
     percentOff,
     amountOff,
@@ -1876,6 +1884,9 @@ class Stripe extends Abstract {
     };
   }
 
+  /**
+   * Validate and transform coupon duration input
+   */
   private validateAndTransformCouponDurationInput({
     duration,
     durationInMonths,
@@ -1899,6 +1910,9 @@ class Stripe extends Abstract {
     };
   }
 
+  /**
+   * Create stripe promo code
+   */
   public async createPromoCode({ couponId, code: userCode }: IStripePromoCodeParams): Promise<{
     id: string;
     code: string;

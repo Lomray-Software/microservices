@@ -4,50 +4,80 @@ export default class couponEntity1691443587317 implements MigrationInterface {
   name = 'couponEntity1691443587317';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(
-      `CREATE TABLE "promo_code" ("promoCodeId" character varying(30) NOT NULL, "code" character varying NOT NULL, "couponId" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "couponPromoCodeId" character varying(30), CONSTRAINT "PK_6aeee3e0180adf2bf461b066a82" PRIMARY KEY ("promoCodeId"))`,
-    );
+    /**
+     * Types
+     */
     await queryRunner.query(
       `CREATE TYPE "public"."coupon_duration_enum" AS ENUM('ones', 'repeating', 'forever')`,
     );
+
+    /**
+     * Tables
+     */
     await queryRunner.query(
-      `CREATE TABLE "coupon" ("couponId" character varying(8) NOT NULL, "name" character varying, "amountOff" double precision, "percentOff" integer, "duration" "public"."coupon_duration_enum" NOT NULL, "durationInMonths" integer, "maxRedemptions" integer, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_85a34266f36892347867b21d6ad" PRIMARY KEY ("couponId"))`,
+      `CREATE TABLE "promo_code" ("promoCodeId" character varying(30) NOT NULL, "code" character varying NOT NULL, "couponId" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "couponPromoCodeId" character varying(30), CONSTRAINT "promo_code(pk):promoCodeId" PRIMARY KEY ("promoCodeId"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "coupon_products_product" ("couponId" character varying(8) NOT NULL, "productId" character varying(19) NOT NULL, CONSTRAINT "PK_0bd6a4b75fc235663fff0cdfc2b" PRIMARY KEY ("couponId", "productId"))`,
+      `CREATE TABLE "coupon" ("couponId" character varying(8) NOT NULL, "name" character varying, "amountOff" double precision, "percentOff" integer, "duration" "public"."coupon_duration_enum" NOT NULL, "durationInMonths" integer, "maxRedemptions" integer, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "coupon(pk):couponId" PRIMARY KEY ("couponId"))`,
     );
     await queryRunner.query(
-      `CREATE INDEX "IDX_006cd586575d86f4705186b869" ON "coupon_products_product" ("couponId") `,
+      `CREATE TABLE "coupon_products_product" ("couponId" character varying(8) NOT NULL, "productId" character varying(19) NOT NULL, CONSTRAINT "coupon_products_product(pk):couponId_productId" PRIMARY KEY ("couponId", "productId"))`,
+    );
+
+    /**
+     * Constraints
+     */
+    await queryRunner.query(
+      `ALTER TABLE "promo_code" ADD CONSTRAINT "promo_code(fk):couponPromoCodeId_promoCodeId" FOREIGN KEY ("couponPromoCodeId") REFERENCES "promo_code"("promoCodeId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
     await queryRunner.query(
-      `CREATE INDEX "IDX_bdd320620afd063015fa0976ae" ON "coupon_products_product" ("productId") `,
+      `ALTER TABLE "coupon_products_product" ADD CONSTRAINT "coupon_products_product(fk):couponId" FOREIGN KEY ("couponId") REFERENCES "coupon"("couponId") ON DELETE CASCADE ON UPDATE CASCADE`,
     );
     await queryRunner.query(
-      `ALTER TABLE "promo_code" ADD CONSTRAINT "FK_8db7b0ac755956ce3d0cb6266b8" FOREIGN KEY ("couponPromoCodeId") REFERENCES "promo_code"("promoCodeId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "coupon_products_product" ADD CONSTRAINT "coupon_products_product(fk):productId" FOREIGN KEY ("productId") REFERENCES "product"("productId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+
+    /**
+     * Indexes
+     */
+    await queryRunner.query(
+      `CREATE INDEX "IDX_coupon_products_product_couponId" ON "coupon_products_product" ("couponId") `,
     );
     await queryRunner.query(
-      `ALTER TABLE "coupon_products_product" ADD CONSTRAINT "FK_006cd586575d86f4705186b869a" FOREIGN KEY ("couponId") REFERENCES "coupon"("couponId") ON DELETE CASCADE ON UPDATE CASCADE`,
-    );
-    await queryRunner.query(
-      `ALTER TABLE "coupon_products_product" ADD CONSTRAINT "FK_bdd320620afd063015fa0976ae1" FOREIGN KEY ("productId") REFERENCES "product"("productId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `CREATE INDEX "IDX_coupon_products_product_productId" ON "coupon_products_product" ("productId") `,
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    /**
+     * Types
+     */
+    await queryRunner.query(`DROP TYPE "public"."coupon_duration_enum"`);
+
+    /**
+     * Indexes
+     */
+    await queryRunner.query(`DROP INDEX "public"."IDX_coupon_products_product_couponId"`);
+    await queryRunner.query(`DROP INDEX "public"."IDX_coupon_products_product_productId"`);
+
+    /**
+     * Constraints
+     */
     await queryRunner.query(
-      `ALTER TABLE "coupon_products_product" DROP CONSTRAINT "FK_bdd320620afd063015fa0976ae1"`,
+      `ALTER TABLE "promo_code" DROP CONSTRAINT "promo_code(fk):couponPromoCodeId_promoCodeId"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "coupon_products_product" DROP CONSTRAINT "FK_006cd586575d86f4705186b869a"`,
+      `ALTER TABLE "coupon_products_product" DROP CONSTRAINT "coupon_products_product(fk):couponId"`,
     );
     await queryRunner.query(
-      `ALTER TABLE "promo_code" DROP CONSTRAINT "FK_8db7b0ac755956ce3d0cb6266b8"`,
+      `ALTER TABLE "coupon_products_product" DROP CONSTRAINT "coupon_products_product(fk):productId"`,
     );
-    await queryRunner.query(`DROP INDEX "public"."IDX_bdd320620afd063015fa0976ae"`);
-    await queryRunner.query(`DROP INDEX "public"."IDX_006cd586575d86f4705186b869"`);
+
+    /**
+     * Tables
+     */
     await queryRunner.query(`DROP TABLE "coupon_products_product"`);
     await queryRunner.query(`DROP TABLE "coupon"`);
-    await queryRunner.query(`DROP TYPE "public"."coupon_duration_enum"`);
     await queryRunner.query(`DROP TABLE "promo_code"`);
   }
 }

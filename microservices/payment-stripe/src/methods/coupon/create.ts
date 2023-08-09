@@ -1,14 +1,6 @@
-import { Endpoint } from '@lomray/microservice-helpers';
+import { Endpoint, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
-import {
-  IsEnum,
-  IsInt,
-  IsNumber,
-  IsObject,
-  IsOptional,
-  IsString,
-  ValidateIf,
-} from 'class-validator';
+import { IsEnum, IsNumber, IsObject, IsString, Length } from 'class-validator';
 import { getManager } from 'typeorm';
 import CouponDuration from '@constants/coupon-duration';
 import Coupon from '@entities/coupon';
@@ -16,39 +8,46 @@ import TCurrency from '@interfaces/currency';
 import Factory from '@services/payment-gateway/factory';
 
 class CreateCouponInput {
-  @IsString()
-  @IsOptional()
+  @IsUndefinable()
+  @Length(1, 36)
   userId?: string;
 
-  @IsString()
-  @IsOptional()
+  @IsUndefinable()
+  @Length(1, 100)
   name?: string;
 
-  @IsString()
-  @IsOptional()
+  @IsUndefinable()
+  @Length(3, 3)
   currency?: TCurrency;
 
+  @IsUndefinable()
   @IsNumber()
-  @IsOptional()
   amountOff?: number;
 
-  @IsInt()
-  @IsOptional()
+  @IsUndefinable()
+  @IsNumber()
   percentOff?: number;
 
   @IsEnum(CouponDuration)
   duration: CouponDuration;
 
-  @ValidateIf((object) => object.duration === CouponDuration.REPEATING)
-  @IsInt()
+  @IsValidate(CreateCouponInput, (entity) => CreateCouponInput.isDurationRepeating(entity))
+  @IsNumber()
   durationInMonths?: number;
 
+  @IsUndefinable()
   @IsNumber()
-  @IsOptional()
   maxRedemptions?: number;
 
   @IsString({ each: true })
   products: string[];
+
+  /**
+   * Check if duration is repeating
+   */
+  public static isDurationRepeating(entity: CreateCouponInput) {
+    return entity.duration === CouponDuration.REPEATING;
+  }
 }
 
 class CreateCouponOutput {
@@ -66,12 +65,30 @@ const create = Endpoint.custom(
     output: CreateCouponOutput,
     description: 'Create new coupon',
   }),
-  async (params) => {
+  async ({
+    userId,
+    name,
+    currency,
+    amountOff,
+    percentOff,
+    duration,
+    durationInMonths,
+    maxRedemptions,
+    products,
+  }) => {
     const service = await Factory.create(getManager());
 
     return {
       entity: await service.createCoupon({
-        ...params,
+        userId,
+        name,
+        currency,
+        amountOff,
+        percentOff,
+        duration,
+        durationInMonths,
+        maxRedemptions,
+        products,
       }),
     };
   },

@@ -58,10 +58,11 @@ export interface IProductParams {
 }
 
 export interface ICouponParams {
+  duration: CouponDuration;
+  products: string[];
+  userId?: string;
   name?: string;
   maxRedemptions?: number;
-  products: string[];
-  duration: CouponDuration;
   durationInMonths?: number;
   amountOff?: number;
   percentOff?: number;

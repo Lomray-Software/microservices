@@ -1,5 +1,5 @@
-import { Endpoint, IsNullable } from '@lomray/microservice-helpers';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { Endpoint, IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsBoolean, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import Factory from '@services/payment-gateway/factory';
 
@@ -17,7 +17,7 @@ class CreateCheckoutInput {
   cancelUrl: string;
 
   @IsBoolean()
-  @IsOptional()
+  @IsUndefinable()
   isAllowPromoCode?: boolean;
 }
 

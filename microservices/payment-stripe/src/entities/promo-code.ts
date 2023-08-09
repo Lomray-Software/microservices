@@ -1,5 +1,5 @@
-import { IsTypeormDate } from '@lomray/microservice-helpers';
-import { IsOptional, IsString } from 'class-validator';
+import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
+import { Length, ValidateNested } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -28,13 +28,13 @@ class PromoCode {
   @JSONSchema({
     description: 'The customer-facing code.',
   })
-  @Column({ type: 'varchar' })
-  @IsString()
-  @IsOptional()
+  @Column({ type: 'varchar', length: 15 })
+  @Length(1, 15)
+  @IsUndefinable()
   code: string;
 
-  @Column()
-  @IsString()
+  @Column({ type: 'varchar', length: 8 })
+  @Length(1, 8)
   couponId: string;
 
   @IsTypeormDate()
@@ -45,6 +45,7 @@ class PromoCode {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @ValidateNested()
   @ManyToOne(() => PromoCode)
   coupon: Coupon;
 }

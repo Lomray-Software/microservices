@@ -1,5 +1,5 @@
-import { IsTypeormDate, IsValidate } from '@lomray/microservice-helpers';
-import { IsEnum, IsInt, IsNumber, IsOptional, IsString, Length, Max, Min } from 'class-validator';
+import { IsNullable, IsTypeormDate, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
+import { IsEnum, IsNumber, Length, Max, Min, ValidateNested } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -30,38 +30,42 @@ class Coupon {
   @Length(1, 8)
   couponId: string;
 
-  @Column({ type: 'varchar', nullable: true, default: null })
-  @IsString()
-  @IsOptional()
+  @Column({ type: 'uuid', default: null })
+  @IsNullable()
+  @IsUndefinable()
+  @Length(1, 36)
   userId: string | null;
 
   @JSONSchema({
     description: 'Name of the coupon displayed to customers on for instance invoices or receipts',
   })
-  @Column({ type: 'varchar', nullable: true })
-  @IsString()
-  @IsOptional()
+  @Column({ type: 'varchar', length: 100, default: null })
+  @IsNullable()
+  @IsUndefinable()
+  @Length(1, 100)
   name: string | null;
 
   @JSONSchema({
     description: 'Amount that will be taken off the subtotal of any invoices for this customer.',
   })
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'float', default: null })
+  @IsNullable()
+  @IsUndefinable()
   @IsNumber()
-  @IsOptional()
-  amountOff?: number;
+  amountOff: number | null;
 
   @JSONSchema({
     description:
       'Percent that will be taken off the subtotal of any invoices for this customer for the duration of the coupon.',
   })
-  @Column({ type: 'int', nullable: true })
-  @IsValidate(Coupon, (coupon) => !coupon.amountOff)
+  @Column({ type: 'int', default: null })
+  @IsNullable()
+  @IsUndefinable()
+  @IsValidate(Coupon, (entity) => !Coupon.isAmountOffExists(entity))
   @Min(1)
   @Max(100)
-  @IsInt()
-  @IsOptional()
-  percentOff?: number;
+  @IsNumber()
+  percentOff: number | null;
 
   @Column({
     type: 'enum',
@@ -73,9 +77,11 @@ class Coupon {
   @JSONSchema({
     description: 'If duration is repeating, the number of months the coupon applies.',
   })
-  @Column({ type: 'int', nullable: true })
-  @IsValidate(Coupon, (coupon) => coupon.duration === CouponDuration.REPEATING)
-  @IsInt()
+  @Column({ type: 'int', default: null })
+  @IsNullable()
+  @IsUndefinable()
+  @IsValidate(Coupon, (entity) => Coupon.isDurationRepeating(entity))
+  @IsNumber()
   durationInMonths: number | null;
 
   @JSONSchema({
@@ -83,9 +89,10 @@ class Coupon {
       'Maximum number of times this coupon can be redeemed, in total, ' +
       'across all customers, before it is no longer valid.',
   })
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int', default: null })
+  @IsNullable()
+  @IsUndefinable()
   @IsNumber()
-  @IsOptional()
   maxRedemptions: number | null;
 
   @IsTypeormDate()
@@ -109,8 +116,23 @@ class Coupon {
   })
   products: Product[];
 
+  @ValidateNested()
   @OneToMany(() => PromoCode, (promoCode) => promoCode.coupon)
   promoCodes: PromoCode[];
+
+  /**
+   * Check if amountOff exists
+   */
+  public static isAmountOffExists(entity: Coupon) {
+    return Boolean(entity.amountOff);
+  }
+
+  /**
+   * Check if duration is repeating
+   */
+  public static isDurationRepeating(entity: Coupon) {
+    return entity.duration === CouponDuration.REPEATING;
+  }
 }
 
 export default Coupon;
