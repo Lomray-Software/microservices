@@ -123,14 +123,14 @@ class Coupon {
   /**
    * Check if amountOff exists
    */
-  public static isAmountOffExists(entity: Coupon) {
+  private static isAmountOffExists(entity: Coupon) {
     return Boolean(entity.amountOff);
   }
 
   /**
    * Check if duration is repeating
    */
-  public static isDurationRepeating(entity: Coupon) {
+  private static isDurationRepeating(entity: Coupon) {
     return entity.duration === CouponDuration.REPEATING;
   }
 }

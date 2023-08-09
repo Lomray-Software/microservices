@@ -45,7 +45,7 @@ class CreateCouponInput {
   /**
    * Check if duration is repeating
    */
-  public static isDurationRepeating(entity: CreateCouponInput) {
+  private static isDurationRepeating(entity: CreateCouponInput) {
     return entity.duration === CouponDuration.REPEATING;
   }
 }
