@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryColumn,
@@ -61,6 +62,16 @@ class Product {
   transactions: Transaction[];
 
   @ManyToMany(() => Coupon)
+  @JoinTable({
+    joinColumn: {
+      name: 'productId',
+      referencedColumnName: 'productId',
+    },
+    inverseJoinColumn: {
+      name: 'couponId',
+      referencedColumnName: 'couponId',
+    },
+  })
   coupons: Coupon[];
 }
 
