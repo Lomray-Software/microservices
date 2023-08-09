@@ -18,7 +18,7 @@ export default class couponEntity1691443587317 implements MigrationInterface {
       `CREATE TABLE "promo_code" ("promoCodeId" character varying(30) NOT NULL, "code" character varying NOT NULL, "couponId" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "couponPromoCodeId" character varying(30), CONSTRAINT "promo_code(pk):promoCodeId" PRIMARY KEY ("promoCodeId"))`,
     );
     await queryRunner.query(
-      `CREATE TABLE "coupon" ("couponId" character varying(8) NOT NULL, "name" character varying, "amountOff" double precision, "percentOff" integer, "duration" "public"."coupon_duration_enum" NOT NULL, "durationInMonths" integer, "maxRedemptions" integer, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "coupon(pk):couponId" PRIMARY KEY ("couponId"))`,
+      `CREATE TABLE "coupon" ("couponId" character varying(8) NOT NULL, "userId" character varying(36), "name" character varying, "amountOff" double precision, "percentOff" integer, "duration" "public"."coupon_duration_enum" NOT NULL, "durationInMonths" integer, "maxRedemptions" integer, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "coupon(pk):couponId" PRIMARY KEY ("couponId"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "coupon_products_product" ("couponId" character varying(8) NOT NULL, "productId" character varying(19) NOT NULL, CONSTRAINT "coupon_products_product(pk):couponId_productId" PRIMARY KEY ("couponId", "productId"))`,
