@@ -1323,6 +1323,7 @@ class Stripe extends Abstract {
       customer: senderCustomer.customerId,
       // How much must sender must pay
       amount: userUnitAmount,
+      // How much application will collect fee
       application_fee_amount: userUnitAmount - receiverUnitRevenue,
       transfer_data: {
         destination: receiverAccountId,
@@ -1336,10 +1337,11 @@ class Stripe extends Abstract {
       paymentMethodId,
       cardId: paymentMethodCardId,
       transactionId: stripePaymentIntent.id,
-      tax: paymentProviderUnitFee,
-      fee: applicationUnitFee,
+      fee: applicationUnitFee + paymentProviderUnitFee,
       params: {
         feesPayer,
+        applicationFee: applicationUnitFee,
+        paymentProviderFee: paymentProviderUnitFee,
       },
     };
 
