@@ -257,7 +257,7 @@ abstract class Abstract {
 
     if (!products || products.length !== params.products.length) {
       throw new BaseException({
-        status: 409,
+        status: 400,
         message: "One or more products don't exists.",
       });
     }
