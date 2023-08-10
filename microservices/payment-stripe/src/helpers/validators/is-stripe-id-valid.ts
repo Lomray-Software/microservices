@@ -13,7 +13,12 @@ const IsValidStripeId = (validationOptions?: ValidationOptions) =>
       options: validationOptions,
       validator: {
         validate(value: string) {
-          return value.startsWith('ba_') || value.startsWith('card_') || value.startsWith('pm_');
+          return (
+            value.startsWith('ba_') ||
+            value.startsWith('card_') ||
+            value.startsWith('pm_') ||
+            value.startsWith('promo_')
+          );
         },
         defaultMessage(args: ValidationArguments) {
           return `${args.property} is not a valid Stripe Id`;

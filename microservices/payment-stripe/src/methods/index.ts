@@ -5,6 +5,8 @@ import BankAccountAdd from '@methods/bank-account/add';
 import CrudBankAccount from '@methods/bank-account/crud';
 import CardAdd from '@methods/card/add';
 import CrudCard from '@methods/card/crud';
+import CouponCreate from '@methods/coupon/create';
+import CrudCoupon from '@methods/coupon/crud';
 import CustomerCreate from '@methods/customer/create';
 import CrudCustomer from '@methods/customer/crud';
 import CustomerRemove from '@methods/customer/remove';
@@ -12,6 +14,7 @@ import PriceCreate from '@methods/price/create';
 import CrudPrice from '@methods/price/crud';
 import ProductCreate from '@methods/product/create';
 import CrudProduct from '@methods/product/crud';
+import CrudPromoCode from '@methods/promo-code/crud';
 import Balance from '@methods/stripe/balance';
 import ConnectAccount from '@methods/stripe/connect-account';
 import ConnectAccountLink from '@methods/stripe/connect-account-link';
@@ -64,6 +67,13 @@ export default (ms: Microservice): void => {
     price: {
       ...CrudPrice,
       create: PriceCreate,
+    },
+    coupon: {
+      ...CrudCoupon,
+      create: CouponCreate,
+    },
+    'promo-code': {
+      ...CrudPromoCode,
     },
   };
 

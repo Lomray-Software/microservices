@@ -6,10 +6,13 @@ import {
   CreateDateColumn,
   Entity,
   Index,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import Coupon from '@entities/coupon';
 import Price from '@entities/price';
 import Transaction from '@entities/transaction';
 
@@ -18,6 +21,7 @@ import Transaction from '@entities/transaction';
   properties: {
     price: { $ref: '#/definitions/Price' },
     transactions: { $ref: '#/definitions/Transaction', type: 'array' },
+    coupons: { $ref: '#/definitions/Coupon', type: 'array' },
   },
 })
 @Entity()
@@ -56,6 +60,19 @@ class Product {
 
   @OneToMany('Transaction', 'product')
   transactions: Transaction[];
+
+  @ManyToMany(() => Coupon)
+  @JoinTable({
+    joinColumn: {
+      name: 'productId',
+      referencedColumnName: 'productId',
+    },
+    inverseJoinColumn: {
+      name: 'couponId',
+      referencedColumnName: 'couponId',
+    },
+  })
+  coupons: Coupon[];
 }
 
 export default Product;
