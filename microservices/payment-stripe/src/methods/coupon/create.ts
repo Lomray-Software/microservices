@@ -8,44 +8,44 @@ import TCurrency from '@interfaces/currency';
 import Factory from '@services/payment-gateway/factory';
 
 class CreateCouponInput {
-  @IsUndefinable()
-  @Length(1, 36)
-  userId?: string;
-
-  @IsUndefinable()
-  @Length(1, 100)
-  name?: string;
-
-  @IsUndefinable()
-  @Length(3, 3)
-  currency?: TCurrency;
-
-  @IsUndefinable()
-  @IsNumber()
-  amountOff?: number;
-
-  @IsUndefinable()
-  @IsNumber()
-  percentOff?: number;
-
   @IsEnum(CouponDuration)
   duration: CouponDuration;
+
+  @IsString({ each: true })
+  products: string[];
+
+  @Length(1, 36)
+  @IsUndefinable()
+  userId?: string;
+
+  @Length(1, 100)
+  @IsUndefinable()
+  name?: string;
+
+  @Length(3, 3)
+  @IsUndefinable()
+  currency?: TCurrency;
+
+  @IsNumber()
+  @IsUndefinable()
+  amountOff?: number;
+
+  @IsNumber()
+  @IsUndefinable()
+  percentOff?: number;
 
   @IsValidate(CreateCouponInput, (entity) => CreateCouponInput.isDurationRepeating(entity))
   @IsNumber()
   durationInMonths?: number;
 
-  @IsUndefinable()
   @IsNumber()
+  @IsUndefinable()
   maxRedemptions?: number;
-
-  @IsString({ each: true })
-  products: string[];
 
   /**
    * Check if duration is repeating
    */
-  private static isDurationRepeating(entity: CreateCouponInput) {
+  private static isDurationRepeating(entity: CreateCouponInput): boolean {
     return entity.duration === CouponDuration.REPEATING;
   }
 }

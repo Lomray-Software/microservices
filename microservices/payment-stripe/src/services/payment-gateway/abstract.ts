@@ -268,7 +268,9 @@ abstract class Abstract {
       products,
     });
 
-    return this.couponRepository.save(coupon);
+    await this.couponRepository.save(coupon);
+
+    return coupon;
   }
 }
 
