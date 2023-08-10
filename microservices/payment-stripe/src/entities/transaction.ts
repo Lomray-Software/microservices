@@ -27,6 +27,9 @@ export interface IParams {
   feesPayer?: TransactionRole;
   // PaymentIntent charge id, must exist for refund
   chargeId?: string;
+  // Decomposed fees
+  applicationFee?: number;
+  paymentProviderFee?: number;
 }
 
 @JSONSchema({
@@ -101,7 +104,7 @@ class Transaction {
   amount: number;
 
   @JSONSchema({
-    description: 'Payment provider percent',
+    description: 'Sales tax or other, that should be paid to the government by tax collector',
   })
   @Column({ type: 'int', default: 0 })
   @IsUndefinable()
@@ -109,7 +112,7 @@ class Transaction {
   tax: number;
 
   @JSONSchema({
-    description: 'Application percent',
+    description: 'Fees: application, payment provider, etc..',
   })
   @Column({ type: 'int', default: 0 })
   @IsUndefinable()
