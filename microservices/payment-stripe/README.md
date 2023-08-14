@@ -81,7 +81,7 @@ __Run on JS__: ~110 MB PEAK / ~80 MB
 Run stripe cli for test dev env:
 
 ```bash
-stripe listen --forward-to 'http://localhost:3005/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=connect'
+stripe listen --forward-to 'http://localhost:3000/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=connect'
 ```
 
 Rebuild: 1
