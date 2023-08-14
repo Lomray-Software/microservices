@@ -1,12 +1,11 @@
 import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { Length } from 'class-validator';
+import { IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
   CreateDateColumn,
   Entity,
   Index,
-  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryColumn,
@@ -61,17 +60,11 @@ class Product {
   @OneToMany('Transaction', 'product')
   transactions: Transaction[];
 
-  @ManyToMany(() => Coupon)
-  @JoinTable({
-    joinColumn: {
-      name: 'productId',
-      referencedColumnName: 'productId',
-    },
-    inverseJoinColumn: {
-      name: 'couponId',
-      referencedColumnName: 'couponId',
-    },
+  @JSONSchema({
+    example: [{ couponId: 'id' }],
   })
+  @IsObject({ each: true })
+  @ManyToMany('Coupon', 'products')
   coupons: Coupon[];
 }
 

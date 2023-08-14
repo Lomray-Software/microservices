@@ -1,5 +1,5 @@
 import { IsNullable, IsTypeormDate, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
-import { IsEnum, IsNumber, Length, Max, Min, ValidateNested } from 'class-validator';
+import { IsEnum, IsNumber, IsObject, Length, Max, Min, ValidateNested } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -103,8 +103,10 @@ class Coupon {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToMany(() => Product, (product) => product.coupons)
+  @IsObject({ each: true })
+  @ManyToMany('Product', 'coupons')
   @JoinTable({
+    name: 'coupon_products_product',
     joinColumn: {
       name: 'couponId',
       referencedColumnName: 'couponId',
