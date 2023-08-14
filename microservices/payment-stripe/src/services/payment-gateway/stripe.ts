@@ -136,6 +136,16 @@ interface IRefundEvent {
   refundInProcess: Event;
 }
 
+interface IPaymentIntentFees {
+  paymentProviderUnitFee: number;
+  applicationUnitFee: number;
+  userUnitAmount: number;
+  receiverUnitRevenue: number;
+  receiverAdditionalFee: number;
+  senderAdditionalFee: number;
+  extraReceiverUnitRevenue: number;
+}
+
 type TCardData =
   | StripeSdk.PaymentMethodCreateParams.Card1
   | StripeSdk.PaymentMethodCreateParams.Card2;
@@ -1271,6 +1281,9 @@ class Stripe extends Abstract {
     additionalFeesPercent,
     extraReceiverRevenuePercent,
   }: IPaymentIntentParams): Promise<[Transaction, Transaction]> {
+    const { fees } = await remoteConfig();
+    const { instantPayoutPercent = 1 } = fees!;
+
     const senderCustomer = await this.customerRepository.findOne({ userId });
     const receiverCustomer = await this.customerRepository.findOne({ userId: receiverId });
 
@@ -1313,14 +1326,21 @@ class Stripe extends Abstract {
     /**
      * Calculate fees
      */
-    const { userUnitAmount, receiverUnitRevenue, applicationUnitFee, paymentProviderUnitFee } =
-      await this.getPaymentIntentFees({
-        entityUnitCost,
-        applicationPaymentPercent,
-        feesPayer,
-        additionalFeesPercent,
-        extraReceiverRevenuePercent,
-      });
+    const {
+      userUnitAmount,
+      receiverUnitRevenue,
+      applicationUnitFee,
+      paymentProviderUnitFee,
+      receiverAdditionalFee,
+      extraReceiverUnitRevenue,
+      senderAdditionalFee,
+    } = await this.getPaymentIntentFees({
+      entityUnitCost,
+      applicationPaymentPercent,
+      feesPayer,
+      additionalFeesPercent,
+      extraReceiverRevenuePercent,
+    });
 
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
@@ -1364,12 +1384,23 @@ class Stripe extends Abstract {
         userId: senderCustomer.userId,
         type: TransactionType.CREDIT,
         amount: userUnitAmount,
+        params: {
+          ...transactionData.params,
+          extraFee: senderAdditionalFee,
+        },
       }),
       this.transactionRepository.save({
         ...transactionData,
         userId: receiverUserId,
         type: TransactionType.DEBIT,
         amount: receiverUnitRevenue,
+        // Amount that will be charge for instant payout
+        params: {
+          ...transactionData.params,
+          extraFee: receiverAdditionalFee,
+          extraRevenue: extraReceiverUnitRevenue,
+          estimatedInstantPayoutFee: Math.round(receiverUnitRevenue * (instantPayoutPercent / 100)),
+        },
       }),
     ]);
   }
@@ -1501,12 +1532,7 @@ class Stripe extends Abstract {
     additionalFeesPercent,
     applicationPaymentPercent = 0,
     extraReceiverRevenuePercent = 0,
-  }: IGetPaymentIntentFeesParams): Promise<{
-    paymentProviderUnitFee: number;
-    applicationUnitFee: number;
-    userUnitAmount: number;
-    receiverUnitRevenue: number;
-  }> {
+  }: IGetPaymentIntentFeesParams): Promise<IPaymentIntentFees> {
     const { fees } = await remoteConfig();
 
     const { paymentPercent, stableUnit } = fees!;
@@ -1528,6 +1554,12 @@ class Stripe extends Abstract {
       extraReceiverRevenuePercent,
     );
 
+    const sharedFees = {
+      extraReceiverUnitRevenue,
+      senderAdditionalFee,
+      receiverAdditionalFee,
+    };
+
     /**
      * How much percent from total amount will receive end user
      */
@@ -1540,6 +1572,7 @@ class Stripe extends Abstract {
       );
 
       return {
+        ...sharedFees,
         applicationUnitFee,
         userUnitAmount,
         paymentProviderUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
@@ -1553,6 +1586,7 @@ class Stripe extends Abstract {
       getPercentFromAmount(entityUnitCost, paymentPercent) + stableUnit;
 
     return {
+      ...sharedFees,
       applicationUnitFee,
       paymentProviderUnitFee,
       userUnitAmount: Math.round(entityUnitCost + senderAdditionalFee),
