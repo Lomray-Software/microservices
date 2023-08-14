@@ -1929,6 +1929,15 @@ class Stripe extends Abstract {
       code,
     };
   }
+
+  /**
+   * Remove stripe coupon
+   */
+  public async removeCoupon(couponId: string): Promise<boolean> {
+    const { deleted: isDeleted } = await this.sdk.coupons.del(couponId);
+
+    return isDeleted;
+  }
 }
 
 export default Stripe;
