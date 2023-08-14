@@ -24,13 +24,12 @@ class Coupon implements EntitySubscriberInterface<CouponEntity> {
     }
 
     const service = await Factory.create(manager);
-
     const isDeleted = await service.removeCoupon(entity.couponId);
 
     if (!isDeleted) {
       throw new BaseException({
         status: 500,
-        message: "Can't remove coupon. Please try latter.",
+        message: "Can't remove coupon. Please try later.",
       });
     }
   }
