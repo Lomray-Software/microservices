@@ -34,6 +34,8 @@ export interface IParams {
   extraRevenue?: number;
   // Amount that will charge for instant payout
   estimatedInstantPayoutFee?: number;
+  // Original entity cost
+  entityCost?: number;
 }
 
 @JSONSchema({

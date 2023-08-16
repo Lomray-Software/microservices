@@ -1312,7 +1312,7 @@ class Stripe extends Abstract {
     if (!receiverAccountId || !isReceiverVerified) {
       throw new BaseException({
         status: 400,
-        message: "Receiver don't have setup or verified connected account",
+        message: "Receiver don't have setup or verified connected account.",
       });
     }
 
@@ -1346,6 +1346,13 @@ class Stripe extends Abstract {
     const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
       ...(title ? { description: title } : {}),
       metadata: {
+        // Original float entity cost
+        entityCost,
+        applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee),
+        receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
+        senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
+        receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue),
+        ...(feesPayer ? { feesPayer } : {}),
         ...(entityId ? { entityId } : {}),
       },
       payment_method_types: [StripePaymentMethods.CARD],
@@ -1375,6 +1382,7 @@ class Stripe extends Abstract {
         feesPayer,
         applicationFee: applicationUnitFee,
         paymentProviderFee: paymentProviderUnitFee,
+        entityCost: entityUnitCost,
       },
     };
 
