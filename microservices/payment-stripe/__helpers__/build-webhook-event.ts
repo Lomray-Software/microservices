@@ -14,7 +14,7 @@ export interface IStripeEvent<TEventData>
 /**
  * Returns Stripe webhook event
  */
-const buildWebhookEvent = <T>(data: T): IStripeEvent<T> => ({
+const buildWebhookEvent = <TEventData>(data: TEventData): IStripeEvent<TEventData> => ({
   id: 'event-id',
   object: 'event',
   account: 'account',
