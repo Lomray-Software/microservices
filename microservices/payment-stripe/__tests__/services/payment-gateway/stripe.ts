@@ -3,6 +3,8 @@ import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import StripeSdk, { Stripe as StripeTypes } from 'stripe';
+import buildWebhookEvent from '@__helpers__/build-webhook-event';
+import { bankAccountMock } from '@__mocks__/bank-account';
 import { cardMock } from '@__mocks__/card';
 import messages from '@__mocks__/messages';
 import {
@@ -13,6 +15,7 @@ import {
   customerMock,
   paymentMethodId,
 } from '@__mocks__/stripe';
+import { bankAccountEventMock } from '@__mocks__/webhook-events/external-account/bank-account';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import TransactionRole from '@constants/transaction-role';
 import OriginalStripe from '@services/payment-gateway/stripe';
@@ -85,305 +88,345 @@ describe('services/payment-gateway/stripe', () => {
     sandbox.restore();
   });
 
-  it('should correctly create customer', async () => {
-    StripeInstanceParamStub.value(stripeMock());
-    const { userId, customerId } = await service.createCustomer(userMock.userId);
-
-    expect(userId).to.equal(userMock.userId);
-    expect(customerId).to.equal(customerMock.id);
-    expect(TypeormMock.entityManager.save).to.calledOnce;
-  });
-
-  it('should correctly return account link', async () => {
-    StripeInstanceParamStub.value(stripeMock());
-    TypeormMock.entityManager.findOne.resolves(userMock);
-
-    const accountLink = await service.getConnectAccountLink(
-      userMock.userId,
-      accountUrlMock,
-      accountUrlMock,
-    );
-
-    expect(accountLink).to.equal(accountLinkMock.url);
-  });
-
-  it("should should throw error: customer isn't found", async () => {
-    TypeormMock.entityManager.findOne.resolves(undefined);
-
-    expect(
-      await waitResult(
-        service.getConnectAccountLink(userMock.userId, accountUrlMock, accountUrlMock),
-      ),
-    ).to.throw(messages.customerIsNotFound);
-  });
-
-  it("should should throw error: customer don't have setup connect account", async () => {
-    TypeormMock.entityManager.findOne.resolves({ ...userMock, params: {} });
-
-    expect(
-      await waitResult(
-        service.getConnectAccountLink(userMock.userId, accountUrlMock, accountUrlMock),
-      ),
-    ).to.throw("Customer don't have setup connect account");
-  });
-
-  it('should correctly return setup intent client secret', async () => {
-    StripeInstanceParamStub.value(stripeMock());
-    TypeormMock.entityManager.findOne.resolves(userMock);
-
-    const clientSecret = await service.setupIntent(userMock.userId);
-
-    expect(clientSecret).to.equal(clientSecretMock);
-  });
-
-  it("should correctly return setup intent client secret if customer isn't exist", async () => {
-    StripeInstanceParamStub.value(stripeMock());
-    TypeormMock.entityManager.findOne.resolves(undefined);
-
-    const clientSecret = await service.setupIntent(userMock.userId);
-
-    expect(clientSecret).to.equal(clientSecretMock);
-  });
-
-  it('should correctly crete connect account and return link for different users', async () => {
-    const users = [userMock, { ...userMock, params: {} }];
-
-    for (const user of users) {
+  describe('core', () => {
+    it('should correctly create customer', async () => {
       StripeInstanceParamStub.value(stripeMock());
-      TypeormMock.entityManager.findOne.resolves(user);
+      const { userId, customerId } = await service.createCustomer(userMock.userId);
 
-      const accountLink = await service.connectAccount(
+      expect(userId).to.equal(userMock.userId);
+      expect(customerId).to.equal(customerMock.id);
+      expect(TypeormMock.entityManager.save).to.calledOnce;
+    });
+
+    it('should correctly return account link', async () => {
+      StripeInstanceParamStub.value(stripeMock());
+      TypeormMock.entityManager.findOne.resolves(userMock);
+
+      const accountLink = await service.getConnectAccountLink(
         userMock.userId,
-        'mike@gmail.com',
-        StripeAccountTypes.STANDARD,
         accountUrlMock,
         accountUrlMock,
       );
 
       expect(accountLink).to.equal(accountLinkMock.url);
-    }
-  });
-
-  it('should correctly return customer balance', async () => {
-    StripeInstanceParamStub.value(stripeMock());
-    TypeormMock.entityManager.findOne.resolves(userMock);
-
-    const balance = await service.getBalance(userMock.userId);
-
-    expect(balance).to.deep.equal({
-      available: {
-        eur: 0,
-        usd: 1000,
-      },
-      instant: {
-        eur: 0,
-        usd: 0,
-      },
-      pending: {
-        eur: 0,
-        usd: 0,
-      },
     });
-  });
 
-  it("should return error (balance): customer isn't found", async () => {
-    StripeInstanceParamStub.value(stripeMock());
-    TypeormMock.entityManager.findOne.resolves(undefined);
+    it("should should throw error: customer isn't found", async () => {
+      TypeormMock.entityManager.findOne.resolves(undefined);
 
-    expect(await waitResult(service.getBalance(userMock.userId))).to.throw("Customer isn't found");
-  });
-
-  it("should should throw error (balance): customer don't have related connect account", async () => {
-    TypeormMock.entityManager.findOne.resolves({ ...userMock, params: {} });
-
-    expect(await waitResult(service.getBalance(userMock.userId))).to.throw(
-      "Customer don't have related connect account",
-    );
-  });
-
-  it('should multiply the amount by 100 for valid inputs', () => {
-    const testCases = [
-      { input: 10, expected: 1000 },
-      { input: '20.5', expected: 2050 },
-      { input: ' 30.75 ', expected: 3075 },
-      { input: '1000.25', expected: 100025 },
-    ];
-
-    testCases.forEach(({ input, expected }) => {
-      const result = service.toSmallestCurrencyUnit(input);
-
-      expect(result).to.equal(expected);
+      expect(
+        await waitResult(
+          service.getConnectAccountLink(userMock.userId, accountUrlMock, accountUrlMock),
+        ),
+      ).to.throw(messages.customerIsNotFound);
     });
-  });
 
-  it('should return NaN for invalid inputs', () => {
-    const testCases = ['invalid', '1.2.3'];
+    it("should should throw error: customer don't have setup connect account", async () => {
+      TypeormMock.entityManager.findOne.resolves({ ...userMock, params: {} });
 
-    testCases.forEach((input) => {
-      const result = service.toSmallestCurrencyUnit(input);
-
-      expect(result).to.be.NaN;
+      expect(
+        await waitResult(
+          service.getConnectAccountLink(userMock.userId, accountUrlMock, accountUrlMock),
+        ),
+      ).to.throw("Customer don't have setup connect account");
     });
-  });
 
-  it('should correctly remove customer', async () => {
-    StripeInstanceParamStub.value(stripeMock());
-    TypeormMock.entityManager.findOne.resolves(userMock);
+    it('should correctly return setup intent client secret', async () => {
+      StripeInstanceParamStub.value(stripeMock());
+      TypeormMock.entityManager.findOne.resolves(userMock);
 
-    const isRemoved = await service.removeCustomer(userMock.userId);
+      const clientSecret = await service.setupIntent(userMock.userId);
 
-    expect(isRemoved).to.true;
-  });
+      expect(clientSecret).to.equal(clientSecretMock);
+    });
 
-  it("shouldn't remove customer cause stripe remove failed", async () => {
-    StripeInstanceParamStub.value(stripeMock({ isDeletedCustomer: false }));
-    TypeormMock.entityManager.findOne.resolves(userMock);
+    it("should correctly return setup intent client secret if customer isn't exist", async () => {
+      StripeInstanceParamStub.value(stripeMock());
+      TypeormMock.entityManager.findOne.resolves(undefined);
 
-    const isRemoved = await service.removeCustomer(userMock.userId);
+      const clientSecret = await service.setupIntent(userMock.userId);
 
-    expect(isRemoved).to.false;
-  });
+      expect(clientSecret).to.equal(clientSecretMock);
+    });
 
-  it("should return error (remove customer): customer isn't found", async () => {
-    StripeInstanceParamStub.value(stripeMock());
-    TypeormMock.entityManager.findOne.resolves(undefined);
+    it('should correctly crete connect account and return link for different users', async () => {
+      const users = [userMock, { ...userMock, params: {} }];
 
-    expect(await waitResult(service.removeCustomer(userMock.userId))).to.throw(
-      messages.customerIsNotFound,
-    );
-  });
+      for (const user of users) {
+        StripeInstanceParamStub.value(stripeMock());
+        TypeormMock.entityManager.findOne.resolves(user);
 
-  it('should correctly add bank account customer', async () => {
-    StripeInstanceParamStub.value(stripeMock());
-    TypeormMock.entityManager.findOne.resolves(userMock);
+        const accountLink = await service.connectAccount(
+          userMock.userId,
+          'mike@gmail.com',
+          StripeAccountTypes.STANDARD,
+          accountUrlMock,
+          accountUrlMock,
+        );
 
-    const bankAccount = {
-      userId: userMock.userId,
-      bankAccountId: 'bank-account-id',
-      bankName: 'American Express',
-      holderName: 'Mike',
-      lastDigits: '4242',
-    };
+        expect(accountLink).to.equal(accountLinkMock.url);
+      }
+    });
 
-    TypeormMock.entityManager.save.resolves(bankAccount);
+    it('should correctly return customer balance', async () => {
+      StripeInstanceParamStub.value(stripeMock());
+      TypeormMock.entityManager.findOne.resolves(userMock);
 
-    const result = await service.addBankAccount(bankAccount);
+      const balance = await service.getBalance(userMock.userId);
 
-    expect(result).to.deep.equal(bankAccount);
-  });
-
-  it("should return error (add bank account): customer isn't found", async () => {
-    StripeInstanceParamStub.value(stripeMock());
-    TypeormMock.entityManager.findOne.resolves(undefined);
-
-    expect(await waitResult(service.removeCustomer(userMock.userId))).to.throw(
-      messages.customerIsNotFound,
-    );
-  });
-
-  it('should correctly compute payment intent fees', async () => {
-    const expectedResult = {
-      applicationUnitFee: 0,
-      extraReceiverUnitRevenue: 0,
-      paymentProviderUnitFee: 61,
-      receiverAdditionalFee: 0,
-      receiverUnitRevenue: 1000,
-      senderAdditionalFee: 0,
-      userUnitAmount: 1061,
-    };
-
-    expect(
-      await service.getPaymentIntentFees({
-        feesPayer: TransactionRole.SENDER,
-        entityUnitCost: 1000,
-      }),
-    ).to.deep.equal(expectedResult);
-  });
-
-  it('should correctly compute payment intent fees with application fees', async () => {
-    const expectedResult = {
-      applicationUnitFee: 30,
-      extraReceiverUnitRevenue: 0,
-      paymentProviderUnitFee: 62,
-      receiverAdditionalFee: 0,
-      receiverUnitRevenue: 1000,
-      senderAdditionalFee: 0,
-      userUnitAmount: 1092,
-    };
-
-    expect(
-      await service.getPaymentIntentFees({
-        feesPayer: TransactionRole.SENDER,
-        entityUnitCost: 1000,
-        applicationPaymentPercent: 3,
-      }),
-    ).to.deep.equal(expectedResult);
-  });
-
-  it('should correctly compute payment intent fees with application  and receiver additional fees', async () => {
-    const expectedResult = {
-      applicationUnitFee: 30,
-      extraReceiverUnitRevenue: 0,
-      paymentProviderUnitFee: 62,
-      receiverAdditionalFee: 60,
-      receiverUnitRevenue: 940,
-      senderAdditionalFee: 0,
-      userUnitAmount: 1092,
-    };
-
-    expect(
-      await service.getPaymentIntentFees({
-        feesPayer: TransactionRole.SENDER,
-        entityUnitCost: 1000,
-        applicationPaymentPercent: 3,
-        additionalFeesPercent: {
-          receiver: 6,
-          sender: 0,
+      expect(balance).to.deep.equal({
+        available: {
+          eur: 0,
+          usd: 1000,
         },
-      }),
-    ).to.deep.equal(expectedResult);
-  });
+        instant: {
+          eur: 0,
+          usd: 0,
+        },
+        pending: {
+          eur: 0,
+          usd: 0,
+        },
+      });
+    });
 
-  it('should correctly set payment method', async () => {
-    StripeInstanceParamStub.value(
-      stripeMock({
-        customersUpdateResult: {
-          ...customerMock,
-          // eslint-disable-next-line camelcase
-          invoice_settings: {
-            // eslint-disable-next-line camelcase
-            default_payment_method: paymentMethodId,
+    it("should return error (balance): customer isn't found", async () => {
+      StripeInstanceParamStub.value(stripeMock());
+      TypeormMock.entityManager.findOne.resolves(undefined);
+
+      expect(await waitResult(service.getBalance(userMock.userId))).to.throw(
+        "Customer isn't found",
+      );
+    });
+
+    it("should should throw error (balance): customer don't have related connect account", async () => {
+      TypeormMock.entityManager.findOne.resolves({ ...userMock, params: {} });
+
+      expect(await waitResult(service.getBalance(userMock.userId))).to.throw(
+        "Customer don't have related connect account",
+      );
+    });
+
+    it('should multiply the amount by 100 for valid inputs', () => {
+      const testCases = [
+        { input: 10, expected: 1000 },
+        { input: '20.5', expected: 2050 },
+        { input: ' 30.75 ', expected: 3075 },
+        { input: '1000.25', expected: 100025 },
+      ];
+
+      testCases.forEach(({ input, expected }) => {
+        const result = service.toSmallestCurrencyUnit(input);
+
+        expect(result).to.equal(expected);
+      });
+    });
+
+    it('should return NaN for invalid inputs', () => {
+      const testCases = ['invalid', '1.2.3'];
+
+      testCases.forEach((input) => {
+        const result = service.toSmallestCurrencyUnit(input);
+
+        expect(result).to.be.NaN;
+      });
+    });
+
+    it('should correctly remove customer', async () => {
+      StripeInstanceParamStub.value(stripeMock());
+      TypeormMock.entityManager.findOne.resolves(userMock);
+
+      const isRemoved = await service.removeCustomer(userMock.userId);
+
+      expect(isRemoved).to.true;
+    });
+
+    it("shouldn't remove customer cause stripe remove failed", async () => {
+      StripeInstanceParamStub.value(stripeMock({ isDeletedCustomer: false }));
+      TypeormMock.entityManager.findOne.resolves(userMock);
+
+      const isRemoved = await service.removeCustomer(userMock.userId);
+
+      expect(isRemoved).to.false;
+    });
+
+    it("should return error (remove customer): customer isn't found", async () => {
+      StripeInstanceParamStub.value(stripeMock());
+      TypeormMock.entityManager.findOne.resolves(undefined);
+
+      expect(await waitResult(service.removeCustomer(userMock.userId))).to.throw(
+        messages.customerIsNotFound,
+      );
+    });
+
+    it('should correctly add bank account customer', async () => {
+      StripeInstanceParamStub.value(stripeMock());
+      TypeormMock.entityManager.findOne.resolves(userMock);
+
+      const bankAccount = {
+        userId: userMock.userId,
+        bankAccountId: 'bank-account-id',
+        bankName: 'American Express',
+        holderName: 'Mike',
+        lastDigits: '4242',
+      };
+
+      TypeormMock.entityManager.save.resolves(bankAccount);
+
+      const result = await service.addBankAccount(bankAccount);
+
+      expect(result).to.deep.equal(bankAccount);
+    });
+
+    it("should return error (add bank account): customer isn't found", async () => {
+      StripeInstanceParamStub.value(stripeMock());
+      TypeormMock.entityManager.findOne.resolves(undefined);
+
+      expect(await waitResult(service.removeCustomer(userMock.userId))).to.throw(
+        messages.customerIsNotFound,
+      );
+    });
+
+    it('should correctly compute payment intent fees', async () => {
+      const expectedResult = {
+        applicationUnitFee: 0,
+        extraReceiverUnitRevenue: 0,
+        paymentProviderUnitFee: 61,
+        receiverAdditionalFee: 0,
+        receiverUnitRevenue: 1000,
+        senderAdditionalFee: 0,
+        userUnitAmount: 1061,
+      };
+
+      expect(
+        await service.getPaymentIntentFees({
+          feesPayer: TransactionRole.SENDER,
+          entityUnitCost: 1000,
+        }),
+      ).to.deep.equal(expectedResult);
+    });
+
+    it('should correctly compute payment intent fees with application fees', async () => {
+      const expectedResult = {
+        applicationUnitFee: 30,
+        extraReceiverUnitRevenue: 0,
+        paymentProviderUnitFee: 62,
+        receiverAdditionalFee: 0,
+        receiverUnitRevenue: 1000,
+        senderAdditionalFee: 0,
+        userUnitAmount: 1092,
+      };
+
+      expect(
+        await service.getPaymentIntentFees({
+          feesPayer: TransactionRole.SENDER,
+          entityUnitCost: 1000,
+          applicationPaymentPercent: 3,
+        }),
+      ).to.deep.equal(expectedResult);
+    });
+
+    it('should correctly compute payment intent fees with application  and receiver additional fees', async () => {
+      const expectedResult = {
+        applicationUnitFee: 30,
+        extraReceiverUnitRevenue: 0,
+        paymentProviderUnitFee: 62,
+        receiverAdditionalFee: 60,
+        receiverUnitRevenue: 940,
+        senderAdditionalFee: 0,
+        userUnitAmount: 1092,
+      };
+
+      expect(
+        await service.getPaymentIntentFees({
+          feesPayer: TransactionRole.SENDER,
+          entityUnitCost: 1000,
+          applicationPaymentPercent: 3,
+          additionalFeesPercent: {
+            receiver: 6,
+            sender: 0,
           },
-        } as StripeSdk.Customer,
-      }),
-    );
-    TypeormMock.entityManager.findOne.resolves({
-      ...cardMock,
-      params: { paymentMethodId },
-      customer: userMock,
+        }),
+      ).to.deep.equal(expectedResult);
     });
 
-    const isSet = await service.setDefaultCustomerPaymentMethod(
-      userMock.customerId as string,
-      'payment-method-id',
-    );
+    it('should correctly set payment method', async () => {
+      StripeInstanceParamStub.value(
+        stripeMock({
+          customersUpdateResult: {
+            ...customerMock,
+            // eslint-disable-next-line camelcase
+            invoice_settings: {
+              // eslint-disable-next-line camelcase
+              default_payment_method: paymentMethodId,
+            },
+          } as StripeSdk.Customer,
+        }),
+      );
+      TypeormMock.entityManager.findOne.resolves({
+        ...cardMock,
+        params: { paymentMethodId },
+        customer: userMock,
+      });
 
-    expect(isSet).to.true;
+      const isSet = await service.setDefaultCustomerPaymentMethod(
+        userMock.customerId as string,
+        'payment-method-id',
+      );
+
+      expect(isSet).to.true;
+    });
+
+    it("shouldn't correctly set payment method", async () => {
+      StripeInstanceParamStub.value(stripeMock());
+      TypeormMock.entityManager.findOne.resolves({
+        ...cardMock,
+        params: { paymentMethodId },
+        customer: userMock,
+      });
+
+      const isSet = await service.setDefaultCustomerPaymentMethod(
+        userMock.customerId as string,
+        'payment-method-id',
+      );
+
+      expect(isSet).to.false;
+    });
   });
 
-  it("shouldn't correctly set payment method", async () => {
-    StripeInstanceParamStub.value(stripeMock());
-    TypeormMock.entityManager.findOne.resolves({
-      ...cardMock,
-      params: { paymentMethodId },
-      customer: userMock,
+  describe('webhooks handlers', () => {
+    describe('Event: account.external_account.deleted', () => {
+      it('should correctly remove bank account', async () => {
+        const event = buildWebhookEvent<StripeSdk.BankAccount>(bankAccountEventMock);
+
+        const extractIdStub = sinon.stub().returns(event.data.object.id);
+        const isExternalAccountIsBankAccountStub = sinon.stub().resolves(true);
+        const getBankAccountByIdStub = sinon.stub().resolves(bankAccountMock);
+
+        await service.handleExternalAccountDeleted.call(
+          {
+            extractId: extractIdStub,
+            isExternalAccountIsBankAccount: isExternalAccountIsBankAccountStub,
+            getBankAccountById: getBankAccountByIdStub,
+            bankAccountRepository: TypeormMock.entityManager,
+          },
+          event,
+        );
+
+        expect(TypeormMock.entityManager.remove).calledOnce;
+      });
+
+      it('should throw error: invalid bank connected account', async () => {
+        const event = buildWebhookEvent<StripeSdk.BankAccount>(bankAccountEventMock);
+
+        delete event.data.object.account;
+
+        expect(
+          await waitResult(
+            service.handleExternalAccountDeleted(event as unknown as StripeSdk.Event),
+          ),
+        ).to.throw('The connected account reference in external account data not found.');
+      });
     });
-
-    const isSet = await service.setDefaultCustomerPaymentMethod(
-      userMock.customerId as string,
-      'payment-method-id',
-    );
-
-    expect(isSet).to.false;
   });
 });
