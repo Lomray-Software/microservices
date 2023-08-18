@@ -1025,6 +1025,13 @@ class Stripe extends Abstract {
     if (!this.isExternalAccountIsBankAccount(externalAccount)) {
       const card = await this.getCardById(externalAccount.id);
 
+      if (!card) {
+        throw new BaseException({
+          status: 500,
+          message: messages.getNotFoundMessage('Failed to handle external account updated. Card'),
+        });
+      }
+
       const {
         last4: lastDigits,
         brand,
@@ -1048,6 +1055,15 @@ class Stripe extends Abstract {
     }
 
     const bankAccount = await this.getBankAccountById(externalAccount.id);
+
+    if (!bankAccount) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage(
+          'Failed to handle external account updated. Bank account',
+        ),
+      });
+    }
 
     const {
       last4: lastDigits,
@@ -1136,7 +1152,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles connect account deleted
-   * NOTE: Connect account event
+   * @description NOTE: Connect account event
    */
   public async handleExternalAccountDeleted(event: StripeSdk.Event): Promise<void> {
     const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
@@ -1148,10 +1164,17 @@ class Stripe extends Abstract {
       });
     }
 
-    const externalAccountId = this.extractId(externalAccount.account);
+    const externalAccountId = this.extractId(externalAccount.id);
 
     if (!this.isExternalAccountIsBankAccount(externalAccount)) {
       const card = await this.getCardById(externalAccountId);
+
+      if (!card) {
+        throw new BaseException({
+          status: 500,
+          message: messages.getNotFoundMessage('Failed to handle external account deleted. Card'),
+        });
+      }
 
       await this.cardRepository.remove(card);
 
@@ -1160,12 +1183,21 @@ class Stripe extends Abstract {
 
     const bankAccount = await this.getBankAccountById(externalAccountId);
 
+    if (!bankAccount) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage(
+          'Failed to handle external account deleted. Bank account',
+        ),
+      });
+    }
+
     await this.bankAccountRepository.remove(bankAccount);
   }
 
   /**
    * Handles customer update
-   * NOTE: Connect account event
+   * @description NOTE: Connect account event
    */
   public async handleAccountUpdated(event: StripeSdk.Event) {
     /* eslint-disable camelcase */
@@ -1729,40 +1761,22 @@ class Stripe extends Abstract {
    * Returns card by card id
    * NOTE: Uses to search related connect account (external account) data
    */
-  private async getCardById(cardId: string): Promise<Card> {
-    const card = await this.cardRepository
+  private getCardById(cardId: string): Promise<Card | undefined> {
+    return this.cardRepository
       .createQueryBuilder('card')
       .where("card.params ->> 'cardId' = :cardId", { cardId })
       .getOne();
-
-    if (!card) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Card'),
-      });
-    }
-
-    return card;
   }
 
   /**
    * Returns bank account by bank account id
    * NOTE: Uses to search related connect account (external account) data
    */
-  private async getBankAccountById(bankAccountId: string): Promise<BankAccount> {
-    const bankAccount = await this.bankAccountRepository
+  private getBankAccountById(bankAccountId: string): Promise<BankAccount | undefined> {
+    return this.bankAccountRepository
       .createQueryBuilder('bankAccount')
       .where("bankAccount.params ->> 'bankAccountId' = :bankAccountId", { bankAccountId })
       .getOne();
-
-    if (!bankAccount) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Bank account'),
-      });
-    }
-
-    return bankAccount;
   }
 
   /**
