@@ -1085,7 +1085,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles connect account create
-   * NOTES: Connect account event
+   * @description NOTES: Connect account event
    */
   public async handleExternalAccountCreated(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
