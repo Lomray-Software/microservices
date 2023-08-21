@@ -1,10 +1,24 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsNumber, IsObject, Length } from 'class-validator';
+import { IsEnum, IsNumber, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import TransactionStatus from '@constants/transaction-status';
+import Transaction from '@entities/transaction';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface IParams {}
+interface IParams {
+  // Reason for the refund, either user-provided
+  reason?: string;
+  // Error reason for failed refund
+  errorReason?: string;
+}
 
 /**
  * Refund entity
@@ -12,12 +26,16 @@ interface IParams {}
 @Entity()
 class Refund {
   @JSONSchema({
-    description: 'Microservices transaction id (uuid)',
+    description: 'Stripe transaction id (payment intent)',
+    example: 'pi_3Nha3JAmQ4asS8PS0JPXIyEh',
   })
   @PrimaryColumn()
   @Length(1, 36)
   transactionId: string;
 
+  @JSONSchema({
+    description: 'Requested refund amount',
+  })
   @JSONSchema({ description: 'Unit amount (e.g. 100$ = 10000 in unit' })
   @Column({ type: 'int' })
   @IsNumber()
@@ -28,7 +46,13 @@ class Refund {
   @IsUndefinable()
   params: IParams;
 
-  status: string;
+  @JSONSchema({
+    description: 'Status should be started with the refund prefix',
+  })
+  @Column({ type: 'enum', enum: TransactionStatus, default: TransactionStatus.INITIAL })
+  @IsEnum(TransactionStatus)
+  @IsUndefinable()
+  status: TransactionStatus;
 
   @IsTypeormDate()
   @CreateDateColumn()
@@ -37,6 +61,10 @@ class Refund {
   @IsTypeormDate()
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne('Transaction', 'refunds')
+  @IsObject()
+  transaction: Transaction;
 }
 
 export default Refund;

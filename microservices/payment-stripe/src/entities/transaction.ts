@@ -1,5 +1,6 @@
 import { IsTypeormDate, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
-import { Allow, IsEnum, IsNumber, IsObject, Length } from 'class-validator';
+import { Type } from 'class-transformer';
+import { Allow, IsEnum, IsNumber, IsObject, Length, ValidateNested } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -7,6 +8,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -17,6 +19,7 @@ import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import type Customer from '@entities/customer';
 import type Product from '@entities/product';
+import Refund from '@entities/refund';
 import IsValidStripeId from '@helpers/validators/is-stripe-id-valid';
 
 export interface IParams {
@@ -46,6 +49,7 @@ export interface IParams {
   properties: {
     customer: { $ref: '#/definitions/Customer' },
     product: { $ref: '#/definitions/Product' },
+    refunds: { $ref: '#/definitions/Refund', type: 'array' },
   },
 })
 @Entity()
@@ -54,6 +58,10 @@ class Transaction {
   @Allow()
   id: string;
 
+  @JSONSchema({
+    description: 'Stripe transaction id (payment intent)',
+    example: 'pi_3Nha3JAmQ4asS8PS0JPXIyEh',
+  })
   @Column({ type: 'varchar', length: 66 })
   @Length(1, 66)
   transactionId: string;
@@ -165,6 +173,14 @@ class Transaction {
     referencedColumnName: 'userId',
   })
   customer: Customer;
+
+  @OneToMany('Refund', 'transaction')
+  @JoinColumn({ name: 'transactionId' })
+  @IsObject({ each: true })
+  @Type(() => Refund)
+  @ValidateNested()
+  @IsUndefinable()
+  refunds: Refund[];
 
   /**
    * Check is cardId exist
