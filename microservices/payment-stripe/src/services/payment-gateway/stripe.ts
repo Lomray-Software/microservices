@@ -1384,6 +1384,8 @@ class Stripe extends Abstract {
         receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
         senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
         receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue),
+        // From which card paid
+        ...(cardId ? { cardId } : {}),
         ...(feesPayer ? { feesPayer } : {}),
         ...(entityId ? { entityId } : {}),
       },
