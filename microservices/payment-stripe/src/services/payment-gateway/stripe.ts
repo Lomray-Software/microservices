@@ -78,6 +78,7 @@ interface IPaymentIntentMetadata {
 interface IRefundParams {
   transactionId: string;
   refundAmountType?: RefundAmountType;
+  amount?: number;
   /**
    * If user don't have required amount in connect account, he must provide
    * bank account or card id that will be used for refund charge
@@ -1626,7 +1627,11 @@ class Stripe extends Abstract {
    * Sender payed 106.39$: 100$ - entity cost, 3.39$ - stripe fees, 3$ - platform application fee.
    * In the end of refund sender will receive 100$ and platform revenue will be 3$.
    */
-  public async refund({ transactionId }: IRefundParams): Promise<boolean> {
+  public async refund({
+    transactionId,
+    amount,
+    refundAmountType = RefundAmountType.REVENUE,
+  }: IRefundParams): Promise<boolean> {
     const debitTransaction = await this.transactionRepository.findOne({
       transactionId,
       type: TransactionType.DEBIT,
@@ -1646,6 +1651,24 @@ class Stripe extends Abstract {
       });
     }
 
+    let amountUnit: number | undefined;
+
+    if (amount) {
+      amountUnit = this.toSmallestCurrencyUnit(amount);
+    } else {
+      amountUnit =
+        refundAmountType === RefundAmountType.REVENUE
+          ? debitTransaction.amount
+          : debitTransaction.params.entityCost;
+    }
+
+    if (!amountUnit) {
+      throw new BaseException({
+        status: 500,
+        message: 'Failed to refund transaction. Invalid refund amount.',
+      });
+    }
+
     /**
      * Returns refunds from platform (application) account to sender
      */
@@ -1654,7 +1677,7 @@ class Stripe extends Abstract {
       charge: debitTransaction.params.chargeId,
       reverse_transfer: true,
       refund_application_fee: false,
-      amount: 1000,
+      amount: amountUnit,
     });
 
     const refund = this.refundRepository.create({
