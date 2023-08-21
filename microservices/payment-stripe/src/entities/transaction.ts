@@ -9,6 +9,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -62,7 +63,7 @@ class Transaction {
     description: 'Stripe transaction id (payment intent)',
     example: 'pi_3Nha3JAmQ4asS8PS0JPXIyEh',
   })
-  @Column({ type: 'varchar', length: 66 })
+  @PrimaryColumn({ type: 'varchar', length: 66 })
   @Length(1, 66)
   transactionId: string;
 
