@@ -15,7 +15,7 @@ export default class refund1692635371272 implements MigrationInterface {
      * Create refund table
      */
     await queryRunner.query(
-      `CREATE TABLE "refund" ("transactionId" varchar(66) NOT NULL, "amount" integer NOT NULL, "params" json NOT NULL DEFAULT '{}', "status" "public"."transaction_status_enum" NOT NULL DEFAULT 'initial', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "refund(pk):transactionId" PRIMARY KEY ("transactionId"))`,
+      `CREATE TABLE "refund" (id uuid, "transactionId" varchar(66) NOT NULL, "amount" integer NOT NULL, "params" json NOT NULL DEFAULT '{}', "status" "public"."transaction_status_enum" NOT NULL DEFAULT 'initial', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "refund(pk):id" PRIMARY KEY ("id"))`,
     );
   }
 
