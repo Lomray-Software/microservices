@@ -742,7 +742,7 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Handles reversed transfer
+   * Handles refund updated
    */
   public async handleRefundUpdated(event: StripeSdk.Event): Promise<void> {
     const {
