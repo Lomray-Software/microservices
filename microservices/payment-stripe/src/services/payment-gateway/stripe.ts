@@ -59,6 +59,21 @@ interface IPaymentIntentParams {
   extraReceiverRevenuePercent?: number;
 }
 
+interface IPaymentIntentMetadata {
+  senderId: string;
+  receiverId: string;
+  entityCost: string;
+  cardId: string;
+  feesPayer: TransactionRole;
+  applicationFee: string;
+  receiverExtraFee: string;
+  senderExtraFee: string;
+  receiverExtraRevenue: string;
+  paymentProviderFee: string;
+  entityId?: string;
+  title?: string;
+}
+
 interface IRefundParams {
   transactionId: string;
   /**
@@ -344,6 +359,7 @@ class Stripe extends Abstract {
       case StripeTransactionStatus.ERROR:
       case StripeTransactionStatus.PAYMENT_FAILED:
       case StripeTransactionStatus.CANCELED:
+      case StripeTransactionStatus.REQUIRES_PAYMENT_METHOD:
         return TransactionStatus.ERROR;
 
       case StripeTransactionStatus.NO_PAYMENT_REQUIRED:
@@ -526,12 +542,12 @@ class Stripe extends Abstract {
    *  [secondEventType]: secondCallback
    * }
    */
-  public handleWebhookEvent(
+  public async handleWebhookEvent(
     payload: string,
     signature: string,
     webhookKey: string,
     webhookType: string,
-  ): void {
+  ): Promise<void> {
     const event = this.sdk.webhooks.constructEvent(payload, signature, webhookKey);
 
     switch (event.type) {
@@ -539,7 +555,7 @@ class Stripe extends Abstract {
        * Checkout session events
        */
       case 'checkout.session.completed':
-        void this.handleTransactionCompleted(event);
+        await this.handleTransactionCompleted(event);
         break;
 
       /**
@@ -550,7 +566,7 @@ class Stripe extends Abstract {
           connect: this.handleAccountUpdated(event),
         };
 
-        void accountUpdatedHandlers?.[webhookType];
+        await accountUpdatedHandlers?.[webhookType];
         break;
 
       case 'account.external_account.created':
@@ -558,7 +574,7 @@ class Stripe extends Abstract {
           connect: this.handleExternalAccountCreated(event),
         };
 
-        void accountExternalAccountCreatedHandlers?.[webhookType];
+        await accountExternalAccountCreatedHandlers?.[webhookType];
         break;
 
       case 'account.external_account.updated':
@@ -566,7 +582,7 @@ class Stripe extends Abstract {
           connect: this.handleExternalAccountUpdated(event),
         };
 
-        void accountExternalAccountUpdatedHandlers?.[webhookType];
+        await accountExternalAccountUpdatedHandlers?.[webhookType];
         break;
 
       case 'account.external_account.deleted':
@@ -574,23 +590,27 @@ class Stripe extends Abstract {
           connect: this.handleExternalAccountDeleted(event),
         };
 
-        void accountExternalAccountDeletedHandlers?.[webhookType];
+        await accountExternalAccountDeletedHandlers?.[webhookType];
         break;
 
       /**
        * Payment method events
        */
       case 'setup_intent.succeeded':
-        void this.handleSetupIntentSucceed(event);
+        await this.handleSetupIntentSucceed(event);
         break;
 
       case 'payment_method.updated':
       case 'payment_method.automatically_updated':
-        void this.handlePaymentMethodUpdated(event);
+        await this.handlePaymentMethodUpdated(event);
         break;
 
       case 'payment_method.detached':
-        void this.handlePaymentMethodDetached(event);
+        this.handlePaymentMethodDetached(event);
+        break;
+
+      case 'payment_intent.created':
+        await this.handlePaymentIntentFailureCreate(event);
         break;
 
       /**
@@ -599,19 +619,19 @@ class Stripe extends Abstract {
       case 'payment_intent.processing':
       case 'payment_intent.payment_failed':
       case 'payment_intent.succeeded':
-        void this.handlePaymentIntent(event);
+        await this.handlePaymentIntent(event);
         break;
 
       case 'charge.refund.updated':
       case 'charge.refunded':
-        void this.handleChargeRefund(event);
+        await this.handleChargeRefund(event);
         break;
 
       /**
        * Customer events
        */
       case 'customer.updated':
-        void this.handleCustomerUpdated(event);
+        await this.handleCustomerUpdated(event);
         break;
     }
   }
@@ -776,6 +796,102 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Handles payment intent failure creation
+   * @description NOTES: Payment intent will be created with the failed status: card was declined -
+   * high fraud risk but stripe will throw error on creation and send webhook event with the creation
+   */
+  public async handlePaymentIntentFailureCreate(event: StripeSdk.Event): Promise<void> {
+    const {
+      id,
+      status,
+      metadata,
+      application_fee_amount: applicationFeeAmount,
+      amount,
+    } = event.data.object as StripeSdk.PaymentIntent;
+
+    const transactions = await this.transactionRepository.find({ transactionId: id });
+
+    /**
+     * If transactions weren't created cause payment intent failed on create
+     */
+    if (transactions.length) {
+      return;
+    }
+
+    const {
+      entityId,
+      title,
+      feesPayer,
+      cardId,
+      entityCost,
+      applicationFee,
+      paymentProviderFee,
+      senderExtraFee,
+      receiverExtraFee,
+      receiverExtraRevenue,
+      senderId,
+      receiverId,
+    } = metadata as unknown as IPaymentIntentMetadata;
+
+    const paymentProviderUnitFee = this.toSmallestCurrencyUnit(paymentProviderFee);
+
+    const card = await this.cardRepository
+      .createQueryBuilder('card')
+      .where('card.userId = :userId AND card.id = :cardId', { userId: senderId, cardId })
+      .getOne();
+
+    if (!card) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Failed to create transaction. Card'),
+      });
+    }
+
+    /* eslint-enable camelcase */
+    const transactionData = {
+      entityId,
+      title,
+      paymentMethodId: card.params.paymentMethodId,
+      cardId,
+      transactionId: id,
+      status: this.getStatus(status as StripeTransactionStatus),
+      // eslint-disable-next-line camelcase
+      fee: applicationFeeAmount || 0,
+      params: {
+        feesPayer,
+        applicationFee: Number(applicationFee),
+        paymentProviderFee: paymentProviderUnitFee,
+        entityCost: Number(entityCost),
+      },
+    };
+
+    await Promise.all([
+      this.transactionRepository.save({
+        ...transactionData,
+        userId: senderId,
+        type: TransactionType.CREDIT,
+        amount,
+        params: {
+          ...transactionData.params,
+          extraFee: this.toSmallestCurrencyUnit(senderExtraFee),
+        },
+      }),
+      this.transactionRepository.save({
+        ...transactionData,
+        userId: receiverId,
+        type: TransactionType.DEBIT,
+        amount,
+        // Amount that will be charge for instant payout
+        params: {
+          ...transactionData.params,
+          extraFee: this.toSmallestCurrencyUnit(receiverExtraFee),
+          extraRevenue: this.toSmallestCurrencyUnit(receiverExtraRevenue),
+        },
+      }),
+    ]);
+  }
+
+  /**
    * Handles payment intent statuses
    */
   public async handlePaymentIntent(event: StripeSdk.Event): Promise<void> {
@@ -783,6 +899,7 @@ class Stripe extends Abstract {
       id,
       status,
       latest_charge: latestCharge,
+      last_payment_error: lastPaymentError,
     } = event.data.object as StripeSdk.PaymentIntent;
 
     const transactions = await this.transactionRepository.find({ transactionId: id });
@@ -790,7 +907,9 @@ class Stripe extends Abstract {
     if (!transactions.length) {
       throw new BaseException({
         status: 500,
-        message: messages.getNotFoundMessage('Debit or credit transaction'),
+        message: messages.getNotFoundMessage(
+          'Failed to handle payment intent. Debit or credit transaction',
+        ),
       });
     }
 
@@ -801,6 +920,15 @@ class Stripe extends Abstract {
         }
 
         transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
+
+        /**
+         * If payment intent failed
+         */
+        if (lastPaymentError) {
+          transaction.params.errorMessage = lastPaymentError.message;
+          transaction.params.errorCode = lastPaymentError.code;
+          transaction.params.declineCode = lastPaymentError.decline_code;
+        }
 
         return this.transactionRepository.save(transaction);
       }),
@@ -1309,9 +1437,9 @@ class Stripe extends Abstract {
     title,
     applicationPaymentPercent,
     entityId,
-    feesPayer,
     additionalFeesPercent,
     extraReceiverRevenuePercent,
+    feesPayer = TransactionRole.SENDER,
   }: IPaymentIntentParams): Promise<[Transaction, Transaction]> {
     const { fees } = await remoteConfig();
     const { instantPayoutPercent = 1 } = fees!;
@@ -1380,12 +1508,17 @@ class Stripe extends Abstract {
       metadata: {
         // Original float entity cost
         entityCost,
+        paymentProviderUnitFee: this.fromSmallestCurrencyUnit(paymentProviderUnitFee),
         applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee),
         receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
         senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
         receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue),
-        ...(feesPayer ? { feesPayer } : {}),
+        cardId: paymentMethodCardId,
+        feesPayer,
+        senderId: senderCustomer.userId,
+        receiverId: receiverUserId,
         ...(entityId ? { entityId } : {}),
+        ...(title ? { description: title } : {}),
       },
       payment_method_types: [StripePaymentMethods.CARD],
       confirm: true,
@@ -1447,7 +1580,7 @@ class Stripe extends Abstract {
 
   /**
    * Refund transaction (payment intent)
-   * NOTES:
+   * @description NOTES:
    * Sender payed 106.39$: 100$ - entity cost, 3.39$ - stripe fees, 3$ - platform application fee.
    * In the end of refund sender will receive 100$ and platform revenue will be 3$.
    */
@@ -1474,7 +1607,6 @@ class Stripe extends Abstract {
     /**
      * Returns refunds from platform (application) account to sender
      */
-
     /* eslint-disable camelcase */
     await this.sdk.refunds.create({
       charge: debitTransaction.params.chargeId,
@@ -1509,7 +1641,7 @@ class Stripe extends Abstract {
 
   /**
    * Returns positive int amount
-   * NOTE: Should return the positive integer representing how much
+   * @description NOTE: Should return the positive integer representing how much
    * to charge in the smallest currency unit
    */
   public toSmallestCurrencyUnit(amount: number | string): number {
@@ -1705,19 +1837,18 @@ class Stripe extends Abstract {
     const cardQuery = this.cardRepository
       .createQueryBuilder('card')
       .where('card.userId = :userId', { userId })
-      .andWhere('card.isDefault = true')
       .andWhere("card.params ->> 'paymentMethodId' IS NOT NULL");
 
     if (cardId) {
-      card = await cardQuery.andWhere("card.params ->> 'cardId' = :cardId", { cardId }).getOne();
+      card = await cardQuery.andWhere('card.id = :cardId', { cardId }).getOne();
     } else {
-      card = await cardQuery.getOne();
+      card = await cardQuery.andWhere('card.isDefault = true').getOne();
     }
 
     if (!card) {
       throw new BaseException({
         status: 500,
-        message: messages.getNotFoundMessage('Card'),
+        message: messages.getNotFoundMessage('Failed to get charging card. Card'),
       });
     }
 
