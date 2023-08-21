@@ -1705,19 +1705,18 @@ class Stripe extends Abstract {
     const cardQuery = this.cardRepository
       .createQueryBuilder('card')
       .where('card.userId = :userId', { userId })
-      .andWhere('card.isDefault = true')
       .andWhere("card.params ->> 'paymentMethodId' IS NOT NULL");
 
     if (cardId) {
-      card = await cardQuery.andWhere("card.params ->> 'cardId' = :cardId", { cardId }).getOne();
+      card = await cardQuery.andWhere('card.id = :cardId', { cardId }).getOne();
     } else {
-      card = await cardQuery.getOne();
+      card = await cardQuery.andWhere('card.isDefault = true').getOne();
     }
 
     if (!card) {
       throw new BaseException({
         status: 500,
-        message: messages.getNotFoundMessage('Card'),
+        message: messages.getNotFoundMessage('Failed to get charging card. Card'),
       });
     }
 
