@@ -542,12 +542,12 @@ class Stripe extends Abstract {
    *  [secondEventType]: secondCallback
    * }
    */
-  public handleWebhookEvent(
+  public async handleWebhookEvent(
     payload: string,
     signature: string,
     webhookKey: string,
     webhookType: string,
-  ): void {
+  ): Promise<void> {
     const event = this.sdk.webhooks.constructEvent(payload, signature, webhookKey);
 
     switch (event.type) {
@@ -555,7 +555,7 @@ class Stripe extends Abstract {
        * Checkout session events
        */
       case 'checkout.session.completed':
-        void this.handleTransactionCompleted(event);
+        await this.handleTransactionCompleted(event);
         break;
 
       /**
@@ -566,7 +566,7 @@ class Stripe extends Abstract {
           connect: this.handleAccountUpdated(event),
         };
 
-        void accountUpdatedHandlers?.[webhookType];
+        await accountUpdatedHandlers?.[webhookType];
         break;
 
       case 'account.external_account.created':
@@ -574,7 +574,7 @@ class Stripe extends Abstract {
           connect: this.handleExternalAccountCreated(event),
         };
 
-        void accountExternalAccountCreatedHandlers?.[webhookType];
+        await accountExternalAccountCreatedHandlers?.[webhookType];
         break;
 
       case 'account.external_account.updated':
@@ -582,7 +582,7 @@ class Stripe extends Abstract {
           connect: this.handleExternalAccountUpdated(event),
         };
 
-        void accountExternalAccountUpdatedHandlers?.[webhookType];
+        await accountExternalAccountUpdatedHandlers?.[webhookType];
         break;
 
       case 'account.external_account.deleted':
@@ -590,27 +590,27 @@ class Stripe extends Abstract {
           connect: this.handleExternalAccountDeleted(event),
         };
 
-        void accountExternalAccountDeletedHandlers?.[webhookType];
+        await accountExternalAccountDeletedHandlers?.[webhookType];
         break;
 
       /**
        * Payment method events
        */
       case 'setup_intent.succeeded':
-        void this.handleSetupIntentSucceed(event);
+        await this.handleSetupIntentSucceed(event);
         break;
 
       case 'payment_method.updated':
       case 'payment_method.automatically_updated':
-        void this.handlePaymentMethodUpdated(event);
+        await this.handlePaymentMethodUpdated(event);
         break;
 
       case 'payment_method.detached':
-        void this.handlePaymentMethodDetached(event);
+        this.handlePaymentMethodDetached(event);
         break;
 
       case 'payment_intent.created':
-        void this.handlePaymentIntentFailureCreate(event);
+        await this.handlePaymentIntentFailureCreate(event);
         break;
 
       /**
@@ -619,19 +619,19 @@ class Stripe extends Abstract {
       case 'payment_intent.processing':
       case 'payment_intent.payment_failed':
       case 'payment_intent.succeeded':
-        void this.handlePaymentIntent(event);
+        await this.handlePaymentIntent(event);
         break;
 
       case 'charge.refund.updated':
       case 'charge.refunded':
-        void this.handleChargeRefund(event);
+        await this.handleChargeRefund(event);
         break;
 
       /**
        * Customer events
        */
       case 'customer.updated':
-        void this.handleCustomerUpdated(event);
+        await this.handleCustomerUpdated(event);
         break;
     }
   }
