@@ -146,13 +146,6 @@ interface IPaymentIntentEvent {
   error: Event;
 }
 
-interface IRefundEvent {
-  refunded: Event;
-  refundCanceled: Event;
-  refundFailed: Event;
-  refundInProcess: Event;
-}
-
 interface IPaymentIntentFees {
   paymentProviderUnitFee: number;
   applicationUnitFee: number;
@@ -186,16 +179,6 @@ class Stripe extends Abstract {
     [TransactionStatus.SUCCESS]: Event.PaymentIntentSuccess,
     [TransactionStatus.IN_PROCESS]: Event.PaymentIntentInProcess,
     [TransactionStatus.ERROR]: Event.PaymentIntentError,
-  };
-
-  /**
-   * Refund event name
-   */
-  private refundEventName: IRefundEvent = {
-    [TransactionStatus.REFUNDED]: Event.RefundSuccess,
-    [TransactionStatus.REFUND_FAILED]: Event.RefundFailed,
-    [TransactionStatus.REFUND_CANCELED]: Event.RefundCanceled,
-    [TransactionStatus.REFUND_IN_PROCESS]: Event.RefundInProcess,
   };
 
   /**
@@ -624,9 +607,10 @@ class Stripe extends Abstract {
         await this.handlePaymentIntent(event);
         break;
 
-      case 'charge.refund.updated':
+      // case 'transfer.reversed':
+      // case 'charge.refund.updated':
       case 'charge.refunded':
-        await this.handleChargeRefund(event);
+        await this.handleChargeRefunded(event);
         break;
 
       /**
@@ -749,15 +733,99 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Handles refund statuses
+   * Handles reversed transfer
    */
-  public async handleChargeRefund(event: StripeSdk.Event): Promise<void> {
-    const { status, payment_intent: paymentIntent } = event.data.object as StripeSdk.Refund;
+  public async handleReversedTransfer(event: StripeSdk.Event): Promise<void> {
+    const {
+      status,
+      reason,
+      failure_reason: failedReason,
+      payment_intent: paymentIntent,
+    } = event.data.object as StripeSdk.Refund;
 
     if (!paymentIntent || !status) {
       throw new BaseException({
         status: 500,
-        message: "Payment intent id or refund status wasn't provided",
+        message: "Payment intent id or refund status wasn't provided.",
+      });
+    }
+
+    const refund = await this.refundRepository.findOne({
+      transactionId: this.extractId(paymentIntent),
+    });
+
+    if (!refund) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Failed to update transaction refund data. Refund'),
+      });
+    }
+
+    const refundStatus = this.getStatus(`refund_${status}` as unknown as StripeTransactionStatus);
+
+    if (!refundStatus) {
+      throw new BaseException({
+        status: 500,
+        message: 'Failed to get transaction status for refund.',
+      });
+    }
+
+    refund.status = refundStatus;
+    refund.params.errorReason = failedReason;
+
+    if (reason && refund.params.reason !== reason) {
+      refund.params.reason = reason;
+    }
+
+    await this.refundRepository.save(refund);
+
+    // if (!transactions.length) {
+    //   throw new BaseException({
+    //     status: 500,
+    //     message: messages.getNotFoundMessage('Debit or credit transaction'),
+    //   });
+    // }
+
+    // for (const transaction of transactions) {
+    //   const transactionStatus = this.getStatus(
+    //     `refund_${status}` as unknown as StripeTransactionStatus,
+    //   );
+    //
+    //   transaction.status = transactionStatus;
+    //
+    //   /**
+    //    * Transaction should be updated before event publish
+    //    */
+    //   await this.transactionRepository.save(transaction);
+    //
+    //   const eventName = this.refundEventName?.[transactionStatus];
+    //
+    //   if (!eventName) {
+    //     return;
+    //   }
+    //
+    //   void Microservice.eventPublish(eventName as Event, {
+    //     transactionStatus,
+    //     transaction,
+    //   });
+    // }
+  }
+
+  /**
+   * Handles charge refunded
+   */
+  public async handleChargeRefunded(event: StripeSdk.Event): Promise<void> {
+    const {
+      status,
+      payment_intent: paymentIntent,
+      amount_refunded: refundedAmount,
+      amount,
+    } = event.data.object as StripeSdk.Charge;
+
+    if (!paymentIntent || !status) {
+      throw new BaseException({
+        status: 500,
+        message: "Payment intent id or refund status wasn't provided.",
       });
     }
 
@@ -768,30 +836,23 @@ class Stripe extends Abstract {
     if (!transactions.length) {
       throw new BaseException({
         status: 500,
-        message: messages.getNotFoundMessage('Debit or credit transaction'),
+        message: messages.getNotFoundMessage(
+          'Failed to handle charge refunded event. Debit or credit transaction',
+        ),
       });
     }
 
+    transactions.forEach((transaction) => {
+      transaction.status =
+        refundedAmount !== amount ? TransactionStatus.PARTIAL_REFUNDED : TransactionStatus.REFUNDED;
+      transaction.params.refundedAmount = refundedAmount;
+    });
+
+    await this.transactionRepository.save(transactions);
+
     for (const transaction of transactions) {
-      const transactionStatus = this.getStatus(
-        `refund_${status}` as unknown as StripeTransactionStatus,
-      );
-
-      transaction.status = transactionStatus;
-
-      /**
-       * Transaction should be updated before event publish
-       */
-      await this.transactionRepository.save(transaction);
-
-      const eventName = this.refundEventName?.[transactionStatus];
-
-      if (!eventName) {
-        return;
-      }
-
-      void Microservice.eventPublish(eventName as Event, {
-        transactionStatus,
+      void Microservice.eventPublish(Event.RefundSuccess, {
+        transactionStatus: transaction.status,
         transaction,
       });
     }
@@ -1602,7 +1663,7 @@ class Stripe extends Abstract {
     if (!debitTransaction.params.chargeId) {
       throw new BaseException({
         status: 400,
-        message: "Transaction don't have related transfer id and can't be refunded",
+        message: "Transaction don't have related transfer id and can't be refunded.",
       });
     }
 
@@ -1614,14 +1675,17 @@ class Stripe extends Abstract {
       charge: debitTransaction.params.chargeId,
       reverse_transfer: true,
       refund_application_fee: false,
-      amount: debitTransaction.amount,
+      amount: 1000,
     });
 
     const refund = this.refundRepository.create({
       transactionId,
       amount: stripeRefund.amount,
-      status: TransactionStatus.INITIAL,
+      status: stripeRefund.status
+        ? this.getStatus(stripeRefund.status as StripeTransactionStatus)
+        : TransactionStatus.INITIAL,
       params: {
+        refundId: stripeRefund.id,
         reason: stripeRefund.reason as string,
         errorReason: stripeRefund.failure_reason,
       },

@@ -40,6 +40,8 @@ export interface IParams {
   estimatedInstantPayoutFee?: number;
   // Original entity cost
   entityCost?: number;
+  // Refunded amount
+  refundedAmount?: number;
 }
 
 @JSONSchema({

@@ -1,11 +1,20 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsEnum, IsNumber, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import TransactionStatus from '@constants/transaction-status';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface IParams {
+  // Example: re_3NhW8PAmQ4asS8PS0QPP80ER
+  refundId?: string;
   // Reason for the refund, either user-provided
   reason?: string;
   // Error reason for failed refund
@@ -14,11 +23,19 @@ interface IParams {
 
 /**
  * Refund entity
+ * @TODO Refund don't have pure relation to the transaction cause, cause:
+ * 1. Transaction id is not unique (presented as debit and credit transactions)
+ * 2. If relation will be refer to the transaction pk id, refunds will be duplicated for both transaction types
  */
+@JSONSchema({ description: 'Created refund related to the transaction' })
 @Entity()
 class Refund {
+  @PrimaryGeneratedColumn('uuid')
+  @Length(1, 36)
+  id: string;
+
   @JSONSchema({
-    description: 'Stripe transaction id (payment intent)',
+    description: 'Stripe transaction id (e.g. payment intent)',
     example: 'pi_3Nha3JAmQ4asS8PS0JPXIyEh',
   })
   @PrimaryColumn({ type: 'varchar', length: 66 })
@@ -26,7 +43,8 @@ class Refund {
   transactionId: string;
 
   @JSONSchema({
-    description: 'Requested refund amount',
+    description: 'Handled refund amount, should be less or equal to refund amount',
+    example: 10000,
   })
   @JSONSchema({ description: 'Unit amount (e.g. 100$ = 10000 in unit' })
   @Column({ type: 'int' })
