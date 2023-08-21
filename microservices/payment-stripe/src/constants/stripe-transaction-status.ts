@@ -10,6 +10,8 @@ enum TransactionStatus {
   PAYMENT_FAILED = 'payment_failed',
   PROCESSING = 'processing',
   REQUIRES_CONFIRMATION = 'requires_confirmation',
+  // Example: Card declined - high fraud risk
+  REQUIRES_PAYMENT_METHOD = 'requires_payment_method',
   REFUND_SUCCEEDED = 'refund_succeeded',
   REFUND_PENDING = 'refund_pending',
   REFUND_CANCELED = 'refund_canceled',

@@ -23,6 +23,10 @@ export interface IParams {
   paymentStatus?: StripeTransactionStatus;
   checkoutStatus?: StripeCheckoutStatus;
   errorMessage?: string;
+  // Example: card_declined
+  errorCode?: string;
+  // Example: generic_decline
+  declineCode?: string;
   // Application and stripe fees payer
   feesPayer?: TransactionRole;
   // PaymentIntent charge id, must exist for refund
