@@ -45,7 +45,7 @@ const webhook = Endpoint.custom(
 
     const service = await Factory.create(getManager());
 
-    service.handleWebhookEvent(
+    await service.handleWebhookEvent(
       rawBody,
       payload.headers['stripe-signature'] as string,
       webhookKey,
