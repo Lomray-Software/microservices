@@ -1610,12 +1610,24 @@ class Stripe extends Abstract {
      * Returns refunds from platform (application) account to sender
      */
     /* eslint-disable camelcase */
-    await this.sdk.refunds.create({
+    const stripeRefund = await this.sdk.refunds.create({
       charge: debitTransaction.params.chargeId,
       reverse_transfer: true,
       refund_application_fee: false,
       amount: debitTransaction.amount,
     });
+
+    const refund = this.refundRepository.create({
+      transactionId,
+      amount: stripeRefund.amount,
+      status: TransactionStatus.INITIAL,
+      params: {
+        reason: stripeRefund.reason as string,
+        errorReason: stripeRefund.failure_reason,
+      },
+    });
+
+    await this.refundRepository.save(refund);
 
     /* eslint-enable camelcase */
     return true;

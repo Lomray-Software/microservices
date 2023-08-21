@@ -1,16 +1,8 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsEnum, IsNumber, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  PrimaryColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import TransactionStatus from '@constants/transaction-status';
-import Transaction from '@entities/transaction';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface IParams {
@@ -29,8 +21,8 @@ class Refund {
     description: 'Stripe transaction id (payment intent)',
     example: 'pi_3Nha3JAmQ4asS8PS0JPXIyEh',
   })
-  @PrimaryColumn()
-  @Length(1, 36)
+  @PrimaryColumn({ type: 'varchar', length: 66 })
+  @Length(1, 66)
   transactionId: string;
 
   @JSONSchema({
@@ -61,10 +53,6 @@ class Refund {
   @IsTypeormDate()
   @UpdateDateColumn()
   updatedAt: Date;
-
-  @ManyToOne('Transaction', 'refunds')
-  @IsObject()
-  transaction: Transaction;
 }
 
 export default Refund;
