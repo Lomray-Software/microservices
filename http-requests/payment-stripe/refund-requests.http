@@ -21,6 +21,20 @@ Content-Type: application/json
   }
 }
 
+### Refund custom amount
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.refund",
+  "params": {
+    "transactionId": "pi_3NhgeiAmQ4asS8PS1elCTWIA",
+    "amount": 100
+  }
+}
+
 ### Refund revenue
 POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
@@ -30,7 +44,21 @@ Content-Type: application/json
   "id": "1",
   "method": "stripe.refund",
   "params": {
-    "transactionId": "pi_3NgXZSAmQ4asS8PS1ApUuPSI"
+    "transactionId": "pi_3NhgeiAmQ4asS8PS1elCTWIA"
+  }
+}
+
+### Refund entity cost with extra fees
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.refund",
+  "params": {
+    "transactionId": "pi_3NhgeiAmQ4asS8PS1elCTWIA",
+    "refundAmountType": "entityCost"
   }
 }
 
