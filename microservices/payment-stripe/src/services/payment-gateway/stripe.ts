@@ -6,6 +6,7 @@ import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
 import BalanceType from '@constants/balance-type';
 import CouponDuration from '@constants/coupon-duration';
+import RefundAmountType from '@constants/refund-amount-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
@@ -61,6 +62,7 @@ interface IPaymentIntentParams {
 
 interface IRefundParams {
   transactionId: string;
+  refundAmountType?: RefundAmountType;
   /**
    * If user don't have required amount in connect account, he must provide
    * bank account or card id that will be used for refund charge
