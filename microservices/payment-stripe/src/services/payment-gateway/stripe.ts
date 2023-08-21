@@ -607,8 +607,16 @@ class Stripe extends Abstract {
         await this.handlePaymentIntent(event);
         break;
 
-      // case 'transfer.reversed':
-      // case 'charge.refund.updated':
+      /**
+       * Refund events
+       */
+      case 'charge.refund.updated':
+        await this.handleRefundUpdated(event);
+        break;
+
+      /**
+       * Charge events
+       */
       case 'charge.refunded':
         await this.handleChargeRefunded(event);
         break;
@@ -624,7 +632,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles payment method detach
-   * NOTE: Card and other payment methods should be removed in according subscribers
+   * @description NOTE: Card and other payment methods should be removed in according subscribers
    */
   public handlePaymentMethodDetached(event: StripeSdk.Event): void {
     const { id: paymentMethodId } = event.data.object as StripeSdk.PaymentMethod;
@@ -735,8 +743,9 @@ class Stripe extends Abstract {
   /**
    * Handles reversed transfer
    */
-  public async handleReversedTransfer(event: StripeSdk.Event): Promise<void> {
+  public async handleRefundUpdated(event: StripeSdk.Event): Promise<void> {
     const {
+      id,
       status,
       reason,
       failure_reason: failedReason,
@@ -750,18 +759,19 @@ class Stripe extends Abstract {
       });
     }
 
-    const refund = await this.refundRepository.findOne({
-      transactionId: this.extractId(paymentIntent),
-    });
+    const refund = await this.refundRepository
+      .createQueryBuilder('r')
+      .where("r.params ->> 'refundId' = :refundId", { refundId: id })
+      .getOne();
 
     if (!refund) {
       throw new BaseException({
         status: 500,
-        message: messages.getNotFoundMessage('Failed to update transaction refund data. Refund'),
+        message: messages.getNotFoundMessage('Failed to update refund. Refund'),
       });
     }
 
-    const refundStatus = this.getStatus(`refund_${status}` as unknown as StripeTransactionStatus);
+    const refundStatus = this.getStatus(status as unknown as StripeTransactionStatus);
 
     if (!refundStatus) {
       throw new BaseException({
@@ -778,37 +788,6 @@ class Stripe extends Abstract {
     }
 
     await this.refundRepository.save(refund);
-
-    // if (!transactions.length) {
-    //   throw new BaseException({
-    //     status: 500,
-    //     message: messages.getNotFoundMessage('Debit or credit transaction'),
-    //   });
-    // }
-
-    // for (const transaction of transactions) {
-    //   const transactionStatus = this.getStatus(
-    //     `refund_${status}` as unknown as StripeTransactionStatus,
-    //   );
-    //
-    //   transaction.status = transactionStatus;
-    //
-    //   /**
-    //    * Transaction should be updated before event publish
-    //    */
-    //   await this.transactionRepository.save(transaction);
-    //
-    //   const eventName = this.refundEventName?.[transactionStatus];
-    //
-    //   if (!eventName) {
-    //     return;
-    //   }
-    //
-    //   void Microservice.eventPublish(eventName as Event, {
-    //     transactionStatus,
-    //     transaction,
-    //   });
-    // }
   }
 
   /**
