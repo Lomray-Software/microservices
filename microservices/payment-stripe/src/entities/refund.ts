@@ -1,4 +1,4 @@
-import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsEnum, IsNumber, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
@@ -50,6 +50,19 @@ class Refund {
   @Column({ type: 'int' })
   @IsNumber()
   amount: number;
+
+  /**
+   * Uses for creating relation for partial refund transaction that contain 2 or more
+   * nested entities that were paid in single transaction
+   */
+  @JSONSchema({
+    description: 'Microservice entity. Can be entity from transaction group or other',
+  })
+  @Column({ type: 'varchar', length: 36, default: null })
+  @IsUndefinable()
+  @IsNullable()
+  @Length(1, 36)
+  entityId: string | null;
 
   @Column({ type: 'json', default: {} })
   @IsObject()
