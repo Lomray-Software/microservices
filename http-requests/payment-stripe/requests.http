@@ -327,3 +327,85 @@ Content-Type: application/json
     }
   }
 }
+
+### Create product
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "product.create",
+  "params": {
+      "entityId": "0768006a-ca95-4c30-ae40-a3d9d7b249ea",
+      "name": "name",
+      "description": "name",
+      "userId": "u768006a-ca95-4c30-ae40-a3d9d7b249ea"
+  }
+}
+
+### Create price
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "price.create",
+  "params": {
+    "productId": "prod_OUvz71cTxv9nUu",
+    "currency": "usd",
+    "userId": "u768006a-ca95-4c30-ae40-a3d9d7b249ea",
+    "unitAmount": 10000
+  }
+}
+
+### Create coupon
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "coupon.create",
+  "params": {
+    "products": ["prod_OUvz71cTxv9nUu"],
+    "userId": "u768006a-ca95-4c30-ae40-a3d9d7b249ea",
+    "percentOff": 50,
+    "maxRedemptions": 2,
+    "duration": "forever"
+  }
+}
+
+### Create promo code
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "promo-code.create",
+  "params": {
+    "fields": {
+      "couponId": "5wBcPAcY"
+    }
+  }
+}
+
+### View product
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "product.view",
+  "params": {
+    "query": {
+      "relations": ["coupons", "coupons.promoCodes"],
+      "where": {
+        "productId": "prod_OUvz71cTxv9nUu"
+      }
+    }
+  }
+}
