@@ -16,6 +16,10 @@ class RefundInput {
   @IsEnum(RefundAmountType)
   @IsUndefinable()
   refundAmountType?: RefundAmountType;
+
+  @IsString()
+  @IsUndefinable()
+  entityId?: string;
 }
 
 class RefundOutput {
@@ -33,11 +37,11 @@ const refund = Endpoint.custom(
     output: RefundOutput,
     description: 'Create transaction refund',
   }),
-  async ({ transactionId, amount, refundAmountType }) => {
+  async ({ transactionId, amount, refundAmountType, entityId }) => {
     const service = await Factory.create(getManager());
 
     return {
-      isInstantiated: await service.refund({ transactionId, amount, refundAmountType }),
+      isInstantiated: await service.refund({ transactionId, amount, refundAmountType, entityId }),
     };
   },
 );

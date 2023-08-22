@@ -85,6 +85,7 @@ interface IRefundParams {
    */
   bankAccountId?: string;
   cardId?: string;
+  entityId?: string;
 }
 
 interface ICheckoutParams {
@@ -1630,6 +1631,7 @@ class Stripe extends Abstract {
   public async refund({
     transactionId,
     amount,
+    entityId,
     refundAmountType = RefundAmountType.REVENUE,
   }: IRefundParams): Promise<boolean> {
     const debitTransaction = await this.transactionRepository.findOne({
@@ -1686,6 +1688,7 @@ class Stripe extends Abstract {
       status: stripeRefund.status
         ? this.getStatus(stripeRefund.status as StripeTransactionStatus)
         : TransactionStatus.INITIAL,
+      ...(entityId ? { entityId } : {}),
       params: {
         refundId: stripeRefund.id,
         reason: stripeRefund.reason as string,
