@@ -1,5 +1,5 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsObject, Length, ValidateNested } from 'class-validator';
+import { Length, ValidateNested } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -49,7 +49,6 @@ class PromoCode {
   @ManyToOne('Coupon', 'promoCodes')
   @JoinColumn({ name: 'couponId' })
   @ValidateNested()
-  @IsObject()
   coupon: Coupon;
 }
 
