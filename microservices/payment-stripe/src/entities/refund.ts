@@ -5,7 +5,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -38,7 +37,7 @@ class Refund {
     description: 'Stripe transaction id (e.g. payment intent)',
     example: 'pi_3Nha3JAmQ4asS8PS0JPXIyEh',
   })
-  @PrimaryColumn({ type: 'varchar', length: 66 })
+  @Column({ type: 'varchar', length: 66 })
   @Length(1, 66)
   transactionId: string;
 
