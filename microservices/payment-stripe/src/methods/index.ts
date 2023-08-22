@@ -15,6 +15,7 @@ import CrudPrice from '@methods/price/crud';
 import ProductCreate from '@methods/product/create';
 import CrudProduct from '@methods/product/crud';
 import CrudPromoCode from '@methods/promo-code/crud';
+import CrudRefund from '@methods/refund/crud';
 import Balance from '@methods/stripe/balance';
 import ConnectAccount from '@methods/stripe/connect-account';
 import ConnectAccountLink from '@methods/stripe/connect-account-link';
@@ -42,6 +43,7 @@ export default (ms: Microservice): void => {
       add: BankAccountAdd,
     },
     transaction: CrudTransaction,
+    refund: CrudRefund,
     customer: {
       ...CrudCustomer,
       create: CustomerCreate,

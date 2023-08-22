@@ -11,6 +11,7 @@ import Coupon from '@entities/coupon';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
+import Refund from '@entities/refund';
 import Transaction, { IParams as ITransactionEntityParams } from '@entities/transaction';
 import messages from '@helpers/validators/messages';
 
@@ -105,6 +106,11 @@ abstract class Abstract {
   /**
    * @protected
    */
+  protected readonly refundRepository: Repository<Refund>;
+
+  /**
+   * @protected
+   */
   protected readonly couponRepository: Repository<Coupon>;
 
   /**
@@ -130,6 +136,7 @@ abstract class Abstract {
     this.productRepository = manager.getRepository(Product);
     this.priceRepository = manager.getRepository(Price);
     this.transactionRepository = manager.getRepository(Transaction);
+    this.refundRepository = manager.getRepository(Refund);
     this.cardRepository = manager.getRepository(Card);
     this.bankAccountRepository = manager.getRepository(BankAccount);
     this.couponRepository = manager.getRepository(Coupon);

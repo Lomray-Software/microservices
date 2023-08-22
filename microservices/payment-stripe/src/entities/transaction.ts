@@ -40,6 +40,8 @@ export interface IParams {
   estimatedInstantPayoutFee?: number;
   // Original entity cost
   entityCost?: number;
+  // Refunded amount
+  refundedAmount?: number;
 }
 
 @JSONSchema({
@@ -54,6 +56,10 @@ class Transaction {
   @Allow()
   id: string;
 
+  @JSONSchema({
+    description: 'Stripe transaction id (payment intent)',
+    example: 'pi_3Nha3JAmQ4asS8PS0JPXIyEh',
+  })
   @Column({ type: 'varchar', length: 66 })
   @Length(1, 66)
   transactionId: string;
