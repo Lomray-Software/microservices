@@ -1,4 +1,5 @@
 import { IsNullable, IsTypeormDate, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
+import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsObject, Length, Max, Min, ValidateNested } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
@@ -118,8 +119,10 @@ class Coupon {
   })
   products: Product[];
 
+  @OneToMany('PromoCode', 'coupon')
+  @IsObject({ each: true })
+  @Type(() => PromoCode)
   @ValidateNested()
-  @OneToMany(() => PromoCode, (promoCode) => promoCode.coupon)
   promoCodes: PromoCode[];
 
   /**

@@ -1,10 +1,11 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { Length, ValidateNested } from 'class-validator';
+import { IsObject, Length, ValidateNested } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
@@ -25,6 +26,10 @@ class PromoCode {
   @PrimaryColumn({ type: 'varchar', length: 30 })
   promoCodeId: string;
 
+  @Column({ type: 'varchar', length: 8 })
+  @Length(1, 8)
+  couponId: string;
+
   @JSONSchema({
     description: 'The customer-facing code.',
   })
@@ -32,10 +37,6 @@ class PromoCode {
   @Length(1, 15)
   @IsUndefinable()
   code: string;
-
-  @Column({ type: 'varchar', length: 8 })
-  @Length(1, 8)
-  couponId: string;
 
   @IsTypeormDate()
   @CreateDateColumn()
@@ -45,8 +46,10 @@ class PromoCode {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @ManyToOne('Coupon', 'promoCodes')
+  @JoinColumn({ name: 'couponId' })
   @ValidateNested()
-  @ManyToOne(() => PromoCode)
+  @IsObject()
   coupon: Coupon;
 }
 
