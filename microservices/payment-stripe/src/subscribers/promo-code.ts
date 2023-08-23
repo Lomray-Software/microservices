@@ -23,6 +23,7 @@ class PromoCode implements EntitySubscriberInterface<PromoCodeEntity> {
     const { id, code } = await service.createPromoCode({
       couponId: entity.couponId,
       code: entity.code,
+      maxRedemptions: entity.maxRedemptions || undefined,
     });
 
     entity.code = code;
