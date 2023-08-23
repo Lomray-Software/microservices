@@ -169,6 +169,7 @@ interface IStripeCouponParams extends ICouponParams {
 interface IStripePromoCodeParams {
   couponId: string;
   code?: string;
+  maxRedemptions?: number;
 }
 /**
  * Stripe payment provider
@@ -2185,13 +2186,19 @@ class Stripe extends Abstract {
   /**
    * Create stripe promo code
    */
-  public async createPromoCode({ couponId, code: userCode }: IStripePromoCodeParams): Promise<{
+  public async createPromoCode({
+    couponId,
+    code: userCode,
+    maxRedemptions,
+  }: IStripePromoCodeParams): Promise<{
     id: string;
     code: string;
   }> {
     const { id, code } = await this.sdk.promotionCodes.create({
       coupon: couponId,
       code: userCode,
+      // eslint-disable-next-line camelcase
+      max_redemptions: maxRedemptions,
     });
 
     return {

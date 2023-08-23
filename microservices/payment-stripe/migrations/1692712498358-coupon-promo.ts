@@ -20,7 +20,7 @@ export default class couponPromo1692712498358 implements MigrationInterface {
      * Add fk on couponId ref couponId
      */
     await queryRunner.query(
-      `ALTER TABLE "promo_code" ADD CONSTRAINT "promo_code(fk):couponId" FOREIGN KEY ("couponId") REFERENCES "coupon"("couponId") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+      `ALTER TABLE "promo_code" ADD CONSTRAINT "promo_code(fk):couponId" FOREIGN KEY ("couponId") REFERENCES "coupon"("couponId") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
   }
 
