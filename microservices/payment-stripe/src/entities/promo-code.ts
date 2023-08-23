@@ -1,5 +1,5 @@
-import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { Length, ValidateNested } from 'class-validator';
+import { IsTypeormDate, IsUndefinable, IsNullable } from '@lomray/microservice-helpers';
+import { Length, ValidateNested, IsNumber } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -29,6 +29,17 @@ class PromoCode {
   @Column({ type: 'varchar', length: 8 })
   @Length(1, 8)
   couponId: string;
+
+  @JSONSchema({
+    description:
+      'Maximum number of times this promo-code can be redeemed, in total, ' +
+      'across all customers, before it is no longer valid.',
+  })
+  @Column({ type: 'int', default: null })
+  @IsNullable()
+  @IsUndefinable()
+  @IsNumber()
+  maxRedemptions: number | null;
 
   @JSONSchema({
     description: 'The customer-facing code.',
