@@ -201,7 +201,7 @@ class Card {
 
     await cardRepository.remove(card, { listeners: false });
 
-    void Microservice.eventPublish(Event.CardRemoved, card);
+    void Microservice.eventPublish(Event.CardRemoved, databaseEntity);
   }
 }
 
