@@ -1,4 +1,5 @@
-import { BaseException } from '@lomray/microservice-nodejs-lib';
+import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
+import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
 import { EntityManager, getManager } from 'typeorm';
 import CardEntity from '@entities/card';
 import CustomerEntity from '@entities/customer';
@@ -66,6 +67,8 @@ class Card {
 
     entity.isDefault = true;
     await cardRepository.save(entity, { listeners: false });
+
+    void Microservice.eventPublish(Event.CardCreated, entity);
   }
 
   /**
@@ -147,6 +150,8 @@ class Card {
     customer.params.hasDefaultPaymentMethod = Boolean(paymentMethodId);
 
     await customerRepository.save(customer);
+
+    void Microservice.eventPublish(Event.CardUpdated, entity);
   }
 
   /**
@@ -181,6 +186,10 @@ class Card {
       throw new BaseException({ status: 500, message: messages.getNotFoundMessage('Card') });
     }
 
+    if (card.isDefault) {
+      throw new BaseException({ status: 400, message: "Default card can't be removed." });
+    }
+
     const isRemoved = await service.removeCustomerPaymentMethod(paymentMethodId);
 
     if (!isRemoved) {
@@ -191,6 +200,8 @@ class Card {
     }
 
     await cardRepository.remove(card, { listeners: false });
+
+    void Microservice.eventPublish(Event.CardRemoved, databaseEntity);
   }
 }
 
