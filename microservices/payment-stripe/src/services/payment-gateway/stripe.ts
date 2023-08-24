@@ -1127,7 +1127,7 @@ class Stripe extends Abstract {
    */
   public async handleSetupIntentSucceed(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
-    const { payment_method } = event.data.object as StripeSdk.SetupIntent;
+    const { id, payment_method } = event.data.object as StripeSdk.SetupIntent;
 
     if (!payment_method) {
       throw new BaseException({
@@ -1178,7 +1178,7 @@ class Stripe extends Abstract {
 
     const savedCard = await this.cardRepository.save({
       ...cardParams,
-      params: { isApproved: true, paymentMethodId },
+      params: { isApproved: true, paymentMethodId, setupIntentId: id },
     });
 
     void Microservice.eventPublish(Event.SetupIntentSucceeded, {
