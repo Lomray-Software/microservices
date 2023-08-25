@@ -30,6 +30,8 @@ export interface IParams {
   paymentMethodId?: string;
   // Is approved by payment provider (setup is succeeded)
   isApproved?: boolean;
+  // Setup intent id
+  setupIntentId?: string;
 }
 
 /**
