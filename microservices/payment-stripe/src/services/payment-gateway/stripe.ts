@@ -1659,11 +1659,12 @@ class Stripe extends Abstract {
 
     if (amount) {
       amountUnit = this.toSmallestCurrencyUnit(amount);
+    } else if (refundAmountType === RefundAmountType.REVENUE) {
+      amountUnit = debitTransaction.amount;
     } else {
       amountUnit =
-        refundAmountType === RefundAmountType.REVENUE
-          ? debitTransaction.amount
-          : debitTransaction.params.entityCost;
+        // Paid entity cost - already refunded amount
+        (debitTransaction.params.entityCost || 0) - (debitTransaction.params.refundedAmount || 0);
     }
 
     if (!amountUnit) {
