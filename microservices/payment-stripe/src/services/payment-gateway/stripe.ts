@@ -1685,7 +1685,6 @@ class Stripe extends Abstract {
       metadata: {
         ...(entityId ? { entityId } : {}),
         ...(refundAmountType ? { refundAmountType } : {}),
-        amount: this.fromSmallestCurrencyUnit(amountUnit),
       },
     });
 
