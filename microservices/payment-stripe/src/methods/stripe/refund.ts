@@ -1,7 +1,9 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsBoolean, IsEnum, IsNumber, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsEnum, IsNumber, IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import RefundAmountType from '@constants/refund-amount-type';
+import Refund from '@entities/refund';
 import Factory from '@services/payment-gateway/factory';
 
 class RefundInput {
@@ -23,8 +25,9 @@ class RefundInput {
 }
 
 class RefundOutput {
-  @IsBoolean()
-  isInstantiated: boolean;
+  @IsObject()
+  @Type(() => Refund)
+  entity: Refund;
 }
 
 /**
@@ -41,7 +44,7 @@ const refund = Endpoint.custom(
     const service = await Factory.create(getManager());
 
     return {
-      isInstantiated: await service.refund({ transactionId, amount, refundAmountType, entityId }),
+      entity: await service.refund({ transactionId, amount, refundAmountType, entityId }),
     };
   },
 );

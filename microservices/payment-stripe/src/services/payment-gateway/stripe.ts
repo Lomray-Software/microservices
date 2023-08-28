@@ -20,6 +20,7 @@ import Coupon from '@entities/coupon';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
+import Refund from '@entities/refund';
 import Transaction from '@entities/transaction';
 import composeBalance from '@helpers/compose-balance';
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
@@ -1634,7 +1635,7 @@ class Stripe extends Abstract {
     amount,
     entityId,
     refundAmountType = RefundAmountType.REVENUE,
-  }: IRefundParams): Promise<boolean> {
+  }: IRefundParams): Promise<Refund> {
     const debitTransaction = await this.transactionRepository.findOne({
       transactionId,
       type: TransactionType.DEBIT,
@@ -1681,6 +1682,10 @@ class Stripe extends Abstract {
       reverse_transfer: true,
       refund_application_fee: false,
       amount: amountUnit,
+      metadata: {
+        ...(entityId ? { entityId } : {}),
+        ...(refundAmountType ? { refundAmountType } : {}),
+      },
     });
 
     const refund = this.refundRepository.create({
@@ -1700,7 +1705,7 @@ class Stripe extends Abstract {
     await this.refundRepository.save(refund);
 
     /* eslint-enable camelcase */
-    return true;
+    return refund;
   }
 
   /**
