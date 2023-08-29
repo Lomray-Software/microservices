@@ -5,6 +5,7 @@ import { validate } from 'class-validator';
 import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
 import BalanceType from '@constants/balance-type';
+import BusinessType from '@constants/business-type';
 import CouponDuration from '@constants/coupon-duration';
 import RefundAmountType from '@constants/refund-amount-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
@@ -469,6 +470,7 @@ class Stripe extends Abstract {
     accountType: StripeAccountTypes,
     refreshUrl: string,
     returnUrl: string,
+    businessType?: BusinessType,
   ): Promise<string> {
     const customer = await super.getCustomer(userId);
 
@@ -477,6 +479,8 @@ class Stripe extends Abstract {
         type: accountType,
         country: 'US',
         email,
+        // eslint-disable-next-line camelcase
+        ...(businessType ? { business_type: businessType } : {}),
         settings: {
           payouts: {
             // eslint-disable-next-line camelcase
@@ -496,7 +500,7 @@ class Stripe extends Abstract {
 
   /**
    * Returns account link
-   * NOTE: Use when user needs to update connect account data
+   * @description NOTE: Use when user needs to update connect account data
    */
   public async getConnectAccountLink(
     userId: string,
@@ -524,7 +528,7 @@ class Stripe extends Abstract {
 
   /**
    * Get the webhook from stripe and handle deciding on type of event
-   * NOTE: If handlers can be used for connect and master account - wrap it in handlers callbacks
+   * @description NOTE: If handlers can be used for connect and master account - wrap it in handlers callbacks
    * Example (eventType could be 'connect', 'account' or other):
    * const fullWebhookEventName = {
    *  [firstEventType]: firstCallback,
