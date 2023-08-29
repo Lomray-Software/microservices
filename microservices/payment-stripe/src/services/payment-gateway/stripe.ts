@@ -1601,7 +1601,7 @@ class Stripe extends Abstract {
       },
     };
 
-    return Promise.all([
+    const transactions = await Promise.all([
       this.transactionRepository.save({
         ...transactionData,
         userId: senderCustomer.userId,
@@ -1626,6 +1626,18 @@ class Stripe extends Abstract {
         },
       }),
     ]);
+
+    /**
+     * Sync payment intent with the microservice transactions
+     */
+    void this.sdk.paymentIntents.update(stripePaymentIntent.id, {
+      metadata: {
+        creditTransactionId: transactions?.[0]?.id,
+        debitTransactionId: transactions?.[1]?.id,
+      },
+    });
+
+    return transactions;
   }
 
   /**
@@ -1704,10 +1716,16 @@ class Stripe extends Abstract {
         refundId: stripeRefund.id,
         reason: stripeRefund.reason as string,
         errorReason: stripeRefund.failure_reason,
+        refundAmountType,
       },
     });
 
     await this.refundRepository.save(refund);
+
+    /**
+     * Sync stripe refund with the microservice refund
+     */
+    void this.sdk.refunds.update(stripeRefund.id, { metadata: { refundId: refund.id } });
 
     /* eslint-enable camelcase */
     return refund;
