@@ -8,6 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import type RefundAmountType from '@constants/refund-amount-type';
 import TransactionStatus from '@constants/transaction-status';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -18,6 +19,7 @@ interface IParams {
   reason?: string;
   // Error reason for failed refund
   errorReason?: string;
+  refundAmountType?: RefundAmountType;
 }
 
 /**

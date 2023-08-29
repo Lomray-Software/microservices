@@ -1092,6 +1092,14 @@
         "out": {
           "admin": "allow"
         }
+      },
+      "businessType": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
       }
     },
     "createdAt": "2023-05-26T15:01:39.186Z"
