@@ -1,0 +1,195 @@
+[
+  {
+    "microservice": "blog",
+    "method": "config-reset",
+    "description": "Reset RemoteConfig cache",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelOut": "RemoteConfigOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "blog",
+    "method": "article.count",
+    "description": "Returns count of Article by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "blog",
+    "method": "article.list",
+    "description": "Returns list of Article by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "blog.ListOutputParams.c0718f9de7af72f9ddb37b82c4ad5fa6",
+    "methodFilters": []
+  },
+  {
+    "microservice": "blog",
+    "method": "article.view",
+    "description": "Returns Article by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "blog.ViewOutputParams.c98c23a6a233ecd03d7c8ae5c4319774",
+    "methodFilters": []
+  },
+  {
+    "microservice": "blog",
+    "method": "article.create",
+    "description": "Create a new Article",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelIn": "blog.CreateRequestParams.0d67bd74760ece94a30d098add43bce6",
+    "modelOut": "blog.CreateOutputParams.c98c23a6a233ecd03d7c8ae5c4319774",
+    "methodFilters": []
+  },
+  {
+    "microservice": "blog",
+    "method": "article.update",
+    "description": "Update Article by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelIn": "blog.UpdateRequestParams.0d67bd74760ece94a30d098add43bce6",
+    "modelOut": "blog.UpdateOutputParams.c98c23a6a233ecd03d7c8ae5c4319774",
+    "methodFilters": []
+  },
+  {
+    "microservice": "blog",
+    "method": "article.remove",
+    "description": "Remove Article by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "blog.RemoveOutputParams.1934b80b9e9302ca2f2fec428c544459",
+    "methodFilters": []
+  },
+  {
+    "microservice": "blog",
+    "method": "category.count",
+    "description": "Returns count of Category by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "blog",
+    "method": "category.list",
+    "description": "Returns list of Category by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "blog.ListOutputParams.9c94ed2630a9544c25565710c9d059f3",
+    "methodFilters": []
+  },
+  {
+    "microservice": "blog",
+    "method": "category.view",
+    "description": "Returns Category by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "blog.ViewOutputParams.ba4aba427fa3cfa1c861ca4dfb5727b6",
+    "methodFilters": []
+  },
+  {
+    "microservice": "blog",
+    "method": "category.create",
+    "description": "Create a new Category",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelIn": "blog.CreateRequestParams.e7a5364efc7d0c6bf0374919675e49d7",
+    "modelOut": "blog.CreateOutputParams.ba4aba427fa3cfa1c861ca4dfb5727b6",
+    "methodFilters": []
+  },
+  {
+    "microservice": "blog",
+    "method": "category.update",
+    "description": "Update Category by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelIn": "blog.UpdateRequestParams.e7a5364efc7d0c6bf0374919675e49d7",
+    "modelOut": "blog.UpdateOutputParams.ba4aba427fa3cfa1c861ca4dfb5727b6",
+    "methodFilters": []
+  },
+  {
+    "microservice": "blog",
+    "method": "category.remove",
+    "description": "Remove Category by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "blog.RemoveOutputParams.2e0ac765381278957b0cd30b46caee13",
+    "methodFilters": []
+  },
+  {
+    "microservice": "blog",
+    "method": "meta",
+    "description": "Get microservice metadata",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelOut": "MicroserviceMetaOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "blog",
+    "method": "middleware-register",
+    "description": "Register remote middleware on this microservice",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-29T18:52:45.656Z",
+    "modelIn": "ClientRegisterMiddlewareInput",
+    "modelOut": "ClientRegisterMiddlewareOutput",
+    "methodFilters": []
+  }
+]

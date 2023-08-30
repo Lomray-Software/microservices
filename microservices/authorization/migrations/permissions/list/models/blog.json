@@ -1,0 +1,292 @@
+[
+  {
+    "microservice": "blog",
+    "alias": "blog.Category",
+    "title": "Category",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "name": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "alias": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "articles": "blog.Article"
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.Article",
+    "title": "Article",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "title": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "alias": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "description": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "content": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "publishDate": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "categories": "blog.Category"
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.ListOutputParams.c0718f9de7af72f9ddb37b82c4ad5fa6",
+    "title": "List Output Params",
+    "schema": {
+      "list": "blog.Article",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.ViewOutputParams.c98c23a6a233ecd03d7c8ae5c4319774",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "blog.Article"
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.CreateRequestParams.0d67bd74760ece94a30d098add43bce6",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "blog.Article"
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.CreateOutputParams.c98c23a6a233ecd03d7c8ae5c4319774",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "blog.Article"
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.UpdateRequestParams.0d67bd74760ece94a30d098add43bce6",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "blog.Article",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.UpdateOutputParams.c98c23a6a233ecd03d7c8ae5c4319774",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "blog.Article"
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.RemoveOutputParams.1934b80b9e9302ca2f2fec428c544459",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "blog.Article",
+      "entities": "blog.Article"
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.ListOutputParams.9c94ed2630a9544c25565710c9d059f3",
+    "title": "List Output Params",
+    "schema": {
+      "list": "blog.Category",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.ViewOutputParams.ba4aba427fa3cfa1c861ca4dfb5727b6",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "blog.Category"
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.CreateRequestParams.e7a5364efc7d0c6bf0374919675e49d7",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "blog.Category"
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.CreateOutputParams.ba4aba427fa3cfa1c861ca4dfb5727b6",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "blog.Category"
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.UpdateRequestParams.e7a5364efc7d0c6bf0374919675e49d7",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "blog.Category",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.UpdateOutputParams.ba4aba427fa3cfa1c861ca4dfb5727b6",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "blog.Category"
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  },
+  {
+    "microservice": "blog",
+    "alias": "blog.RemoveOutputParams.2e0ac765381278957b0cd30b46caee13",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "blog.Category",
+      "entities": "blog.Category"
+    },
+    "createdAt": "2023-08-29T18:52:45.656Z"
+  }
+]
