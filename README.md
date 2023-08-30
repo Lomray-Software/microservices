@@ -10,6 +10,7 @@ Prod: [![Build prod](https://github.com/Lomray-Software/microservices/actions/wo
 ## Microservices list:
  - [Authentication](microservices/authentication)
  - [Authorization](microservices/authorization)
+ -  - [Blog](microservices/blog)
  - [Configuration](microservices/configuration)
  - [Content](microservices/content)
  - [Cron](microservices/cron)
@@ -18,7 +19,6 @@ Prod: [![Build prod](https://github.com/Lomray-Software/microservices/actions/wo
  - [Notification](microservices/notification)
  - [Payment-stripe](microservices/payment-stripe)
  - [Users](microservices/users)
- - [Blog](microservices/blog)
  
 ## Use [CLI](https://github.com/Lomray-Software/microservices-cli) to start your own art.
 
