@@ -2,6 +2,21 @@ blog
 -------------------
 
 RPC 2.0 Microservice.
+This microservice provides articles and categories management system.
+
+![npm (scoped)](https://img.shields.io/npm/v/@lomray/microservice-blog)  
+![Docker](https://img.shields.io/npm/v/@lomray/microservice-blog?label=docker)  
+![Docker prod](https://img.shields.io/badge/Docker%20prod-%3Alatest-blue)  
+![Docker staging](https://img.shields.io/badge/Docker%20staging-%3Alatest--staging-orange)  
+![GitHub](https://img.shields.io/github/license/Lomray-Software/microservices)
+![GitHub package.json dependency version (dev dep on branch)](https://img.shields.io/github/package-json/dependency-version/Lomray-Software/microservices/dev/typescript/staging)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=microservice-blog&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=microservice-blog)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-blog&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=microservice-blog)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=microservice-blog&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=microservice-blog)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=microservice-blog&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=microservice-blog)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=microservice-blog&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=microservice-blog)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=microservice-blog&metric=coverage)](https://sonarcloud.io/summary/new_code?id=microservice-blog)
 
 ## Navigation
 - [ENVIRONMENTS](#environments)
