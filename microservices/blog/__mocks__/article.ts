@@ -1,6 +1,6 @@
 const articleMock = {
-  title: 'Plauzzable article',
-  alias: 'plauzzable-article',
+  title: 'article',
+  alias: 'alias-article',
   description:
     'In by an appetite no humoured returned informed. Possession so comparison inquietude he he conviction no decisively.',
   content:

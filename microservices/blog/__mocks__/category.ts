@@ -1,6 +1,6 @@
 const categoryMock = {
-  name: 'Streaming shows',
-  alias: 'streaming-shows',
+  name: 'Category',
+  alias: 'alias-category',
 };
 
 /* eslint-disable import/prefer-default-export */
