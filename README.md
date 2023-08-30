@@ -10,6 +10,7 @@ Prod: [![Build prod](https://github.com/Lomray-Software/microservices/actions/wo
 ## Microservices list:
  - [Authentication](microservices/authentication)
  - [Authorization](microservices/authorization)
+ - [Blog](microservices/blog)
  - [Configuration](microservices/configuration)
  - [Content](microservices/content)
  - [Cron](microservices/cron)
