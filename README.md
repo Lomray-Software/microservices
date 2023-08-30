@@ -18,6 +18,7 @@ Prod: [![Build prod](https://github.com/Lomray-Software/microservices/actions/wo
  - [Notification](microservices/notification)
  - [Payment-stripe](microservices/payment-stripe)
  - [Users](microservices/users)
+ - [Blog](microservices/blog)
  
 ## Use [CLI](https://github.com/Lomray-Software/microservices-cli) to start your own art.
 
