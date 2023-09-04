@@ -1552,40 +1552,51 @@ class Stripe extends Abstract {
       extraReceiverRevenuePercent,
     });
 
-    /* eslint-disable camelcase */
-    const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
-      ...(title ? { description: title } : {}),
-      metadata: {
-        // Original float entity cost
-        entityCost,
-        paymentProviderUnitFee: this.fromSmallestCurrencyUnit(paymentProviderUnitFee),
-        applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee),
-        receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
-        senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
-        receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue),
-        cardId: paymentMethodCardId,
-        feesPayer,
-        senderId: senderCustomer.userId,
-        receiverId: receiverUserId,
-        ...(entityId ? { entityId } : {}),
-        ...(title ? { description: title } : {}),
-      },
-      payment_method_types: [StripePaymentMethods.CARD],
-      confirm: true,
-      currency: 'usd',
-      capture_method: 'automatic',
-      payment_method: paymentMethodId,
-      customer: senderCustomer.customerId,
-      // How much must sender must pay
-      amount: userUnitAmount,
-      // How much application will collect fee
-      application_fee_amount: userUnitAmount - receiverUnitRevenue,
-      transfer_data: {
-        destination: receiverAccountId,
-      },
-    });
+    let stripePaymentIntent: StripeSdk.PaymentIntent;
 
-    /* eslint-enable camelcase */
+    try {
+      /* eslint-disable camelcase */
+      stripePaymentIntent = await this.sdk.paymentIntents.create({
+        ...(title ? { description: title } : {}),
+        metadata: {
+          // Original float entity cost
+          entityCost,
+          paymentProviderUnitFee: this.fromSmallestCurrencyUnit(paymentProviderUnitFee),
+          applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee),
+          receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
+          senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
+          receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue),
+          cardId: paymentMethodCardId,
+          feesPayer,
+          senderId: senderCustomer.userId,
+          receiverId: receiverUserId,
+          ...(entityId ? { entityId } : {}),
+          ...(title ? { description: title } : {}),
+        },
+        payment_method_types: [StripePaymentMethods.CARD],
+        confirm: true,
+        currency: 'usd',
+        capture_method: 'automatic',
+        payment_method: paymentMethodId,
+        customer: senderCustomer.customerId,
+        // How much must sender must pay
+        amount: userUnitAmount,
+        // How much application will collect fee
+        application_fee_amount: userUnitAmount - receiverUnitRevenue,
+        transfer_data: {
+          destination: receiverAccountId,
+        },
+      });
+
+      /* eslint-enable camelcase */
+    } catch (e) {
+      const message = `Failed to create payment intent. ${e?.message as string}`;
+
+      Log.error(message);
+
+      throw new BaseException({ status: 500, message });
+    }
+
     const transactionData = {
       entityId,
       title,
@@ -1885,6 +1896,143 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Create stripe promo code
+   */
+  public async createPromoCode({
+    couponId,
+    code: userCode,
+    maxRedemptions,
+  }: IStripePromoCodeParams): Promise<{
+    id: string;
+    code: string;
+  }> {
+    const { id, code } = await this.sdk.promotionCodes.create({
+      coupon: couponId,
+      code: userCode,
+      // eslint-disable-next-line camelcase
+      max_redemptions: maxRedemptions,
+    });
+
+    return {
+      id,
+      code,
+    };
+  }
+
+  /**
+   * Remove stripe coupon
+   */
+  public async removeCoupon(couponId: string): Promise<boolean> {
+    const { deleted: isDeleted } = await this.sdk.coupons.del(couponId);
+
+    return isDeleted;
+  }
+
+  /**
+   * Create stripe coupon
+   */
+  public async createCoupon({
+    userId,
+    name,
+    currency,
+    products,
+    percentOff,
+    amountOff,
+    maxRedemptions,
+    duration,
+    durationInMonths,
+  }: IStripeCouponParams): Promise<Coupon> {
+    const couponDiscount = this.validateAndTransformCouponDiscountInput({ percentOff, amountOff });
+    const couponDuration = this.validateAndTransformCouponDurationInput({
+      duration,
+      durationInMonths,
+    });
+
+    const { id } = await this.sdk.coupons.create({
+      name,
+      currency: currency || 'usd',
+      ...couponDiscount,
+      ...couponDuration,
+      // eslint-disable-next-line camelcase
+      applies_to: {
+        products,
+      },
+    });
+
+    return super.createCoupon(
+      {
+        userId,
+        name,
+        products,
+        percentOff,
+        amountOff,
+        maxRedemptions,
+        duration,
+        durationInMonths,
+      },
+      id,
+    );
+  }
+
+  /**
+   * Validate and transform coupon discount input
+   */
+  private validateAndTransformCouponDiscountInput({
+    percentOff,
+    amountOff,
+  }: Pick<IStripeCouponParams, 'percentOff' | 'amountOff'>): Pick<
+    StripeSdk.CouponCreateParams,
+    'amount_off' | 'percent_off'
+  > {
+    if (!amountOff && !percentOff) {
+      throw new BaseException({
+        status: 400,
+        message: 'Neither discount amount nor percent provided.',
+      });
+    }
+
+    if (amountOff && percentOff) {
+      throw new BaseException({
+        status: 400,
+        message: 'Cannot provide both amount and percent discount.',
+      });
+    }
+
+    return {
+      // eslint-disable-next-line camelcase
+      amount_off: amountOff,
+      // eslint-disable-next-line camelcase
+      percent_off: percentOff,
+    };
+  }
+
+  /**
+   * Validate and transform coupon duration input
+   */
+  private validateAndTransformCouponDurationInput({
+    duration,
+    durationInMonths,
+  }: Pick<IStripeCouponParams, 'duration' | 'durationInMonths'>): Pick<
+    StripeSdk.CouponCreateParams,
+    'duration' | 'duration_in_months'
+  > {
+    {
+      if (duration === CouponDuration.REPEATING && !durationInMonths) {
+        throw new BaseException({
+          status: 400,
+          message: 'If duration is repeating, the number of months the coupon applies.',
+        });
+      }
+    }
+
+    return {
+      duration: duration as StripeSdk.CouponCreateParams.Duration,
+      // eslint-disable-next-line camelcase
+      duration_in_months: durationInMonths,
+    };
+  }
+
+  /**
    * Get and calculate transfer information
    */
   protected async getTransferInfo(
@@ -2105,143 +2253,6 @@ class Stripe extends Abstract {
       cvc,
       number: digits,
     };
-  }
-
-  /**
-   * Create stripe coupon
-   */
-  public async createCoupon({
-    userId,
-    name,
-    currency,
-    products,
-    percentOff,
-    amountOff,
-    maxRedemptions,
-    duration,
-    durationInMonths,
-  }: IStripeCouponParams): Promise<Coupon> {
-    const couponDiscount = this.validateAndTransformCouponDiscountInput({ percentOff, amountOff });
-    const couponDuration = this.validateAndTransformCouponDurationInput({
-      duration,
-      durationInMonths,
-    });
-
-    const { id } = await this.sdk.coupons.create({
-      name,
-      currency: currency || 'usd',
-      ...couponDiscount,
-      ...couponDuration,
-      // eslint-disable-next-line camelcase
-      applies_to: {
-        products,
-      },
-    });
-
-    return super.createCoupon(
-      {
-        userId,
-        name,
-        products,
-        percentOff,
-        amountOff,
-        maxRedemptions,
-        duration,
-        durationInMonths,
-      },
-      id,
-    );
-  }
-
-  /**
-   * Validate and transform coupon discount input
-   */
-  private validateAndTransformCouponDiscountInput({
-    percentOff,
-    amountOff,
-  }: Pick<IStripeCouponParams, 'percentOff' | 'amountOff'>): Pick<
-    StripeSdk.CouponCreateParams,
-    'amount_off' | 'percent_off'
-  > {
-    if (!amountOff && !percentOff) {
-      throw new BaseException({
-        status: 400,
-        message: 'Neither discount amount nor percent provided.',
-      });
-    }
-
-    if (amountOff && percentOff) {
-      throw new BaseException({
-        status: 400,
-        message: 'Cannot provide both amount and percent discount.',
-      });
-    }
-
-    return {
-      // eslint-disable-next-line camelcase
-      amount_off: amountOff,
-      // eslint-disable-next-line camelcase
-      percent_off: percentOff,
-    };
-  }
-
-  /**
-   * Validate and transform coupon duration input
-   */
-  private validateAndTransformCouponDurationInput({
-    duration,
-    durationInMonths,
-  }: Pick<IStripeCouponParams, 'duration' | 'durationInMonths'>): Pick<
-    StripeSdk.CouponCreateParams,
-    'duration' | 'duration_in_months'
-  > {
-    {
-      if (duration === CouponDuration.REPEATING && !durationInMonths) {
-        throw new BaseException({
-          status: 400,
-          message: 'If duration is repeating, the number of months the coupon applies.',
-        });
-      }
-    }
-
-    return {
-      duration: duration as StripeSdk.CouponCreateParams.Duration,
-      // eslint-disable-next-line camelcase
-      duration_in_months: durationInMonths,
-    };
-  }
-
-  /**
-   * Create stripe promo code
-   */
-  public async createPromoCode({
-    couponId,
-    code: userCode,
-    maxRedemptions,
-  }: IStripePromoCodeParams): Promise<{
-    id: string;
-    code: string;
-  }> {
-    const { id, code } = await this.sdk.promotionCodes.create({
-      coupon: couponId,
-      code: userCode,
-      // eslint-disable-next-line camelcase
-      max_redemptions: maxRedemptions,
-    });
-
-    return {
-      id,
-      code,
-    };
-  }
-
-  /**
-   * Remove stripe coupon
-   */
-  public async removeCoupon(couponId: string): Promise<boolean> {
-    const { deleted: isDeleted } = await this.sdk.coupons.del(couponId);
-
-    return isDeleted;
   }
 }
 
