@@ -12,12 +12,13 @@ Content-Type: application/json
     "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
     "entityCost": 100,
     "feesPayer": "sender",
-    "title": "ticket",
+    "title": "Test: campaign ticket with tax",
     "applicationPaymentPercent": 3,
     "additionalFeesPercent": {
-      "receiver": 5,
+      "receiver": 6,
       "sender": 0
-    }
+    },
+    "withTax": true
   }
 }
 
@@ -30,7 +31,7 @@ Content-Type: application/json
   "id": "1",
   "method": "stripe.refund",
   "params": {
-    "transactionId": "pi_3NhgeiAmQ4asS8PS1elCTWIA",
+    "transactionId": "pi_3NkNQYAmQ4asS8PS13Dz4Z0x",
     "amount": 100
   }
 }
@@ -44,7 +45,7 @@ Content-Type: application/json
   "id": "1",
   "method": "stripe.refund",
   "params": {
-    "transactionId": "pi_3NhgeiAmQ4asS8PS1elCTWIA"
+    "transactionId": "pi_3NiFSQAmQ4asS8PS0oUkim0t"
   }
 }
 
@@ -57,7 +58,7 @@ Content-Type: application/json
   "id": "1",
   "method": "stripe.refund",
   "params": {
-    "transactionId": "pi_3NhgeiAmQ4asS8PS1elCTWIA",
+    "transactionId": "pi_3NkNTgAmQ4asS8PS1b9pWug7",
     "refundAmountType": "entityCost"
   }
 }
