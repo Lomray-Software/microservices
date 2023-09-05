@@ -60,6 +60,12 @@ interface IPaymentIntentParams {
   additionalFeesPercent?: Record<TransactionRole, number>;
   // Extra receiver revenue percent from application payment percent
   extraReceiverRevenuePercent?: number;
+  withTax?: boolean;
+}
+
+interface IComputePaymentIntentTaxParams {
+  amountUnit: number;
+  customerId: string;
 }
 
 interface IPaymentIntentMetadata {
@@ -75,6 +81,7 @@ interface IPaymentIntentMetadata {
   paymentProviderFee: string;
   entityId?: string;
   title?: string;
+  taxId?: string;
 }
 
 interface IRefundParams {
@@ -1490,6 +1497,7 @@ class Stripe extends Abstract {
     additionalFeesPercent,
     extraReceiverRevenuePercent,
     feesPayer = TransactionRole.SENDER,
+    withTax,
   }: IPaymentIntentParams): Promise<[Transaction, Transaction]> {
     const { fees } = await remoteConfig();
     const { instantPayoutPercent = 1 } = fees!;
@@ -1533,6 +1541,15 @@ class Stripe extends Abstract {
 
     const entityUnitCost = this.toSmallestCurrencyUnit(entityCost);
 
+    let tax: StripeSdk.Tax.Calculation | null = null;
+
+    if (withTax) {
+      tax = await this.computePaymentIntentTax({
+        amountUnit: entityUnitCost,
+        customerId: senderCustomer.customerId,
+      });
+    }
+
     /**
      * Calculate fees
      */
@@ -1572,6 +1589,7 @@ class Stripe extends Abstract {
           receiverId: receiverUserId,
           ...(entityId ? { entityId } : {}),
           ...(title ? { description: title } : {}),
+          ...(tax ? { taxId: tax.id } : {}),
         },
         payment_method_types: [StripePaymentMethods.CARD],
         confirm: true,
@@ -2253,6 +2271,54 @@ class Stripe extends Abstract {
       cvc,
       number: digits,
     };
+  }
+
+  /**
+   * Compute tax
+   */
+  private computePaymentIntentTax({
+    amountUnit,
+  }: IComputePaymentIntentTaxParams): Promise<StripeSdk.Tax.Calculation> {
+    /* eslint-disable camelcase */
+    return this.sdk.tax.calculations.create({
+      currency: 'usd',
+      line_items: [
+        {
+          amount: amountUnit,
+          reference: 'entity',
+          tax_behavior: 'exclusive',
+        },
+      ],
+      /**
+       * @TODO: for tests
+       */
+      customer_details: {
+        address: {
+          country: 'US',
+          postal_code: '48001',
+        },
+        address_source: 'billing',
+      },
+      // Customer should be with the attached address details at least postal code
+      // customer: customerId,
+      expand: ['line_items.data.tax_breakdown'],
+    });
+    /* eslint-enable camelcase */
+  }
+
+  /**
+   * Returns customer details
+   */
+  private async getCustomerDetails(userId: string): Promise<StripeSdk.Customer | null> {
+    const user = await this.customerRepository.findOne({ userId });
+
+    if (!user) {
+      throw new BaseException({ status: 500, message: 'Failed to get customer details. Customer' });
+    }
+
+    const customer = await this.sdk.customers.retrieve(user.customerId);
+
+    return !customer.deleted ? customer : null;
   }
 }
 

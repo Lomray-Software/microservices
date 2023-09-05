@@ -1,5 +1,5 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsEnum, IsNumber, IsObject, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber, IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import TransactionRole from '@constants/transaction-role';
 import type Transaction from '@entities/transaction';
@@ -42,6 +42,10 @@ class PaymentIntentInput {
   @IsNumber()
   @IsUndefinable()
   extraReceiverRevenuePercent?: number;
+
+  @IsBoolean()
+  @IsUndefinable()
+  withTax?: boolean;
 }
 
 class PaymentIntentOutput {
@@ -70,6 +74,7 @@ const connectAccount = Endpoint.custom(
     feesPayer,
     additionalFeesPercent,
     extraReceiverRevenuePercent,
+    withTax,
   }) => {
     const service = await Factory.create(getManager());
 
@@ -85,6 +90,7 @@ const connectAccount = Endpoint.custom(
         feesPayer,
         additionalFeesPercent,
         extraReceiverRevenuePercent,
+        withTax,
       }),
     };
   },
