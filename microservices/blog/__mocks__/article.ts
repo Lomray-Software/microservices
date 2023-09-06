@@ -6,7 +6,7 @@ const articleMock = {
   content:
     '<div><p>Marianne jointure attended she hastened surprise but she.</p><p> Ever lady son yet you very paid form away.</p></div>',
   extra: {
-    authorName: 'John Doe',
+    links: ['https://google.com', 'https://wikipedia.com'],
   },
 };
 
