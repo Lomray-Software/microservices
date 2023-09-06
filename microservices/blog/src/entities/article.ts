@@ -55,7 +55,15 @@ class Article {
   publishDate: string | null;
 
   @JSONSchema({
-    description: 'Used for storing dynamic data. For example extra links or extra authors.',
+    description: 'Used for storing dynamic data',
+    example: {
+      links: ['https://google.com', 'https://wikipedia.com'],
+      extraAuthor: {
+        name: 'John Doe',
+        link: 'https://facebook.com',
+        email: 'johndoe@gmail.com',
+      },
+    },
   })
   @Column({ type: 'json', default: {} })
   @IsUndefinable()
