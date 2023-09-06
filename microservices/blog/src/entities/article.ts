@@ -55,9 +55,7 @@ class Article {
   publishDate: string | null;
 
   @JSONSchema({
-    description:
-      'Set of key-value pairs that can be attach to an article.' +
-      'This can be useful for storing extra information about the article in a structured format.',
+    description: 'Used for storing dynamic data. For example extra links or extra authors.',
   })
   @Column({ type: 'json', default: {} })
   @IsUndefinable()
