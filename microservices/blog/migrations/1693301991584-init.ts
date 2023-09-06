@@ -8,7 +8,7 @@ export default class init1693301991584 implements MigrationInterface {
      * Tables
      */
     await queryRunner.query(
-      `CREATE TABLE "article" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" character varying(36), "title" character varying(255) NOT NULL, "alias" character varying(255) NOT NULL, "description" character varying(255) NOT NULL, "content" text NOT NULL DEFAULT '', "publishDate" TIMESTAMP, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "article(uq):alias" UNIQUE ("alias"), CONSTRAINT "article(pk):id" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "article" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" character varying(36), "title" character varying(255) NOT NULL, "alias" character varying(255) NOT NULL, "description" character varying(255) NOT NULL, "content" text NOT NULL DEFAULT '', "publishDate" TIMESTAMP,  "extra" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "article(uq):alias" UNIQUE ("alias"), CONSTRAINT "article(pk):id" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "category" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying(50) NOT NULL, "alias" character varying(255) NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "category(uq):alias" UNIQUE ("alias"), CONSTRAINT "category(pk):id" PRIMARY KEY ("id"))`,
