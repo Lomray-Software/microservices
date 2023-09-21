@@ -219,5 +219,17 @@
         "createdAt": "2022-03-15T06:18:07.204Z"
       }
     ]
+  },
+  {
+    "microservice": "notification",
+    "method": "notice.hide-all",
+    "description": "Notifications multiple hide",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-09-20T22:49:48.824Z",
+    "modelOut": "notification.HideAllOutput",
+    "methodFilters": []
   }
 ]

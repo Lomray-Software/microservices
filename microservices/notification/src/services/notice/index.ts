@@ -1,4 +1,4 @@
-import { EntityManager, getManager } from 'typeorm';
+import { EntityManager, getManager, getRepository } from 'typeorm';
 import NoticeEntity from '@entities/notice';
 import { HideAllOutput } from '@methods/notice/hide-all';
 
@@ -35,20 +35,16 @@ class Notice {
       };
     }
 
-    const affected = await this.manager.transaction(async (entityManager): Promise<number> => {
-      const repository = entityManager.getRepository(NoticeEntity);
-      const result = await repository.update(
-        {
-          userId,
-          isHidden: false,
-        },
-        {
-          isHidden: true,
-        },
-      );
-
-      return Number(result.affected);
-    });
+    const repository = getRepository(NoticeEntity);
+    const { affected } = await repository.update(
+      {
+        userId,
+        isHidden: false,
+      },
+      {
+        isHidden: true,
+      },
+    );
 
     return {
       status: true,
