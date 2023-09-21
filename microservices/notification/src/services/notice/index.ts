@@ -1,4 +1,4 @@
-import { EntityManager, getManager, getRepository } from 'typeorm';
+import { EntityManager, getManager } from 'typeorm';
 import NoticeEntity from '@entities/notice';
 import { HideAllOutput } from '@methods/notice/hide-all';
 
@@ -35,7 +35,7 @@ class Notice {
       };
     }
 
-    const repository = getRepository(NoticeEntity);
+    const repository = this.manager.getRepository(NoticeEntity);
     const { affected } = await repository.update(
       {
         userId,
