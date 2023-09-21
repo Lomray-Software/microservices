@@ -4,6 +4,7 @@ import CONST from '@constants/index';
 import EmailSend from '@methods/email/send';
 import CrudMessage from '@methods/messages/crud';
 import CrudNotice from '@methods/notice/crud';
+import HideAll from '@methods/notice/hide-all';
 import PhoneSend from '@methods/phone/send';
 import PushSend from '@methods/push/send';
 
@@ -13,7 +14,10 @@ import PushSend from '@methods/push/send';
 export default (ms: Microservice): void => {
   const crud = {
     message: CrudMessage,
-    notice: CrudNotice,
+    notice: {
+      ...CrudNotice,
+      'hide-all': HideAll,
+    },
   };
 
   /**

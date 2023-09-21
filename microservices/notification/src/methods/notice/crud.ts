@@ -7,6 +7,9 @@ import Notice from '@entities/notice';
  */
 const crud = Endpoint.controller(() => getRepository(Notice), {
   restore: false,
+  create: {
+    options: () => ({ isAllowMultiple: true }),
+  },
 });
 
 export default crud;
