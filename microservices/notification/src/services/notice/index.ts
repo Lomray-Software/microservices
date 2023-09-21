@@ -1,3 +1,4 @@
+import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { EntityManager, getManager } from 'typeorm';
 import NoticeEntity from '@entities/notice';
 
@@ -20,14 +21,18 @@ class Notice {
   /**
    * Init service
    */
-  public static init() {
+  public static init(): Notice {
     return new Notice();
   }
 
   /**
    * Hide all user's notifications
    */
-  public hideAll(userId?: string) {
+  public hideAll(userId?: string): Promise<number> {
+    if (!userId) {
+      throw new BaseException({ status: 500, message: 'No user provided' });
+    }
+
     return this.manager.transaction(async (entityManager): Promise<number> => {
       const repository = entityManager.getRepository(NoticeEntity);
       const { affected } = await repository.update(
