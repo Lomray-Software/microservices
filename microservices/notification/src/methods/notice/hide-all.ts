@@ -1,10 +1,14 @@
-import { Endpoint } from '@lomray/microservice-helpers';
-import { IsNumber } from 'class-validator';
+import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsBoolean, IsNumber } from 'class-validator';
 import Notice from '@services/notice';
 
-class HideAllOutput {
+export class HideAllOutput {
+  @IsBoolean()
+  status: boolean;
+
   @IsNumber()
-  affected: number;
+  @IsUndefinable()
+  affected?: number;
 }
 
 /**
@@ -15,9 +19,7 @@ const hideAll = Endpoint.custom(
     output: HideAllOutput,
     description: 'Notifications multiple hide',
   }),
-  async ({ payload }) => ({
-    affected: await Notice.init().hideAll(payload?.authentication?.userId as string),
-  }),
+  ({ payload }) => Notice.init().hideAll(payload?.authentication?.userId as string),
 );
 
 export default hideAll;

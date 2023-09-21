@@ -1,6 +1,6 @@
-import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { EntityManager, getManager } from 'typeorm';
 import NoticeEntity from '@entities/notice';
+import { HideAllOutput } from '@methods/notice/hide-all';
 
 /**
  * Notice service
@@ -28,14 +28,16 @@ class Notice {
   /**
    * Hide all user's notifications
    */
-  public hideAll(userId?: string): Promise<number> {
+  public async hideAll(userId?: string): Promise<HideAllOutput> {
     if (!userId) {
-      throw new BaseException({ status: 500, message: 'No user provided' });
+      return {
+        status: false,
+      };
     }
 
-    return this.manager.transaction(async (entityManager): Promise<number> => {
+    const affected = await this.manager.transaction(async (entityManager): Promise<number> => {
       const repository = entityManager.getRepository(NoticeEntity);
-      const { affected } = await repository.update(
+      const result = await repository.update(
         {
           userId,
           isHidden: false,
@@ -45,8 +47,13 @@ class Notice {
         },
       );
 
-      return Number(affected);
+      return Number(result.affected);
     });
+
+    return {
+      status: true,
+      affected,
+    };
   }
 }
 
