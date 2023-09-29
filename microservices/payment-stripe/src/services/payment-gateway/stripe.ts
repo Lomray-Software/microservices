@@ -1555,12 +1555,12 @@ class Stripe extends Abstract {
       ...(title ? { description: title } : {}),
       metadata: {
         // Original float entity cost
-        entityCost: entityCost.toString(),
-        paymentProviderFee: this.fromSmallestCurrencyUnit(paymentProviderUnitFee).toString(),
-        applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee).toString(),
-        receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee).toString(),
-        senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee).toString(),
-        receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue).toString(),
+        entityCost,
+        paymentProviderFee: this.fromSmallestCurrencyUnit(paymentProviderUnitFee),
+        applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee),
+        receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
+        senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
+        receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue),
         cardId: paymentMethodCardId,
         feesPayer,
         senderId: senderCustomer.userId,
