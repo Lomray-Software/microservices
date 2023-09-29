@@ -883,8 +883,6 @@ class Stripe extends Abstract {
       receiverId,
     } = metadata as unknown as IPaymentIntentMetadata;
 
-    const paymentProviderUnitFee = this.toSmallestCurrencyUnit(paymentProviderFee);
-
     const card = await this.cardRepository
       .createQueryBuilder('card')
       .where('card.userId = :userId AND card.id = :cardId', { userId: senderId, cardId })
@@ -909,9 +907,9 @@ class Stripe extends Abstract {
       fee: applicationFeeAmount || 0,
       params: {
         feesPayer,
-        applicationFee: Number(applicationFee),
-        paymentProviderFee: paymentProviderUnitFee,
-        entityCost: Number(entityCost),
+        applicationFee: this.toSmallestCurrencyUnit(Number(applicationFee)),
+        paymentProviderFee: this.toSmallestCurrencyUnit(paymentProviderFee),
+        entityCost: this.toSmallestCurrencyUnit(Number(entityCost)),
       },
     };
 
@@ -923,7 +921,7 @@ class Stripe extends Abstract {
         amount,
         params: {
           ...transactionData.params,
-          extraFee: this.toSmallestCurrencyUnit(senderExtraFee),
+          extraFee: this.toSmallestCurrencyUnit(Number(senderExtraFee)),
         },
       }),
       this.transactionRepository.save({
@@ -934,8 +932,8 @@ class Stripe extends Abstract {
         // Amount that will be charge for instant payout
         params: {
           ...transactionData.params,
-          extraFee: this.toSmallestCurrencyUnit(receiverExtraFee),
-          extraRevenue: this.toSmallestCurrencyUnit(receiverExtraRevenue),
+          extraFee: this.toSmallestCurrencyUnit(Number(receiverExtraFee)),
+          extraRevenue: this.toSmallestCurrencyUnit(Number(receiverExtraRevenue)),
         },
       }),
     ]);
@@ -1557,12 +1555,12 @@ class Stripe extends Abstract {
       ...(title ? { description: title } : {}),
       metadata: {
         // Original float entity cost
-        entityCost,
-        paymentProviderUnitFee: this.fromSmallestCurrencyUnit(paymentProviderUnitFee),
-        applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee),
-        receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
-        senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
-        receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue),
+        entityCost: entityCost.toString(),
+        paymentProviderFee: this.fromSmallestCurrencyUnit(paymentProviderUnitFee).toString(),
+        applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee).toString(),
+        receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee).toString(),
+        senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee).toString(),
+        receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue).toString(),
         cardId: paymentMethodCardId,
         feesPayer,
         senderId: senderCustomer.userId,
