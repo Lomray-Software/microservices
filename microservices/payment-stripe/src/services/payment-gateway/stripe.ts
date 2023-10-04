@@ -88,6 +88,8 @@ interface IRefundParams {
   bankAccountId?: string;
   cardId?: string;
   entityId?: string;
+  // Abstract entity type
+  type?: string;
 }
 
 interface ICheckoutParams {
@@ -1649,6 +1651,7 @@ class Stripe extends Abstract {
     amount,
     entityId,
     refundAmountType = RefundAmountType.REVENUE,
+    type,
   }: IRefundParams): Promise<Refund> {
     const debitTransaction = await this.transactionRepository.findOne({
       transactionId,
@@ -1700,6 +1703,7 @@ class Stripe extends Abstract {
       metadata: {
         ...(entityId ? { entityId } : {}),
         ...(refundAmountType ? { refundAmountType } : {}),
+        ...(type ? { type } : {}),
       },
     });
 
@@ -1715,6 +1719,7 @@ class Stripe extends Abstract {
         reason: stripeRefund.reason as string,
         errorReason: stripeRefund.failure_reason,
         refundAmountType,
+        ...(type ? { type } : {}),
       },
     });
 
