@@ -84,7 +84,10 @@ interface IPaymentIntentMetadata {
   paymentProviderFee: string;
   entityId?: string;
   title?: string;
-  taxId?: string;
+  taxId?: ITax['id'];
+  transactionAmountWithTax?: ITax['transactionAmountWithTaxUnit'];
+  taxExpiresAt?: ITax['expiresAt'];
+  taxCreatedAt?: ITax['createdAt'];
 }
 
 interface IRefundParams {
@@ -1542,8 +1545,6 @@ class Stripe extends Abstract {
       params: { accountId: receiverAccountId, isVerified: isReceiverVerified },
     } = receiverCustomer;
 
-    console.log('customer data', await this.getCustomerDetails(senderCustomer.userId));
-
     if (!receiverAccountId || !isReceiverVerified) {
       throw new BaseException({
         status: 400,
@@ -1567,7 +1568,6 @@ class Stripe extends Abstract {
       });
     }
 
-    console.log('tax', tax);
     /**
      * Calculate fees
      */
@@ -1604,7 +1604,16 @@ class Stripe extends Abstract {
         receiverId: receiverUserId,
         ...(entityId ? { entityId } : {}),
         ...(title ? { description: title } : {}),
-        ...(tax ? { taxId: tax.id } : {}),
+        ...(tax
+          ? {
+              taxId: tax.id,
+              taxCreatedAt: tax.createdAt?.toISOString(),
+              taxExpiresAt: tax.expiresAt?.toISOString(),
+              transactionAmountWithTax: this.fromSmallestCurrencyUnit(
+                tax.transactionAmountWithTaxUnit,
+              ),
+            }
+          : {}),
       },
       payment_method_types: [StripePaymentMethods.CARD],
       confirm: true,
