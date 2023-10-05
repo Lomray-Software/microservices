@@ -12,12 +12,7 @@ Content-Type: application/json
     "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
     "entityCost": 100,
     "feesPayer": "sender",
-    "title": "Test: campaign ticket with tax",
-    "applicationPaymentPercent": 3,
-    "additionalFeesPercent": {
-      "receiver": 6,
-      "sender": 0
-    },
+    "title": "Test 5: campaign ticket with tax",
     "withTax": true
   }
 }
