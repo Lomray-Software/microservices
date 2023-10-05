@@ -1586,6 +1586,7 @@ class Stripe extends Abstract {
         receiverId: receiverUserId,
         ...(entityId ? { entityId } : {}),
         ...(title ? { description: title } : {}),
+        ...(tax ? { taxId: tax.id } : {}),
       },
       payment_method_types: [StripePaymentMethods.CARD],
       confirm: true,
@@ -1601,52 +1602,8 @@ class Stripe extends Abstract {
         destination: receiverAccountId,
       },
     });
-    let stripePaymentIntent: StripeSdk.PaymentIntent;
 
-    try {
-      /* eslint-disable camelcase */
-      stripePaymentIntent = await this.sdk.paymentIntents.create({
-        ...(title ? { description: title } : {}),
-        metadata: {
-          // Original float entity cost
-          entityCost,
-          paymentProviderUnitFee: this.fromSmallestCurrencyUnit(paymentProviderUnitFee),
-          applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee),
-          receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
-          senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
-          receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue),
-          cardId: paymentMethodCardId,
-          feesPayer,
-          senderId: senderCustomer.userId,
-          receiverId: receiverUserId,
-          ...(entityId ? { entityId } : {}),
-          ...(title ? { description: title } : {}),
-          ...(tax ? { taxId: tax.id } : {}),
-        },
-        payment_method_types: [StripePaymentMethods.CARD],
-        confirm: true,
-        currency: 'usd',
-        capture_method: 'automatic',
-        payment_method: paymentMethodId,
-        customer: senderCustomer.customerId,
-        // How much must sender must pay
-        amount: userUnitAmount,
-        // How much application will collect fee
-        application_fee_amount: userUnitAmount - receiverUnitRevenue,
-        transfer_data: {
-          destination: receiverAccountId,
-        },
-      });
-
-      /* eslint-enable camelcase */
-    } catch (e) {
-      const message = `Failed to create payment intent. ${e?.message as string}`;
-
-      Log.error(message);
-
-      throw new BaseException({ status: 500, message });
-    }
-
+    /* eslint-enable camelcase */
     const transactionData = {
       entityId,
       title,
