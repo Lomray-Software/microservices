@@ -20,6 +20,8 @@ interface IParams {
   // Error reason for failed refund
   errorReason?: string;
   refundAmountType?: RefundAmountType;
+  // Abstract entity type
+  type?: string;
 }
 
 /**

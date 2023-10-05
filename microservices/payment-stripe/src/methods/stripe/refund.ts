@@ -1,6 +1,7 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsObject, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsObject, IsString, Length, Min } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
 import { getManager } from 'typeorm';
 import RefundAmountType from '@constants/refund-amount-type';
 import Refund from '@entities/refund';
@@ -11,6 +12,7 @@ class RefundInput {
   transactionId: string;
 
   // Float value
+  @Min(1)
   @IsNumber()
   @IsUndefinable()
   amount?: number;
@@ -19,9 +21,18 @@ class RefundInput {
   @IsUndefinable()
   refundAmountType?: RefundAmountType;
 
+  @Length(1, 36)
   @IsString()
   @IsUndefinable()
   entityId?: string;
+
+  @JSONSchema({
+    description: 'Abstract entity type',
+  })
+  @Length(1, 50)
+  @IsString()
+  @IsUndefinable()
+  type?: string;
 }
 
 class RefundOutput {

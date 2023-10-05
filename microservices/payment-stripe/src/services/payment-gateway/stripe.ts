@@ -95,6 +95,8 @@ interface IRefundParams {
   bankAccountId?: string;
   cardId?: string;
   entityId?: string;
+  // Abstract entity type
+  type?: string;
 }
 
 interface ICheckoutParams {
@@ -890,8 +892,6 @@ class Stripe extends Abstract {
       receiverId,
     } = metadata as unknown as IPaymentIntentMetadata;
 
-    const paymentProviderUnitFee = this.toSmallestCurrencyUnit(paymentProviderFee);
-
     const card = await this.cardRepository
       .createQueryBuilder('card')
       .where('card.userId = :userId AND card.id = :cardId', { userId: senderId, cardId })
@@ -916,9 +916,9 @@ class Stripe extends Abstract {
       fee: applicationFeeAmount || 0,
       params: {
         feesPayer,
-        applicationFee: Number(applicationFee),
-        paymentProviderFee: paymentProviderUnitFee,
-        entityCost: Number(entityCost),
+        applicationFee: this.toSmallestCurrencyUnit(Number(applicationFee)),
+        paymentProviderFee: this.toSmallestCurrencyUnit(paymentProviderFee),
+        entityCost: this.toSmallestCurrencyUnit(Number(entityCost)),
       },
     };
 
@@ -930,7 +930,7 @@ class Stripe extends Abstract {
         amount,
         params: {
           ...transactionData.params,
-          extraFee: this.toSmallestCurrencyUnit(senderExtraFee),
+          extraFee: this.toSmallestCurrencyUnit(Number(senderExtraFee)),
         },
       }),
       this.transactionRepository.save({
@@ -941,8 +941,8 @@ class Stripe extends Abstract {
         // Amount that will be charge for instant payout
         params: {
           ...transactionData.params,
-          extraFee: this.toSmallestCurrencyUnit(receiverExtraFee),
-          extraRevenue: this.toSmallestCurrencyUnit(receiverExtraRevenue),
+          extraFee: this.toSmallestCurrencyUnit(Number(receiverExtraFee)),
+          extraRevenue: this.toSmallestCurrencyUnit(Number(receiverExtraRevenue)),
         },
       }),
     ]);
@@ -1569,6 +1569,38 @@ class Stripe extends Abstract {
       extraReceiverRevenuePercent,
     });
 
+    /* eslint-disable camelcase */
+    const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
+      ...(title ? { description: title } : {}),
+      metadata: {
+        // Original float entity cost
+        entityCost,
+        paymentProviderFee: this.fromSmallestCurrencyUnit(paymentProviderUnitFee),
+        applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee),
+        receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
+        senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
+        receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue),
+        cardId: paymentMethodCardId,
+        feesPayer,
+        senderId: senderCustomer.userId,
+        receiverId: receiverUserId,
+        ...(entityId ? { entityId } : {}),
+        ...(title ? { description: title } : {}),
+      },
+      payment_method_types: [StripePaymentMethods.CARD],
+      confirm: true,
+      currency: 'usd',
+      capture_method: 'automatic',
+      payment_method: paymentMethodId,
+      customer: senderCustomer.customerId,
+      // How much must sender must pay
+      amount: userUnitAmount,
+      // How much application will collect fee
+      application_fee_amount: userUnitAmount - receiverUnitRevenue,
+      transfer_data: {
+        destination: receiverAccountId,
+      },
+    });
     let stripePaymentIntent: StripeSdk.PaymentIntent;
 
     try {
@@ -1680,6 +1712,7 @@ class Stripe extends Abstract {
     amount,
     entityId,
     refundAmountType = RefundAmountType.REVENUE,
+    type,
   }: IRefundParams): Promise<Refund> {
     const debitTransaction = await this.transactionRepository.findOne({
       transactionId,
@@ -1731,6 +1764,7 @@ class Stripe extends Abstract {
       metadata: {
         ...(entityId ? { entityId } : {}),
         ...(refundAmountType ? { refundAmountType } : {}),
+        ...(type ? { type } : {}),
       },
     });
 
@@ -1746,6 +1780,7 @@ class Stripe extends Abstract {
         reason: stripeRefund.reason as string,
         errorReason: stripeRefund.failure_reason,
         refundAmountType,
+        ...(type ? { type } : {}),
       },
     });
 
