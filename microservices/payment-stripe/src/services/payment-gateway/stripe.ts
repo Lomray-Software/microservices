@@ -30,6 +30,7 @@ import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
+import type ITax from '@interfaces/tax';
 import Abstract, {
   IBankAccountParams,
   ICardParams,
@@ -66,6 +67,7 @@ interface IPaymentIntentParams {
 interface IComputePaymentIntentTaxParams {
   amountUnit: number;
   customerId: string;
+  shouldIgnoreNotCollecting?: boolean;
 }
 
 interface IPaymentIntentMetadata {
@@ -1527,6 +1529,8 @@ class Stripe extends Abstract {
       params: { accountId: receiverAccountId, isVerified: isReceiverVerified },
     } = receiverCustomer;
 
+    console.log('customer data', await this.getCustomerDetails(senderCustomer.userId));
+
     if (!receiverAccountId || !isReceiverVerified) {
       throw new BaseException({
         status: 400,
@@ -1541,7 +1545,7 @@ class Stripe extends Abstract {
 
     const entityUnitCost = this.toSmallestCurrencyUnit(entityCost);
 
-    let tax: StripeSdk.Tax.Calculation | null = null;
+    let tax: ITax | null = null;
 
     if (withTax) {
       tax = await this.computePaymentIntentTax({
@@ -1550,6 +1554,7 @@ class Stripe extends Abstract {
       });
     }
 
+    console.log('tax', tax);
     /**
      * Calculate fees
      */
@@ -1595,7 +1600,7 @@ class Stripe extends Abstract {
       payment_method: paymentMethodId,
       customer: senderCustomer.customerId,
       // How much must sender must pay
-      amount: userUnitAmount,
+      amount: tax?.transactionAmountWithTaxUnit || userUnitAmount,
       // How much application will collect fee
       application_fee_amount: userUnitAmount - receiverUnitRevenue,
       transfer_data: {
@@ -2266,13 +2271,16 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Compute tax
+   * Compute transaction tax
+   * @description NOTE: Customer SHOULD HAVE address details - at least postal code
    */
-  private computePaymentIntentTax({
+  private async computePaymentIntentTax({
     amountUnit,
-  }: IComputePaymentIntentTaxParams): Promise<StripeSdk.Tax.Calculation> {
+    customerId,
+    shouldIgnoreNotCollecting = false,
+  }: IComputePaymentIntentTaxParams): Promise<ITax> {
     /* eslint-disable camelcase */
-    return this.sdk.tax.calculations.create({
+    const tax = await this.sdk.tax.calculations.create({
       currency: 'usd',
       line_items: [
         {
@@ -2281,21 +2289,46 @@ class Stripe extends Abstract {
           tax_behavior: 'exclusive',
         },
       ],
-      /**
-       * @TODO: for tests
-       */
-      customer_details: {
-        address: {
-          country: 'US',
-          postal_code: '48001',
-        },
-        address_source: 'billing',
-      },
-      // Customer should be with the attached address details at least postal code
-      // customer: customerId,
+      // customer_details: {
+      //   address: {
+      //     country: 'US',
+      //     postal_code: '32837',
+      //   },
+      //   address_source: 'billing',
+      // },
+      //
+      customer: customerId,
       expand: ['line_items.data.tax_breakdown'],
     });
     /* eslint-enable camelcase */
+
+    /**
+     * @TODO: Fix. This property exist in response, but sdk type - not
+     */
+    if (
+      // @ts-ignore
+      tax.tax_breakdown.some((breakdown) => breakdown?.taxability_reason === 'not_collecting') &&
+      !shouldIgnoreNotCollecting
+    ) {
+      throw new BaseException({
+        status: 500,
+        message: 'Failed to compute tax. Tax not collecting.',
+      });
+    }
+
+    if (!tax.id || !tax.expires_at) {
+      throw new BaseException({
+        status: 500,
+        message: 'Failed to compute tax. Tax is invalid.',
+      });
+    }
+
+    return {
+      id: tax.id,
+      transactionAmountWithTaxUnit: tax.amount_total,
+      createdAt: new Date(tax.tax_date),
+      expiresAt: new Date(tax.expires_at),
+    };
   }
 
   /**

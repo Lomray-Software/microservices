@@ -18,8 +18,9 @@ import TransactionType from '@constants/transaction-type';
 import type Customer from '@entities/customer';
 import type Product from '@entities/product';
 import IsValidStripeId from '@helpers/validators/is-stripe-id-valid';
+import type ITax from '@interfaces/tax';
 
-export interface IParams {
+export interface IParams extends Partial<ITax> {
   paymentStatus?: StripeTransactionStatus;
   checkoutStatus?: StripeCheckoutStatus;
   errorMessage?: string;
