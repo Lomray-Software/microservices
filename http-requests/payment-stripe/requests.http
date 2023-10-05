@@ -9,9 +9,9 @@ Content-Type: application/json
   "id": "1",
   "method": "customer.create",
   "params": {
-    "userId": "1est1111-17f8-4501-9de2-a6e775ea39f3",
-    "name": "test1111",
-    "email": "test1111@stripe.acc"
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
+    "name": "John",
+    "email": "john@doe.com"
   }
 }
 
@@ -39,7 +39,7 @@ Content-Type: application/json
   "id": "1",
   "method": "stripe.setup-intent",
   "params": {
-    "userId": "0b0be2e8-1013-4be8-8e7f-a27c4b0a5e45"
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3"
   }
 }
 
@@ -52,9 +52,9 @@ Content-Type: application/json
   "id": "1",
   "method": "stripe.connect-account",
   "params": {
-    "userId": "1est1111-17f8-4501-9de2-a6e775ea39f3",
-    "email": "best@stripe.acc",
-    "accountType": "express",
+    "userId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
+    "email": "r111eceiver@gmail.com",
+    "accountType": "standard",
     "refreshUrl": "https://example.com",
     "returnUrl": "https://example.com"
   }
@@ -69,12 +69,14 @@ Content-Type: application/json
   "id": "1",
   "method": "stripe.create-payment-intent",
   "params": {
-    "userId": "2tandard-17f8-4501-9de2-a6e775ea39f3",
-    "receiverId": "0b0be2e8-1013-4be8-8e7f-a27c4b0a5e45",
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
+    "receiverId": "admif8f1-17f8-4501-9de2-a6e775ea39f3",
     "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
     "entityCost": 100,
-    "feesPayer": "receiver",
-    "title": "test payment"
+    "feesPayer": "sender",
+    "title": "ticket",
+    "applicationPaymentPercent": 3,
+    "extraReceiverRevenuePercent": 1
   }
 }
 
@@ -320,7 +322,7 @@ Content-Type: application/json
   "params": {
     "query": {
       "where": {
-        "id": "d101bb55-6f2e-40d8-bc9f-c28e2151aaf2"
+        "id": "0768006a-ca95-4c30-ae40-a3d9d7b249ea"
       }
     }
   }
@@ -335,10 +337,10 @@ Content-Type: application/json
   "id": "1",
   "method": "product.create",
   "params": {
-      "entityId": "0768006a-ca95-4c30-ae40-a3d9d7b249ea",
-      "name": "name",
-      "description": "name",
-      "userId": "u768006a-ca95-4c30-ae40-a3d9d7b249ea"
+    "entityId": "0768006a-ca95-4c30-ae40-a3d9d7b249ea",
+    "name": "name",
+    "description": "name",
+    "userId": "u768006a-ca95-4c30-ae40-a3d9d7b249ea"
   }
 }
 
