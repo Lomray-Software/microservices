@@ -1436,7 +1436,12 @@ class Stripe extends Abstract {
    * Handles completing of transaction inside stripe payment process
    */
   public async handleTransactionCompleted(event: StripeSdk.Event): Promise<Transaction | void> {
-    const { id, payment_status: paymentStatus, status } = event.data.object as ICheckoutEvent;
+    const {
+      id,
+      payment_status: paymentStatus,
+      status,
+      amount_total: amountTotal,
+    } = event.data.object as ICheckoutEvent;
 
     const transaction = await this.transactionRepository.findOne({ transactionId: id });
 
@@ -1448,6 +1453,7 @@ class Stripe extends Abstract {
       { transactionId: id },
       {
         status: this.getStatus(paymentStatus as StripeTransactionStatus),
+        amount: amountTotal,
         params: {
           checkoutStatus: status as StripeCheckoutStatus,
           paymentStatus: paymentStatus as StripeTransactionStatus,
