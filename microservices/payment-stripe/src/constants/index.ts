@@ -13,6 +13,7 @@ const constants = {
   MS_PAYOUT_COEFF: Number(process.env.MS_PAYOUT_COEFF) ?? 0.3,
   MS_FEES:
     process.env.MS_FEES ?? '{ "stableUnit": 30, "paymentPercent": 2.9, "instantPayoutPercent": 1 }',
+  MS_TAXES: process.env.MS_TAXES ?? '{ "defaultPercent": 8 }',
 };
 
 export default constants;

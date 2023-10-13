@@ -28,7 +28,6 @@ import fromExpirationDate from '@helpers/formatters/from-expiration-date';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
-import type IAddress from '@interfaces/address';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
 import type ITax from '@interfaces/tax';
@@ -320,19 +319,10 @@ class Stripe extends Abstract {
   /**
    * Create Customer entity
    */
-  public async createCustomer(
-    userId: string,
-    email?: string,
-    name?: string,
-    address?: IAddress,
-  ): Promise<Customer> {
+  public async createCustomer(userId: string, email?: string, name?: string): Promise<Customer> {
     const { id }: StripeSdk.Customer = await this.sdk.customers.create({
       name,
       email,
-      ...(address && Object.keys(address).length !== 0
-        ? // eslint-disable-next-line camelcase
-          { address: { ...address, postal_code: address?.postalCode } }
-        : {}),
     });
 
     return super.createCustomer(userId, id);
@@ -1559,7 +1549,7 @@ class Stripe extends Abstract {
     }
 
     const {
-      params: { paymentMethodId },
+      params: { paymentMethodId, zipcode },
       id: paymentMethodCardId,
     } = await this.getChargingCard(senderCustomer.userId, cardId);
 
@@ -1568,10 +1558,27 @@ class Stripe extends Abstract {
     let tax: ITax | null = null;
 
     if (withTax) {
+      /**
+       * At least zipcode (postal code) MUST exist
+       */
+      if (!zipcode) {
+        throw new BaseException({
+          status: 500,
+          message: 'Card zipcode is required for compute transaction tax.',
+        });
+      }
+
       tax = await this.computePaymentIntentTax({
         amountUnit: entityUnitCost,
         customerId: senderCustomer.customerId,
       });
+
+      if (!tax) {
+        throw new BaseException({
+          status: 500,
+          message: 'Tax compute was failed.',
+        });
+      }
     }
 
     /**
