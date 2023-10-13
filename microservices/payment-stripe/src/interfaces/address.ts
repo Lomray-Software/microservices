@@ -1,3 +1,7 @@
+import { IsUndefinable } from '@lomray/microservice-helpers';
+import { IsString } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
+
 interface IAddress {
   // City, district, suburb, town, village, or ward.
   city?: string;
@@ -13,4 +17,36 @@ interface IAddress {
   state?: string;
 }
 
-export default IAddress;
+/**
+ * Address with validation decorators
+ */
+class Address implements IAddress {
+  @IsString()
+  @IsUndefinable()
+  city?: string;
+
+  @IsString()
+  @IsUndefinable()
+  country?: string;
+
+  @IsString()
+  @IsUndefinable()
+  line1?: string;
+
+  @IsString()
+  @IsUndefinable()
+  line2?: string;
+
+  @JSONSchema({
+    description: 'Required for tax compute',
+  })
+  @IsString()
+  @IsUndefinable()
+  postalCode?: string;
+
+  @IsString()
+  @IsUndefinable()
+  state?: string;
+}
+
+export { IAddress, Address };

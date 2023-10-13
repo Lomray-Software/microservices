@@ -32,7 +32,6 @@ export interface IParams {
   isApproved?: boolean;
   // Setup intent id
   setupIntentId?: string;
-  zipcode?: string;
 }
 
 /**
