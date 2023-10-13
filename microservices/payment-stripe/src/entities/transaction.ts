@@ -20,7 +20,16 @@ import type Product from '@entities/product';
 import IsValidStripeId from '@helpers/validators/is-stripe-id-valid';
 import type ITax from '@interfaces/tax';
 
-export interface IParams extends Partial<ITax> {
+export interface IComputedTax {
+  taxId?: ITax['id'];
+  taxTransactionAmountWithTaxUnit?: ITax['transactionAmountWithTaxUnit'];
+  taxExpiresAt?: ITax['expiresAt'];
+  taxCreatedAt?: ITax['createdAt'];
+  taxTotalAmountUnit?: ITax['totalAmountUnit'];
+  taxBehaviour?: ITax['behaviour'];
+}
+
+export interface IParams extends IComputedTax {
   paymentStatus?: StripeTransactionStatus;
   checkoutStatus?: StripeCheckoutStatus;
   errorMessage?: string;

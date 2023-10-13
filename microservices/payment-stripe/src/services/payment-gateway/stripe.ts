@@ -24,6 +24,7 @@ import Price from '@entities/price';
 import Product from '@entities/product';
 import Refund from '@entities/refund';
 import Transaction from '@entities/transaction';
+import type { IComputedTax } from '@entities/transaction';
 import composeBalance from '@helpers/compose-balance';
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
@@ -71,7 +72,8 @@ interface IComputePaymentIntentTaxParams {
   shouldIgnoreNotCollecting?: boolean;
 }
 
-interface IPaymentIntentMetadata {
+interface IPaymentIntentMetadata
+  extends Omit<IComputedTax, 'taxTransactionAmountWithTaxUnit' | 'taxTotalAmountUnit'> {
   senderId: string;
   receiverId: string;
   entityCost: string;
@@ -84,10 +86,8 @@ interface IPaymentIntentMetadata {
   paymentProviderFee: string;
   entityId?: string;
   title?: string;
-  taxId?: ITax['id'];
-  transactionAmountWithTax?: ITax['transactionAmountWithTaxUnit'];
-  taxExpiresAt?: ITax['expiresAt'];
-  taxCreatedAt?: ITax['createdAt'];
+  taxTransactionAmountWithTax?: number;
+  taxTotalAmount?: number;
 }
 
 interface IRefundParams {
@@ -899,6 +899,12 @@ class Stripe extends Abstract {
       receiverExtraRevenue,
       senderId,
       receiverId,
+      taxId,
+      taxTransactionAmountWithTax,
+      taxExpiresAt,
+      taxCreatedAt,
+      taxTotalAmount,
+      taxBehaviour,
     } = metadata as unknown as IPaymentIntentMetadata;
 
     const card = await this.cardRepository
@@ -928,6 +934,14 @@ class Stripe extends Abstract {
         applicationFee: this.toSmallestCurrencyUnit(Number(applicationFee)),
         paymentProviderFee: this.toSmallestCurrencyUnit(paymentProviderFee),
         entityCost: this.toSmallestCurrencyUnit(Number(entityCost)),
+        taxId,
+        taxTransactionAmountWithTaxUnit: this.toSmallestCurrencyUnit(
+          Number(taxTransactionAmountWithTax),
+        ),
+        taxExpiresAt,
+        taxCreatedAt,
+        taxTotalAmountUnit: this.toSmallestCurrencyUnit(Number(taxTotalAmount)),
+        taxBehaviour,
       },
     };
 
@@ -1617,11 +1631,11 @@ class Stripe extends Abstract {
               taxId: tax.id,
               taxCreatedAt: tax.createdAt?.toISOString(),
               taxExpiresAt: tax.expiresAt?.toISOString(),
-              transactionAmountWithTax: this.fromSmallestCurrencyUnit(
+              taxTransactionAmountWithTax: this.fromSmallestCurrencyUnit(
                 tax.transactionAmountWithTaxUnit,
               ),
-              totalAmount: tax.totalAmount,
-              behaviour: tax.behaviour,
+              taxTotalAmount: this.fromSmallestCurrencyUnit(tax.totalAmountUnit),
+              taxBehaviour: tax.behaviour,
             }
           : {}),
       },
@@ -1653,6 +1667,16 @@ class Stripe extends Abstract {
         applicationFee: applicationUnitFee,
         paymentProviderFee: paymentProviderUnitFee,
         entityCost: entityUnitCost,
+        ...(tax
+          ? {
+              taxId: tax.id,
+              taxCreatedAt: tax.createdAt?.toISOString(),
+              taxExpiresAt: tax.expiresAt?.toISOString(),
+              taxTransactionAmountWithTaxUnit: tax.transactionAmountWithTaxUnit,
+              taxTotalAmountUnit: tax.totalAmountUnit,
+              taxBehaviour: tax.behaviour,
+            }
+          : {}),
       },
     };
 
@@ -2376,7 +2400,7 @@ class Stripe extends Abstract {
 
     return {
       id: tax.id,
-      totalAmount: taxDetails?.amount_tax,
+      totalAmountUnit: taxDetails?.amount_tax,
       behaviour: taxDetails?.tax_behavior as TaxBehaviour,
       transactionAmountWithTaxUnit: tax.amount_total,
       createdAt: new Date(tax.tax_date),

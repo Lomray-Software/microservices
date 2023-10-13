@@ -7,7 +7,7 @@ interface ITax {
   expiresAt: Date;
   createdAt: Date;
   // Tax pure total amount
-  totalAmount: number;
+  totalAmountUnit: number;
   behaviour: TaxBehaviour;
 }
 
