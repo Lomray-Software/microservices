@@ -12,6 +12,7 @@ import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
+import TaxBehaviour from '@constants/tax-behaviour';
 import TransactionRole from '@constants/transaction-role';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
@@ -66,7 +67,7 @@ interface IPaymentIntentParams {
 
 interface IComputePaymentIntentTaxParams {
   amountUnit: number;
-  customerId: string;
+  paymentMethodId: string;
   shouldIgnoreNotCollecting?: boolean;
 }
 
@@ -1198,7 +1199,11 @@ class Stripe extends Abstract {
 
     const savedCard = await this.cardRepository.save({
       ...cardParams,
-      params: { isApproved: true, paymentMethodId, setupIntentId: id },
+      params: {
+        isApproved: true,
+        paymentMethodId,
+        setupIntentId: id,
+      },
     });
 
     void Microservice.eventPublish(Event.SetupIntentSucceeded, {
@@ -1549,36 +1554,26 @@ class Stripe extends Abstract {
     }
 
     const {
-      params: { paymentMethodId, zipcode },
+      params: { paymentMethodId },
       id: paymentMethodCardId,
     } = await this.getChargingCard(senderCustomer.userId, cardId);
+
+    if (!paymentMethodId) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Payment intent creation is failed. Payment method'),
+      });
+    }
 
     const entityUnitCost = this.toSmallestCurrencyUnit(entityCost);
 
     let tax: ITax | null = null;
 
     if (withTax) {
-      /**
-       * At least zipcode (postal code) MUST exist
-       */
-      if (!zipcode) {
-        throw new BaseException({
-          status: 500,
-          message: 'Card zipcode is required for compute transaction tax.',
-        });
-      }
-
       tax = await this.computePaymentIntentTax({
         amountUnit: entityUnitCost,
-        customerId: senderCustomer.customerId,
+        paymentMethodId,
       });
-
-      if (!tax) {
-        throw new BaseException({
-          status: 500,
-          message: 'Tax compute was failed.',
-        });
-      }
     }
 
     /**
@@ -1625,6 +1620,8 @@ class Stripe extends Abstract {
               transactionAmountWithTax: this.fromSmallestCurrencyUnit(
                 tax.transactionAmountWithTaxUnit,
               ),
+              totalAmount: tax.totalAmount,
+              behaviour: tax.behaviour,
             }
           : {}),
       },
@@ -2311,10 +2308,26 @@ class Stripe extends Abstract {
    */
   private async computePaymentIntentTax({
     amountUnit,
-    customerId,
+    paymentMethodId,
     shouldIgnoreNotCollecting = false,
   }: IComputePaymentIntentTaxParams): Promise<ITax> {
+    /**
+     * Get payment method data
+     */
+    const paymentMethod = await this.sdk.paymentMethods.retrieve(paymentMethodId, {
+      expand: [StripePaymentMethods.CARD],
+    });
+
     /* eslint-disable camelcase */
+    const { postal_code, country } = paymentMethod.billing_details.address || {};
+
+    if (!postal_code || !country) {
+      throw new BaseException({
+        status: 500,
+        message: 'Payment method at least postal code and country required for compute tax.',
+      });
+    }
+
     const tax = await this.sdk.tax.calculations.create({
       currency: 'usd',
       line_items: [
@@ -2324,18 +2337,19 @@ class Stripe extends Abstract {
           tax_behavior: 'exclusive',
         },
       ],
-      // customer_details: {
-      //   address: {
-      //     country: 'US',
-      //     postal_code: '32837',
-      //   },
-      //   address_source: 'billing',
-      // },
-      //
-      customer: customerId,
+      customer_details: {
+        address: {
+          country,
+          postal_code,
+        },
+        address_source: 'billing',
+      },
+
       expand: ['line_items.data.tax_breakdown'],
     });
     /* eslint-enable camelcase */
+
+    console.log('tax', JSON.stringify(tax));
 
     /**
      * @TODO: Fix. This property exist in response, but sdk type - not
@@ -2351,7 +2365,9 @@ class Stripe extends Abstract {
       });
     }
 
-    if (!tax.id || !tax.expires_at) {
+    const taxDetails = tax.line_items?.data?.[0];
+
+    if (!tax.id || !tax.expires_at || !taxDetails?.amount_tax || !taxDetails?.tax_behavior) {
       throw new BaseException({
         status: 500,
         message: 'Failed to compute tax. Tax is invalid.',
@@ -2360,25 +2376,12 @@ class Stripe extends Abstract {
 
     return {
       id: tax.id,
+      totalAmount: taxDetails?.amount_tax,
+      behaviour: taxDetails?.tax_behavior as TaxBehaviour,
       transactionAmountWithTaxUnit: tax.amount_total,
       createdAt: new Date(tax.tax_date),
       expiresAt: new Date(tax.expires_at),
     };
-  }
-
-  /**
-   * Returns customer details
-   */
-  private async getCustomerDetails(userId: string): Promise<StripeSdk.Customer | null> {
-    const user = await this.customerRepository.findOne({ userId });
-
-    if (!user) {
-      throw new BaseException({ status: 500, message: 'Failed to get customer details. Customer' });
-    }
-
-    const customer = await this.sdk.customers.retrieve(user.customerId);
-
-    return !customer.deleted ? customer : null;
   }
 }
 

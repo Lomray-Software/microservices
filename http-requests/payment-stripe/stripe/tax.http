@@ -1,4 +1,4 @@
-### Creaete transaction with tax
+### Creaete transaction with tax (card without zipcode) - will cause error
 POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
@@ -13,6 +13,26 @@ Content-Type: application/json
     "entityCost": 100,
     "feesPayer": "sender",
     "title": "Payment 1 intent with tax",
+    "withTax": true
+  }
+}
+
+### Creaete transaction with tax (card with zipcode)
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.create-payment-intent",
+  "params": {
+    "userId": "68827b31-33e9-45b5-bf9f-8823b993d0ef",
+    "receiverId": "0b0be2e8-1013-4be8-8e7f-a27c4b0a5e45",
+    "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
+    "cardId": "4a6feca7-22c6-469b-9706-62acfeb6e31a",
+    "entityCost": 100,
+    "feesPayer": "sender",
+    "title": "Payment 3 intent with tax",
     "withTax": true
   }
 }
