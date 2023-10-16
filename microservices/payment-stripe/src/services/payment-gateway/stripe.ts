@@ -2030,20 +2030,10 @@ class Stripe extends Abstract {
         (amountUnit + stableUnit) / (1 - paymentPercent / 100),
       );
 
-      console.log('res1', feesPayer, {
-        processingAmountUnit,
-        stripeFeeUnit: processingAmountUnit - amountUnit,
-      });
-
       return { processingAmountUnit, stripeFeeUnit: processingAmountUnit - amountUnit };
     }
 
     const stripeFeeUnit = getPercentFromAmount(amountUnit, paymentPercent) + stableUnit;
-
-    console.log('res2', feesPayer, {
-      processingAmountUnit: amountUnit - stripeFeeUnit,
-      stripeFeeUnit,
-    });
 
     return { processingAmountUnit: amountUnit - stripeFeeUnit, stripeFeeUnit };
   }
