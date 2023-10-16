@@ -1618,17 +1618,6 @@ class Stripe extends Abstract {
       paymentIntentAmountUnit = userUnitAmount;
     }
 
-    console.log('tax', tax);
-    console.log('userUnitAmount', {
-      userUnitAmount,
-      paymentIntentAmountUnit,
-      receiverUnitRevenue,
-      applicationUnitFee,
-      paymentProviderUnitFee,
-      receiverAdditionalFee,
-      extraReceiverUnitRevenue,
-      senderAdditionalFee,
-    });
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
       ...(title ? { description: title } : {}),
@@ -2509,8 +2498,6 @@ class Stripe extends Abstract {
       expand: ['line_items.data.tax_breakdown'],
     });
     /* eslint-enable camelcase */
-
-    console.log('tax', JSON.stringify(tax));
 
     /**
      * @TODO: Fix. This property exist in response, but sdk type - not
