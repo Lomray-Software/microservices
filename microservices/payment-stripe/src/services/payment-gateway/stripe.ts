@@ -170,6 +170,8 @@ interface IPaymentIntentFees {
   receiverAdditionalFee: number;
   senderAdditionalFee: number;
   extraReceiverUnitRevenue: number;
+  estimatedTaxUnit?: number;
+  estimatedTaxPercent?: number;
 }
 
 type TCardData =
@@ -185,6 +187,7 @@ interface IStripePromoCodeParams {
   code?: string;
   maxRedemptions?: number;
 }
+
 /**
  * Stripe payment provider
  */
@@ -200,7 +203,7 @@ class Stripe extends Abstract {
 
   /**
    * Add new card
-   * NOTES:
+   * @description NOTES:
    * 1. Usage example - only in integration tests
    * 2. Use setup intent for livemode
    * 3. For creating card manually with the sensitive data such as digits, cvc. Platform
@@ -1937,6 +1940,7 @@ class Stripe extends Abstract {
       extraReceiverUnitRevenue,
       senderAdditionalFee,
       receiverAdditionalFee,
+      ...(shouldEstimateTax ? { estimatedTaxPercent: taxes?.defaultPercent } : {}),
     };
 
     /**
@@ -1947,10 +1951,13 @@ class Stripe extends Abstract {
     if (feesPayer === TransactionRole.SENDER) {
       let userTempUnitAmount = entityUnitCost + applicationUnitFee + senderAdditionalFee;
       let userUnitAmount: number;
+      let estimatedTaxUnit = 0;
 
       if (shouldEstimateTax) {
-        userTempUnitAmount += getPercentFromAmount(userTempUnitAmount, taxes?.defaultPercent || 0);
+        estimatedTaxUnit = getPercentFromAmount(userTempUnitAmount, taxes?.defaultPercent || 0);
       }
+
+      userTempUnitAmount += estimatedTaxUnit;
 
       if (withStripeFee) {
         /**
@@ -1968,6 +1975,7 @@ class Stripe extends Abstract {
 
       return {
         ...sharedFees,
+        estimatedTaxUnit,
         applicationUnitFee,
         userUnitAmount,
         paymentProviderUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
@@ -1989,10 +1997,13 @@ class Stripe extends Abstract {
     }
 
     let userUnitAmount = Math.round(entityUnitCost + senderAdditionalFee);
+    let estimatedTaxUnit = 0;
 
     if (shouldEstimateTax) {
-      userUnitAmount += getPercentFromAmount(userUnitAmount, taxes?.defaultPercent || 0);
+      estimatedTaxUnit = getPercentFromAmount(userUnitAmount, taxes?.defaultPercent || 0);
     }
+
+    userUnitAmount += estimatedTaxUnit;
 
     const receiverUnitRevenue = Math.round(
       entityUnitCost -
@@ -2004,6 +2015,7 @@ class Stripe extends Abstract {
 
     return {
       ...sharedFees,
+      estimatedTaxUnit,
       applicationUnitFee,
       paymentProviderUnitFee,
       userUnitAmount,

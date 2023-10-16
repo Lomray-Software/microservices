@@ -52,6 +52,14 @@ class PaymentIntentFeesOutput {
 
   @IsNumber()
   receiverRevenue: number;
+
+  @IsNumber()
+  @IsUndefinable()
+  estimatedTaxPercent?: number;
+
+  @IsNumber()
+  @IsUndefinable()
+  estimatedTax?: number;
 }
 
 /**
@@ -70,6 +78,8 @@ const paymentIntentFees = Endpoint.custom(
     applicationPaymentPercent,
     additionalFeesPercent,
     feesPayer,
+    shouldEstimateTax,
+    withStripeFee,
   }) => {
     const service = await Factory.create(getManager());
 
@@ -81,13 +91,18 @@ const paymentIntentFees = Endpoint.custom(
       feesPayer,
       additionalFeesPercent,
       applicationPaymentPercent,
+      shouldEstimateTax,
+      withStripeFee,
     });
 
     return Object.fromEntries(
       Object.entries(unitFees).map(([title, amount]) => {
         const newKey = title.replace('Unit', '');
 
-        return [newKey, service.fromSmallestCurrencyUnit(amount as number)];
+        return [
+          newKey,
+          !newKey.includes('Percent') ? service.fromSmallestCurrencyUnit(amount as number) : amount,
+        ];
       }),
     ) as unknown as PaymentIntentFeesOutput;
   },
