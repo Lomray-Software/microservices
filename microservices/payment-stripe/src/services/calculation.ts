@@ -130,6 +130,7 @@ class Calculation {
           amount: amountUnit,
           reference: entityId,
           tax_behavior: behaviour,
+          quantity: 1,
         },
       ],
       customer_details: {
