@@ -1975,7 +1975,7 @@ class Stripe extends Abstract {
 
       return {
         ...sharedFees,
-        estimatedTaxUnit,
+        ...(shouldEstimateTax ? { estimatedTaxUnit } : {}),
         applicationUnitFee,
         userUnitAmount,
         paymentProviderUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
@@ -2015,7 +2015,7 @@ class Stripe extends Abstract {
 
     return {
       ...sharedFees,
-      estimatedTaxUnit,
+      ...(shouldEstimateTax ? { estimatedTaxUnit } : {}),
       applicationUnitFee,
       paymentProviderUnitFee,
       userUnitAmount,
