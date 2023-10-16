@@ -27,6 +27,7 @@ export interface IComputedTax {
   taxCreatedAt?: ITax['createdAt'];
   taxTotalAmountUnit?: ITax['totalAmountUnit'];
   taxBehaviour?: ITax['behaviour'];
+  taxFeeUnit?: number;
 }
 
 export interface IParams extends IComputedTax {
