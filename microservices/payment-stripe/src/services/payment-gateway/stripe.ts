@@ -196,7 +196,7 @@ class Stripe extends Abstract {
   /**
    * Payment intent event name
    */
-  private paymentIntentEventName: IPaymentIntentEvent = {
+  private readonly paymentIntentEventName: IPaymentIntentEvent = {
     [TransactionStatus.SUCCESS]: Event.PaymentIntentSuccess,
     [TransactionStatus.IN_PROCESS]: Event.PaymentIntentInProcess,
     [TransactionStatus.ERROR]: Event.PaymentIntentError,
@@ -1593,9 +1593,17 @@ class Stripe extends Abstract {
     let paymentIntentAmountUnit: number | null;
 
     if (withTax) {
+      if (!entityId) {
+        throw new BaseException({
+          status: 400,
+          message: 'Entity reference is required for tax calculation.',
+        });
+      }
+
       const { tax: taxData, feeUnit: taxFeeData } = await Calculation.getPaymentIntentTax(
         this.sdk,
         {
+          entityId,
           processingTransactionAmountUnit: userUnitAmount,
           paymentMethodId,
           feesPayer,

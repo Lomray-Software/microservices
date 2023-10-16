@@ -10,12 +10,14 @@ import type ITax from '@interfaces/tax';
 interface IGetPaymentIntentTaxParams {
   processingTransactionAmountUnit: number;
   paymentMethodId: string;
+  entityId: string;
   feesPayer: TransactionRole;
 }
 
 interface IComputePaymentIntentTaxParams {
   amountUnit: number;
   paymentMethodId: string;
+  entityId: string;
   behaviour?: TaxBehaviour;
   shouldIgnoreNotCollecting?: boolean;
 }
@@ -65,12 +67,18 @@ class Calculation {
    */
   public static async getPaymentIntentTax(
     sdk: StripeSdk,
-    { processingTransactionAmountUnit, paymentMethodId, feesPayer }: IGetPaymentIntentTaxParams,
+    {
+      processingTransactionAmountUnit,
+      entityId,
+      paymentMethodId,
+      feesPayer,
+    }: IGetPaymentIntentTaxParams,
   ): Promise<IPaymentIntentTax> {
     const { taxes } = await remoteConfig();
     const { stableUnit } = taxes!;
 
     const tax = await this.computePaymentIntentTax(sdk, {
+      entityId,
       amountUnit:
         // If sender cover fees, Stripe Tax calculate fee should be included into the precessing amount
         feesPayer === TransactionRole.SENDER
@@ -92,6 +100,7 @@ class Calculation {
     {
       amountUnit,
       paymentMethodId,
+      entityId,
       behaviour = TaxBehaviour.EXCLUSIVE,
       shouldIgnoreNotCollecting = false,
     }: IComputePaymentIntentTaxParams,
@@ -119,7 +128,7 @@ class Calculation {
       line_items: [
         {
           amount: amountUnit,
-          reference: 'entity',
+          reference: entityId,
           tax_behavior: behaviour,
         },
       ],
@@ -155,11 +164,16 @@ class Calculation {
       0,
     );
     const totalTaxPercent = tax?.tax_breakdown?.reduce(
-      (total, { tax_rate_details: details }) => total + (Number(details.percentage_decimal) || 0),
+      (total, { tax_rate_details: details }) => total + (Number(details?.percentage_decimal) || 0),
       0,
     );
 
-    if (!tax.id || !tax.expires_at || typeof totalAmountUnit !== 'number') {
+    if (
+      !tax.id ||
+      !tax.expires_at ||
+      typeof totalAmountUnit !== 'number' ||
+      typeof totalTaxPercent !== 'number'
+    ) {
       throw new BaseException({
         status: 500,
         message: 'Failed to compute tax. Tax is invalid.',

@@ -60,6 +60,7 @@ describe('services/calculation', () => {
       processingTransactionAmountUnit: 11000,
       paymentMethodId: 'pm-1',
       feesPayer: TransactionRole.SENDER,
+      entityId: 'e-1',
     };
 
     const mockTax = {
@@ -79,6 +80,7 @@ describe('services/calculation', () => {
       expect(result).to.deep.equal({ tax: mockTax, feeUnit: configMock.taxes.stableUnit });
       expect(computePaymentIntentTaxStub).to.calledOnce;
       expect(input).to.deep.equal({
+        entityId: mockParams.entityId,
         paymentMethodId: mockParams.paymentMethodId,
         amountUnit: mockParams.processingTransactionAmountUnit + configMock.taxes.stableUnit,
       });
@@ -97,6 +99,7 @@ describe('services/calculation', () => {
       expect(result).to.deep.equal({ tax: mockTax, feeUnit: configMock.taxes.stableUnit });
       expect(computePaymentIntentTaxStub).to.calledOnce;
       expect(input).to.deep.equal({
+        entityId: mockParams.entityId,
         paymentMethodId: mockParams.paymentMethodId,
         amountUnit: mockParams.processingTransactionAmountUnit,
       });
@@ -115,7 +118,9 @@ describe('services/calculation', () => {
         id: 'tax-id',
         expires_at: date,
         tax_date: date,
-        tax_breakdown: [{ taxability_reason: taxabilityReason }],
+        tax_breakdown: [
+          { taxability_reason: taxabilityReason, tax_rate_details: { percentage_decimal: 8.1 } },
+        ],
         line_items: {
           data: [{ amount_tax: 810 }],
         },
@@ -163,6 +168,7 @@ describe('services/calculation', () => {
         transactionAmountWithTaxUnit: undefined,
         createdAt: currentDate,
         expiresAt: currentDate,
+        totalTaxPercent: 8.1,
       });
     });
 
@@ -175,7 +181,7 @@ describe('services/calculation', () => {
             mockParams,
           ),
         ),
-      ).to.throw('Failed to compute tax. Tax not collecting.');
+      ).to.throw('Failed to compute tax. One or more tax breakdown is not collecting.');
     });
 
     it('should throw error: billing is invalid', async () => {
