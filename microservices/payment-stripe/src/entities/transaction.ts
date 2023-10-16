@@ -27,6 +27,7 @@ export interface IComputedTax {
   taxCreatedAt?: ITax['createdAt'];
   taxTotalAmountUnit?: ITax['totalAmountUnit'];
   taxBehaviour?: ITax['behaviour'];
+  totalTaxPercent?: ITax['totalTaxPercent'];
   taxFeeUnit?: number;
 }
 

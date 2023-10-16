@@ -10,12 +10,14 @@ import type ITax from '@interfaces/tax';
 interface IGetPaymentIntentTaxParams {
   processingTransactionAmountUnit: number;
   paymentMethodId: string;
+  entityId: string;
   feesPayer: TransactionRole;
 }
 
 interface IComputePaymentIntentTaxParams {
   amountUnit: number;
   paymentMethodId: string;
+  entityId: string;
   behaviour?: TaxBehaviour;
   shouldIgnoreNotCollecting?: boolean;
 }
@@ -65,12 +67,18 @@ class Calculation {
    */
   public static async getPaymentIntentTax(
     sdk: StripeSdk,
-    { processingTransactionAmountUnit, paymentMethodId, feesPayer }: IGetPaymentIntentTaxParams,
+    {
+      processingTransactionAmountUnit,
+      entityId,
+      paymentMethodId,
+      feesPayer,
+    }: IGetPaymentIntentTaxParams,
   ): Promise<IPaymentIntentTax> {
     const { taxes } = await remoteConfig();
     const { stableUnit } = taxes!;
 
     const tax = await this.computePaymentIntentTax(sdk, {
+      entityId,
       amountUnit:
         // If sender cover fees, Stripe Tax calculate fee should be included into the precessing amount
         feesPayer === TransactionRole.SENDER
@@ -85,12 +93,14 @@ class Calculation {
   /**
    * Compute transaction tax
    * @description NOTE: Customer SHOULD HAVE address details - at least postal code
+   * One this api call cost is $0.05 - DO NOT ALLOW user call this method in depth
    */
   private static async computePaymentIntentTax(
     sdk: StripeSdk,
     {
       amountUnit,
       paymentMethodId,
+      entityId,
       behaviour = TaxBehaviour.EXCLUSIVE,
       shouldIgnoreNotCollecting = false,
     }: IComputePaymentIntentTaxParams,
@@ -103,12 +113,13 @@ class Calculation {
     });
 
     /* eslint-disable camelcase */
-    const { postal_code, country } = paymentMethod.billing_details.address || {};
+    const { postal_code, country } = paymentMethod?.billing_details?.address || {};
 
     if (!postal_code || !country) {
       throw new BaseException({
         status: 500,
-        message: 'Payment method at least postal code and country required for compute tax.',
+        message:
+          'For tax calculation, a payment method must include, at a minimum, the postal code and country information.',
       });
     }
 
@@ -117,8 +128,9 @@ class Calculation {
       line_items: [
         {
           amount: amountUnit,
-          reference: 'entity',
+          reference: entityId,
           tax_behavior: behaviour,
+          quantity: 1,
         },
       ],
       customer_details: {
@@ -138,12 +150,13 @@ class Calculation {
      */
     if (
       // @ts-ignore
-      tax.tax_breakdown.some((breakdown) => breakdown?.taxability_reason === 'not_collecting') &&
+      tax?.tax_breakdown?.some((breakdown) => breakdown?.taxability_reason === 'not_collecting') &&
       !shouldIgnoreNotCollecting
     ) {
       throw new BaseException({
         status: 500,
-        message: 'Failed to compute tax. Tax not collecting.',
+        message: 'Failed to compute tax. One or more tax breakdown is not collecting.',
+        payload: tax?.tax_breakdown,
       });
     }
 
@@ -151,17 +164,32 @@ class Calculation {
       (total, { amount_tax: amountTax }) => total + amountTax,
       0,
     );
+    const totalTaxPercent = tax?.tax_breakdown?.reduce(
+      (total, { tax_rate_details: details }) => total + (Number(details?.percentage_decimal) || 0),
+      0,
+    );
 
-    if (!tax.id || !tax.expires_at || !totalAmountUnit) {
+    if (
+      !tax.id ||
+      !tax.expires_at ||
+      typeof totalAmountUnit !== 'number' ||
+      typeof totalTaxPercent !== 'number'
+    ) {
       throw new BaseException({
         status: 500,
         message: 'Failed to compute tax. Tax is invalid.',
+        payload: {
+          taxId: tax.id,
+          expireAt: tax.expires_at,
+          amountUnit: totalAmountUnit,
+        },
       });
     }
 
     return {
       id: tax.id,
       totalAmountUnit,
+      totalTaxPercent,
       behaviour,
       transactionAmountWithTaxUnit: tax.amount_total,
       createdAt: new Date(tax.tax_date),

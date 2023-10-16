@@ -83,6 +83,7 @@ interface IPaymentIntentMetadata
   taxTransactionAmountWithTax?: number;
   taxTotalAmount?: number;
   taxFee?: number;
+  totalTaxPercent?: number;
 }
 
 interface IRefundParams {
@@ -170,6 +171,8 @@ interface IPaymentIntentFees {
   receiverAdditionalFee: number;
   senderAdditionalFee: number;
   extraReceiverUnitRevenue: number;
+  estimatedTaxUnit?: number;
+  estimatedTaxPercent?: number;
 }
 
 type TCardData =
@@ -185,6 +188,7 @@ interface IStripePromoCodeParams {
   code?: string;
   maxRedemptions?: number;
 }
+
 /**
  * Stripe payment provider
  */
@@ -192,7 +196,7 @@ class Stripe extends Abstract {
   /**
    * Payment intent event name
    */
-  private paymentIntentEventName: IPaymentIntentEvent = {
+  private readonly paymentIntentEventName: IPaymentIntentEvent = {
     [TransactionStatus.SUCCESS]: Event.PaymentIntentSuccess,
     [TransactionStatus.IN_PROCESS]: Event.PaymentIntentInProcess,
     [TransactionStatus.ERROR]: Event.PaymentIntentError,
@@ -200,7 +204,7 @@ class Stripe extends Abstract {
 
   /**
    * Add new card
-   * NOTES:
+   * @description NOTES:
    * 1. Usage example - only in integration tests
    * 2. Use setup intent for livemode
    * 3. For creating card manually with the sensitive data such as digits, cvc. Platform
@@ -1589,9 +1593,17 @@ class Stripe extends Abstract {
     let paymentIntentAmountUnit: number | null;
 
     if (withTax) {
+      if (!entityId) {
+        throw new BaseException({
+          status: 400,
+          message: 'Entity reference is required for tax calculation.',
+        });
+      }
+
       const { tax: taxData, feeUnit: taxFeeData } = await Calculation.getPaymentIntentTax(
         this.sdk,
         {
+          entityId,
           processingTransactionAmountUnit: userUnitAmount,
           paymentMethodId,
           feesPayer,
@@ -1614,6 +1626,17 @@ class Stripe extends Abstract {
       paymentIntentAmountUnit = userUnitAmount;
     }
 
+    /**
+     * Prevent type error cause on payment intent metadata and transaction params
+     */
+    const sharedTaxData = {
+      taxId: tax?.id,
+      taxCreatedAt: tax?.createdAt?.toISOString(),
+      taxExpiresAt: tax?.expiresAt?.toISOString(),
+      taxBehaviour: tax?.behaviour,
+      totalTaxPercent: tax?.totalTaxPercent,
+    };
+
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
       ...(title ? { description: title } : {}),
@@ -1633,15 +1656,12 @@ class Stripe extends Abstract {
         ...(title ? { description: title } : {}),
         ...(tax
           ? {
-              taxId: tax.id,
-              taxCreatedAt: tax.createdAt?.toISOString(),
-              taxExpiresAt: tax.expiresAt?.toISOString(),
+              ...sharedTaxData,
               taxTransactionAmountWithTax: this.fromSmallestCurrencyUnit(
                 tax.transactionAmountWithTaxUnit,
               ),
               ...(taxFeeUnit ? { taxFee: this.fromSmallestCurrencyUnit(taxFeeUnit) } : {}),
               taxTotalAmount: this.fromSmallestCurrencyUnit(tax.totalAmountUnit),
-              taxBehaviour: tax.behaviour,
             }
           : {}),
       },
@@ -1676,12 +1696,9 @@ class Stripe extends Abstract {
         entityCost: entityUnitCost,
         ...(tax
           ? {
-              taxId: tax.id,
-              taxCreatedAt: tax.createdAt?.toISOString(),
-              taxExpiresAt: tax.expiresAt?.toISOString(),
+              ...sharedTaxData,
               taxTransactionAmountWithTaxUnit: tax.transactionAmountWithTaxUnit,
               taxTotalAmountUnit: tax.totalAmountUnit,
-              taxBehaviour: tax.behaviour,
               ...(taxFeeUnit ? { taxFeeUnit } : {}),
             }
           : {}),
@@ -1933,6 +1950,7 @@ class Stripe extends Abstract {
       extraReceiverUnitRevenue,
       senderAdditionalFee,
       receiverAdditionalFee,
+      ...(shouldEstimateTax ? { estimatedTaxPercent: taxes?.defaultPercent } : {}),
     };
 
     /**
@@ -1943,10 +1961,14 @@ class Stripe extends Abstract {
     if (feesPayer === TransactionRole.SENDER) {
       let userTempUnitAmount = entityUnitCost + applicationUnitFee + senderAdditionalFee;
       let userUnitAmount: number;
+      let estimatedTaxUnit = 0;
 
       if (shouldEstimateTax) {
-        userTempUnitAmount += getPercentFromAmount(userTempUnitAmount, taxes?.defaultPercent || 0);
+        userTempUnitAmount += taxes?.stableUnit || 0;
+        estimatedTaxUnit = getPercentFromAmount(userTempUnitAmount, taxes?.defaultPercent || 0);
       }
+
+      userTempUnitAmount += estimatedTaxUnit;
 
       if (withStripeFee) {
         /**
@@ -1964,6 +1986,7 @@ class Stripe extends Abstract {
 
       return {
         ...sharedFees,
+        ...(shouldEstimateTax ? { estimatedTaxUnit, taxFeeUnit: taxes?.stableUnit } : {}),
         applicationUnitFee,
         userUnitAmount,
         paymentProviderUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
@@ -1985,10 +2008,14 @@ class Stripe extends Abstract {
     }
 
     let userUnitAmount = Math.round(entityUnitCost + senderAdditionalFee);
+    let estimatedTaxUnit = 0;
 
     if (shouldEstimateTax) {
-      userUnitAmount += getPercentFromAmount(userUnitAmount, taxes?.defaultPercent || 0);
+      userUnitAmount += taxes?.stableUnit || 0;
+      estimatedTaxUnit = getPercentFromAmount(userUnitAmount, taxes?.defaultPercent || 0);
     }
+
+    userUnitAmount += estimatedTaxUnit;
 
     const receiverUnitRevenue = Math.round(
       entityUnitCost -
@@ -2000,6 +2027,7 @@ class Stripe extends Abstract {
 
     return {
       ...sharedFees,
+      ...(shouldEstimateTax ? { estimatedTaxUnit, taxFeeUnit: taxes?.stableUnit } : {}),
       applicationUnitFee,
       paymentProviderUnitFee,
       userUnitAmount,

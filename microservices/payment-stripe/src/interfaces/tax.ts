@@ -8,6 +8,7 @@ interface ITax {
   createdAt: Date;
   // Tax pure total amount
   totalAmountUnit: number;
+  totalTaxPercent: number;
   behaviour: TaxBehaviour;
 }
 
