@@ -83,6 +83,7 @@ interface IPaymentIntentMetadata
   taxTransactionAmountWithTax?: number;
   taxTotalAmount?: number;
   taxFee?: number;
+  totalTaxPercent?: number;
 }
 
 interface IRefundParams {
@@ -1625,6 +1626,7 @@ class Stripe extends Abstract {
       taxCreatedAt: tax?.createdAt?.toISOString(),
       taxExpiresAt: tax?.expiresAt?.toISOString(),
       taxBehaviour: tax?.behaviour,
+      totalTaxPercent: tax?.totalTaxPercent,
     };
 
     /* eslint-disable camelcase */

@@ -145,7 +145,8 @@ class Calculation {
     ) {
       throw new BaseException({
         status: 500,
-        message: 'Failed to compute tax. Tax not collecting.',
+        message: 'Failed to compute tax. One or more tax breakdown is not collecting.',
+        payload: tax?.tax_breakdown,
       });
     }
 
@@ -153,17 +154,27 @@ class Calculation {
       (total, { amount_tax: amountTax }) => total + amountTax,
       0,
     );
+    const totalTaxPercent = tax?.tax_breakdown?.reduce(
+      (total, { tax_rate_details: details }) => total + (Number(details.percentage_decimal) || 0),
+      0,
+    );
 
     if (!tax.id || !tax.expires_at || typeof totalAmountUnit !== 'number') {
       throw new BaseException({
         status: 500,
         message: 'Failed to compute tax. Tax is invalid.',
+        payload: {
+          taxId: tax.id,
+          expireAt: tax.expires_at,
+          amountUnit: totalAmountUnit,
+        },
       });
     }
 
     return {
       id: tax.id,
       totalAmountUnit,
+      totalTaxPercent,
       behaviour,
       transactionAmountWithTaxUnit: tax.amount_total,
       createdAt: new Date(tax.tax_date),
