@@ -22,6 +22,7 @@ import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
 import Refund from '@entities/refund';
+import type { IComputedTax } from '@entities/transaction';
 import Transaction from '@entities/transaction';
 import composeBalance from '@helpers/compose-balance';
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
@@ -30,6 +31,8 @@ import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
+import type ITax from '@interfaces/tax';
+import Calculation from '@services/calculation';
 import Abstract, {
   IBankAccountParams,
   ICardParams,
@@ -60,9 +63,11 @@ interface IPaymentIntentParams {
   additionalFeesPercent?: Record<TransactionRole, number>;
   // Extra receiver revenue percent from application payment percent
   extraReceiverRevenuePercent?: number;
+  withTax?: boolean;
 }
 
-interface IPaymentIntentMetadata {
+interface IPaymentIntentMetadata
+  extends Omit<IComputedTax, 'taxTransactionAmountWithTaxUnit' | 'taxTotalAmountUnit'> {
   senderId: string;
   receiverId: string;
   entityCost: string;
@@ -75,6 +80,10 @@ interface IPaymentIntentMetadata {
   paymentProviderFee: string;
   entityId?: string;
   title?: string;
+  taxTransactionAmountWithTax?: number;
+  taxTotalAmount?: number;
+  taxFee?: number;
+  totalTaxPercent?: number;
 }
 
 interface IRefundParams {
@@ -139,6 +148,8 @@ interface IGetPaymentIntentFeesParams
     | 'extraReceiverRevenuePercent'
   > {
   entityUnitCost: number;
+  shouldEstimateTax?: boolean;
+  withStripeFee?: boolean;
 }
 
 type TAvailablePaymentMethods =
@@ -160,6 +171,8 @@ interface IPaymentIntentFees {
   receiverAdditionalFee: number;
   senderAdditionalFee: number;
   extraReceiverUnitRevenue: number;
+  estimatedTaxUnit?: number;
+  estimatedTaxPercent?: number;
 }
 
 type TCardData =
@@ -175,6 +188,7 @@ interface IStripePromoCodeParams {
   code?: string;
   maxRedemptions?: number;
 }
+
 /**
  * Stripe payment provider
  */
@@ -182,7 +196,7 @@ class Stripe extends Abstract {
   /**
    * Payment intent event name
    */
-  private paymentIntentEventName: IPaymentIntentEvent = {
+  private readonly paymentIntentEventName: IPaymentIntentEvent = {
     [TransactionStatus.SUCCESS]: Event.PaymentIntentSuccess,
     [TransactionStatus.IN_PROCESS]: Event.PaymentIntentInProcess,
     [TransactionStatus.ERROR]: Event.PaymentIntentError,
@@ -190,7 +204,7 @@ class Stripe extends Abstract {
 
   /**
    * Add new card
-   * NOTES:
+   * @description NOTES:
    * 1. Usage example - only in integration tests
    * 2. Use setup intent for livemode
    * 3. For creating card manually with the sensitive data such as digits, cvc. Platform
@@ -308,7 +322,10 @@ class Stripe extends Abstract {
    * Create Customer entity
    */
   public async createCustomer(userId: string, email?: string, name?: string): Promise<Customer> {
-    const { id }: StripeSdk.Customer = await this.sdk.customers.create({ name, email });
+    const { id }: StripeSdk.Customer = await this.sdk.customers.create({
+      name,
+      email,
+    });
 
     return super.createCustomer(userId, id);
   }
@@ -883,6 +900,13 @@ class Stripe extends Abstract {
       receiverExtraRevenue,
       senderId,
       receiverId,
+      taxId,
+      taxTransactionAmountWithTax,
+      taxExpiresAt,
+      taxCreatedAt,
+      taxTotalAmount,
+      taxBehaviour,
+      taxFee,
     } = metadata as unknown as IPaymentIntentMetadata;
 
     const card = await this.cardRepository
@@ -912,6 +936,15 @@ class Stripe extends Abstract {
         applicationFee: this.toSmallestCurrencyUnit(Number(applicationFee)),
         paymentProviderFee: this.toSmallestCurrencyUnit(paymentProviderFee),
         entityCost: this.toSmallestCurrencyUnit(Number(entityCost)),
+        taxId,
+        taxTransactionAmountWithTaxUnit: this.toSmallestCurrencyUnit(
+          Number(taxTransactionAmountWithTax),
+        ),
+        taxExpiresAt,
+        taxCreatedAt,
+        taxTotalAmountUnit: this.toSmallestCurrencyUnit(Number(taxTotalAmount)),
+        taxBehaviour,
+        ...(taxFee ? { taxFeeUnit: this.toSmallestCurrencyUnit(Number(taxFee)) } : {}),
       },
     };
 
@@ -1183,7 +1216,11 @@ class Stripe extends Abstract {
 
     const savedCard = await this.cardRepository.save({
       ...cardParams,
-      params: { isApproved: true, paymentMethodId, setupIntentId: id },
+      params: {
+        isApproved: true,
+        paymentMethodId,
+        setupIntentId: id,
+      },
     });
 
     void Microservice.eventPublish(Event.SetupIntentSucceeded, {
@@ -1496,46 +1533,33 @@ class Stripe extends Abstract {
     additionalFeesPercent,
     extraReceiverRevenuePercent,
     feesPayer = TransactionRole.SENDER,
+    withTax,
   }: IPaymentIntentParams): Promise<[Transaction, Transaction]> {
     const { fees } = await remoteConfig();
     const { instantPayoutPercent = 1 } = fees!;
 
-    const senderCustomer = await this.customerRepository.findOne({ userId });
-    const receiverCustomer = await this.customerRepository.findOne({ userId: receiverId });
-
-    if (!senderCustomer) {
-      throw new BaseException({
-        status: 400,
-        message: messages.getNotFoundMessage('Sender customer account'),
-      });
-    }
-
-    if (!receiverCustomer) {
-      throw new BaseException({
-        status: 400,
-        message: messages.getNotFoundMessage('Receiver customer account'),
-      });
-    }
+    const { sender: senderCustomer, receiver: receiverCustomer } =
+      await this.getAndValidateTransactionContributors(userId, receiverId);
 
     /**
      * Verify if customer is verified
      */
     const {
       userId: receiverUserId,
-      params: { accountId: receiverAccountId, isVerified: isReceiverVerified },
+      params: { accountId: receiverAccountId },
     } = receiverCustomer;
-
-    if (!receiverAccountId || !isReceiverVerified) {
-      throw new BaseException({
-        status: 400,
-        message: "Receiver don't have setup or verified connected account.",
-      });
-    }
 
     const {
       params: { paymentMethodId },
       id: paymentMethodCardId,
     } = await this.getChargingCard(senderCustomer.userId, cardId);
+
+    if (!paymentMethodId) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Payment intent creation is failed. Payment method'),
+      });
+    }
 
     const entityUnitCost = this.toSmallestCurrencyUnit(entityCost);
 
@@ -1556,7 +1580,62 @@ class Stripe extends Abstract {
       feesPayer,
       additionalFeesPercent,
       extraReceiverRevenuePercent,
+      // If with tax - do not include Stripe transaction fee
+      withStripeFee: !withTax,
     });
+
+    /**
+     * Group up payment intent data
+     */
+    let tax: ITax | null = null;
+    let taxFeeUnit = 0;
+    let stripeFeeUnit: number | null;
+    let paymentIntentAmountUnit: number | null;
+
+    if (withTax) {
+      if (!entityId) {
+        throw new BaseException({
+          status: 400,
+          message: 'Entity reference is required for tax calculation.',
+        });
+      }
+
+      const { tax: taxData, feeUnit: taxFeeData } = await Calculation.getPaymentIntentTax(
+        this.sdk,
+        {
+          entityId,
+          processingTransactionAmountUnit: userUnitAmount,
+          paymentMethodId,
+          feesPayer,
+        },
+      );
+
+      tax = taxData;
+      taxFeeUnit = taxFeeData;
+
+      const { stripeFeeUnit: transactionFeeUnit, processingAmountUnit } =
+        await Calculation.getStripeFeeAndProcessingAmount({
+          amountUnit: taxData?.transactionAmountWithTaxUnit,
+          feesPayer,
+        });
+
+      stripeFeeUnit = transactionFeeUnit;
+      paymentIntentAmountUnit = processingAmountUnit;
+    } else {
+      stripeFeeUnit = paymentProviderUnitFee;
+      paymentIntentAmountUnit = userUnitAmount;
+    }
+
+    /**
+     * Prevent type error cause on payment intent metadata and transaction params
+     */
+    const sharedTaxData = {
+      taxId: tax?.id,
+      taxCreatedAt: tax?.createdAt?.toISOString(),
+      taxExpiresAt: tax?.expiresAt?.toISOString(),
+      taxBehaviour: tax?.behaviour,
+      totalTaxPercent: tax?.totalTaxPercent,
+    };
 
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
@@ -1564,7 +1643,7 @@ class Stripe extends Abstract {
       metadata: {
         // Original float entity cost
         entityCost,
-        paymentProviderFee: this.fromSmallestCurrencyUnit(paymentProviderUnitFee),
+        paymentProviderFee: this.fromSmallestCurrencyUnit(stripeFeeUnit),
         applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee),
         receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
         senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
@@ -1575,6 +1654,16 @@ class Stripe extends Abstract {
         receiverId: receiverUserId,
         ...(entityId ? { entityId } : {}),
         ...(title ? { description: title } : {}),
+        ...(tax
+          ? {
+              ...sharedTaxData,
+              taxTransactionAmountWithTax: this.fromSmallestCurrencyUnit(
+                tax.transactionAmountWithTaxUnit,
+              ),
+              ...(taxFeeUnit ? { taxFee: this.fromSmallestCurrencyUnit(taxFeeUnit) } : {}),
+              taxTotalAmount: this.fromSmallestCurrencyUnit(tax.totalAmountUnit),
+            }
+          : {}),
       },
       payment_method_types: [StripePaymentMethods.CARD],
       confirm: true,
@@ -1583,11 +1672,11 @@ class Stripe extends Abstract {
       payment_method: paymentMethodId,
       customer: senderCustomer.customerId,
       // How much must sender must pay
-      amount: userUnitAmount,
+      amount: paymentIntentAmountUnit,
       // How much application will collect fee
-      application_fee_amount: userUnitAmount - receiverUnitRevenue,
+      application_fee_amount: paymentIntentAmountUnit - receiverUnitRevenue,
       transfer_data: {
-        destination: receiverAccountId,
+        destination: receiverAccountId!,
       },
     });
 
@@ -1598,12 +1687,21 @@ class Stripe extends Abstract {
       paymentMethodId,
       cardId: paymentMethodCardId,
       transactionId: stripePaymentIntent.id,
-      fee: applicationUnitFee + paymentProviderUnitFee,
+      fee: applicationUnitFee + stripeFeeUnit + taxFeeUnit,
+      ...(tax ? { tax: tax.totalAmountUnit } : {}),
       params: {
         feesPayer,
         applicationFee: applicationUnitFee,
-        paymentProviderFee: paymentProviderUnitFee,
+        paymentProviderFee: stripeFeeUnit,
         entityCost: entityUnitCost,
+        ...(tax
+          ? {
+              ...sharedTaxData,
+              taxTransactionAmountWithTaxUnit: tax.transactionAmountWithTaxUnit,
+              taxTotalAmountUnit: tax.totalAmountUnit,
+              ...(taxFeeUnit ? { taxFeeUnit } : {}),
+            }
+          : {}),
       },
     };
 
@@ -1612,7 +1710,7 @@ class Stripe extends Abstract {
         ...transactionData,
         userId: senderCustomer.userId,
         type: TransactionType.CREDIT,
-        amount: userUnitAmount,
+        amount: paymentIntentAmountUnit,
         params: {
           ...transactionData.params,
           extraFee: senderAdditionalFee,
@@ -1810,7 +1908,7 @@ class Stripe extends Abstract {
 
   /**
    * Returns receiver payment amount
-   * NOTES: How much end user will get after fees from transaction
+   * @description NOTES: How much end user will get after fees from transaction
    * 1. Stable unit - stable amount that payment provider charges
    * 2. Payment percent - payment provider fee percent for single transaction
    * Fees calculation:
@@ -1818,6 +1916,7 @@ class Stripe extends Abstract {
    * totalAmount = 106$, receiverReceiver = 100, taxFee = 3, applicationFee = 3
    * 2. Receiver pays fees
    * totalAmount = 100$, receiverReceiver = 94, taxFee = 3, applicationFee = 3
+   * @TODO: Move out to calculations
    */
   public async getPaymentIntentFees({
     entityUnitCost,
@@ -1825,10 +1924,10 @@ class Stripe extends Abstract {
     additionalFeesPercent,
     applicationPaymentPercent = 0,
     extraReceiverRevenuePercent = 0,
+    shouldEstimateTax = false,
+    withStripeFee = true,
   }: IGetPaymentIntentFeesParams): Promise<IPaymentIntentFees> {
-    const { fees } = await remoteConfig();
-
-    const { paymentPercent, stableUnit } = fees!;
+    const { taxes } = await remoteConfig();
 
     /**
      * Calculate additional fees
@@ -1851,6 +1950,7 @@ class Stripe extends Abstract {
       extraReceiverUnitRevenue,
       senderAdditionalFee,
       receiverAdditionalFee,
+      ...(shouldEstimateTax ? { estimatedTaxPercent: taxes?.defaultPercent } : {}),
     };
 
     /**
@@ -1859,13 +1959,34 @@ class Stripe extends Abstract {
     const applicationUnitFee = getPercentFromAmount(entityUnitCost, applicationPaymentPercent);
 
     if (feesPayer === TransactionRole.SENDER) {
-      const userTempUnitAmount = entityUnitCost + applicationUnitFee + senderAdditionalFee;
-      const userUnitAmount = Math.round(
-        (userTempUnitAmount + stableUnit) / (1 - paymentPercent / 100),
-      );
+      let userTempUnitAmount = entityUnitCost + applicationUnitFee + senderAdditionalFee;
+      let userUnitAmount: number;
+      let estimatedTaxUnit = 0;
+
+      if (shouldEstimateTax) {
+        userTempUnitAmount += taxes?.stableUnit || 0;
+        estimatedTaxUnit = getPercentFromAmount(userTempUnitAmount, taxes?.defaultPercent || 0);
+      }
+
+      userTempUnitAmount += estimatedTaxUnit;
+
+      if (withStripeFee) {
+        /**
+         * If tax will be calculated on top set of transaction - do not include Stripe fee
+         */
+        userUnitAmount = (
+          await Calculation.getStripeFeeAndProcessingAmount({
+            amountUnit: userTempUnitAmount,
+            feesPayer: TransactionRole.SENDER,
+          })
+        )?.processingAmountUnit;
+      } else {
+        userUnitAmount = userTempUnitAmount;
+      }
 
       return {
         ...sharedFees,
+        ...(shouldEstimateTax ? { estimatedTaxUnit, taxFeeUnit: taxes?.stableUnit } : {}),
         applicationUnitFee,
         userUnitAmount,
         paymentProviderUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
@@ -1875,21 +1996,179 @@ class Stripe extends Abstract {
       };
     }
 
-    const paymentProviderUnitFee =
-      getPercentFromAmount(entityUnitCost, paymentPercent) + stableUnit;
+    let paymentProviderUnitFee = 0;
+
+    if (withStripeFee) {
+      paymentProviderUnitFee = (
+        await Calculation.getStripeFeeAndProcessingAmount({
+          amountUnit: entityUnitCost,
+          feesPayer: TransactionRole.RECEIVER,
+        })
+      )?.stripeFeeUnit;
+    }
+
+    let userUnitAmount = Math.round(entityUnitCost + senderAdditionalFee);
+    let estimatedTaxUnit = 0;
+
+    if (shouldEstimateTax) {
+      userUnitAmount += taxes?.stableUnit || 0;
+      estimatedTaxUnit = getPercentFromAmount(userUnitAmount, taxes?.defaultPercent || 0);
+    }
+
+    userUnitAmount += estimatedTaxUnit;
+
+    const receiverUnitRevenue = Math.round(
+      entityUnitCost -
+        paymentProviderUnitFee -
+        applicationUnitFee -
+        receiverAdditionalFee +
+        extraReceiverUnitRevenue,
+    );
 
     return {
       ...sharedFees,
+      ...(shouldEstimateTax ? { estimatedTaxUnit, taxFeeUnit: taxes?.stableUnit } : {}),
       applicationUnitFee,
       paymentProviderUnitFee,
-      userUnitAmount: Math.round(entityUnitCost + senderAdditionalFee),
-      receiverUnitRevenue: Math.round(
-        entityUnitCost -
-          paymentProviderUnitFee -
-          applicationUnitFee -
-          receiverAdditionalFee +
-          extraReceiverUnitRevenue,
-      ),
+      userUnitAmount,
+      receiverUnitRevenue,
+    };
+  }
+
+  /**
+   * Create stripe promo code
+   */
+  public async createPromoCode({
+    couponId,
+    code: userCode,
+    maxRedemptions,
+  }: IStripePromoCodeParams): Promise<{
+    id: string;
+    code: string;
+  }> {
+    const { id, code } = await this.sdk.promotionCodes.create({
+      coupon: couponId,
+      code: userCode,
+      // eslint-disable-next-line camelcase
+      max_redemptions: maxRedemptions,
+    });
+
+    return {
+      id,
+      code,
+    };
+  }
+
+  /**
+   * Remove stripe coupon
+   */
+  public async removeCoupon(couponId: string): Promise<boolean> {
+    const { deleted: isDeleted } = await this.sdk.coupons.del(couponId);
+
+    return isDeleted;
+  }
+
+  /**
+   * Create stripe coupon
+   */
+  public async createCoupon({
+    userId,
+    name,
+    currency,
+    products,
+    percentOff,
+    amountOff,
+    maxRedemptions,
+    duration,
+    durationInMonths,
+  }: IStripeCouponParams): Promise<Coupon> {
+    const couponDiscount = this.validateAndTransformCouponDiscountInput({ percentOff, amountOff });
+    const couponDuration = this.validateAndTransformCouponDurationInput({
+      duration,
+      durationInMonths,
+    });
+
+    const { id } = await this.sdk.coupons.create({
+      name,
+      currency: currency || 'usd',
+      ...couponDiscount,
+      ...couponDuration,
+      // eslint-disable-next-line camelcase
+      applies_to: {
+        products,
+      },
+    });
+
+    return super.createCoupon(
+      {
+        userId,
+        name,
+        products,
+        percentOff,
+        amountOff,
+        maxRedemptions,
+        duration,
+        durationInMonths,
+      },
+      id,
+    );
+  }
+
+  /**
+   * Validate and transform coupon discount input
+   */
+  private validateAndTransformCouponDiscountInput({
+    percentOff,
+    amountOff,
+  }: Pick<IStripeCouponParams, 'percentOff' | 'amountOff'>): Pick<
+    StripeSdk.CouponCreateParams,
+    'amount_off' | 'percent_off'
+  > {
+    if (!amountOff && !percentOff) {
+      throw new BaseException({
+        status: 400,
+        message: 'Neither discount amount nor percent provided.',
+      });
+    }
+
+    if (amountOff && percentOff) {
+      throw new BaseException({
+        status: 400,
+        message: 'Cannot provide both amount and percent discount.',
+      });
+    }
+
+    return {
+      // eslint-disable-next-line camelcase
+      amount_off: amountOff,
+      // eslint-disable-next-line camelcase
+      percent_off: percentOff,
+    };
+  }
+
+  /**
+   * Validate and transform coupon duration input
+   */
+  private validateAndTransformCouponDurationInput({
+    duration,
+    durationInMonths,
+  }: Pick<IStripeCouponParams, 'duration' | 'durationInMonths'>): Pick<
+    StripeSdk.CouponCreateParams,
+    'duration' | 'duration_in_months'
+  > {
+    {
+      if (duration === CouponDuration.REPEATING && !durationInMonths) {
+        throw new BaseException({
+          status: 400,
+          message: 'If duration is repeating, the number of months the coupon applies.',
+        });
+      }
+    }
+
+    return {
+      duration: duration as StripeSdk.CouponCreateParams.Duration,
+      // eslint-disable-next-line camelcase
+      duration_in_months: durationInMonths,
     };
   }
 
@@ -2117,140 +2396,44 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Create stripe coupon
+   * Get and validate receiver and sender
    */
-  public async createCoupon({
-    userId,
-    name,
-    currency,
-    products,
-    percentOff,
-    amountOff,
-    maxRedemptions,
-    duration,
-    durationInMonths,
-  }: IStripeCouponParams): Promise<Coupon> {
-    const couponDiscount = this.validateAndTransformCouponDiscountInput({ percentOff, amountOff });
-    const couponDuration = this.validateAndTransformCouponDurationInput({
-      duration,
-      durationInMonths,
-    });
+  private async getAndValidateTransactionContributors(
+    senderId: string,
+    receiverId: string,
+  ): Promise<{ receiver: Customer; sender: Customer }> {
+    const sender = await this.customerRepository.findOne({ userId: senderId });
+    const receiver = await this.customerRepository.findOne({ userId: receiverId });
 
-    const { id } = await this.sdk.coupons.create({
-      name,
-      currency: currency || 'usd',
-      ...couponDiscount,
-      ...couponDuration,
-      // eslint-disable-next-line camelcase
-      applies_to: {
-        products,
-      },
-    });
-
-    return super.createCoupon(
-      {
-        userId,
-        name,
-        products,
-        percentOff,
-        amountOff,
-        maxRedemptions,
-        duration,
-        durationInMonths,
-      },
-      id,
-    );
-  }
-
-  /**
-   * Validate and transform coupon discount input
-   */
-  private validateAndTransformCouponDiscountInput({
-    percentOff,
-    amountOff,
-  }: Pick<IStripeCouponParams, 'percentOff' | 'amountOff'>): Pick<
-    StripeSdk.CouponCreateParams,
-    'amount_off' | 'percent_off'
-  > {
-    if (!amountOff && !percentOff) {
+    if (!sender) {
       throw new BaseException({
         status: 400,
-        message: 'Neither discount amount nor percent provided.',
+        message: messages.getNotFoundMessage('Sender customer account'),
       });
     }
 
-    if (amountOff && percentOff) {
+    if (!receiver) {
       throw new BaseException({
         status: 400,
-        message: 'Cannot provide both amount and percent discount.',
+        message: messages.getNotFoundMessage('Receiver customer account'),
+      });
+    }
+
+    const {
+      params: { accountId: receiverAccountId, isVerified: isReceiverVerified },
+    } = receiver;
+
+    if (!receiverAccountId || !isReceiverVerified) {
+      throw new BaseException({
+        status: 400,
+        message: "Receiver don't have setup or verified connected account.",
       });
     }
 
     return {
-      // eslint-disable-next-line camelcase
-      amount_off: amountOff,
-      // eslint-disable-next-line camelcase
-      percent_off: percentOff,
+      sender,
+      receiver,
     };
-  }
-
-  /**
-   * Validate and transform coupon duration input
-   */
-  private validateAndTransformCouponDurationInput({
-    duration,
-    durationInMonths,
-  }: Pick<IStripeCouponParams, 'duration' | 'durationInMonths'>): Pick<
-    StripeSdk.CouponCreateParams,
-    'duration' | 'duration_in_months'
-  > {
-    {
-      if (duration === CouponDuration.REPEATING && !durationInMonths) {
-        throw new BaseException({
-          status: 400,
-          message: 'If duration is repeating, the number of months the coupon applies.',
-        });
-      }
-    }
-
-    return {
-      duration: duration as StripeSdk.CouponCreateParams.Duration,
-      // eslint-disable-next-line camelcase
-      duration_in_months: durationInMonths,
-    };
-  }
-
-  /**
-   * Create stripe promo code
-   */
-  public async createPromoCode({
-    couponId,
-    code: userCode,
-    maxRedemptions,
-  }: IStripePromoCodeParams): Promise<{
-    id: string;
-    code: string;
-  }> {
-    const { id, code } = await this.sdk.promotionCodes.create({
-      coupon: couponId,
-      code: userCode,
-      // eslint-disable-next-line camelcase
-      max_redemptions: maxRedemptions,
-    });
-
-    return {
-      id,
-      code,
-    };
-  }
-
-  /**
-   * Remove stripe coupon
-   */
-  public async removeCoupon(couponId: string): Promise<boolean> {
-    const { deleted: isDeleted } = await this.sdk.coupons.del(couponId);
-
-    return isDeleted;
   }
 }
 

@@ -1,5 +1,6 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsEnum, IsNumber } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
 import { getManager } from 'typeorm';
 import TransactionRole from '@constants/transaction-role';
 import Factory from '@services/payment-gateway/factory';
@@ -23,6 +24,20 @@ class PaymentIntentFeesInput {
   @IsNumber()
   @IsUndefinable()
   extraReceiverRevenuePercent?: number;
+
+  @JSONSchema({
+    description: 'Should calculate and include estimated tax for transaction',
+  })
+  @IsBoolean()
+  @IsUndefinable()
+  shouldEstimateTax?: boolean;
+
+  @JSONSchema({
+    description: 'Should include stripe fee in calculation result',
+  })
+  @IsBoolean()
+  @IsUndefinable()
+  withStripeFee?: boolean;
 }
 
 class PaymentIntentFeesOutput {
@@ -37,6 +52,18 @@ class PaymentIntentFeesOutput {
 
   @IsNumber()
   receiverRevenue: number;
+
+  @IsNumber()
+  @IsUndefinable()
+  estimatedTaxPercent?: number;
+
+  @IsNumber()
+  @IsUndefinable()
+  estimatedTax?: number;
+
+  @IsNumber()
+  @IsUndefinable()
+  taxFee?: number;
 }
 
 /**
@@ -55,6 +82,8 @@ const paymentIntentFees = Endpoint.custom(
     applicationPaymentPercent,
     additionalFeesPercent,
     feesPayer,
+    shouldEstimateTax,
+    withStripeFee,
   }) => {
     const service = await Factory.create(getManager());
 
@@ -66,13 +95,18 @@ const paymentIntentFees = Endpoint.custom(
       feesPayer,
       additionalFeesPercent,
       applicationPaymentPercent,
+      shouldEstimateTax,
+      withStripeFee,
     });
 
     return Object.fromEntries(
       Object.entries(unitFees).map(([title, amount]) => {
         const newKey = title.replace('Unit', '');
 
-        return [newKey, service.fromSmallestCurrencyUnit(amount as number)];
+        return [
+          newKey,
+          !newKey.includes('Percent') ? service.fromSmallestCurrencyUnit(amount as number) : amount,
+        ];
       }),
     ) as unknown as PaymentIntentFeesOutput;
   },

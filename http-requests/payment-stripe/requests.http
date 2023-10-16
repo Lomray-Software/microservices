@@ -337,10 +337,10 @@ Content-Type: application/json
   "id": "1",
   "method": "product.create",
   "params": {
-      "entityId": "0768006a-ca95-4c30-ae40-a3d9d7b249ea",
-      "name": "name",
-      "description": "name",
-      "userId": "u768006a-ca95-4c30-ae40-a3d9d7b249ea"
+    "entityId": "0768006a-ca95-4c30-ae40-a3d9d7b249ea",
+    "name": "name",
+    "description": "name",
+    "userId": "u768006a-ca95-4c30-ae40-a3d9d7b249ea"
   }
 }
 

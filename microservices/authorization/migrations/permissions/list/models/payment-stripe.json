@@ -1207,6 +1207,14 @@
         "out": {
           "admin": "allow"
         }
+      },
+      "withTax": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
       }
     },
     "createdAt": "2023-05-26T15:01:39.186Z"
@@ -1264,6 +1272,22 @@
           "user": "allow"
         }
       },
+      "shouldEstimateTax": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "withStripeFee": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "extraReceiverRevenuePercent": {
         "in": {
           "user": "allow"
@@ -1289,6 +1313,30 @@
         }
       },
       "applicationFee": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "taxFee": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "estimatedTax": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "estimatedTaxPercent": {
         "in": {
           "admin": "allow"
         },
