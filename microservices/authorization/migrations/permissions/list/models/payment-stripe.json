@@ -1272,6 +1272,22 @@
           "user": "allow"
         }
       },
+      "shouldEstimateTax": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "withStripeFee": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "extraReceiverRevenuePercent": {
         "in": {
           "user": "allow"
