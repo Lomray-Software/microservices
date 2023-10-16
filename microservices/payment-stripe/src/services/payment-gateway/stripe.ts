@@ -12,7 +12,6 @@ import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
-import TaxBehaviour from '@constants/tax-behaviour';
 import TransactionRole from '@constants/transaction-role';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
@@ -33,6 +32,7 @@ import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
 import type ITax from '@interfaces/tax';
+import Calculation from '@services/calculation';
 import Abstract, {
   IBankAccountParams,
   ICardParams,
@@ -64,13 +64,6 @@ interface IPaymentIntentParams {
   // Extra receiver revenue percent from application payment percent
   extraReceiverRevenuePercent?: number;
   withTax?: boolean;
-}
-
-interface IComputePaymentIntentTaxParams {
-  amountUnit: number;
-  paymentMethodId: string;
-  behaviour?: TaxBehaviour;
-  shouldIgnoreNotCollecting?: boolean;
 }
 
 interface IPaymentIntentMetadata
@@ -1596,20 +1589,23 @@ class Stripe extends Abstract {
     let paymentIntentAmountUnit: number | null;
 
     if (withTax) {
-      const { tax: taxData, feeUnit: taxFeeData } = await this.getPaymentIntentTax(
-        userUnitAmount,
-        paymentMethodId,
-        feesPayer,
+      const { tax: taxData, feeUnit: taxFeeData } = await Calculation.getPaymentIntentTax(
+        this.sdk,
+        {
+          processingTransactionAmountUnit: userUnitAmount,
+          paymentMethodId,
+          feesPayer,
+        },
       );
 
       tax = taxData;
       taxFeeUnit = taxFeeData;
 
       const { stripeFeeUnit: transactionFeeUnit, processingAmountUnit } =
-        await this.computeStripeFeeAndProcessingAmount(
-          taxData?.transactionAmountWithTaxUnit,
+        await Calculation.getStripeFeeAndProcessingAmount({
+          amountUnit: taxData?.transactionAmountWithTaxUnit,
           feesPayer,
-        );
+        });
 
       stripeFeeUnit = transactionFeeUnit;
       paymentIntentAmountUnit = processingAmountUnit;
@@ -1903,6 +1899,7 @@ class Stripe extends Abstract {
    * totalAmount = 106$, receiverReceiver = 100, taxFee = 3, applicationFee = 3
    * 2. Receiver pays fees
    * totalAmount = 100$, receiverReceiver = 94, taxFee = 3, applicationFee = 3
+   * @TODO: Move out to calculations
    */
   public async getPaymentIntentFees({
     entityUnitCost,
@@ -1956,7 +1953,10 @@ class Stripe extends Abstract {
          * If tax will be calculated on top set of transaction - do not include Stripe fee
          */
         userUnitAmount = (
-          await this.computeStripeFeeAndProcessingAmount(userTempUnitAmount, TransactionRole.SENDER)
+          await Calculation.getStripeFeeAndProcessingAmount({
+            amountUnit: userTempUnitAmount,
+            feesPayer: TransactionRole.SENDER,
+          })
         )?.processingAmountUnit;
       } else {
         userUnitAmount = userTempUnitAmount;
@@ -1977,7 +1977,10 @@ class Stripe extends Abstract {
 
     if (withStripeFee) {
       paymentProviderUnitFee = (
-        await this.computeStripeFeeAndProcessingAmount(entityUnitCost, TransactionRole.RECEIVER)
+        await Calculation.getStripeFeeAndProcessingAmount({
+          amountUnit: entityUnitCost,
+          feesPayer: TransactionRole.RECEIVER,
+        })
       )?.stripeFeeUnit;
     }
 
@@ -2002,52 +2005,6 @@ class Stripe extends Abstract {
       userUnitAmount,
       receiverUnitRevenue,
     };
-  }
-
-  /**
-   * Returns Stripe fee
-   */
-  private async computeStripeFeeAndProcessingAmount(
-    amountUnit: number,
-    feesPayer: TransactionRole,
-  ): Promise<{ stripeFeeUnit: number; processingAmountUnit: number }> {
-    const { fees } = await remoteConfig();
-    const { paymentPercent, stableUnit } = fees!;
-
-    if (feesPayer === TransactionRole.SENDER) {
-      const processingAmountUnit = Math.round(
-        (amountUnit + stableUnit) / (1 - paymentPercent / 100),
-      );
-
-      return { processingAmountUnit, stripeFeeUnit: processingAmountUnit - amountUnit };
-    }
-
-    const stripeFeeUnit = getPercentFromAmount(amountUnit, paymentPercent) + stableUnit;
-
-    return { processingAmountUnit: amountUnit - stripeFeeUnit, stripeFeeUnit };
-  }
-
-  /**
-   * Returns payment intent tax
-   */
-  private async getPaymentIntentTax(
-    processingTransactionAmountUnit: number,
-    paymentMethodId: string,
-    feesPayer: TransactionRole,
-  ): Promise<{ tax: ITax; feeUnit: number }> {
-    const { taxes } = await remoteConfig();
-    const { stableUnit } = taxes!;
-
-    const tax = await this.computePaymentIntentTax({
-      amountUnit:
-        // If sender cover fees, Stripe Tax calculate fee should be included into the precessing amount
-        feesPayer === TransactionRole.SENDER
-          ? processingTransactionAmountUnit + stableUnit
-          : processingTransactionAmountUnit,
-      paymentMethodId,
-    });
-
-    return { tax, feeUnit: stableUnit };
   }
 
   /**
@@ -2448,90 +2405,6 @@ class Stripe extends Abstract {
     return {
       sender,
       receiver,
-    };
-  }
-
-  /**
-   * Compute transaction tax
-   * @description NOTE: Customer SHOULD HAVE address details - at least postal code
-   */
-  private async computePaymentIntentTax({
-    amountUnit,
-    paymentMethodId,
-    behaviour = TaxBehaviour.EXCLUSIVE,
-    shouldIgnoreNotCollecting = false,
-  }: IComputePaymentIntentTaxParams): Promise<ITax> {
-    /**
-     * Get payment method data
-     */
-    const paymentMethod = await this.sdk.paymentMethods.retrieve(paymentMethodId, {
-      expand: [StripePaymentMethods.CARD],
-    });
-
-    /* eslint-disable camelcase */
-    const { postal_code, country } = paymentMethod.billing_details.address || {};
-
-    if (!postal_code || !country) {
-      throw new BaseException({
-        status: 500,
-        message: 'Payment method at least postal code and country required for compute tax.',
-      });
-    }
-
-    const tax = await this.sdk.tax.calculations.create({
-      currency: 'usd',
-      line_items: [
-        {
-          amount: amountUnit,
-          reference: 'entity',
-          tax_behavior: behaviour,
-        },
-      ],
-      customer_details: {
-        address: {
-          country,
-          postal_code,
-        },
-        address_source: 'billing',
-      },
-
-      expand: ['line_items.data.tax_breakdown'],
-    });
-    /* eslint-enable camelcase */
-
-    /**
-     * @TODO: Fix. This property exist in response, but sdk type - not
-     */
-    if (
-      // @ts-ignore
-      tax.tax_breakdown.some((breakdown) => breakdown?.taxability_reason === 'not_collecting') &&
-      !shouldIgnoreNotCollecting
-    ) {
-      throw new BaseException({
-        status: 500,
-        message: 'Failed to compute tax. Tax not collecting.',
-      });
-    }
-
-    const totalAmountUnit = tax?.line_items?.data?.reduce(
-      (total, { amount_tax: amountTax }) => total + amountTax,
-      0,
-    );
-
-    if (!tax.id || !tax.expires_at || !totalAmountUnit) {
-      throw new BaseException({
-        status: 500,
-        message: 'Failed to compute tax. Tax is invalid.',
-      });
-    }
-
-    return {
-      id: tax.id,
-      totalAmountUnit,
-      behaviour,
-      transactionAmountWithTaxUnit: tax.amount_total,
-      createdAt: new Date(tax.tax_date),
-      expiresAt: new Date(tax.expires_at),
     };
   }
 }
