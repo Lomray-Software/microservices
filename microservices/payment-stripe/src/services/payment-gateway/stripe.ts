@@ -154,14 +154,8 @@ interface IGetPaymentIntentFeesParams
     | 'extraReceiverRevenuePercent'
   > {
   entityUnitCost: number;
-  taxOptions?: {
-    // Real computed Stripe Tax
-    computedTaxAmountUnit?: number;
-    // Compute with shared tax estimated amount
-    shouldCompute?: boolean;
-  };
-  // If Stripe auto compute Stripe Tax fee was charged
-  hasTaxFee?: boolean;
+  shouldEstimateTax?: boolean;
+  withStripeFee?: boolean;
 }
 
 type TAvailablePaymentMethods =
@@ -183,8 +177,6 @@ interface IPaymentIntentFees {
   receiverAdditionalFee: number;
   senderAdditionalFee: number;
   extraReceiverUnitRevenue: number;
-  taxAmountUnit?: number;
-  taxFeeUnit?: number;
 }
 
 type TCardData =
@@ -1549,37 +1541,16 @@ class Stripe extends Abstract {
     const { fees } = await remoteConfig();
     const { instantPayoutPercent = 1 } = fees!;
 
-    const senderCustomer = await this.customerRepository.findOne({ userId });
-    const receiverCustomer = await this.customerRepository.findOne({ userId: receiverId });
-
-    if (!senderCustomer) {
-      throw new BaseException({
-        status: 400,
-        message: messages.getNotFoundMessage('Sender customer account'),
-      });
-    }
-
-    if (!receiverCustomer) {
-      throw new BaseException({
-        status: 400,
-        message: messages.getNotFoundMessage('Receiver customer account'),
-      });
-    }
+    const { sender: senderCustomer, receiver: receiverCustomer } =
+      await this.getAndValidateTransactionContributors(userId, receiverId);
 
     /**
      * Verify if customer is verified
      */
     const {
       userId: receiverUserId,
-      params: { accountId: receiverAccountId, isVerified: isReceiverVerified },
+      params: { accountId: receiverAccountId },
     } = receiverCustomer;
-
-    if (!receiverAccountId || !isReceiverVerified) {
-      throw new BaseException({
-        status: 400,
-        message: "Receiver don't have setup or verified connected account.",
-      });
-    }
 
     const {
       params: { paymentMethodId },
@@ -1595,15 +1566,6 @@ class Stripe extends Abstract {
 
     const entityUnitCost = this.toSmallestCurrencyUnit(entityCost);
 
-    let tax: ITax | null = null;
-
-    if (withTax) {
-      tax = await this.computePaymentIntentTax({
-        amountUnit: entityUnitCost,
-        paymentMethodId,
-      });
-    }
-
     /**
      * Calculate fees
      */
@@ -1615,28 +1577,65 @@ class Stripe extends Abstract {
       receiverAdditionalFee,
       extraReceiverUnitRevenue,
       senderAdditionalFee,
-      taxAmountUnit,
-      taxFeeUnit,
     } = await this.getPaymentIntentFees({
       entityUnitCost,
       applicationPaymentPercent,
       feesPayer,
       additionalFeesPercent,
       extraReceiverRevenuePercent,
-      ...(tax?.totalAmountUnit
-        ? { taxOptions: { computedTaxAmountUnit: tax?.totalAmountUnit } }
-        : {}),
-      hasTaxFee: true,
+      // If with tax - do not include Stripe transaction fee
+      withStripeFee: !withTax,
     });
 
-    console.log('t data', userUnitAmount, receiverUnitRevenue);
+    /**
+     * Group up payment intent data
+     */
+    let tax: ITax | null = null;
+    let taxFeeUnit = 0;
+    let stripeFeeUnit: number | null;
+    let paymentIntentAmountUnit: number | null;
+
+    if (withTax) {
+      const { tax: taxData, feeUnit: taxFeeData } = await this.getPaymentIntentTax(
+        userUnitAmount,
+        paymentMethodId,
+        feesPayer,
+      );
+
+      tax = taxData;
+      taxFeeUnit = taxFeeData;
+
+      const { stripeFeeUnit: transactionFeeUnit, processingAmountUnit } =
+        await this.computeStripeFeeAndProcessingAmount(
+          taxData?.transactionAmountWithTaxUnit,
+          feesPayer,
+        );
+
+      stripeFeeUnit = transactionFeeUnit;
+      paymentIntentAmountUnit = processingAmountUnit;
+    } else {
+      stripeFeeUnit = paymentProviderUnitFee;
+      paymentIntentAmountUnit = userUnitAmount;
+    }
+
+    console.log('tax', tax);
+    console.log('userUnitAmount', {
+      userUnitAmount,
+      paymentIntentAmountUnit,
+      receiverUnitRevenue,
+      applicationUnitFee,
+      paymentProviderUnitFee,
+      receiverAdditionalFee,
+      extraReceiverUnitRevenue,
+      senderAdditionalFee,
+    });
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
       ...(title ? { description: title } : {}),
       metadata: {
         // Original float entity cost
         entityCost,
-        paymentProviderFee: this.fromSmallestCurrencyUnit(paymentProviderUnitFee),
+        paymentProviderFee: this.fromSmallestCurrencyUnit(stripeFeeUnit),
         applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee),
         receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
         senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
@@ -1668,11 +1667,11 @@ class Stripe extends Abstract {
       payment_method: paymentMethodId,
       customer: senderCustomer.customerId,
       // How much must sender must pay
-      amount: userUnitAmount,
+      amount: paymentIntentAmountUnit,
       // How much application will collect fee
-      application_fee_amount: userUnitAmount - receiverUnitRevenue,
+      application_fee_amount: paymentIntentAmountUnit - receiverUnitRevenue,
       transfer_data: {
-        destination: receiverAccountId,
+        destination: receiverAccountId!,
       },
     });
 
@@ -1683,12 +1682,12 @@ class Stripe extends Abstract {
       paymentMethodId,
       cardId: paymentMethodCardId,
       transactionId: stripePaymentIntent.id,
-      fee: applicationUnitFee + paymentProviderUnitFee + (taxFeeUnit || 0),
-      ...(tax ? { tax: taxAmountUnit || tax.totalAmountUnit } : {}),
+      fee: applicationUnitFee + stripeFeeUnit + taxFeeUnit,
+      ...(tax ? { tax: tax.totalAmountUnit } : {}),
       params: {
         feesPayer,
         applicationFee: applicationUnitFee,
-        paymentProviderFee: paymentProviderUnitFee,
+        paymentProviderFee: stripeFeeUnit,
         entityCost: entityUnitCost,
         ...(tax
           ? {
@@ -1709,7 +1708,7 @@ class Stripe extends Abstract {
         ...transactionData,
         userId: senderCustomer.userId,
         type: TransactionType.CREDIT,
-        amount: userUnitAmount,
+        amount: paymentIntentAmountUnit,
         params: {
           ...transactionData.params,
           extraFee: senderAdditionalFee,
@@ -1922,30 +1921,10 @@ class Stripe extends Abstract {
     additionalFeesPercent,
     applicationPaymentPercent = 0,
     extraReceiverRevenuePercent = 0,
-    hasTaxFee,
-    taxOptions,
+    shouldEstimateTax = false,
+    withStripeFee = true,
   }: IGetPaymentIntentFeesParams): Promise<IPaymentIntentFees> {
-    if (taxOptions && Object.keys(taxOptions).length !== 1) {
-      throw new BaseException({
-        status: 500,
-        message: 'Invalid options of compute payment intent tax.',
-      });
-    }
-
-    const { fees, taxes } = await remoteConfig();
-    const { defaultPercent: taxDefaultPercent, stableUnit: taxStableUnit } = taxes!;
-
-    let taxAmountUnit = 0;
-
-    if (taxOptions?.computedTaxAmountUnit) {
-      taxAmountUnit = taxOptions?.computedTaxAmountUnit;
-    }
-
-    if (taxOptions?.shouldCompute) {
-      taxAmountUnit = getPercentFromAmount(entityUnitCost, taxDefaultPercent);
-    }
-
-    const { paymentPercent, stableUnit } = fees!;
+    const { taxes } = await remoteConfig();
 
     /**
      * Calculate additional fees
@@ -1968,54 +1947,64 @@ class Stripe extends Abstract {
       extraReceiverUnitRevenue,
       senderAdditionalFee,
       receiverAdditionalFee,
-      ...(taxAmountUnit ? { taxAmountUnit } : {}),
-      ...(hasTaxFee ? { taxFeeUnit: taxes?.stableUnit } : {}),
     };
 
-    console.log('taxAmountUnit', taxAmountUnit);
     /**
      * How much percent from total amount will receive end user
      */
     const applicationUnitFee = getPercentFromAmount(entityUnitCost, applicationPaymentPercent);
 
     if (feesPayer === TransactionRole.SENDER) {
-      const userTempUnitAmount = entityUnitCost + applicationUnitFee + senderAdditionalFee;
-      let userUnitAmount = Math.round(
-        (userTempUnitAmount + taxAmountUnit + stableUnit) / (1 - paymentPercent / 100),
-      );
+      let userTempUnitAmount = entityUnitCost + applicationUnitFee + senderAdditionalFee;
+      let userUnitAmount: number;
 
-      if (hasTaxFee) {
-        userUnitAmount += taxStableUnit;
+      if (shouldEstimateTax) {
+        userTempUnitAmount += getPercentFromAmount(userTempUnitAmount, taxes?.defaultPercent || 0);
+      }
+
+      if (withStripeFee) {
+        /**
+         * If tax will be calculated on top set of transaction - do not include Stripe fee
+         */
+        userUnitAmount = (
+          await this.computeStripeFeeAndProcessingAmount(userTempUnitAmount, TransactionRole.SENDER)
+        )?.processingAmountUnit;
+      } else {
+        userUnitAmount = userTempUnitAmount;
       }
 
       return {
         ...sharedFees,
         applicationUnitFee,
         userUnitAmount,
-        paymentProviderUnitFee: Math.round(userUnitAmount - userTempUnitAmount - taxAmountUnit),
+        paymentProviderUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
         receiverUnitRevenue: Math.round(
           entityUnitCost - receiverAdditionalFee + extraReceiverUnitRevenue,
         ),
       };
     }
 
-    const paymentProviderUnitFee =
-      getPercentFromAmount(entityUnitCost, paymentPercent) + stableUnit;
+    let paymentProviderUnitFee = 0;
+
+    if (withStripeFee) {
+      paymentProviderUnitFee = (
+        await this.computeStripeFeeAndProcessingAmount(entityUnitCost, TransactionRole.RECEIVER)
+      )?.stripeFeeUnit;
+    }
 
     let userUnitAmount = Math.round(entityUnitCost + senderAdditionalFee);
-    let receiverUnitRevenue = Math.round(
+
+    if (shouldEstimateTax) {
+      userUnitAmount += getPercentFromAmount(userUnitAmount, taxes?.defaultPercent || 0);
+    }
+
+    const receiverUnitRevenue = Math.round(
       entityUnitCost -
-        (taxAmountUnit || 0) -
         paymentProviderUnitFee -
         applicationUnitFee -
         receiverAdditionalFee +
         extraReceiverUnitRevenue,
     );
-
-    if (hasTaxFee) {
-      userUnitAmount += taxStableUnit;
-      receiverUnitRevenue -= taxStableUnit;
-    }
 
     return {
       ...sharedFees,
@@ -2024,6 +2013,62 @@ class Stripe extends Abstract {
       userUnitAmount,
       receiverUnitRevenue,
     };
+  }
+
+  /**
+   * Returns Stripe fee
+   */
+  private async computeStripeFeeAndProcessingAmount(
+    amountUnit: number,
+    feesPayer: TransactionRole,
+  ): Promise<{ stripeFeeUnit: number; processingAmountUnit: number }> {
+    const { fees } = await remoteConfig();
+    const { paymentPercent, stableUnit } = fees!;
+
+    if (feesPayer === TransactionRole.SENDER) {
+      const processingAmountUnit = Math.round(
+        (amountUnit + stableUnit) / (1 - paymentPercent / 100),
+      );
+
+      console.log('res1', feesPayer, {
+        processingAmountUnit,
+        stripeFeeUnit: processingAmountUnit - amountUnit,
+      });
+
+      return { processingAmountUnit, stripeFeeUnit: processingAmountUnit - amountUnit };
+    }
+
+    const stripeFeeUnit = getPercentFromAmount(amountUnit, paymentPercent) + stableUnit;
+
+    console.log('res2', feesPayer, {
+      processingAmountUnit: amountUnit - stripeFeeUnit,
+      stripeFeeUnit,
+    });
+
+    return { processingAmountUnit: amountUnit - stripeFeeUnit, stripeFeeUnit };
+  }
+
+  /**
+   * Returns payment intent tax
+   */
+  private async getPaymentIntentTax(
+    processingTransactionAmountUnit: number,
+    paymentMethodId: string,
+    feesPayer: TransactionRole,
+  ): Promise<{ tax: ITax; feeUnit: number }> {
+    const { taxes } = await remoteConfig();
+    const { stableUnit } = taxes!;
+
+    const tax = await this.computePaymentIntentTax({
+      amountUnit:
+        // If sender cover fees, Stripe Tax calculate fee should be included into the precessing amount
+        feesPayer === TransactionRole.SENDER
+          ? processingTransactionAmountUnit + stableUnit
+          : processingTransactionAmountUnit,
+      paymentMethodId,
+    });
+
+    return { tax, feeUnit: stableUnit };
   }
 
   /**
@@ -2383,6 +2428,47 @@ class Stripe extends Abstract {
       exp_year: year,
       cvc,
       number: digits,
+    };
+  }
+
+  /**
+   * Get and validate receiver and sender
+   */
+  private async getAndValidateTransactionContributors(
+    senderId: string,
+    receiverId: string,
+  ): Promise<{ receiver: Customer; sender: Customer }> {
+    const sender = await this.customerRepository.findOne({ userId: senderId });
+    const receiver = await this.customerRepository.findOne({ userId: receiverId });
+
+    if (!sender) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Sender customer account'),
+      });
+    }
+
+    if (!receiver) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Receiver customer account'),
+      });
+    }
+
+    const {
+      params: { accountId: receiverAccountId, isVerified: isReceiverVerified },
+    } = receiver;
+
+    if (!receiverAccountId || !isReceiverVerified) {
+      throw new BaseException({
+        status: 400,
+        message: "Receiver don't have setup or verified connected account.",
+      });
+    }
+
+    return {
+      sender,
+      receiver,
     };
   }
 

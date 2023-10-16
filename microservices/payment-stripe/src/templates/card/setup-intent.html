@@ -13,8 +13,6 @@
   <div id="payment-element">
     <!-- Elements will create form elements here -->
   </div>
-  <label for="card-zipcode">Card Zipcode:</label>
-  <input type="text" id="card-zipcode" required>
   <button id="submit">Submit</button>
   <div id="error-message">
     <!-- Display error message to your customers here -->
@@ -38,26 +36,13 @@
   paymentElement.mount('#payment-element');
 
   const form = document.getElementById('payment-form');
-  const cardZipcodeInput = document.getElementById('card-zipcode');
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-
     const {error} = await stripe.confirmSetup({
-      // `Elements` instance that was used to create the Payment Element
       elements,
       confirmParams: {
         return_url: 'https://example.com/account/payments/setup-complete',
-        payment_method_data: {
-          card: {
-            // Pass the zipcode from the input field to the billing_details
-            billing_details: {
-              address: {
-                postal_code: cardZipcodeInput.value,
-              },
-            },
-          },
-        },
       }
     });
 
