@@ -25,6 +25,11 @@ interface IGetStripeFeeAndProcessingAmountParams {
   feesPayer: TransactionRole;
 }
 
+interface IPaymentIntentTax {
+  tax: ITax;
+  feeUnit: number;
+}
+
 /**
  * Stripe calculation service
  */
@@ -61,7 +66,7 @@ class Calculation {
   public static async getPaymentIntentTax(
     sdk: StripeSdk,
     { processingTransactionAmountUnit, paymentMethodId, feesPayer }: IGetPaymentIntentTaxParams,
-  ): Promise<{ tax: ITax; feeUnit: number }> {
+  ): Promise<IPaymentIntentTax> {
     const { taxes } = await remoteConfig();
     const { stableUnit } = taxes!;
 
