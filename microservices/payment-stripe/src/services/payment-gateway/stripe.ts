@@ -1614,6 +1614,16 @@ class Stripe extends Abstract {
       paymentIntentAmountUnit = userUnitAmount;
     }
 
+    /**
+     * Prevent type error cause on payment intent metadata and transaction params
+     */
+    const sharedTaxData = {
+      taxId: tax?.id,
+      taxCreatedAt: tax?.createdAt?.toISOString(),
+      taxExpiresAt: tax?.expiresAt?.toISOString(),
+      taxBehaviour: tax?.behaviour,
+    };
+
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
       ...(title ? { description: title } : {}),
@@ -1633,15 +1643,12 @@ class Stripe extends Abstract {
         ...(title ? { description: title } : {}),
         ...(tax
           ? {
-              taxId: tax.id,
-              taxCreatedAt: tax.createdAt?.toISOString(),
-              taxExpiresAt: tax.expiresAt?.toISOString(),
+              ...sharedTaxData,
               taxTransactionAmountWithTax: this.fromSmallestCurrencyUnit(
                 tax.transactionAmountWithTaxUnit,
               ),
               ...(taxFeeUnit ? { taxFee: this.fromSmallestCurrencyUnit(taxFeeUnit) } : {}),
               taxTotalAmount: this.fromSmallestCurrencyUnit(tax.totalAmountUnit),
-              taxBehaviour: tax.behaviour,
             }
           : {}),
       },
@@ -1676,12 +1683,9 @@ class Stripe extends Abstract {
         entityCost: entityUnitCost,
         ...(tax
           ? {
-              taxId: tax.id,
-              taxCreatedAt: tax.createdAt?.toISOString(),
-              taxExpiresAt: tax.expiresAt?.toISOString(),
+              ...sharedTaxData,
               taxTransactionAmountWithTaxUnit: tax.transactionAmountWithTaxUnit,
               taxTotalAmountUnit: tax.totalAmountUnit,
-              taxBehaviour: tax.behaviour,
               ...(taxFeeUnit ? { taxFeeUnit } : {}),
             }
           : {}),
