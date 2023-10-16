@@ -1320,6 +1320,14 @@
           "user": "allow"
         }
       },
+      "taxFee": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
       "estimatedTax": {
         "in": {
           "admin": "allow"

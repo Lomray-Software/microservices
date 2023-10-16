@@ -1964,6 +1964,7 @@ class Stripe extends Abstract {
       let estimatedTaxUnit = 0;
 
       if (shouldEstimateTax) {
+        userTempUnitAmount += taxes?.stableUnit || 0;
         estimatedTaxUnit = getPercentFromAmount(userTempUnitAmount, taxes?.defaultPercent || 0);
       }
 
@@ -1985,7 +1986,7 @@ class Stripe extends Abstract {
 
       return {
         ...sharedFees,
-        ...(shouldEstimateTax ? { estimatedTaxUnit } : {}),
+        ...(shouldEstimateTax ? { estimatedTaxUnit, taxFeeUnit: taxes?.stableUnit } : {}),
         applicationUnitFee,
         userUnitAmount,
         paymentProviderUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
@@ -2010,6 +2011,7 @@ class Stripe extends Abstract {
     let estimatedTaxUnit = 0;
 
     if (shouldEstimateTax) {
+      userUnitAmount += taxes?.stableUnit || 0;
       estimatedTaxUnit = getPercentFromAmount(userUnitAmount, taxes?.defaultPercent || 0);
     }
 
@@ -2025,7 +2027,7 @@ class Stripe extends Abstract {
 
     return {
       ...sharedFees,
-      ...(shouldEstimateTax ? { estimatedTaxUnit } : {}),
+      ...(shouldEstimateTax ? { estimatedTaxUnit, taxFeeUnit: taxes?.stableUnit } : {}),
       applicationUnitFee,
       paymentProviderUnitFee,
       userUnitAmount,

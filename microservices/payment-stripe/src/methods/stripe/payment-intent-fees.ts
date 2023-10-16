@@ -60,6 +60,10 @@ class PaymentIntentFeesOutput {
   @IsNumber()
   @IsUndefinable()
   estimatedTax?: number;
+
+  @IsNumber()
+  @IsUndefinable()
+  taxFee?: number;
 }
 
 /**
