@@ -1,11 +1,11 @@
 import { BaseException } from '@lomray/microservice-nodejs-lib';
-import StripeSdk from 'stripe';
+import type StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
 import TaxBehaviour from '@constants/tax-behaviour';
 import TransactionRole from '@constants/transaction-role';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
-import ITax from '@interfaces/tax';
+import type ITax from '@interfaces/tax';
 
 interface IGetPaymentIntentTaxParams {
   processingTransactionAmountUnit: number;
