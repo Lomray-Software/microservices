@@ -85,6 +85,7 @@ class Calculation {
   /**
    * Compute transaction tax
    * @description NOTE: Customer SHOULD HAVE address details - at least postal code
+   * One this api call cost is $0.05 - DO NOT ALLOW user call this method in depth
    */
   private static async computePaymentIntentTax(
     sdk: StripeSdk,
@@ -103,12 +104,13 @@ class Calculation {
     });
 
     /* eslint-disable camelcase */
-    const { postal_code, country } = paymentMethod.billing_details.address || {};
+    const { postal_code, country } = paymentMethod?.billing_details?.address || {};
 
     if (!postal_code || !country) {
       throw new BaseException({
         status: 500,
-        message: 'Payment method at least postal code and country required for compute tax.',
+        message:
+          'For tax calculation, a payment method must include, at a minimum, the postal code and country information.',
       });
     }
 
@@ -138,7 +140,7 @@ class Calculation {
      */
     if (
       // @ts-ignore
-      tax.tax_breakdown.some((breakdown) => breakdown?.taxability_reason === 'not_collecting') &&
+      tax?.tax_breakdown?.some((breakdown) => breakdown?.taxability_reason === 'not_collecting') &&
       !shouldIgnoreNotCollecting
     ) {
       throw new BaseException({
@@ -152,7 +154,7 @@ class Calculation {
       0,
     );
 
-    if (!tax.id || !tax.expires_at || !totalAmountUnit) {
+    if (!tax.id || !tax.expires_at || typeof totalAmountUnit !== 'number') {
       throw new BaseException({
         status: 500,
         message: 'Failed to compute tax. Tax is invalid.',

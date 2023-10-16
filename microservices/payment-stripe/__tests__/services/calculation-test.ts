@@ -1,9 +1,11 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
+import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import type StripeSdk from 'stripe';
 import { configMock } from '@__mocks__/config';
 import * as remoteConfig from '@config/remote';
+import TaxBehaviour from '@constants/tax-behaviour';
 import TransactionRole from '@constants/transaction-role';
 import Calculation from '@services/calculation';
 
@@ -98,6 +100,106 @@ describe('services/calculation', () => {
         paymentMethodId: mockParams.paymentMethodId,
         amountUnit: mockParams.processingTransactionAmountUnit,
       });
+    });
+  });
+
+  describe('computePaymentIntentTax', () => {
+    const currentDate = new Date();
+
+    /* eslint-disable camelcase */
+    const getSdk = ({
+      date,
+      taxabilityReason = 'collecting',
+      billing = { billing_details: { address: { country: 'US', postal_code: '99301' } } },
+      tax = {
+        id: 'tax-id',
+        expires_at: date,
+        tax_date: date,
+        tax_breakdown: [{ taxability_reason: taxabilityReason }],
+        line_items: {
+          data: [{ amount_tax: 810 }],
+        },
+      } as unknown as StripeSdk.Tax.Calculation,
+    }: {
+      date: Date;
+      taxabilityReason?: 'collecting' | 'not_collecting';
+      billing?: Record<string, unknown>;
+      tax?: StripeSdk.Tax.Calculation;
+    }) =>
+      ({
+        paymentMethods: {
+          retrieve() {
+            return billing;
+          },
+        },
+        tax: {
+          calculations: {
+            create() {
+              return tax;
+            },
+          },
+        },
+      }) as unknown as StripeSdk;
+    /* eslint-enable camelcase */
+
+    const mockParams = {
+      amountUnit: 12000,
+      paymentMethodId: 'pm-1',
+      behaviour: TaxBehaviour.EXCLUSIVE,
+      shouldIgnoreNotCollecting: false,
+    };
+
+    it('should correctly calculate payment intent tax', async () => {
+      expect(
+        await Calculation['computePaymentIntentTax'].call(
+          {},
+          getSdk({ date: currentDate }),
+          mockParams,
+        ),
+      ).to.deep.equal({
+        id: 'tax-id',
+        totalAmountUnit: 810,
+        behaviour: TaxBehaviour.EXCLUSIVE,
+        transactionAmountWithTaxUnit: undefined,
+        createdAt: currentDate,
+        expiresAt: currentDate,
+      });
+    });
+
+    it('should throw error: tax not collecting', async () => {
+      expect(
+        await waitResult(
+          Calculation['computePaymentIntentTax'].call(
+            {},
+            getSdk({ date: currentDate, taxabilityReason: 'not_collecting' }),
+            mockParams,
+          ),
+        ),
+      ).to.throw('Failed to compute tax. Tax not collecting.');
+    });
+
+    it('should throw error: billing is invalid', async () => {
+      expect(
+        await waitResult(
+          // @ts-ignore
+          Calculation['computePaymentIntentTax'].call({}, getSdk({ billing: {} }), mockParams),
+        ),
+      ).to.throw(
+        'For tax calculation, a payment method must include, at a minimum, the postal code and country information.',
+      );
+    });
+
+    it('should throw error: tax is invalid', async () => {
+      expect(
+        await waitResult(
+          Calculation['computePaymentIntentTax'].call(
+            {},
+            // @ts-ignore
+            getSdk({ tax: {} }),
+            mockParams,
+          ),
+        ),
+      ).to.throw('Failed to compute tax. Tax is invalid.');
     });
   });
 });
