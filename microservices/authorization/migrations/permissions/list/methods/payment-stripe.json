@@ -720,5 +720,174 @@
     "modelIn": "payment-stripe.BalanceInput",
     "modelOut": "payment-stripe.BalanceOutput",
     "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "cart.count",
+    "description": "Returns count of Cart by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-10-30T09:24:47.046Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "cart.list",
+    "description": "Returns list of Cart by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-10-30T09:24:47.046Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "payment-stripe.ListOutputParams.3f78214eac0c47bffaefe248d786f857",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "cart.view",
+    "description": "Returns Cart by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-10-30T09:24:47.046Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "payment-stripe.ViewOutputParams.5cb169f85091333c9c1f3dc870f748e7",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "cart.create",
+    "description": "Create a new Cart",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-10-30T09:24:47.046Z",
+    "modelIn": "payment-stripe.CreateRequestParams.f97351f439ebb29eafb2f8b46116f1c0",
+    "modelOut": "payment-stripe.CreateOutputParams.5cb169f85091333c9c1f3dc870f748e7",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "cart.update",
+    "description": "Update Cart by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-10-30T09:24:47.046Z",
+    "modelIn": "payment-stripe.UpdateRequestParams.f97351f439ebb29eafb2f8b46116f1c0",
+    "modelOut": "payment-stripe.UpdateOutputParams.5cb169f85091333c9c1f3dc870f748e7",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "cart.remove",
+    "description": "Remove Cart by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-10-30T09:24:47.046Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "payment-stripe.RemoveOutputParams.55814d09bbf0d7c913ea4a198290965a",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "cart-item.count",
+    "description": "Returns count of CartItem by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-10-30T09:24:47.046Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "cart-item.list",
+    "description": "Returns list of CartItem by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-10-30T09:24:47.046Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "payment-stripe.ListOutputParams.db2f41a5254dba79aa935c04af0b8010",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "cart-item.view",
+    "description": "Returns CartItem by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-10-30T09:24:47.046Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "payment-stripe.ViewOutputParams.7f642d85eae6343cc5ecb76390a11b43",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "cart-item.create",
+    "description": "Create a new CartItem",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-10-30T09:24:47.046Z",
+    "modelIn": "payment-stripe.CreateRequestParams.78c97c83835f4871241d90dce096a681",
+    "modelOut": "payment-stripe.CreateOutputParams.7f642d85eae6343cc5ecb76390a11b43",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "cart-item.update",
+    "description": "Update CartItem by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-10-30T09:24:47.046Z",
+    "modelIn": "payment-stripe.UpdateRequestParams.78c97c83835f4871241d90dce096a681",
+    "modelOut": "payment-stripe.UpdateOutputParams.7f642d85eae6343cc5ecb76390a11b43",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "cart-item.remove",
+    "description": "Remove CartItem by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-10-30T09:24:47.046Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "payment-stripe.RemoveOutputParams.d6e9cf451c7801f1dd44d1472c487199",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "stripe.create-cart-checkout",
+    "description": "Setup intent and return client secret key",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-10-30T09:24:47.046Z",
+    "modelIn": "payment-stripe.CreateCartCheckoutInput",
+    "modelOut": "payment-stripe.CreateCartCheckoutOutput",
+    "methodFilters": []
   }
 ]

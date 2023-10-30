@@ -7,6 +7,7 @@ import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
+import Cart from '@entities/cart';
 import Coupon from '@entities/coupon';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
@@ -101,6 +102,11 @@ abstract class Abstract {
   /**
    * @protected
    */
+  protected readonly cartRepository: Repository<Cart>;
+
+  /**
+   * @protected
+   */
   protected readonly transactionRepository: Repository<Transaction>;
 
   /**
@@ -135,6 +141,7 @@ abstract class Abstract {
     this.customerRepository = manager.getRepository(Customer);
     this.productRepository = manager.getRepository(Product);
     this.priceRepository = manager.getRepository(Price);
+    this.cartRepository = manager.getRepository(Cart);
     this.transactionRepository = manager.getRepository(Transaction);
     this.refundRepository = manager.getRepository(Refund);
     this.cardRepository = manager.getRepository(Card);

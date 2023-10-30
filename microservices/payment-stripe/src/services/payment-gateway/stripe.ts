@@ -189,6 +189,13 @@ interface IStripePromoCodeParams {
   maxRedemptions?: number;
 }
 
+interface ICreateMultipleProductCheckoutParams {
+  cartId: string;
+  successUrl: string;
+  cancelUrl: string;
+  userId: string;
+}
+
 /**
  * Stripe payment provider
  */
@@ -472,6 +479,64 @@ class Stripe extends Abstract {
         userId,
         productId: price.productId,
         entityId: price.product.entityId,
+        status: TransactionStatus.INITIAL,
+      },
+      id,
+    );
+
+    return url;
+  }
+
+  /**
+   * Create checkout session for existing cart and return url to redirect user for payment
+   */
+  public async createCartCheckout(
+    params: ICreateMultipleProductCheckoutParams,
+  ): Promise<string | null> {
+    const { cartId, userId, successUrl, cancelUrl } = params;
+    const { customerId } = await super.getCustomer(userId);
+
+    const cart = await this.cartRepository.findOne(
+      { id: cartId },
+      {
+        relations: ['cartItems', 'cartItems.price'],
+      },
+    );
+
+    if (!cart) {
+      Log.error(`There is no cart related to this cartId: ${cartId}`);
+
+      return null;
+    }
+
+    if (cart.userId && cart.userId !== userId) {
+      Log.error(`Cart with id ${cartId} doesn't belong to user with id ${userId}`);
+
+      return null;
+    }
+
+    const lineItems = cart.items.map(({ price, quantity }) => ({
+      price: price.priceId,
+      quantity,
+    }));
+
+    /* eslint-disable camelcase */
+    const { id, url } = await this.sdk.checkout.sessions.create({
+      // @ts-ignore
+      line_items: lineItems,
+      mode: 'payment',
+      customer: customerId,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+    });
+    /* eslint-enable camelcase */
+
+    await this.createTransaction(
+      {
+        type: TransactionType.CREDIT,
+        amount: cart.items.reduce((acc, item) => acc + item.price.unitAmount * item.quantity, 0),
+        userId,
+        entityId: cart.entityId || undefined,
         status: TransactionStatus.INITIAL,
       },
       id,
