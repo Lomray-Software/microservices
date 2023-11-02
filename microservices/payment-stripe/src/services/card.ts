@@ -14,7 +14,7 @@ import Factory from '@services/payment-gateway/factory';
 class Card {
   /**
    * Handle create
-   * NOTES:
+   * @description NOTES:
    * 1. Card should be created from setup intent succeed
    * 2. Should be called after insert
    */
@@ -41,6 +41,8 @@ class Card {
      * Card count will contain current card
      */
     if (cardsCount) {
+      void Microservice.eventPublish(Event.CardCreated, entity);
+
       return;
     }
 

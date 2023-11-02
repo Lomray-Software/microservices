@@ -717,10 +717,14 @@ class Stripe extends Abstract {
 
   /**
    * Handles payment method update
-   * NOTE: Expected card that can be setup via setupIntent
+   * @description Expected card that can be setup via setupIntent
    */
   public async handlePaymentMethodUpdated(event: StripeSdk.Event): Promise<void> {
-    const { id, card: cardPaymentMethod } = event.data.object as StripeSdk.PaymentMethod;
+    const {
+      id,
+      card: cardPaymentMethod,
+      billing_details: billing,
+    } = event.data.object as StripeSdk.PaymentMethod;
 
     if (!cardPaymentMethod) {
       throw new BaseException({
@@ -747,6 +751,8 @@ class Stripe extends Abstract {
       last4: lastDigits,
       brand,
       funding,
+      issuer,
+      country,
     } = cardPaymentMethod;
 
     const expired = toExpirationDate(expMonth, expYear);
@@ -755,6 +761,11 @@ class Stripe extends Abstract {
     card.expired = expired;
     card.brand = brand;
     card.funding = funding;
+    card.origin = country;
+    // If billing was updated to null - SHOULD set null
+    card.country = billing.address?.country || null;
+    card.postalCode = billing.address?.postal_code || null;
+    card.params.issuer = issuer;
 
     await this.cardRepository.save(card);
 
@@ -1161,7 +1172,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles setup intent succeed
-   * NOTE: Should be called when webhook triggers
+   * @description Should be called when webhook triggers
    */
   public async handleSetupIntentSucceed(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
@@ -1201,7 +1212,16 @@ class Stripe extends Abstract {
 
     const {
       id: paymentMethodId,
-      card: { brand, last4: lastDigits, exp_month: expMonth, exp_year: expYear, funding },
+      billing_details: billing,
+      card: {
+        brand,
+        last4: lastDigits,
+        exp_month: expMonth,
+        exp_year: expYear,
+        funding,
+        country,
+        issuer,
+      },
     } = paymentMethod;
 
     const { userId } = customer;
@@ -1211,6 +1231,9 @@ class Stripe extends Abstract {
       brand,
       userId,
       funding,
+      origin: country,
+      ...(billing.address?.country ? { country: billing.address.country } : {}),
+      ...(billing.address?.postal_code ? { postalCode: billing.address.postal_code } : {}),
       expired: toExpirationDate(expMonth, expYear),
     };
 
@@ -1220,6 +1243,7 @@ class Stripe extends Abstract {
         isApproved: true,
         paymentMethodId,
         setupIntentId: id,
+        issuer,
       },
     });
 
@@ -1231,7 +1255,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles connect account update
-   * NOTE: Connect account event
+   * @description Connect account event
    */
   public async handleExternalAccountUpdated(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
@@ -1255,6 +1279,10 @@ class Stripe extends Abstract {
         default_for_currency: isDefault,
         available_payout_methods: availablePayoutMethods,
         funding,
+        issuer,
+        country,
+        address_country: billingCountry,
+        address_zip: billingPostalCode,
       } = externalAccount;
 
       card.isDefault = Boolean(isDefault);
@@ -1262,6 +1290,10 @@ class Stripe extends Abstract {
       card.expired = toExpirationDate(exp_month, exp_year);
       card.brand = brand;
       card.funding = funding;
+      card.origin = country;
+      card.params.issuer = issuer;
+      card.country = billingCountry;
+      card.postalCode = billingPostalCode;
       card.isInstantPayoutAllowed = this.isAllowedInstantPayout(availablePayoutMethods);
 
       await this.cardRepository.save(card);

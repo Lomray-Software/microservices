@@ -16,7 +16,8 @@ import IsCardExpirationValid from '@helpers/validators/is-card-expiration-valid'
 import IsLastCardDigitsValid from '@helpers/validators/is-last-card-digits-valid';
 
 /**
- * NOTES:
+ * Card params
+ * @description
  * 1. Card with paymentMethodId (from setupIntent) uses for CHARGING specific
  * amount from user card without user manual approve
  * 2. Card with the cardId it's related to user connect account card for
@@ -32,11 +33,13 @@ export interface IParams {
   isApproved?: boolean;
   // Setup intent id
   setupIntentId?: string;
+  // Card issuer name
+  issuer?: string | null;
 }
 
 /**
  * Card entity
- * NOTE: Stipe - should store both cards from connect account and from SetupIntent
+ * @description Stipe should store both cards from connect account and from SetupIntent
  */
 @JSONSchema({
   properties: {
@@ -88,6 +91,36 @@ class Card {
   @Column({ type: 'varchar', length: 20 })
   @Length(1, 20)
   brand: string;
+
+  @JSONSchema({
+    description: 'Issuer country. Where issuer (e.g. bank) is registered',
+    examples: ['US', 'BR'],
+  })
+  @Column({ type: 'varchar', length: 5, default: null })
+  @Length(1, 5)
+  @IsUndefinable()
+  @IsNullable()
+  origin: string | null;
+
+  @JSONSchema({
+    description: 'Billing country. Where holder (e.g. customer) is registered',
+    examples: ['US', 'BR'],
+  })
+  @Column({ type: 'varchar', length: 5, default: null })
+  @Length(1, 5)
+  @IsUndefinable()
+  @IsNullable()
+  country: string | null;
+
+  @JSONSchema({
+    description: 'Billing postal code. Where holder (e.g. customer) is registered',
+    examples: ['99301', '95076'],
+  })
+  @Column({ type: 'varchar', length: 10, default: null })
+  @Length(1, 10)
+  @IsUndefinable()
+  @IsNullable()
+  postalCode: string | null;
 
   @Column({ type: 'varchar', length: 100, default: null })
   @IsNullable()
