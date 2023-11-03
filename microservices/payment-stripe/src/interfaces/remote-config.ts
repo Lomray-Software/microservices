@@ -1,6 +1,8 @@
-import { Stripe } from 'stripe';
+import type { Stripe } from 'stripe';
 import type IFees from '@interfaces/fees';
 import type ITaxes from '@interfaces/taxes';
+
+export type TSetupIntentUsage = 'off_session' | 'on_session';
 
 /**
  * Microservice remote config
@@ -15,4 +17,5 @@ export interface IRemoteConfig {
   paymentMethods?: string[];
   apiKey?: string;
   config?: Stripe.StripeConfig;
+  setupIntentUsage?: TSetupIntentUsage;
 }

@@ -4,6 +4,7 @@ import type { IRemoteConfig } from '@interfaces/remote-config';
 
 const defaultConfig: IRemoteConfig = {
   paymentMethods: CONST.MS_PAYMENT_METHODS,
+  setupIntentUsage: CONST.SETUP_INTENT_USAGE,
   apiKey: CONST.MS_API_KEY,
   config: CONST.MS_CONFIG,
   webhookKeys: CONST.MS_WEBHOOK_KEYS,
