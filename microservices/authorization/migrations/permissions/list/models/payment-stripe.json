@@ -1922,5 +1922,334 @@
       }
     },
     "createdAt": "2023-06-06T09:54:26.730Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CartProductPrice",
+    "title": "Cart Product Price",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "cartId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "priceId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "quantity": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "cart": "payment-stripe.Cart",
+      "price": "payment-stripe.Price"
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.Cart",
+    "title": "Cart",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "items": "payment-stripe.CartProductPrice"
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ListOutputParams.3f78214eac0c47bffaefe248d786f857",
+    "title": "List Output Params",
+    "schema": {
+      "list": "payment-stripe.Cart",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ViewOutputParams.5cb169f85091333c9c1f3dc870f748e7",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "payment-stripe.Cart"
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateRequestParams.f97351f439ebb29eafb2f8b46116f1c0",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "payment-stripe.Cart"
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateOutputParams.5cb169f85091333c9c1f3dc870f748e7",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "payment-stripe.Cart"
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateRequestParams.f97351f439ebb29eafb2f8b46116f1c0",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "payment-stripe.Cart",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateOutputParams.5cb169f85091333c9c1f3dc870f748e7",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "payment-stripe.Cart"
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.RemoveOutputParams.55814d09bbf0d7c913ea4a198290965a",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "payment-stripe.Cart",
+      "entities": "payment-stripe.Cart"
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ListOutputParams.e085a8c37c448c1d77f671c89f469e42",
+    "title": "List Output Params",
+    "schema": {
+      "list": "payment-stripe.CartProductPrice",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ViewOutputParams.5894fc9b6549265d781889da7f6054bc",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "payment-stripe.CartProductPrice"
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateRequestParams.5f48ce1a0d3a87fb7b3b7c7735f8a45c",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "payment-stripe.CartProductPrice"
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateOutputParams.5894fc9b6549265d781889da7f6054bc",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "payment-stripe.CartProductPrice"
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateRequestParams.5f48ce1a0d3a87fb7b3b7c7735f8a45c",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "payment-stripe.CartProductPrice",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateOutputParams.5894fc9b6549265d781889da7f6054bc",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "payment-stripe.CartProductPrice"
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.RemoveOutputParams.a8b85634ef04c1a3f2e6a3dd782accc0",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "payment-stripe.CartProductPrice",
+      "entities": "payment-stripe.CartProductPrice"
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateCartCheckoutInput",
+    "title": "Create Cart Checkout Input",
+    "schema": {
+      "cartId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userId": {
+        "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          },
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "successUrl": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "cancelUrl": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateCartCheckoutOutput",
+    "title": "Create Cart Checkout Output",
+    "schema": {
+      "redirectUrl": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-11-03T10:05:10.401Z"
   }
 ]

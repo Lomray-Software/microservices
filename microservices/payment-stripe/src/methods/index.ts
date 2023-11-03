@@ -5,6 +5,8 @@ import BankAccountAdd from '@methods/bank-account/add';
 import CrudBankAccount from '@methods/bank-account/crud';
 import CardAdd from '@methods/card/add';
 import CrudCard from '@methods/card/crud';
+import CrudCart from '@methods/cart/crud';
+import CrudCartProductPrice from '@methods/cart-product-price/crud';
 import CouponCreate from '@methods/coupon/create';
 import CrudCoupon from '@methods/coupon/crud';
 import CustomerCreate from '@methods/customer/create';
@@ -19,6 +21,7 @@ import CrudRefund from '@methods/refund/crud';
 import Balance from '@methods/stripe/balance';
 import ConnectAccount from '@methods/stripe/connect-account';
 import ConnectAccountLink from '@methods/stripe/connect-account-link';
+import CreateCartCheckout from '@methods/stripe/create-cart-checkout';
 import CreateCheckout from '@methods/stripe/create-checkout';
 import CreatePaymentIntent from '@methods/stripe/create-payment-intent';
 import InstantPayout from '@methods/stripe/instant-payout';
@@ -42,6 +45,8 @@ export default (ms: Microservice): void => {
       ...CrudBankAccount,
       add: BankAccountAdd,
     },
+    cart: CrudCart,
+    'cart-product-price': CrudCartProductPrice,
     transaction: CrudTransaction,
     refund: CrudRefund,
     customer: {
@@ -52,6 +57,7 @@ export default (ms: Microservice): void => {
     stripe: {
       'setup-intent': SetupIntent,
       'create-checkout': CreateCheckout,
+      'create-cart-checkout': CreateCartCheckout,
       'connect-account': ConnectAccount,
       'create-payment-intent': CreatePaymentIntent,
       'payment-intent-fees': PaymentIntentFees,
