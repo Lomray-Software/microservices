@@ -499,18 +499,12 @@ class Stripe extends Abstract {
     const cart = await this.cartRepository.findOne(
       { id: cartId },
       {
-        relations: ['cartItems', 'cartItems.price'],
+        relations: ['items', 'items.price'],
       },
     );
 
     if (!cart) {
       Log.error(`There is no cart related to this cartId: ${cartId}`);
-
-      return null;
-    }
-
-    if (cart.userId && cart.userId !== userId) {
-      Log.error(`Cart with id ${cartId} doesn't belong to user with id ${userId}`);
 
       return null;
     }
@@ -536,7 +530,7 @@ class Stripe extends Abstract {
         type: TransactionType.CREDIT,
         amount: cart.items.reduce((acc, item) => acc + item.price.unitAmount * item.quantity, 0),
         userId,
-        entityId: cart.entityId || undefined,
+        entityId: cart.id,
         status: TransactionStatus.INITIAL,
       },
       id,

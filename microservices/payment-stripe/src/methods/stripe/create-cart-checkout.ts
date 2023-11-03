@@ -8,6 +8,9 @@ class CreateCartCheckoutInput {
   cartId: string;
 
   @IsString()
+  userId: string;
+
+  @IsString()
   successUrl: string;
 
   @IsString()
@@ -29,7 +32,7 @@ const createCartCheckout = Endpoint.custom(
     output: CreateCartCheckoutOutput,
     description: 'Setup intent and return client secret key',
   }),
-  async ({ cartId, successUrl, cancelUrl, payload }) => {
+  async ({ cartId, successUrl, cancelUrl, userId }) => {
     const service = await Factory.create(getManager());
 
     return {
@@ -37,7 +40,7 @@ const createCartCheckout = Endpoint.custom(
         cartId,
         successUrl,
         cancelUrl,
-        userId: payload?.authorization.userId as string,
+        userId,
       }),
     };
   },

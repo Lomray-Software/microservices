@@ -1,5 +1,6 @@
-import { IsTypeormDate } from '@lomray/microservice-helpers';
-import { Allow, Length } from 'class-validator';
+import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
+import { Allow, IsNumber, Length } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
   CreateDateColumn,
@@ -12,14 +13,21 @@ import {
 import Price from '@entities/price';
 import Cart from './cart';
 
+@JSONSchema({
+  properties: {
+    cart: { $ref: '#/definitions/Cart' },
+    price: { $ref: '#/definitions/Price' },
+  },
+})
 @Entity()
-class CartItem {
+class CartProductPrice {
   @PrimaryGeneratedColumn('uuid')
   @Allow()
   id: string;
 
   @Column({ type: 'varchar' })
   @Length(1, 36)
+  @IsUndefinable({ groups: ['create'] })
   cartId: string;
 
   @Column({ type: 'varchar' })
@@ -27,6 +35,8 @@ class CartItem {
   priceId: string;
 
   @Column({ type: 'int', default: 1 })
+  @IsNumber()
+  @IsUndefinable()
   quantity: number;
 
   @IsTypeormDate()
@@ -46,4 +56,4 @@ class CartItem {
   price: Price;
 }
 
-export default CartItem;
+export default CartProductPrice;

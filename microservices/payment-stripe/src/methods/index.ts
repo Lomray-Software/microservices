@@ -6,7 +6,7 @@ import CrudBankAccount from '@methods/bank-account/crud';
 import CardAdd from '@methods/card/add';
 import CrudCard from '@methods/card/crud';
 import CrudCart from '@methods/cart/crud';
-import CrudCartItem from '@methods/cart-item/crud';
+import CrudCartProductPrice from '@methods/cart-product-price/crud';
 import CouponCreate from '@methods/coupon/create';
 import CrudCoupon from '@methods/coupon/crud';
 import CustomerCreate from '@methods/customer/create';
@@ -46,7 +46,7 @@ export default (ms: Microservice): void => {
       add: BankAccountAdd,
     },
     cart: CrudCart,
-    'cart-item': CrudCartItem,
+    'cart-product-price': CrudCartProductPrice,
     transaction: CrudTransaction,
     refund: CrudRefund,
     customer: {
