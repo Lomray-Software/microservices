@@ -311,12 +311,17 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Create SetupIntent and get back client secret
+   * Create SetupIntent and return to client secret
+   * @description Use on session usage for checkouts
    */
   public async setupIntent(userId: string): Promise<string | null> {
+    const { setupIntentUsage } = await remoteConfig();
+
+    // Get related customer
     const { customerId } = await super.getCustomer(userId);
 
     const { client_secret: clientSecret } = await this.sdk.setupIntents.create({
+      usage: setupIntentUsage,
       customer: customerId,
       // eslint-disable-next-line camelcase
       payment_method_types: this.methods,
