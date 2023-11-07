@@ -1302,6 +1302,7 @@ class Stripe extends Abstract {
       userId,
       funding,
       fingerprint,
+      paymentMethodId,
       origin: country,
       ...(billing.address?.country ? { country: billing.address.country } : {}),
       ...(billing.address?.postal_code ? { postalCode: billing.address.postal_code } : {}),
@@ -1312,7 +1313,6 @@ class Stripe extends Abstract {
       ...cardParams,
       params: {
         isApproved: true,
-        paymentMethodId,
         setupIntentId: id,
         issuer,
       },
