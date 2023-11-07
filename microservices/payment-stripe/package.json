@@ -39,17 +39,19 @@
     "start:prod": "node --require ./lib/tracer.js ./lib/index.js"
   },
   "dependencies": {
-    "@lomray/microservice-helpers": "^2.9.2",
-    "@lomray/microservices-client-api": "^2.35.0",
+    "@lomray/microservice-helpers": "^2.10.0",
+    "@lomray/microservices-client-api": "^2.52.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "class-validator-jsonschema": "^5.0.0",
     "stripe": "^11.16.0",
     "typeorm": "0.2.41",
-    "uuidv4": "^6.2.13"
+    "uuidv4": "^6.2.13",
+    "lodash": "^4.17.21"
   },
   "peerDependencies": {
-    "tslib": "^2.6.1"
+    "tslib": "^2.6.1",
+    "@types/lodash": "^4.14.195"
   },
   "overrides": {
     "typeorm": {
