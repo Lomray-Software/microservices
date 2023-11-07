@@ -1,11 +1,12 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum, IsString, Length } from 'class-validator';
 import { getManager } from 'typeorm';
 import BusinessType from '@constants/business-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import Factory from '@services/payment-gateway/factory';
 
 class ConnectAccountInput {
+  @Length(1, 36)
   @IsString()
   userId: string;
 

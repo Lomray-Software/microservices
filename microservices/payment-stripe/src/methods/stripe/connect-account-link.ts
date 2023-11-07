@@ -1,9 +1,10 @@
 import { Endpoint } from '@lomray/microservice-helpers';
-import { IsString } from 'class-validator';
+import { IsString, Length } from 'class-validator';
 import { getManager } from 'typeorm';
 import Factory from '@services/payment-gateway/factory';
 
 class ConnectAccountLinkInput {
+  @Length(1, 36)
   @IsString()
   userId: string;
 

@@ -1,14 +1,15 @@
 import { Endpoint, IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsBoolean, IsString } from 'class-validator';
+import { IsBoolean, IsString, Length } from 'class-validator';
 import { getManager } from 'typeorm';
 import Factory from '@services/payment-gateway/factory';
 
 class CreateCheckoutInput {
-  @IsString()
-  priceId: string;
-
+  @Length(1, 36)
   @IsString()
   userId: string;
+
+  @IsString()
+  priceId: string;
 
   @IsString()
   successUrl: string;

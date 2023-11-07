@@ -1,5 +1,5 @@
 import { Endpoint, IsNullable } from '@lomray/microservice-helpers';
-import { IsString } from 'class-validator';
+import { IsString, Length } from 'class-validator';
 import { getManager } from 'typeorm';
 import Factory from '@services/payment-gateway/factory';
 
@@ -7,6 +7,7 @@ class CreateCartCheckoutInput {
   @IsString()
   cartId: string;
 
+  @Length(1, 36)
   @IsString()
   userId: string;
 
