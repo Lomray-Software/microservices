@@ -32,6 +32,7 @@ import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
 import type ITax from '@interfaces/tax';
+import CardRepository from '@repositories/card';
 import Calculation from '@services/calculation';
 import Abstract, {
   IBankAccountParams,
@@ -281,7 +282,7 @@ class Stripe extends Abstract {
 
   /**
    * Add bank account
-   * NOTE: Usage example - integration tests
+   * @description NOTE: Usage example - integration tests
    * @TODO: Integrate with stripe
    */
   public async addBankAccount({
@@ -761,7 +762,8 @@ class Stripe extends Abstract {
 
     await Promise.all(
       cards.map((card) => {
-        card.isDefault = card.params.paymentMethodId === invoiceSettings.default_payment_method;
+        card.isDefault =
+          CardRepository.extractPaymentMethodId(card) === invoiceSettings.default_payment_method;
 
         return this.cardRepository.save(card);
       }),
@@ -799,7 +801,9 @@ class Stripe extends Abstract {
 
     const card = await this.cardRepository
       .createQueryBuilder('card')
-      .where("card.params->>'paymentMethodId' = :value", { value: id })
+      .where(`card.params->>'paymentMethodId' = :value OR card."paymentMethodId" = :value`, {
+        value: id,
+      })
       .getOne();
 
     if (!card) {
@@ -1000,7 +1004,7 @@ class Stripe extends Abstract {
     const transactionData = {
       entityId,
       title,
-      paymentMethodId: card.params.paymentMethodId,
+      paymentMethodId: CardRepository.extractPaymentMethodId(card),
       cardId,
       transactionId: id,
       status: this.getStatus(status as StripeTransactionStatus),
@@ -2333,7 +2337,9 @@ class Stripe extends Abstract {
     const cardQuery = this.cardRepository
       .createQueryBuilder('card')
       .where('card.userId = :userId', { userId })
-      .andWhere("card.params ->> 'paymentMethodId' IS NOT NULL");
+      .andWhere(
+        `card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL`,
+      );
 
     if (cardId) {
       card = await cardQuery.andWhere('card.id = :cardId', { cardId }).getOne();
@@ -2348,7 +2354,7 @@ class Stripe extends Abstract {
       });
     }
 
-    if (!card.params.paymentMethodId) {
+    if (!CardRepository.extractPaymentMethodId(card)) {
       throw new BaseException({
         status: 400,
         message: "Amount can't be charged from this card. Card isn't specified is payment method.",

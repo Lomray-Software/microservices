@@ -14,6 +14,7 @@ import {
 import type Customer from '@entities/customer';
 import IsCardExpirationValid from '@helpers/validators/is-card-expiration-valid';
 import IsLastCardDigitsValid from '@helpers/validators/is-last-card-digits-valid';
+import IsValidStripeId from '@helpers/validators/is-stripe-id-valid';
 
 /**
  * Card params
@@ -27,12 +28,12 @@ import IsLastCardDigitsValid from '@helpers/validators/is-last-card-digits-valid
 export interface IParams {
   // Only have cards from connected account and cards related to SetupIntent doesn't have own id
   cardId?: string;
-  // Related payment method for card. Uses in paymentIntent for proceed payments
-  paymentMethodId?: string;
   // Is approved by payment provider (setup is succeeded)
   isApproved?: boolean;
   // Setup intent id
   setupIntentId?: string;
+  // @TODO: Remove. Retain for historical assistance
+  paymentMethodId?: string;
   // Card issuer name
   issuer?: string | null;
 }
@@ -56,6 +57,20 @@ class Card {
   @Column({ type: 'varchar', length: 36 })
   @Length(1, 36)
   userId: string;
+
+  /**
+   * Uses in client queries
+   */
+  @JSONSchema({
+    description:
+      'If payment method exist that Card can be charged and used in paymentIntent for processing payments. Attached to the customer, not connected account',
+  })
+  @Column({ type: 'varchar', length: 66, default: null })
+  @IsValidStripeId()
+  @Length(1, 66)
+  @IsUndefinable()
+  @IsNullable()
+  paymentMethodId: string | null;
 
   @JSONSchema({
     description: 'Last 4 digits',
