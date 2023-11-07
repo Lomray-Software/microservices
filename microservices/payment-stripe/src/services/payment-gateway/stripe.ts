@@ -1339,6 +1339,10 @@ class Stripe extends Abstract {
        * Card properties for renewal card that must be identical
        */
       const cardProperties = ['lastDigits', 'brand', 'origin', 'fingerprint', 'funding', 'userId'];
+      const existingCardPaymentMethodId = CardRepository.extractPaymentMethodId(entity);
+
+      const { year: existingYear, month: existingMonth } = fromExpirationDate(entity.expired);
+      const { year: updatedYear, month: updatedMonth } = fromExpirationDate(cardEntity.expired);
 
       /**
        * Update renewal card details
@@ -1347,13 +1351,24 @@ class Stripe extends Abstract {
       if (
         entity.expired !== cardEntity.expired &&
         // All other card details MUST be equal
-        _.isEqual(_.pick(entity, cardProperties), _.pick(cardParams, cardProperties))
+        _.isEqual(_.pick(entity, cardProperties), _.pick(cardParams, cardProperties)) &&
+        // Check expiration dates
+        updatedYear >= existingYear &&
+        updatedMonth >= existingMonth
       ) {
         entity.expired = cardEntity.expired;
 
-        await this.cardRepository.save(entity);
+        /**
+         * Update card details and next() detach new duplicated card
+         */
+        await this.sdk.paymentMethods.update(existingCardPaymentMethodId as string, {
+          card: {
+            exp_month: updatedMonth,
+            exp_year: updatedYear,
+          },
+        });
 
-        return;
+        await this.cardRepository.save(entity);
       }
 
       /**
