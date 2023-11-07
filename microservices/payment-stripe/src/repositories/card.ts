@@ -1,5 +1,18 @@
-import { EntityRepository, Repository } from 'typeorm';
+import { EntityManager, EntityRepository, getManager, Repository } from 'typeorm';
 import CardEntity from '@entities/card';
+
+export interface IGetCardDataByFingerprintParams {
+  userId: string;
+  fingerprint?: string | null;
+  manager?: EntityManager;
+  shouldExpandCard?: boolean;
+}
+
+export interface IGetCardDataByFingerprintResult {
+  isExist: boolean;
+  type?: 'paymentMethod' | 'externalAccount';
+  entity?: CardEntity;
+}
 
 @EntityRepository(CardEntity)
 class Card extends Repository<CardEntity> {
@@ -9,6 +22,42 @@ class Card extends Repository<CardEntity> {
    */
   public static extractPaymentMethodId({ paymentMethodId, params }: CardEntity): string | null {
     return paymentMethodId || params.paymentMethodId || null;
+  }
+
+  /**
+   * Returns card presentation by fingerprint
+   */
+  public static async getCardDataByFingerprint({
+    userId,
+    fingerprint,
+    shouldExpandCard = false,
+    manager = getManager(),
+  }: IGetCardDataByFingerprintParams): Promise<IGetCardDataByFingerprintResult> {
+    const notExistResult = { isExist: false };
+
+    if (!fingerprint) {
+      return notExistResult;
+    }
+
+    const repository = manager.getRepository(CardEntity);
+
+    const card = await repository.findOne({
+      ...(shouldExpandCard ? {} : { select: ['id', 'userId', 'paymentMethodId', 'params'] }),
+      where: {
+        fingerprint,
+        userId,
+      },
+    });
+
+    if (card) {
+      return {
+        isExist: true,
+        type: Card.extractPaymentMethodId(card) ? 'paymentMethod' : 'externalAccount',
+        ...(shouldExpandCard ? { entity: card } : {}),
+      };
+    }
+
+    return notExistResult;
   }
 }
 

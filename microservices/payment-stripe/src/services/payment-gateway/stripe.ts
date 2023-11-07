@@ -2,6 +2,7 @@ import { Log } from '@lomray/microservice-helpers';
 import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
 import { validate } from 'class-validator';
+import _ from 'lodash';
 import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
 import BalanceType from '@constants/balance-type';
@@ -1240,7 +1241,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles setup intent succeed
-   * @description Should be called when webhook triggers
+   * @description Support cards. Should be called when webhook triggers
    */
   public async handleSetupIntentSucceed(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
@@ -1289,6 +1290,7 @@ class Stripe extends Abstract {
         funding,
         country,
         issuer,
+        fingerprint,
       },
     } = paymentMethod;
 
@@ -1299,13 +1301,14 @@ class Stripe extends Abstract {
       brand,
       userId,
       funding,
+      fingerprint,
       origin: country,
       ...(billing.address?.country ? { country: billing.address.country } : {}),
       ...(billing.address?.postal_code ? { postalCode: billing.address.postal_code } : {}),
       expired: toExpirationDate(expMonth, expYear),
     };
 
-    const savedCard = await this.cardRepository.save({
+    const cardEntity = {
       ...cardParams,
       params: {
         isApproved: true,
@@ -1313,12 +1316,57 @@ class Stripe extends Abstract {
         setupIntentId: id,
         issuer,
       },
+    };
+
+    const { isExist, type, entity } = await CardRepository.getCardDataByFingerprint({
+      userId,
+      fingerprint,
+      shouldExpandCard: true,
     });
 
-    void Microservice.eventPublish(Event.SetupIntentSucceeded, {
-      ...cardParams,
-      cardId: savedCard.id,
-    });
+    /**
+     * Cancel set up card if this card already exist as the payment method
+     */
+    if (isExist && type === 'paymentMethod') {
+      if (!entity) {
+        throw new BaseException({
+          status: 500,
+          message: messages.getNotFoundMessage('Failed to validate duplicated card. Card'),
+        });
+      }
+
+      const cardProperties = ['lastDigits', 'brand', 'origin', 'fingerprint', 'funding', 'userId'];
+
+      /**
+       * Update renewal card details
+       * @description Stripe does not create new fingerprint if card was renewal with new expiration date
+       */
+      if (
+        entity.expired !== cardEntity.expired &&
+        // All other card details MUST be equal
+        _.isEqual(_.pick(entity, cardProperties), _.pick(cardParams, cardProperties))
+      ) {
+        entity.expired = cardEntity.expired;
+
+        await this.cardRepository.save(entity);
+
+        return;
+      }
+
+      /**
+       * If customer trying to add identical, not renewal card
+       * @description Detach duplicated card from Stripe customer
+       */
+      await this.sdk.paymentMethods.detach(paymentMethodId);
+
+      await Microservice.eventPublish(Event.CardNotCreatedDuplicated, cardEntity);
+
+      return;
+    }
+
+    const savedCard = await this.cardRepository.save(cardEntity);
+
+    void Microservice.eventPublish(Event.SetupIntentSucceeded, savedCard);
   }
 
   /**
@@ -1415,7 +1463,9 @@ class Stripe extends Abstract {
       });
     }
 
-    const { userId } = await this.getCustomerByAccountId(this.extractId(externalAccount.account));
+    const { userId, params } = await this.getCustomerByAccountId(
+      this.extractId(externalAccount.account),
+    );
 
     if (!this.isExternalAccountIsBankAccount(externalAccount)) {
       const {
@@ -1427,13 +1477,34 @@ class Stripe extends Abstract {
         exp_month,
         available_payout_methods: availablePayoutMethods,
         default_for_currency: isDefault,
+        fingerprint,
       } = externalAccount;
+
+      /**
+       * Only connected custom account can attach few external account for payouts
+       */
+      if (params.accountType === 'custom') {
+        const { isExist, type } = await CardRepository.getCardDataByFingerprint({
+          userId,
+          fingerprint,
+        });
+
+        if (isExist && type === 'externalAccount') {
+          /**
+           * @TODO: Handle for custom account duplicated card attach. Throw error and delete card from Stripe, etc..
+           */
+          const message = 'External account attached card is duplicated.';
+
+          Log.error(message);
+        }
+      }
 
       await this.cardRepository.save({
         lastDigits,
         brand,
         funding,
         userId,
+        ...(fingerprint ? { fingerprint } : {}),
         isInstantPayoutAllowed: this.isAllowedInstantPayout(availablePayoutMethods),
         isDefault: Boolean(isDefault),
         expired: toExpirationDate(exp_month, exp_year),

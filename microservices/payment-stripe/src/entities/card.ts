@@ -73,6 +73,16 @@ class Card {
   paymentMethodId: string | null;
 
   @JSONSchema({
+    description:
+      'Card fingerprint. Remove duplicates duplicates if same card uses as payment method',
+  })
+  @Column({ type: 'varchar', length: 30, default: null })
+  @Length(1, 30)
+  @IsUndefinable()
+  @IsNullable()
+  fingerprint: string | null;
+
+  @JSONSchema({
     description: 'Last 4 digits',
     example: '4242',
   })
