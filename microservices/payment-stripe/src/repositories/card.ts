@@ -1,14 +1,14 @@
 import { EntityManager, EntityRepository, getManager, Repository } from 'typeorm';
 import CardEntity from '@entities/card';
 
-export interface IGetCardDataByFingerprintParams {
+export interface ICardDataByFingerprintParams {
   userId: string;
   fingerprint?: string | null;
   manager?: EntityManager;
   shouldExpandCard?: boolean;
 }
 
-export interface IGetCardDataByFingerprintResult {
+export interface ICardDataByFingerprintResult {
   isExist: boolean;
   type?: 'paymentMethod' | 'externalAccount';
   entity?: CardEntity;
@@ -32,7 +32,7 @@ class Card extends Repository<CardEntity> {
     fingerprint,
     shouldExpandCard = false,
     manager = getManager(),
-  }: IGetCardDataByFingerprintParams): Promise<IGetCardDataByFingerprintResult> {
+  }: ICardDataByFingerprintParams): Promise<ICardDataByFingerprintResult> {
     const notExistResult = { isExist: false };
 
     if (!fingerprint) {
