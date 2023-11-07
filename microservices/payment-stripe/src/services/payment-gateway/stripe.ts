@@ -584,6 +584,38 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Returns dashboard login link
+   * @description Eligible only for the express connect accounts.
+   * DO NOT email, text, or otherwise send login link URLs directly to user
+   */
+  public async getDashboardLoginLink(userId: string): Promise<string> {
+    const customer = await this.customerRepository.findOne({ userId });
+
+    if (!customer) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Customer'),
+      });
+    }
+
+    if (!customer.params.accountId) {
+      throw new BaseException({
+        status: 400,
+        message: "Customer don't have setup connect account",
+      });
+    }
+
+    if (customer.params.accountType !== 'express') {
+      throw new BaseException({
+        status: 500,
+        message: 'Dashboard login allowed only for express accounts.',
+      });
+    }
+
+    return (await this.sdk.accounts.createLoginLink(customer.params.accountId)).url;
+  }
+
+  /**
    * Returns account link
    * @description NOTE: Use when user needs to update connect account data
    */
