@@ -2,6 +2,7 @@ import { Log } from '@lomray/microservice-helpers';
 import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
 import { validate } from 'class-validator';
+import _ from 'lodash';
 import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
 import BalanceType from '@constants/balance-type';
@@ -32,6 +33,7 @@ import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
 import type ITax from '@interfaces/tax';
+import CardRepository from '@repositories/card';
 import Calculation from '@services/calculation';
 import Abstract, {
   IBankAccountParams,
@@ -281,7 +283,7 @@ class Stripe extends Abstract {
 
   /**
    * Add bank account
-   * NOTE: Usage example - integration tests
+   * @description NOTE: Usage example - integration tests
    * @TODO: Integrate with stripe
    */
   public async addBankAccount({
@@ -761,7 +763,8 @@ class Stripe extends Abstract {
 
     await Promise.all(
       cards.map((card) => {
-        card.isDefault = card.params.paymentMethodId === invoiceSettings.default_payment_method;
+        card.isDefault =
+          CardRepository.extractPaymentMethodId(card) === invoiceSettings.default_payment_method;
 
         return this.cardRepository.save(card);
       }),
@@ -799,7 +802,9 @@ class Stripe extends Abstract {
 
     const card = await this.cardRepository
       .createQueryBuilder('card')
-      .where("card.params->>'paymentMethodId' = :value", { value: id })
+      .where(`card.params->>'paymentMethodId' = :value OR card."paymentMethodId" = :value`, {
+        value: id,
+      })
       .getOne();
 
     if (!card) {
@@ -1000,7 +1005,7 @@ class Stripe extends Abstract {
     const transactionData = {
       entityId,
       title,
-      paymentMethodId: card.params.paymentMethodId,
+      paymentMethodId: CardRepository.extractPaymentMethodId(card),
       cardId,
       transactionId: id,
       status: this.getStatus(status as StripeTransactionStatus),
@@ -1236,7 +1241,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles setup intent succeed
-   * @description Should be called when webhook triggers
+   * @description Support cards. Should be called when webhook triggers
    */
   public async handleSetupIntentSucceed(event: StripeSdk.Event): Promise<void> {
     /* eslint-disable camelcase */
@@ -1285,6 +1290,7 @@ class Stripe extends Abstract {
         funding,
         country,
         issuer,
+        fingerprint,
       },
     } = paymentMethod;
 
@@ -1295,26 +1301,90 @@ class Stripe extends Abstract {
       brand,
       userId,
       funding,
+      fingerprint,
+      paymentMethodId,
       origin: country,
       ...(billing.address?.country ? { country: billing.address.country } : {}),
       ...(billing.address?.postal_code ? { postalCode: billing.address.postal_code } : {}),
       expired: toExpirationDate(expMonth, expYear),
     };
 
-    const savedCard = await this.cardRepository.save({
+    const cardEntity = {
       ...cardParams,
       params: {
         isApproved: true,
-        paymentMethodId,
         setupIntentId: id,
         issuer,
       },
+    };
+
+    const { isExist, type, entity } = await CardRepository.getCardDataByFingerprint({
+      userId,
+      fingerprint,
+      shouldExpandCard: true,
     });
 
-    void Microservice.eventPublish(Event.SetupIntentSucceeded, {
-      ...cardParams,
-      cardId: savedCard.id,
-    });
+    /**
+     * Cancel set up card if this card already exist as the payment method
+     */
+    if (isExist && type === 'paymentMethod') {
+      if (!entity) {
+        throw new BaseException({
+          status: 500,
+          message: messages.getNotFoundMessage('Failed to validate duplicated card. Card'),
+        });
+      }
+
+      /**
+       * Card properties for renewal card that must be identical
+       */
+      const cardProperties = ['lastDigits', 'brand', 'origin', 'fingerprint', 'funding', 'userId'];
+      const existingCardPaymentMethodId = CardRepository.extractPaymentMethodId(entity);
+
+      const { year: existingYear, month: existingMonth } = fromExpirationDate(entity.expired);
+      const { year: updatedYear, month: updatedMonth } = fromExpirationDate(cardEntity.expired);
+
+      /**
+       * Update renewal card details
+       * @description Stripe does not create new fingerprint if card was renewal with new expiration date
+       */
+      if (
+        entity.expired !== cardEntity.expired &&
+        // All other card details MUST be equal
+        _.isEqual(_.pick(entity, cardProperties), _.pick(cardParams, cardProperties)) &&
+        // Check expiration dates
+        updatedYear >= existingYear &&
+        updatedMonth >= existingMonth
+      ) {
+        entity.expired = cardEntity.expired;
+
+        /**
+         * Update card details and next() detach new duplicated card
+         */
+        await this.sdk.paymentMethods.update(existingCardPaymentMethodId as string, {
+          card: {
+            exp_month: updatedMonth,
+            exp_year: updatedYear,
+          },
+        });
+
+        await this.cardRepository.save(entity);
+      }
+
+      /**
+       * If customer trying to add identical, not renewal card
+       * @description Detach duplicated card from Stripe customer
+       */
+      await this.sdk.paymentMethods.detach(paymentMethodId);
+
+      await Microservice.eventPublish(Event.CardNotCreatedDuplicated, cardEntity);
+
+      return;
+    }
+
+    const savedCard = await this.cardRepository.save(cardEntity);
+
+    void Microservice.eventPublish(Event.SetupIntentSucceeded, savedCard);
   }
 
   /**
@@ -1411,7 +1481,9 @@ class Stripe extends Abstract {
       });
     }
 
-    const { userId } = await this.getCustomerByAccountId(this.extractId(externalAccount.account));
+    const { userId, params } = await this.getCustomerByAccountId(
+      this.extractId(externalAccount.account),
+    );
 
     if (!this.isExternalAccountIsBankAccount(externalAccount)) {
       const {
@@ -1423,17 +1495,45 @@ class Stripe extends Abstract {
         exp_month,
         available_payout_methods: availablePayoutMethods,
         default_for_currency: isDefault,
+        address_zip: billingPostalCode,
+        address_country: billingCountry,
+        fingerprint,
+        issuer,
+        country,
       } = externalAccount;
+
+      /**
+       * Only connected custom account can attach few external account for payouts
+       */
+      if (params.accountType === 'custom') {
+        const { isExist, type } = await CardRepository.getCardDataByFingerprint({
+          userId,
+          fingerprint,
+        });
+
+        if (isExist && type === 'externalAccount') {
+          /**
+           * @TODO: Handle for custom account duplicated card attach. Throw error and delete card from Stripe, etc..
+           */
+          const message = 'External account attached card is duplicated.';
+
+          Log.error(message);
+        }
+      }
 
       await this.cardRepository.save({
         lastDigits,
         brand,
         funding,
         userId,
+        origin: country,
+        ...(fingerprint ? { fingerprint } : {}),
         isInstantPayoutAllowed: this.isAllowedInstantPayout(availablePayoutMethods),
+        ...(billingCountry ? { country: billingCountry } : {}),
+        ...(billingPostalCode ? { postalCode: billingPostalCode } : {}),
         isDefault: Boolean(isDefault),
         expired: toExpirationDate(exp_month, exp_year),
-        params: { cardId },
+        params: { cardId, issuer },
       });
 
       return;
@@ -2333,7 +2433,9 @@ class Stripe extends Abstract {
     const cardQuery = this.cardRepository
       .createQueryBuilder('card')
       .where('card.userId = :userId', { userId })
-      .andWhere("card.params ->> 'paymentMethodId' IS NOT NULL");
+      .andWhere(
+        `card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL`,
+      );
 
     if (cardId) {
       card = await cardQuery.andWhere('card.id = :cardId', { cardId }).getOne();
@@ -2348,7 +2450,7 @@ class Stripe extends Abstract {
       });
     }
 
-    if (!card.params.paymentMethodId) {
+    if (!CardRepository.extractPaymentMethodId(card)) {
       throw new BaseException({
         status: 400,
         message: "Amount can't be charged from this card. Card isn't specified is payment method.",

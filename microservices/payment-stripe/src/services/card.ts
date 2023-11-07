@@ -4,6 +4,7 @@ import { EntityManager, getManager } from 'typeorm';
 import CardEntity from '@entities/card';
 import CustomerEntity from '@entities/customer';
 import messages from '@helpers/validators/messages';
+import CardRepository from '@repositories/card';
 import Factory from '@services/payment-gateway/factory';
 
 /**
@@ -19,7 +20,9 @@ class Card {
    * 2. Should be called after insert
    */
   public static async handleCreate(entity: CardEntity, manager: EntityManager): Promise<void> {
-    if (!entity.params.paymentMethodId) {
+    const paymentMethodId = CardRepository.extractPaymentMethodId(entity);
+
+    if (!paymentMethodId) {
       return;
     }
 
@@ -33,7 +36,9 @@ class Card {
     const cardsCount = await cardRepository
       .createQueryBuilder('card')
       .where('card.userId = :userId', { userId: entity.userId })
-      .andWhere("card.params ->> 'paymentMethodId' IS NOT NULL")
+      .andWhere(
+        `card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL`,
+      )
       .andWhere('card.isDefault = :isDefault', { isDefault: true })
       .getCount();
 
@@ -57,7 +62,7 @@ class Card {
 
     const isSet = await service.setDefaultCustomerPaymentMethod(
       customer.customerId,
-      entity.params.paymentMethodId,
+      paymentMethodId,
     );
 
     if (!isSet) {
@@ -82,10 +87,12 @@ class Card {
     entity: CardEntity,
     manager: EntityManager,
   ): Promise<void> {
+    const paymentMethodId = CardRepository.extractPaymentMethodId(entity);
+
     /**
      * If card isn't payment method
      */
-    if (!entity.params.paymentMethodId || databaseEntity.isDefault === entity.isDefault) {
+    if (!paymentMethodId || databaseEntity.isDefault === entity.isDefault) {
       return;
     }
 
@@ -97,10 +104,7 @@ class Card {
     const customerRepository = manager.getRepository(CustomerEntity);
     const service = await Factory.create(getManager());
 
-    const {
-      params: { paymentMethodId },
-      userId,
-    } = entity;
+    const { userId } = entity;
 
     /**
      * Get all customer related card
@@ -136,7 +140,7 @@ class Card {
      */
     await Promise.all(
       cards.map((card) => {
-        card.isDefault = card.params.paymentMethodId === paymentMethodId;
+        card.isDefault = CardRepository.extractPaymentMethodId(card) === paymentMethodId;
 
         return cardRepository.save(card, { listeners: false });
       }),
@@ -166,22 +170,24 @@ class Card {
     const cardRepository = manager.getRepository(CardEntity);
     const service = await Factory.create(getManager());
 
+    const paymentMethodId = CardRepository.extractPaymentMethodId(databaseEntity);
+
     /**
      * Card isn't payment method
      */
-    if (!databaseEntity.params.paymentMethodId) {
+    if (!paymentMethodId) {
       return;
     }
 
-    const {
-      params: { paymentMethodId },
-      userId,
-    } = databaseEntity;
+    const { userId } = databaseEntity;
 
     const card = await cardRepository
       .createQueryBuilder('card')
       .where('card.userId = :userId', { userId })
-      .andWhere("card.params ->> 'paymentMethodId' = :paymentMethodId", { paymentMethodId })
+      .andWhere(
+        `card.params ->> 'paymentMethodId' = :paymentMethodId OR card."paymentMethodId" = :paymentMethodId`,
+        { paymentMethodId },
+      )
       .getOne();
 
     if (!card) {
