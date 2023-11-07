@@ -1495,7 +1495,11 @@ class Stripe extends Abstract {
         exp_month,
         available_payout_methods: availablePayoutMethods,
         default_for_currency: isDefault,
+        address_zip: billingPostalCode,
+        address_country: billingCountry,
         fingerprint,
+        issuer,
+        country,
       } = externalAccount;
 
       /**
@@ -1522,11 +1526,14 @@ class Stripe extends Abstract {
         brand,
         funding,
         userId,
+        origin: country,
         ...(fingerprint ? { fingerprint } : {}),
         isInstantPayoutAllowed: this.isAllowedInstantPayout(availablePayoutMethods),
+        ...(billingCountry ? { country: billingCountry } : {}),
+        ...(billingPostalCode ? { postalCode: billingPostalCode } : {}),
         isDefault: Boolean(isDefault),
         expired: toExpirationDate(exp_month, exp_year),
-        params: { cardId },
+        params: { cardId, issuer },
       });
 
       return;
