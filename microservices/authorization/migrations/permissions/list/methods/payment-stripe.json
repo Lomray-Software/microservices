@@ -889,5 +889,18 @@
     "modelIn": "ListRequestParams",
     "modelOut": "payment-stripe.ListOutputParams.e085a8c37c448c1d77f671c89f469e42",
     "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "stripe.dashboard-login-link",
+    "description": "Create new link for access to the express account dashboard",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-11-07T16:05:58.208Z",
+    "modelIn": "payment-stripe.DashboardLoginLinkInput",
+    "modelOut": "payment-stripe.DashboardLoginLinkOutput",
+    "methodFilters": []
   }
 ]
