@@ -1335,6 +1335,9 @@ class Stripe extends Abstract {
         });
       }
 
+      /**
+       * Card properties for renewal card that must be identical
+       */
       const cardProperties = ['lastDigits', 'brand', 'origin', 'fingerprint', 'funding', 'userId'];
 
       /**
