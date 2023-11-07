@@ -23,6 +23,8 @@ class Card {
     const paymentMethodId = CardRepository.extractPaymentMethodId(entity);
 
     if (!paymentMethodId) {
+      void Microservice.eventPublish(Event.CardCreated, entity);
+
       return;
     }
 
