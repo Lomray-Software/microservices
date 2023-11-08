@@ -41,8 +41,12 @@ class Card implements EntitySubscriberInterface<CardEntity> {
   /**
    * Handle card remove
    */
-  public async beforeRemove({ databaseEntity, manager }: RemoveEvent<CardEntity>): Promise<void> {
-    await CardService.handleRemove(databaseEntity, manager);
+  public async beforeRemove({
+    databaseEntity,
+    manager,
+    queryRunner,
+  }: RemoveEvent<CardEntity>): Promise<void> {
+    await CardService.handleRemove(databaseEntity, manager, queryRunner);
   }
 }
 
