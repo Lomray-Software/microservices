@@ -1777,10 +1777,9 @@ class Stripe extends Abstract {
       params: { accountId: receiverAccountId },
     } = receiverCustomer;
 
-    const {
-      params: { paymentMethodId },
-      id: paymentMethodCardId,
-    } = await this.getChargingCard(senderCustomer.userId, cardId);
+    const chargeCard = await this.getChargingCard(senderCustomer.userId, cardId);
+
+    const paymentMethodId = CardRepository.extractPaymentMethodId(chargeCard);
 
     if (!paymentMethodId) {
       throw new BaseException({
@@ -1789,6 +1788,11 @@ class Stripe extends Abstract {
       });
     }
 
+    const { id: paymentMethodCardId } = chargeCard;
+
+    /**
+     * Get parsed entity cost
+     */
     const entityUnitCost = this.toSmallestCurrencyUnit(entityCost);
 
     /**
@@ -2466,7 +2470,7 @@ class Stripe extends Abstract {
       .createQueryBuilder('card')
       .where('card.userId = :userId', { userId })
       .andWhere(
-        `card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL`,
+        `(card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL)`,
       );
 
     if (cardId) {
