@@ -1,12 +1,14 @@
 import { Endpoint } from '@lomray/microservice-helpers';
-import { IsBoolean, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsString, Length, Min } from 'class-validator';
 import { getManager } from 'typeorm';
 import Factory from '@services/payment-gateway/factory';
 
 class CreateInstantPayoutInput {
+  @Length(1, 36)
   @IsString()
   userId: string;
 
+  @Min(1)
   @IsNumber()
   amount: number;
 }

@@ -1,14 +1,16 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsBoolean, IsEnum, IsNumber, IsObject, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber, IsObject, IsString, Length } from 'class-validator';
 import { getManager } from 'typeorm';
 import TransactionRole from '@constants/transaction-role';
 import type Transaction from '@entities/transaction';
 import Factory from '@services/payment-gateway/factory';
 
 class PaymentIntentInput {
+  @Length(1, 36)
   @IsString()
   userId: string;
 
+  @Length(1, 36)
   @IsString()
   receiverId: string;
 

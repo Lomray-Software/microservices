@@ -2251,5 +2251,37 @@
       }
     },
     "createdAt": "2023-11-03T10:05:10.401Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.DashboardLoginLinkInput",
+    "title": "Dashboard Login Link Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-11-07T16:05:58.208Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.DashboardLoginLinkOutput",
+    "title": "Dashboard Login Link Output",
+    "schema": {
+      "url": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-11-07T16:05:58.208Z"
   }
 ]
