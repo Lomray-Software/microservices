@@ -1,6 +1,6 @@
 import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
-import { EntityManager, getManager } from 'typeorm';
+import { EntityManager, getManager, QueryRunner } from 'typeorm';
 import CardEntity from '@entities/card';
 import CustomerEntity from '@entities/customer';
 import messages from '@helpers/validators/messages';
@@ -23,6 +23,9 @@ class Card {
     const paymentMethodId = CardRepository.extractPaymentMethodId(entity);
 
     if (!paymentMethodId) {
+      /**
+       * External account card (card attached as payout method for connect account)
+       */
       void Microservice.eventPublish(Event.CardCreated, entity);
 
       return;
@@ -82,7 +85,7 @@ class Card {
 
   /**
    * Handle update stripe card and card entities default payment method status
-   * @TODO: Add support if needed for updating card data in the stripe
+   * @TODO: Handle external account card data updated
    */
   public static async handleUpdate(
     databaseEntity: CardEntity,
@@ -168,48 +171,35 @@ class Card {
   public static async handleRemove(
     databaseEntity: CardEntity,
     manager: EntityManager,
+    { data: { isFromWebhook } }: QueryRunner,
   ): Promise<void> {
-    const cardRepository = manager.getRepository(CardEntity);
     const service = await Factory.create(getManager());
 
-    const paymentMethodId = CardRepository.extractPaymentMethodId(databaseEntity);
+    if (isFromWebhook) {
+      void Microservice.eventPublish(Event.CardRemoved, databaseEntity);
 
-    /**
-     * Card isn't payment method
-     */
-    if (!paymentMethodId) {
       return;
     }
 
-    const { userId } = databaseEntity;
-
-    const card = await cardRepository
-      .createQueryBuilder('card')
-      .where('card.userId = :userId', { userId })
-      .andWhere(
-        `card.params ->> 'paymentMethodId' = :paymentMethodId OR card."paymentMethodId" = :paymentMethodId`,
-        { paymentMethodId },
-      )
-      .getOne();
-
-    if (!card) {
-      throw new BaseException({ status: 500, message: messages.getNotFoundMessage('Card') });
-    }
-
-    if (card.isDefault) {
+    if (databaseEntity.isDefault) {
       throw new BaseException({ status: 400, message: "Default card can't be removed." });
     }
 
-    const isRemoved = await service.removeCustomerPaymentMethod(paymentMethodId);
+    /**
+     * Handle setup intent card (card have payment method reference), NOT external account
+     */
+    const paymentMethodId = CardRepository.extractPaymentMethodId(databaseEntity);
 
-    if (!isRemoved) {
-      throw new BaseException({
-        status: 500,
-        message: 'Failed to remove card as the payment method.',
-      });
+    if (paymentMethodId) {
+      const isRemoved = await service.removeCustomerPaymentMethod(paymentMethodId);
+
+      if (!isRemoved) {
+        throw new BaseException({
+          status: 500,
+          message: 'Failed to remove card as the payment method.',
+        });
+      }
     }
-
-    await cardRepository.remove(card, { listeners: false });
 
     void Microservice.eventPublish(Event.CardRemoved, databaseEntity);
   }

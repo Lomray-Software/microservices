@@ -716,7 +716,7 @@ class Stripe extends Abstract {
         break;
 
       case 'payment_method.detached':
-        this.handlePaymentMethodDetached(event);
+        await this.handlePaymentMethodDetached(event);
         break;
 
       case 'payment_intent.created':
@@ -758,9 +758,34 @@ class Stripe extends Abstract {
   /**
    * Handles payment method detach
    * @description NOTE: Card and other payment methods should be removed in according subscribers
+   * @TODO: Handle other payment methods if needed
    */
-  public handlePaymentMethodDetached(event: StripeSdk.Event): void {
-    const { id: paymentMethodId } = event.data.object as StripeSdk.PaymentMethod;
+  public async handlePaymentMethodDetached(event: StripeSdk.Event): Promise<void> {
+    const { id: paymentMethodId, card: cardPaymentMethod } = event.data
+      .object as StripeSdk.PaymentMethod;
+
+    if (!cardPaymentMethod) {
+      throw new BaseException({
+        status: 500,
+        message: "Payment method card wasn't provided",
+      });
+    }
+
+    const card = await this.cardRepository
+      .createQueryBuilder('card')
+      .where(`card.params->>'paymentMethodId' = :value OR card."paymentMethodId" = :value`, {
+        value: paymentMethodId,
+      })
+      .getOne();
+
+    if (!card) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Payment method'),
+      });
+    }
+
+    await this.cardRepository.remove(card, { data: { isFromWebhook: true } });
 
     void Microservice.eventPublish(Event.PaymentMethodRemoved, {
       paymentMethodId,
@@ -1777,10 +1802,9 @@ class Stripe extends Abstract {
       params: { accountId: receiverAccountId },
     } = receiverCustomer;
 
-    const {
-      params: { paymentMethodId },
-      id: paymentMethodCardId,
-    } = await this.getChargingCard(senderCustomer.userId, cardId);
+    const chargeCard = await this.getChargingCard(senderCustomer.userId, cardId);
+
+    const paymentMethodId = CardRepository.extractPaymentMethodId(chargeCard);
 
     if (!paymentMethodId) {
       throw new BaseException({
@@ -1789,6 +1813,11 @@ class Stripe extends Abstract {
       });
     }
 
+    const { id: paymentMethodCardId } = chargeCard;
+
+    /**
+     * Get parsed entity cost
+     */
     const entityUnitCost = this.toSmallestCurrencyUnit(entityCost);
 
     /**
@@ -2466,7 +2495,7 @@ class Stripe extends Abstract {
       .createQueryBuilder('card')
       .where('card.userId = :userId', { userId })
       .andWhere(
-        `card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL`,
+        `(card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL)`,
       );
 
     if (cardId) {
