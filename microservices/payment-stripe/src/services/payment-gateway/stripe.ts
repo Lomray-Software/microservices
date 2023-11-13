@@ -23,7 +23,6 @@ import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
 import Refund from '@entities/refund';
-import type { IComputedTax } from '@entities/transaction';
 import Transaction from '@entities/transaction';
 import composeBalance from '@helpers/compose-balance';
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
@@ -32,6 +31,7 @@ import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
+import type IPaymentIntentMetadata from '@interfaces/payment-intent-metadata';
 import type ITax from '@interfaces/tax';
 import CardRepository from '@repositories/card';
 import Calculation from '@services/calculation';
@@ -66,26 +66,6 @@ interface IPaymentIntentParams {
   // Extra receiver revenue percent from application payment percent
   extraReceiverRevenuePercent?: number;
   withTax?: boolean;
-}
-
-interface IPaymentIntentMetadata
-  extends Omit<IComputedTax, 'taxTransactionAmountWithTaxUnit' | 'taxTotalAmountUnit'> {
-  senderId: string;
-  receiverId: string;
-  entityCost: string;
-  cardId: string;
-  feesPayer: TransactionRole;
-  applicationFee: string;
-  receiverExtraFee: string;
-  senderExtraFee: string;
-  receiverExtraRevenue: string;
-  paymentProviderFee: string;
-  entityId?: string;
-  title?: string;
-  taxTransactionAmountWithTax?: number;
-  taxTotalAmount?: number;
-  taxFee?: number;
-  totalTaxPercent?: number;
 }
 
 interface IRefundParams {
@@ -1962,6 +1942,21 @@ class Stripe extends Abstract {
       },
     };
 
+    let stripeTaxTransaction: StripeSdk.Tax.Transaction | null = null;
+
+    // Create tax transaction (for Stripe Tax reports)
+    if (withTax) {
+      if (!tax?.id) {
+        // This case SHOULD NOT exist
+        Log.error('Tax id was not found for create tax transaction for payment intent with tax');
+      }
+
+      stripeTaxTransaction = await this.sdk.tax.transactions.createFromCalculation({
+        calculation: tax?.id as string,
+        reference: stripePaymentIntent.id,
+      });
+    }
+
     const transactions = await Promise.all([
       this.transactionRepository.save({
         ...transactionData,
@@ -1971,6 +1966,7 @@ class Stripe extends Abstract {
         params: {
           ...transactionData.params,
           extraFee: senderAdditionalFee,
+          taxTransactionId: stripeTaxTransaction?.id,
         },
       }),
       this.transactionRepository.save({
@@ -1984,6 +1980,7 @@ class Stripe extends Abstract {
           extraFee: receiverAdditionalFee,
           extraRevenue: extraReceiverUnitRevenue,
           estimatedInstantPayoutFee: Math.round(receiverUnitRevenue * (instantPayoutPercent / 100)),
+          taxTransactionId: stripeTaxTransaction?.id,
         },
       }),
     ]);
@@ -1995,6 +1992,7 @@ class Stripe extends Abstract {
       metadata: {
         creditTransactionId: transactions?.[0]?.id,
         debitTransactionId: transactions?.[1]?.id,
+        ...(withTax && { taxTransactionId: stripeTaxTransaction?.id }),
       },
     });
 

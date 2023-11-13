@@ -18,9 +18,11 @@ import TransactionType from '@constants/transaction-type';
 import type Customer from '@entities/customer';
 import type Product from '@entities/product';
 import IsValidStripeId from '@helpers/validators/is-stripe-id-valid';
+import IPaymentIntentMetadata from '@interfaces/payment-intent-metadata';
 import type ITax from '@interfaces/tax';
 
 export interface IComputedTax {
+  // Calculated tax id
   taxId?: ITax['id'];
   taxTransactionAmountWithTaxUnit?: ITax['transactionAmountWithTaxUnit'];
   taxExpiresAt?: ITax['expiresAt'];
@@ -31,7 +33,8 @@ export interface IComputedTax {
   taxFeeUnit?: number;
 }
 
-export interface IParams extends IComputedTax {
+export interface IParams extends IComputedTax, Pick<IPaymentIntentMetadata, 'taxTransactionId'> {
+  // Created tax transaction id
   paymentStatus?: StripeTransactionStatus;
   checkoutStatus?: StripeCheckoutStatus;
   errorMessage?: string;
