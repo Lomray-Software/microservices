@@ -1,4 +1,5 @@
 import { BaseException } from '@lomray/microservice-nodejs-lib';
+import _ from 'lodash';
 import type StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
@@ -150,38 +151,36 @@ class Calculation {
      */
     if (
       // @ts-ignore
-      tax?.tax_breakdown?.some((breakdown) => breakdown?.taxability_reason === 'not_collecting') &&
+      tax.tax_breakdown?.some((breakdown) => breakdown?.taxability_reason === 'not_collecting') &&
       !shouldIgnoreNotCollecting
     ) {
       throw new BaseException({
         status: 500,
         message: 'Failed to compute tax. One or more tax breakdown is not collecting.',
-        payload: tax?.tax_breakdown,
+        payload: tax.tax_breakdown,
       });
     }
 
-    const totalAmountUnit = tax?.line_items?.data?.reduce(
+    const totalAmountUnit = tax.line_items?.data?.reduce(
       (total, { amount_tax: amountTax }) => total + amountTax,
       0,
     );
-    const totalTaxPercent = tax?.tax_breakdown?.reduce(
+    const totalTaxPercent = tax.tax_breakdown?.reduce(
       (total, { tax_rate_details: details }) => total + (Number(details?.percentage_decimal) || 0),
       0,
     );
 
-    if (
-      !tax.id ||
-      !tax.expires_at ||
-      typeof totalAmountUnit !== 'number' ||
-      typeof totalTaxPercent !== 'number'
-    ) {
+    const isInvalidTaxResultTypes = !_.isNumber(totalAmountUnit) || !_.isNumber(totalTaxPercent);
+
+    if (!tax.id || !tax.expires_at || isInvalidTaxResultTypes) {
       throw new BaseException({
         status: 500,
         message: 'Failed to compute tax. Tax is invalid.',
         payload: {
           taxId: tax.id,
           expireAt: tax.expires_at,
-          amountUnit: totalAmountUnit,
+          totalAmountUnit,
+          totalTaxPercent,
         },
       });
     }

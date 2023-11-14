@@ -1791,6 +1791,9 @@ class Stripe extends Abstract {
 
     const chargeCard = await this.getChargingCard(senderCustomer.userId, cardId);
 
+    /**
+     * Get card related payment method
+     */
     const paymentMethodId = CardRepository.extractPaymentMethodId(chargeCard);
 
     if (!paymentMethodId) {
