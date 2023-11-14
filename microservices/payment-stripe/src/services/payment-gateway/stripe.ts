@@ -83,6 +83,8 @@ interface IRefundParams {
   entityId?: string;
   // Abstract entity type
   type?: string;
+  // Should refund collected application fees and taxes
+  refundApplicationCollectedAmount?: boolean;
 }
 
 interface ICheckoutParams {
@@ -2042,38 +2044,56 @@ class Stripe extends Abstract {
     transactionId,
     amount,
     entityId,
-    refundAmountType = RefundAmountType.REVENUE,
     type,
+    refundAmountType,
+    refundApplicationCollectedAmount = false,
   }: IRefundParams): Promise<Refund> {
-    const debitTransaction = await this.transactionRepository.findOne({
-      transactionId,
-      type: TransactionType.DEBIT,
+    const [creditTransaction, debitTransaction] = await this.transactionRepository.find({
+      where: {
+        transactionId,
+      },
+      order: { type: 'ASC' },
     });
 
-    if (!debitTransaction) {
+    if (!debitTransaction || !creditTransaction) {
       throw new BaseException({
         status: 400,
         message: messages.getNotFoundMessage('Transaction'),
       });
     }
 
-    if (!debitTransaction.params.chargeId) {
+    const {
+      refundedAmount = 0,
+      entityCost = 0,
+      chargeId,
+      taxTransactionId,
+    } = debitTransaction.params;
+
+    if (!chargeId) {
       throw new BaseException({
         status: 400,
-        message: "Transaction don't have related transfer id and can't be refunded.",
+        message: "Transaction don't have related charge id and can't be refunded.",
       });
     }
 
     let amountUnit: number | undefined;
 
     if (amount) {
+      /**
+       * Refund specific amount
+       */
       amountUnit = this.toSmallestCurrencyUnit(amount);
     } else if (refundAmountType === RefundAmountType.REVENUE) {
+      /**
+       * Refund det transaction amount
+       */
       amountUnit = debitTransaction.amount;
     } else {
-      amountUnit =
-        // Paid entity cost - already refunded amount
-        (debitTransaction.params.entityCost || 0) - (debitTransaction.params.refundedAmount || 0);
+      /**
+       * Refund rest ENTITY amount
+       * @description Formula: (Paid entity cost) - (already refunded amount) = rest amount
+       */
+      amountUnit = entityCost - refundedAmount;
     }
 
     if (!amountUnit) {
@@ -2088,9 +2108,9 @@ class Stripe extends Abstract {
      */
     /* eslint-disable camelcase */
     const stripeRefund = await this.sdk.refunds.create({
-      charge: debitTransaction.params.chargeId,
+      charge: chargeId,
       reverse_transfer: true,
-      refund_application_fee: false,
+      refund_application_fee: refundApplicationCollectedAmount,
       amount: amountUnit,
       metadata: {
         ...(entityId ? { entityId } : {}),
@@ -2110,17 +2130,70 @@ class Stripe extends Abstract {
         refundId: stripeRefund.id,
         reason: stripeRefund.reason as string,
         errorReason: stripeRefund.failure_reason,
-        refundAmountType,
+        ...(refundAmountType || amountUnit === debitTransaction.amount ? { refundAmountType } : {}),
         ...(type ? { type } : {}),
       },
     });
 
     await this.refundRepository.save(refund);
 
+    let taxReversalTransaction: StripeSdk.Tax.Transaction | null = null;
+
+    /**
+     * Register tax transaction reversal for Stripe Tax reports
+     * @description Applicable ONLY if transaction was proceeded with Taxes
+     */
+    if (taxTransactionId) {
+      const stripeRefunds = await this.sdk.refunds.list({ charge: chargeId });
+
+      const isSingleRefund =
+        !stripeRefunds.data.length ||
+        (stripeRefunds.data.length === 1 &&
+          stripeRefunds.data.every(({ id }) => id === stripeRefund.id));
+      const isSingleRefundAndFullAmount =
+        creditTransaction.amount === amountUnit && !refundedAmount && isSingleRefund;
+
+      let originalLineItemId: string | undefined;
+
+      if (!isSingleRefundAndFullAmount) {
+        originalLineItemId = (await this.sdk.tax.transactions.listLineItems(taxTransactionId))
+          ?.data?.[0].id;
+      }
+
+      taxReversalTransaction = await this.sdk.tax.transactions.createReversal({
+        mode: isSingleRefundAndFullAmount ? 'full' : 'partial',
+        original_transaction: taxTransactionId,
+        // Refund transaction id
+        reference: `${debitTransaction.transactionId}-${
+          isSingleRefundAndFullAmount ? 'cancel' : 'refund'
+        }`,
+        line_items: [
+          {
+            reference: `${debitTransaction.entityId}-refund`,
+            original_line_item: originalLineItemId as string,
+            // Should be negative
+            amount: -amountUnit,
+            amount_tax: 0,
+          },
+        ],
+        metadata: {
+          stripeRefund: stripeRefund.id,
+          refundId: refund.id,
+          refund_reason: stripeRefund.reason,
+        },
+      });
+    }
+
+    console.log('taxReversalTransaction', JSON.stringify(taxReversalTransaction));
     /**
      * Sync stripe refund with the microservice refund
      */
-    void this.sdk.refunds.update(stripeRefund.id, { metadata: { refundId: refund.id } });
+    void this.sdk.refunds.update(stripeRefund.id, {
+      metadata: {
+        refundId: refund.id,
+        ...(taxReversalTransaction && { taxReversalTransactionId: taxReversalTransaction.id }),
+      },
+    });
 
     /* eslint-enable camelcase */
     return refund;
