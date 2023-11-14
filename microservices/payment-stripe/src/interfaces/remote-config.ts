@@ -4,10 +4,14 @@ import type ITaxes from '@interfaces/taxes';
 
 export type TSetupIntentUsage = 'off_session' | 'on_session';
 
+export type TDuplicatedCarsUsage = 'support' | 'reject';
+
 /**
  * Microservice remote config
  */
 export interface IRemoteConfig {
+  duplicatedCardsUsage: TDuplicatedCarsUsage;
+  setupIntentUsage: TSetupIntentUsage;
   webhookKeys?: {
     [id: string]: string; // id (unique key) - secret (webhook Signing secret)
   };
@@ -17,5 +21,4 @@ export interface IRemoteConfig {
   paymentMethods?: string[];
   apiKey?: string;
   config?: Stripe.StripeConfig;
-  setupIntentUsage?: TSetupIntentUsage;
 }
