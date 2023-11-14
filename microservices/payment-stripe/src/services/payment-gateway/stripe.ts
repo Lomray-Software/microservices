@@ -1782,6 +1782,13 @@ class Stripe extends Abstract {
       params: { accountId: receiverAccountId },
     } = receiverCustomer;
 
+    if (!receiverAccountId) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Receiver connect account id'),
+      });
+    }
+
     const chargeCard = await this.getChargingCard(senderCustomer.userId, cardId);
 
     const paymentMethodId = CardRepository.extractPaymentMethodId(chargeCard);
@@ -1913,7 +1920,7 @@ class Stripe extends Abstract {
       // How much application will collect fee
       application_fee_amount: paymentIntentAmountUnit - receiverUnitRevenue,
       transfer_data: {
-        destination: receiverAccountId!,
+        destination: receiverAccountId,
       },
     });
 
