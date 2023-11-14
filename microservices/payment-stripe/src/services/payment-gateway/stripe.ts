@@ -34,8 +34,10 @@ import TCurrency from '@interfaces/currency';
 import type IPaymentIntentMetadata from '@interfaces/payment-intent-metadata';
 import type ITax from '@interfaces/tax';
 import CardRepository from '@repositories/card';
+import type { ICardDataByFingerprintResult } from '@repositories/card';
 import Calculation from '@services/calculation';
-import Abstract, {
+import Abstract from './abstract';
+import type {
   IBankAccountParams,
   ICardParams,
   ICouponParams,
@@ -1281,6 +1283,8 @@ class Stripe extends Abstract {
    * @description Support cards. Should be called when webhook triggers
    */
   public async handleSetupIntentSucceed(event: StripeSdk.Event): Promise<void> {
+    const { duplicatedCardsUsage } = await remoteConfig();
+
     /* eslint-disable camelcase */
     const { id, payment_method } = event.data.object as StripeSdk.SetupIntent;
 
@@ -1346,82 +1350,99 @@ class Stripe extends Abstract {
       expired: toExpirationDate(expMonth, expYear),
     };
 
-    const cardEntity = {
+    const cardEntity = this.cardRepository.create({
       ...cardParams,
       params: {
         isApproved: true,
         setupIntentId: id,
         issuer,
       },
-    };
-
-    const { isExist, type, entity } = await CardRepository.getCardDataByFingerprint({
-      userId,
-      fingerprint,
-      shouldExpandCard: true,
     });
 
     /**
-     * Cancel set up card if this card already exist as the payment method
+     * If we should reject duplicated cards - check
      */
-    if (isExist && type === 'paymentMethod') {
-      if (!entity) {
-        throw new BaseException({
-          status: 500,
-          message: messages.getNotFoundMessage('Failed to validate duplicated card. Card'),
-        });
+    if (duplicatedCardsUsage === 'reject') {
+      const cardData = await CardRepository.getCardDataByFingerprint({
+        userId,
+        fingerprint,
+        shouldExpandCard: true,
+      });
+
+      /**
+       * Cancel set up card if this card already exist as the payment method
+       */
+      if (cardData.isExist && cardData.type === 'paymentMethod') {
+        await this.detachOrRenewWithDetachDuplicatedCard(paymentMethodId, cardEntity, cardData);
+
+        return;
       }
-
-      /**
-       * Card properties for renewal card that must be identical
-       */
-      const cardProperties = ['lastDigits', 'brand', 'origin', 'fingerprint', 'funding', 'userId'];
-      const existingCardPaymentMethodId = CardRepository.extractPaymentMethodId(entity);
-
-      const { year: existingYear, month: existingMonth } = fromExpirationDate(entity.expired);
-      const { year: updatedYear, month: updatedMonth } = fromExpirationDate(cardEntity.expired);
-
-      /**
-       * Update renewal card details
-       * @description Stripe does not create new fingerprint if card was renewal with new expiration date
-       */
-      if (
-        entity.expired !== cardEntity.expired &&
-        // All other card details MUST be equal
-        _.isEqual(_.pick(entity, cardProperties), _.pick(cardParams, cardProperties)) &&
-        // Check expiration dates
-        updatedYear >= existingYear &&
-        updatedMonth >= existingMonth
-      ) {
-        entity.expired = cardEntity.expired;
-
-        /**
-         * Update card details and next() detach new duplicated card
-         */
-        await this.sdk.paymentMethods.update(existingCardPaymentMethodId as string, {
-          card: {
-            exp_month: updatedMonth,
-            exp_year: updatedYear,
-          },
-        });
-
-        await this.cardRepository.save(entity);
-      }
-
-      /**
-       * If customer trying to add identical, not renewal card
-       * @description Detach duplicated card from Stripe customer
-       */
-      await this.sdk.paymentMethods.detach(paymentMethodId);
-
-      await Microservice.eventPublish(Event.CardNotCreatedDuplicated, cardEntity);
-
-      return;
     }
 
     const savedCard = await this.cardRepository.save(cardEntity);
 
     void Microservice.eventPublish(Event.SetupIntentSucceeded, savedCard);
+  }
+
+  /**
+   * Detach duplicated card
+   * @description Will detach duplicated card from Stripe customer
+   */
+  private async detachOrRenewWithDetachDuplicatedCard(
+    paymentMethodId: string,
+    cardEntity: Card,
+    { entity }: ICardDataByFingerprintResult,
+  ): Promise<void> {
+    if (!entity) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Failed to validate duplicated card. Card'),
+      });
+    }
+
+    /**
+     * Card properties for renewal card that must be identical
+     */
+    const cardProperties = ['lastDigits', 'brand', 'origin', 'fingerprint', 'funding', 'userId'];
+    const existingCardPaymentMethodId = CardRepository.extractPaymentMethodId(entity);
+
+    const { year: existingYear, month: existingMonth } = fromExpirationDate(entity.expired);
+    const { year: updatedYear, month: updatedMonth } = fromExpirationDate(cardEntity.expired);
+
+    /**
+     * Update renewal card details
+     * @description Stripe does not create new fingerprint if card was renewal with new expiration date
+     */
+    if (
+      entity.expired !== cardEntity.expired &&
+      // All other card details MUST be equal
+      _.isEqual(_.pick(entity, cardProperties), _.pick(cardEntity, cardProperties)) &&
+      // Check expiration dates
+      updatedYear >= existingYear &&
+      updatedMonth >= existingMonth
+    ) {
+      entity.expired = cardEntity.expired;
+
+      /**
+       * Update card details and next() detach new duplicated card
+       */
+      await this.sdk.paymentMethods.update(existingCardPaymentMethodId as string, {
+        card: {
+          exp_month: updatedMonth,
+          exp_year: updatedYear,
+        },
+      });
+
+      await this.cardRepository.save(entity);
+    }
+
+    /**
+     * If customer trying to add identical, not renewal card
+     * @description Detach duplicated card from Stripe customer
+     */
+    await this.sdk.paymentMethods.detach(paymentMethodId);
+
+    await Microservice.eventPublish(Event.CardNotCreatedDuplicated, cardEntity);
   }
 
   /**
@@ -1543,6 +1564,7 @@ class Stripe extends Abstract {
        * Only connected custom account can attach few external account for payouts
        */
       if (params.accountType === 'custom') {
+        // User SHOULD NOT be eligible in any way to attach same card as payout method
         const { isExist, type } = await CardRepository.getCardDataByFingerprint({
           userId,
           fingerprint,
