@@ -1913,6 +1913,7 @@ class Stripe extends Abstract {
       confirm: true,
       currency: 'usd',
       capture_method: 'automatic',
+      // Card as the payment method
       payment_method: paymentMethodId,
       customer: senderCustomer.customerId,
       // How much must sender must pay
