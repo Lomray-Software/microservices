@@ -190,4 +190,22 @@ describe('services/methods/renew-auth-token', () => {
 
     expect(await waitResult(result)).to.throw('Authentication token not found');
   });
+
+  it('should correctly update renewal token db expiration at', async () => {
+    TypeormMock.entityManager.findOne.resolves(repository.create({ id: tokenId, userId }));
+
+    const { access, refresh } = jwtService.create(tokenId);
+
+    await service['renewJwtTokens']({
+      access,
+      refresh,
+      params: { maxAge: 20 },
+      jwtPayload: {},
+      returnType: TokenCreateReturnType.directly,
+    });
+
+    const [, token] = TypeormMock.entityManager.save.firstCall.args;
+
+    expect(token.expirationAt).to.equal(jwtService.decode(refresh).exp);
+  });
 });
