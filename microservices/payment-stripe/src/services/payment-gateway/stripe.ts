@@ -2055,7 +2055,11 @@ class Stripe extends Abstract {
       order: { type: 'ASC' },
     });
 
-    if (!debitTransaction || !creditTransaction) {
+    if (
+      !debitTransaction ||
+      !creditTransaction ||
+      creditTransaction.type !== TransactionType.CREDIT
+    ) {
       throw new BaseException({
         status: 400,
         message: messages.getNotFoundMessage('Transaction'),
@@ -2153,29 +2157,28 @@ class Stripe extends Abstract {
       const isSingleRefundAndFullAmount =
         creditTransaction.amount === amountUnit && !refundedAmount && isSingleRefund;
 
-      let originalLineItemId: string | undefined;
-
-      if (!isSingleRefundAndFullAmount) {
-        originalLineItemId = (await this.sdk.tax.transactions.listLineItems(taxTransactionId))
-          ?.data?.[0].id;
-      }
+      const lineItems = await this.sdk.tax.transactions.listLineItems(taxTransactionId);
 
       taxReversalTransaction = await this.sdk.tax.transactions.createReversal({
         mode: isSingleRefundAndFullAmount ? 'full' : 'partial',
         original_transaction: taxTransactionId,
         // Refund transaction id
         reference: `${debitTransaction.transactionId}-${
-          isSingleRefundAndFullAmount ? 'cancel' : 'refund'
+          isSingleRefundAndFullAmount ? 'cancel' : `refund-${Date.now()}`
         }`,
-        line_items: [
-          {
-            reference: `${debitTransaction.entityId}-refund`,
-            original_line_item: originalLineItemId as string,
-            // Should be negative
-            amount: -amountUnit,
-            amount_tax: 0,
-          },
-        ],
+        ...(!isSingleRefundAndFullAmount
+          ? {
+              line_items: [
+                {
+                  reference: `${debitTransaction.entityId}-refund`,
+                  original_line_item: lineItems.data?.[0]?.id as string,
+                  // Should be negative
+                  amount: -amountUnit,
+                  amount_tax: 0,
+                },
+              ],
+            }
+          : {}),
         metadata: {
           stripeRefund: stripeRefund.id,
           refundId: refund.id,
@@ -2184,7 +2187,6 @@ class Stripe extends Abstract {
       });
     }
 
-    console.log('taxReversalTransaction', JSON.stringify(taxReversalTransaction));
     /**
      * Sync stripe refund with the microservice refund
      */

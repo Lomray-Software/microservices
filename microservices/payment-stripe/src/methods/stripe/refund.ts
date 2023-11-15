@@ -1,6 +1,6 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsObject, IsString, Length, Min } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber, IsObject, IsString, Length, Min } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { getManager } from 'typeorm';
 import RefundAmountType from '@constants/refund-amount-type';
@@ -33,6 +33,10 @@ class RefundInput {
   @IsString()
   @IsUndefinable()
   type?: string;
+
+  @IsBoolean()
+  @IsUndefinable()
+  refundApplicationCollectedAmount?: boolean;
 }
 
 class RefundOutput {
@@ -51,11 +55,23 @@ const refund = Endpoint.custom(
     output: RefundOutput,
     description: 'Create transaction refund',
   }),
-  async ({ transactionId, amount, refundAmountType, entityId }) => {
+  async ({
+    transactionId,
+    amount,
+    refundAmountType,
+    entityId,
+    refundApplicationCollectedAmount,
+  }) => {
     const service = await Factory.create(getManager());
 
     return {
-      entity: await service.refund({ transactionId, amount, refundAmountType, entityId }),
+      entity: await service.refund({
+        transactionId,
+        amount,
+        refundAmountType,
+        entityId,
+        refundApplicationCollectedAmount,
+      }),
     };
   },
 );

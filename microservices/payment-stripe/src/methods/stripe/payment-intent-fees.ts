@@ -68,7 +68,7 @@ class PaymentIntentFeesOutput {
 
 /**
  * Returns calculated fees for payment intent
- * NOTE: Call from frontend for buy entity fees calculation
+ * @description Call from frontend for buy entity fees calculation
  */
 const paymentIntentFees = Endpoint.custom(
   () => ({
