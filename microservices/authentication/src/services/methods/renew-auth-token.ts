@@ -117,7 +117,7 @@ class RenewAuthToken extends BaseAuthToken {
     dbToken.refresh = result.refresh;
     dbToken.params = { ...dbToken.params, ...(params ?? {}) };
     dbToken.jwtPayload = { ...dbToken.jwtPayload, ...(jwtPayload ?? {}) };
-    // Set token expiration
+    // Set the expiration of the token pair
     dbToken.expirationAt = exp ?? null;
 
     await this.repository.save(dbToken);
