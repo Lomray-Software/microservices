@@ -43,6 +43,9 @@ class Token {
   @Length(1, 1000)
   refresh: string | null;
 
+  @JSONSchema({
+    description: 'Maximum token expiration time',
+  })
   @Column({ type: 'int', width: 10, default: null })
   @IsNullable()
   @IsUndefinable()

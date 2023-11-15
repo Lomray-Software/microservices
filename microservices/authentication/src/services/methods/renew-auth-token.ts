@@ -106,12 +106,18 @@ class RenewAuthToken extends BaseAuthToken {
       ...(dbToken.jwtPayload ?? {}),
       userId: dbToken.userId,
     });
-    const { exp } = jwtService.decode(result.access);
+
+    /**
+     * Get refresh token expiration
+     * @description DB token should be stored with the refresh expiration
+     */
+    const { exp } = jwtService.decode(result.refresh);
 
     dbToken.access = result.access;
     dbToken.refresh = result.refresh;
     dbToken.params = { ...dbToken.params, ...(params ?? {}) };
     dbToken.jwtPayload = { ...dbToken.jwtPayload, ...(jwtPayload ?? {}) };
+    // Set token expiration
     dbToken.expirationAt = exp ?? null;
 
     await this.repository.save(dbToken);
