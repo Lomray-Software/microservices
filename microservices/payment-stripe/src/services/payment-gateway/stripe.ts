@@ -161,12 +161,6 @@ type TAvailablePaymentMethods =
   | StripeSdk.BankAccount.AvailablePayoutMethod[]
   | null;
 
-interface IPaymentIntentEvent {
-  success: Event;
-  inProcess: Event;
-  error: Event;
-}
-
 interface IPaymentIntentFees {
   paymentProviderUnitFee: number;
   applicationUnitFee: number;
@@ -204,15 +198,6 @@ interface ICreateMultipleProductCheckoutParams {
  * Stripe payment provider
  */
 class Stripe extends Abstract {
-  /**
-   * Payment intent event name
-   */
-  private readonly paymentIntentEventName: IPaymentIntentEvent = {
-    [TransactionStatus.SUCCESS]: Event.PaymentIntentSuccess,
-    [TransactionStatus.IN_PROCESS]: Event.PaymentIntentInProcess,
-    [TransactionStatus.ERROR]: Event.PaymentIntentError,
-  };
-
   /**
    * Add new card
    * @description NOTES:
@@ -989,18 +974,11 @@ class Stripe extends Abstract {
 
     transactions.forEach((transaction) => {
       transaction.status =
-        refundedAmount !== amount ? TransactionStatus.PARTIAL_REFUNDED : TransactionStatus.REFUNDED;
+        refundedAmount < amount ? TransactionStatus.PARTIAL_REFUNDED : TransactionStatus.REFUNDED;
       transaction.params.refundedAmount = refundedAmount;
     });
 
     await this.transactionRepository.save(transactions);
-
-    for (const transaction of transactions) {
-      void Microservice.eventPublish(Event.RefundSuccess, {
-        transactionStatus: transaction.status,
-        transaction,
-      });
-    }
   }
 
   /**
@@ -1135,7 +1113,7 @@ class Stripe extends Abstract {
       });
     }
 
-    const savedTransactions = await Promise.all(
+    await Promise.all(
       transactions.map((transaction) => {
         if (!transaction.params.chargeId && latestCharge) {
           transaction.params.chargeId = this.extractId(latestCharge);
@@ -1155,21 +1133,6 @@ class Stripe extends Abstract {
         return this.transactionRepository.save(transaction);
       }),
     );
-
-    for (const transaction of savedTransactions) {
-      const transactionStatus = this.getStatus(status as unknown as StripeTransactionStatus);
-
-      const eventName = this.paymentIntentEventName?.[transactionStatus];
-
-      if (!eventName) {
-        return;
-      }
-
-      void Microservice.eventPublish(eventName as Event, {
-        transactionStatus,
-        transaction,
-      });
-    }
   }
 
   /**
