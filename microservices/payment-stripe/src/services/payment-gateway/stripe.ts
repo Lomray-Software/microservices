@@ -84,6 +84,7 @@ interface IPaymentIntentMetadata
   senderExtraFee: string;
   senderPersonalFee: string;
   receiverExtraRevenue: string;
+  receiverRevenue: string;
   stripeFee: string;
   // Total collected fee (includes all fees and tax that collected via application fee)
   fee: string;
@@ -1195,14 +1196,13 @@ class Stripe extends Abstract {
         feesPayer,
         cardId,
         entityCost,
-        platformFee,
-        stripeFee,
         senderId,
         receiverId,
         taxId,
         taxExpiresAt,
         taxCreatedAt,
         taxBehaviour,
+        receiverRevenue,
       } = metadata as unknown as IPaymentIntentMetadata;
 
       const card = await this.cardRepository
@@ -1229,8 +1229,6 @@ class Stripe extends Abstract {
         // @TODO: check if payment stripe calculated data (from payment intent fees) is required
         params: {
           feesPayer,
-          platformFee: this.toSmallestCurrencyUnit(platformFee),
-          stripeFee: this.toSmallestCurrencyUnit(stripeFee),
           entityCost: this.toSmallestCurrencyUnit(entityCost),
           taxId,
           taxExpiresAt,
@@ -1254,7 +1252,7 @@ class Stripe extends Abstract {
           ...transactionData,
           userId: receiverId,
           type: TransactionType.DEBIT,
-          amount,
+          amount: this.toSmallestCurrencyUnit(receiverRevenue),
           params: {
             ...transactionData.params,
           },
@@ -2076,6 +2074,7 @@ class Stripe extends Abstract {
         cardId: paymentMethodCardId,
         fee: this.fromSmallestCurrencyUnit(collectedFeeUnit),
         feesPayer,
+        receiverRevenue: this.fromSmallestCurrencyUnit(receiverUnitRevenue),
         baseFee: this.fromSmallestCurrencyUnit(baseFeeUnit),
         senderPersonalFee: this.fromSmallestCurrencyUnit(senderPersonalFeeUnit),
         receiverPersonalFee: this.fromSmallestCurrencyUnit(receiverPersonalFeeUnit),
