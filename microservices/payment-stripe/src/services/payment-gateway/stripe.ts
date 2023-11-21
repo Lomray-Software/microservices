@@ -719,6 +719,18 @@ class Stripe extends Abstract {
         await this.handlePaymentIntent(event);
         break;
 
+      case 'application_fee.created':
+        await this.handleApplicationFeeCreated(event, 'application_fee.created');
+        break;
+
+      case 'application_fee.refund.updated':
+        await this.handleApplicationFeeRefundUpdated(event, 'application_fee.refund.updated');
+        break;
+
+      case 'application_fee.refunded':
+        await this.handleApplicationFeeRefunded(event, 'application_fee.refunded');
+        break;
+
       /**
        * Refund events
        */
@@ -743,8 +755,171 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Handles application fee created
+   */
+  public async handleApplicationFeeCreated(
+    event: StripeSdk.Event,
+    eventName: string,
+  ): Promise<void> {
+    const {
+      id: applicationFeeId,
+      amount,
+      originating_transaction: transactionChargeId,
+    } = event.data.object as StripeSdk.ApplicationFee;
+
+    if (!transactionChargeId) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage(
+          'Failed to attach application fee to transaction. Application fee charge id',
+        ),
+        payload: { eventName },
+      });
+    }
+
+    const chargeId = this.extractId(transactionChargeId);
+
+    const transactions = await this.transactionRepository
+      .createQueryBuilder('t')
+      .where("(t.params ->> 'chargeId') = :chargeId", { chargeId })
+      .getMany();
+
+    if (!transactions.length) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage(
+          'Failed to attach application fee to transaction. Debit or credit transaction',
+        ),
+        payload: { eventName },
+      });
+    }
+
+    transactions.forEach((transaction) => {
+      if (transaction.fee !== amount) {
+        throw new BaseException({
+          status: 500,
+          message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
+          payload: { eventName },
+        });
+      }
+
+      transaction.applicationFeeId = applicationFeeId;
+    });
+
+    await this.transactionRepository.save(transactions);
+  }
+
+  /**
+   * Handles application fee refund updated
+   */
+  public async handleApplicationFeeRefundUpdated(
+    event: StripeSdk.Event,
+    eventName: string,
+  ): Promise<void> {
+    const { fee } = event.data.object as StripeSdk.FeeRefund;
+
+    const applicationFeeId = this.extractId(fee);
+    const transactions = await this.transactionRepository.find({
+      applicationFeeId,
+    });
+
+    if (!transactions.length) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage(
+          'Failed to update refunded application fees. Debit or credit transaction',
+        ),
+        payload: { eventName },
+      });
+    }
+
+    const { amount, amount_refunded: refundedApplicationFeeAmount } =
+      await this.sdk.applicationFees.retrieve(applicationFeeId);
+
+    /**
+     * @TODO: create helper for updates check
+     */
+    let isUpdated = false;
+
+    transactions.forEach((transaction) => {
+      if (transaction.fee !== amount) {
+        throw new BaseException({
+          status: 500,
+          message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
+          payload: { eventName },
+        });
+      }
+
+      if (transaction.params.refundedApplicationFeeAmount !== refundedApplicationFeeAmount) {
+        transaction.params.refundedApplicationFeeAmount = refundedApplicationFeeAmount;
+        isUpdated = true;
+      }
+    });
+
+    if (!isUpdated) {
+      return;
+    }
+
+    await this.transactionRepository.save(transactions);
+  }
+
+  /**
+   * Handles application fee refunded
+   */
+  public async handleApplicationFeeRefunded(
+    event: StripeSdk.Event,
+    eventName: string,
+  ): Promise<void> {
+    const {
+      id: applicationFeeId,
+      amount,
+      amount_refunded: refundedApplicationFeeAmount,
+    } = event.data.object as StripeSdk.ApplicationFee;
+
+    const transactions = await this.transactionRepository.find({
+      applicationFeeId,
+    });
+
+    if (!transactions.length) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage(
+          'Failed to update refunded application fees. Debit or credit transaction',
+        ),
+        payload: { eventName },
+      });
+    }
+
+    let isUpdated = false;
+
+    /**
+     * @TODO: move out to separate helper (e.g. class calculation)
+     */
+    transactions.forEach((transaction) => {
+      if (transaction.fee !== amount) {
+        throw new BaseException({
+          status: 500,
+          message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
+          payload: { eventName },
+        });
+      }
+
+      if (transaction.params.refundedApplicationFeeAmount !== refundedApplicationFeeAmount) {
+        transaction.params.refundedApplicationFeeAmount = refundedApplicationFeeAmount;
+        isUpdated = true;
+      }
+    });
+
+    if (!isUpdated) {
+      return;
+    }
+
+    await this.transactionRepository.save(transactions);
+  }
+
+  /**
    * Handles payment method detach
-   * @description NOTE: Card and other payment methods should be removed in according subscribers
+   * @description Card and other payment methods should be removed in according subscribers
    * @TODO: Handle other payment methods if needed
    */
   public async handlePaymentMethodDetached(event: StripeSdk.Event): Promise<void> {
