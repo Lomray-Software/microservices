@@ -158,8 +158,8 @@ class Transaction {
   entityId: string;
 
   @JSONSchema({
-    description: `Processing amount, includes all fees, taxes. Presented in units,
-      for instance: $100 = 10000 unit`,
+    description:
+      'Processing amount, includes all fees, taxes. Presented in units, for instance: $100 = 10000 unit',
   })
   @Column({ type: 'int' })
   @IsNumber()
