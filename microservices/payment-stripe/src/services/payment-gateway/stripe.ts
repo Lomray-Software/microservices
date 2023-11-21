@@ -23,7 +23,7 @@ import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
 import Refund from '@entities/refund';
-import type { IComputedTax } from '@entities/transaction';
+import type { IComputedTax, IParams as ITransactionParams } from '@entities/transaction';
 import Transaction from '@entities/transaction';
 import composeBalance from '@helpers/compose-balance';
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
@@ -71,7 +71,8 @@ interface IPaymentIntentParams {
 }
 
 interface IPaymentIntentMetadata
-  extends Omit<IComputedTax, 'taxTransactionAmountWithTaxUnit' | 'taxTotalAmountUnit'> {
+  extends Omit<IComputedTax, 'taxTransactionAmountWithTaxUnit' | 'taxTotalAmountUnit'>,
+    Pick<ITransactionParams, 'baseFee'> {
   senderId: string;
   receiverId: string;
   entityCost: string;
@@ -79,9 +80,13 @@ interface IPaymentIntentMetadata
   feesPayer: TransactionRole;
   platformFee: string;
   receiverExtraFee: string;
+  receiverPersonalFee: string;
   senderExtraFee: string;
+  senderPersonalFee: string;
   receiverExtraRevenue: string;
   stripeFee: string;
+  // Total collected fee (includes all fees and tax that collected via application fee)
+  fee: string;
   entityId?: string;
   title?: string;
   taxTransactionAmountWithTax?: number;
@@ -2055,6 +2060,10 @@ class Stripe extends Abstract {
       taxBehaviour: tax?.behaviour,
       totalTaxPercent: tax?.totalTaxPercent,
     };
+    const baseFeeUnit = platformUnitFee + stripeFeeUnit + taxFeeUnit;
+    const senderPersonalFeeUnit = baseFeeUnit + senderAdditionalFee;
+    const receiverPersonalFeeUnit = baseFeeUnit + receiverAdditionalFee;
+    const collectedFeeUnit = baseFeeUnit + senderAdditionalFee + receiverAdditionalFee;
 
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
@@ -2068,7 +2077,11 @@ class Stripe extends Abstract {
         senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
         receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue),
         cardId: paymentMethodCardId,
+        fee: this.fromSmallestCurrencyUnit(collectedFeeUnit),
         feesPayer,
+        baseFee: this.fromSmallestCurrencyUnit(baseFeeUnit),
+        senderPersonalFee: this.fromSmallestCurrencyUnit(senderPersonalFeeUnit),
+        receiverPersonalFee: this.fromSmallestCurrencyUnit(receiverPersonalFeeUnit),
         senderId: senderCustomer.userId,
         receiverId: receiverUserId,
         ...(entityId ? { entityId } : {}),
@@ -2099,8 +2112,6 @@ class Stripe extends Abstract {
       },
     });
 
-    const baseFee = platformUnitFee + stripeFeeUnit + taxFeeUnit;
-
     /* eslint-enable camelcase */
     const transactionData = {
       entityId,
@@ -2108,14 +2119,14 @@ class Stripe extends Abstract {
       paymentMethodId,
       cardId: paymentMethodCardId,
       transactionId: stripePaymentIntent.id,
-      fee: baseFee + senderAdditionalFee + receiverAdditionalFee,
+      fee: collectedFeeUnit,
       ...(tax ? { tax: tax.totalAmountUnit } : {}),
       params: {
         feesPayer,
         platformFee: platformUnitFee,
         stripeFee: stripeFeeUnit,
         entityCost: entityUnitCost,
-        baseFee,
+        baseFee: baseFeeUnit,
         ...(tax
           ? {
               ...sharedTaxData,
@@ -2136,7 +2147,7 @@ class Stripe extends Abstract {
         params: {
           ...transactionData.params,
           extraFee: senderAdditionalFee,
-          personalFee: baseFee + senderAdditionalFee,
+          personalFee: senderPersonalFeeUnit,
         },
       }),
       this.transactionRepository.save({
@@ -2148,7 +2159,7 @@ class Stripe extends Abstract {
         params: {
           ...transactionData.params,
           extraFee: receiverAdditionalFee,
-          personalFee: baseFee + receiverAdditionalFee,
+          personalFee: receiverPersonalFeeUnit,
           extraRevenue: extraReceiverUnitRevenue,
           estimatedInstantPayoutFee: Math.round(receiverUnitRevenue * (instantPayoutPercent / 100)),
         },
