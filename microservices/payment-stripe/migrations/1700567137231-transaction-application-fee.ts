@@ -5,7 +5,7 @@ export default class transactionApplicationFee1700567137231 implements Migration
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE "transaction" ADD "applicationFeeId" character varying(66) NOT NULL`,
+      `ALTER TABLE "transaction" ADD "applicationFeeId" character varying(66)`,
     );
     await queryRunner.query(
       `ALTER TABLE "transaction" ALTER COLUMN "params" SET DEFAULT '{"refundedTransactionAmount":0,"refundedApplicationFeeAmount":0,"platformFee":0,"stripeFee":0}'`,

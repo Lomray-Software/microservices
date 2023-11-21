@@ -101,9 +101,9 @@ class Transaction {
      NET transaction amount check application fee status (refunded or not) and amount`,
     example: 'fee_1OEqCzPBMR5FbqzbywqfYDwA',
   })
-  @Column({ type: 'varchar', length: 66 })
+  @Column({ type: 'varchar', length: 66, default: null })
   @Length(1, 66)
-  applicationFeeId: string;
+  applicationFeeId: string | null;
 
   @Column({ type: 'varchar', length: 100, default: '' })
   @IsUndefinable()
