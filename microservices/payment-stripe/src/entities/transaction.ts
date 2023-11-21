@@ -76,6 +76,8 @@ const defaultParams: Pick<
     Platform fee - fee that grab Platform as revenue from transaction.
     Stripe fee - fee that Stripe takes from processing transaction.
     Extra fee - apply to sender or/and receiver and included in transaction application fees, and in payment intent collected fees
+    Base fee - platform + stripe + create tax transaction fee
+    Personal fee - base fee + personal (debit or credit extra fee)
   `,
   properties: {
     customer: { $ref: '#/definitions/Customer' },
@@ -176,13 +178,22 @@ class Transaction {
   tax: number;
 
   @JSONSchema({
-    description: `Fees: application, stripe, amount that application collect as tax. Contain all amounts that
-    Platform is required or interested to grab from transaction`,
+    description: `Total fees: application, stripe, amount that application collect, tax, debit and credit extra fees. Contain all amounts that
+    Platform is required or interested to grab from transaction. Should be the same as in Stripe`,
   })
   @Column({ type: 'int', default: 0 })
   @IsUndefinable()
   @IsNumber()
   fee: number;
+
+  @JSONSchema({
+    description:
+      "Personal user fee. Receiver it's application fees with only debit extra fees. Sender it's application fees with only credit extra fees.",
+  })
+  @Column({ type: 'int', default: 0 })
+  @IsUndefinable()
+  @IsNumber()
+  personalFee: number;
 
   @JSONSchema({
     description: 'Field for storing status of payment by the card or any other source',

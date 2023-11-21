@@ -2099,6 +2099,8 @@ class Stripe extends Abstract {
       },
     });
 
+    const baseFee = platformUnitFee + stripeFeeUnit + taxFeeUnit;
+
     /* eslint-enable camelcase */
     const transactionData = {
       entityId,
@@ -2106,7 +2108,7 @@ class Stripe extends Abstract {
       paymentMethodId,
       cardId: paymentMethodCardId,
       transactionId: stripePaymentIntent.id,
-      fee: platformUnitFee + stripeFeeUnit + taxFeeUnit,
+      fee: baseFee + senderAdditionalFee + receiverAdditionalFee,
       ...(tax ? { tax: tax.totalAmountUnit } : {}),
       params: {
         feesPayer,
@@ -2130,8 +2132,7 @@ class Stripe extends Abstract {
         userId: senderCustomer.userId,
         type: TransactionType.CREDIT,
         amount: paymentIntentAmountUnit,
-        // Sender fee SHOULD include extra fee, cause collected by collected fee
-        fee: transactionData.fee + senderAdditionalFee,
+        personalFee: baseFee + senderAdditionalFee,
         params: {
           ...transactionData.params,
           extraFee: senderAdditionalFee,
@@ -2142,8 +2143,7 @@ class Stripe extends Abstract {
         userId: receiverUserId,
         type: TransactionType.DEBIT,
         amount: receiverUnitRevenue,
-        // Receiver fee SHOULD include extra fee, cause collected by collected fee
-        fee: transactionData.fee + receiverAdditionalFee,
+        personalFee: baseFee + receiverAdditionalFee,
         // Amount that will be charge for instant payout
         params: {
           ...transactionData.params,
@@ -2169,7 +2169,7 @@ class Stripe extends Abstract {
 
   /**
    * Refund transaction (payment intent)
-   * @description NOTES:
+   * @description Workflow:
    * Sender payed 106.39$: 100$ - entity cost, 3.39$ - stripe fees, 3$ - platform application fee.
    * In the end of refund sender will receive 100$ and platform revenue will be 3$.
    */
@@ -2286,7 +2286,7 @@ class Stripe extends Abstract {
 
   /**
    * Returns positive int amount
-   * @description NOTE: Should return the positive integer representing how much
+   * @description Should return the positive integer representing how much
    * to charge in the smallest currency unit
    */
   public toSmallestCurrencyUnit(amount: number | string): number {
