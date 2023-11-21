@@ -712,30 +712,32 @@ class Stripe extends Abstract {
         await this.handlePaymentMethodDetached(event);
         break;
 
-      case 'payment_intent.created':
-        await this.handlePaymentIntentFailureCreate(event);
-        break;
-
       /**
        * Payment events
        */
       case 'payment_intent.processing':
-      case 'payment_intent.payment_failed':
       case 'payment_intent.succeeded':
       case 'payment_intent.canceled':
-        await this.handlePaymentIntent(event);
+        await this.handlePaymentIntent(event, event.type);
         break;
 
+      case 'payment_intent.payment_failed':
+        await this.handlePaymentIntentPaymentFailed(event);
+        break;
+
+      /**
+       * Application fee events
+       */
       case 'application_fee.created':
-        await this.handleApplicationFeeCreated(event, 'application_fee.created');
+        await this.handleApplicationFeeCreated(event, event.type);
         break;
 
       case 'application_fee.refund.updated':
-        await this.handleApplicationFeeRefundUpdated(event, 'application_fee.refund.updated');
+        await this.handleApplicationFeeRefundUpdated(event, event.type);
         break;
 
       case 'application_fee.refunded':
-        await this.handleApplicationFeeRefunded(event, 'application_fee.refunded');
+        await this.handleApplicationFeeRefunded(event, event.type);
         break;
 
       /**
@@ -1170,16 +1172,18 @@ class Stripe extends Abstract {
    * @description Payment intent will be created with the failed status: card was declined -
    * high fraud risk but stripe will throw error on creation and send webhook event with the creation
    */
-  public async handlePaymentIntentFailureCreate(event: StripeSdk.Event): Promise<void> {
+  public async handlePaymentIntentPaymentFailed(event: StripeSdk.Event): Promise<void> {
+    const {
+      id,
+      status,
+      metadata,
+      amount,
+      latest_charge: latestCharge,
+      last_payment_error: lastPaymentError,
+    } = event.data.object as StripeSdk.PaymentIntent;
+
     await this.manager.transaction(async (entityManager) => {
       const transactionRepository = entityManager.getRepository(Transaction);
-      const {
-        id,
-        status,
-        metadata,
-        amount,
-        latest_charge: latestCharge,
-      } = event.data.object as StripeSdk.PaymentIntent;
 
       const transactions = await transactionRepository.find({ transactionId: id });
 
@@ -1205,7 +1209,8 @@ class Stripe extends Abstract {
         receiverRevenue,
       } = metadata as unknown as IPaymentIntentMetadata;
 
-      const card = await this.cardRepository
+      const card = await entityManager
+        .getRepository(Card)
         .createQueryBuilder('card')
         .where('card.userId = :userId AND card.id = :cardId', { userId: senderId, cardId })
         .getOne();
@@ -1226,7 +1231,6 @@ class Stripe extends Abstract {
         transactionId: id,
         status: this.getStatus(status as StripeTransactionStatus),
         // eslint-disable-next-line camelcase
-        // @TODO: check if payment stripe calculated data (from payment intent fees) is required
         params: {
           feesPayer,
           entityCost: this.toSmallestCurrencyUnit(entityCost),
@@ -1235,28 +1239,35 @@ class Stripe extends Abstract {
           taxCreatedAt,
           taxBehaviour,
           ...(latestCharge ? { chargeId: this.extractId(latestCharge) } : {}),
+          errorCode: lastPaymentError?.code,
+          errorMessage: lastPaymentError?.message,
+          declineCode: lastPaymentError?.decline_code,
         },
       };
 
       await Promise.all([
-        transactionRepository.save({
-          ...transactionData,
-          userId: senderId,
-          type: TransactionType.CREDIT,
-          amount,
-          params: {
-            ...transactionData.params,
-          },
-        }),
-        transactionRepository.save({
-          ...transactionData,
-          userId: receiverId,
-          type: TransactionType.DEBIT,
-          amount: this.toSmallestCurrencyUnit(receiverRevenue),
-          params: {
-            ...transactionData.params,
-          },
-        }),
+        transactionRepository.save(
+          transactionRepository.create({
+            ...transactionData,
+            userId: senderId,
+            type: TransactionType.CREDIT,
+            amount,
+            params: {
+              ...transactionData.params,
+            },
+          }),
+        ),
+        transactionRepository.save(
+          transactionRepository.create({
+            ...transactionData,
+            userId: receiverId,
+            type: TransactionType.DEBIT,
+            amount: this.toSmallestCurrencyUnit(receiverRevenue),
+            params: {
+              ...transactionData.params,
+            },
+          }),
+        ),
       ]);
 
       // Do not support update payment intent, only recharge via creating new payment
@@ -1271,7 +1282,7 @@ class Stripe extends Abstract {
   /**
    * Handles payment intent statuses
    */
-  public async handlePaymentIntent(event: StripeSdk.Event): Promise<void> {
+  public async handlePaymentIntent(event: StripeSdk.Event, eventName: string): Promise<void> {
     const {
       id,
       status,
@@ -1279,37 +1290,46 @@ class Stripe extends Abstract {
       last_payment_error: lastPaymentError,
     } = event.data.object as StripeSdk.PaymentIntent;
 
-    const transactions = await this.transactionRepository.find({ transactionId: id });
+    await this.manager.transaction(async (entityManager) => {
+      const transactionRepository = entityManager.getRepository(Transaction);
 
-    if (!transactions.length) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage(
-          'Failed to handle payment intent. Debit or credit transaction',
-        ),
-      });
-    }
+      const transactions = await transactionRepository.find({ transactionId: id });
 
-    await Promise.all(
-      transactions.map((transaction) => {
-        if (!transaction.params.chargeId && latestCharge) {
-          transaction.params.chargeId = this.extractId(latestCharge);
-        }
+      if (!transactions.length) {
+        const errorMessage = messages.getNotFoundMessage(
+          `Failed to handle payment intent "${eventName}". Debit or credit transaction`,
+        );
 
-        transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
+        Log.error(errorMessage);
 
-        /**
-         * If payment intent failed
-         */
-        if (lastPaymentError) {
-          transaction.params.errorMessage = lastPaymentError.message;
-          transaction.params.errorCode = lastPaymentError.code;
-          transaction.params.declineCode = lastPaymentError.decline_code;
-        }
+        throw new BaseException({
+          status: 500,
+          message: errorMessage,
+          payload: { eventName },
+        });
+      }
 
-        return this.transactionRepository.save(transaction);
-      }),
-    );
+      await Promise.all(
+        transactions.map((transaction) => {
+          if (!transaction.params.chargeId && latestCharge) {
+            transaction.params.chargeId = this.extractId(latestCharge);
+          }
+
+          transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
+
+          /**
+           * If payment intent failed
+           */
+          if (lastPaymentError) {
+            transaction.params.errorMessage = lastPaymentError.message;
+            transaction.params.errorCode = lastPaymentError.code;
+            transaction.params.declineCode = lastPaymentError.decline_code;
+          }
+
+          return transactionRepository.save(transaction);
+        }),
+      );
+    });
   }
 
   /**
