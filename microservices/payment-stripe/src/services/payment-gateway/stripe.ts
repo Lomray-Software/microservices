@@ -81,7 +81,7 @@ interface IPaymentIntentMetadata
   receiverExtraFee: string;
   senderExtraFee: string;
   receiverExtraRevenue: string;
-  paymentProviderFee: string;
+  stripeFee: string;
   entityId?: string;
   title?: string;
   taxTransactionAmountWithTax?: number;
@@ -162,7 +162,7 @@ type TAvailablePaymentMethods =
   | null;
 
 interface IPaymentIntentFees {
-  paymentProviderUnitFee: number;
+  stripeUnitFee: number;
   applicationUnitFee: number;
   userUnitAmount: number;
   receiverUnitRevenue: number;
@@ -948,7 +948,7 @@ class Stripe extends Abstract {
     const {
       status,
       payment_intent: paymentIntent,
-      amount_refunded: refundedAmount,
+      amount_refunded: refundedTransactionAmount,
       amount,
     } = event.data.object as StripeSdk.Charge;
 
@@ -974,8 +974,10 @@ class Stripe extends Abstract {
 
     transactions.forEach((transaction) => {
       transaction.status =
-        refundedAmount < amount ? TransactionStatus.PARTIAL_REFUNDED : TransactionStatus.REFUNDED;
-      transaction.params.refundedAmount = refundedAmount;
+        refundedTransactionAmount < amount
+          ? TransactionStatus.PARTIAL_REFUNDED
+          : TransactionStatus.REFUNDED;
+      transaction.params.refundedTransactionAmount = refundedTransactionAmount;
     });
 
     await this.transactionRepository.save(transactions);
@@ -1011,7 +1013,7 @@ class Stripe extends Abstract {
       cardId,
       entityCost,
       applicationFee,
-      paymentProviderFee,
+      stripeFee,
       senderExtraFee,
       receiverExtraFee,
       receiverExtraRevenue,
@@ -1051,7 +1053,7 @@ class Stripe extends Abstract {
       params: {
         feesPayer,
         applicationFee: this.toSmallestCurrencyUnit(Number(applicationFee)),
-        paymentProviderFee: this.toSmallestCurrencyUnit(paymentProviderFee),
+        stripeFee: this.toSmallestCurrencyUnit(stripeFee),
         entityCost: this.toSmallestCurrencyUnit(Number(entityCost)),
         taxId,
         taxTransactionAmountWithTaxUnit: this.toSmallestCurrencyUnit(
@@ -1137,7 +1139,7 @@ class Stripe extends Abstract {
 
   /**
    * Create instant payout
-   * NOTE: Should be called from the API
+   * @description Should be called from the API
    */
   public async instantPayout({
     userId,
@@ -1812,7 +1814,7 @@ class Stripe extends Abstract {
       userUnitAmount,
       receiverUnitRevenue,
       applicationUnitFee,
-      paymentProviderUnitFee,
+      stripeUnitFee: paymentIntentStripeFeeUnit,
       receiverAdditionalFee,
       extraReceiverUnitRevenue,
       senderAdditionalFee,
@@ -1864,7 +1866,7 @@ class Stripe extends Abstract {
       stripeFeeUnit = transactionFeeUnit;
       paymentIntentAmountUnit = processingAmountUnit;
     } else {
-      stripeFeeUnit = paymentProviderUnitFee;
+      stripeFeeUnit = paymentIntentStripeFeeUnit;
       paymentIntentAmountUnit = userUnitAmount;
     }
 
@@ -1885,7 +1887,7 @@ class Stripe extends Abstract {
       metadata: {
         // Original float entity cost
         entityCost,
-        paymentProviderFee: this.fromSmallestCurrencyUnit(stripeFeeUnit),
+        stripeFee: this.fromSmallestCurrencyUnit(stripeFeeUnit),
         applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee),
         receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
         senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
@@ -1934,7 +1936,7 @@ class Stripe extends Abstract {
       params: {
         feesPayer,
         applicationFee: applicationUnitFee,
-        paymentProviderFee: stripeFeeUnit,
+        stripeFee: stripeFeeUnit,
         entityCost: entityUnitCost,
         ...(tax
           ? {
@@ -2027,7 +2029,8 @@ class Stripe extends Abstract {
     } else {
       amountUnit =
         // Paid entity cost - already refunded amount
-        (debitTransaction.params.entityCost || 0) - (debitTransaction.params.refundedAmount || 0);
+        (debitTransaction.params.entityCost || 0) -
+        (debitTransaction.params.refundedTransactionAmount || 0);
     }
 
     if (!amountUnit) {
@@ -2043,7 +2046,9 @@ class Stripe extends Abstract {
     /* eslint-disable camelcase */
     const stripeRefund = await this.sdk.refunds.create({
       charge: debitTransaction.params.chargeId,
+      // From receiver connected account funds will be transferred to Platform, then refund
       reverse_transfer: true,
+      // Refund collected application fee, if - not: rest refund amount will be charged from receiver connected account
       refund_application_fee: false,
       amount: amountUnit,
       metadata: {
@@ -2231,17 +2236,17 @@ class Stripe extends Abstract {
         ...(shouldEstimateTax ? { estimatedTaxUnit, taxFeeUnit: taxes?.stableUnit } : {}),
         applicationUnitFee,
         userUnitAmount,
-        paymentProviderUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
+        stripeUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
         receiverUnitRevenue: Math.round(
           entityUnitCost - receiverAdditionalFee + extraReceiverUnitRevenue,
         ),
       };
     }
 
-    let paymentProviderUnitFee = 0;
+    let stripeUnitFee = 0;
 
     if (withStripeFee) {
-      paymentProviderUnitFee = (
+      stripeUnitFee = (
         await Calculation.getStripeFeeAndProcessingAmount({
           amountUnit: entityUnitCost,
           feesPayer: TransactionRole.RECEIVER,
@@ -2261,7 +2266,7 @@ class Stripe extends Abstract {
 
     const receiverUnitRevenue = Math.round(
       entityUnitCost -
-        paymentProviderUnitFee -
+        stripeUnitFee -
         applicationUnitFee -
         receiverAdditionalFee +
         extraReceiverUnitRevenue,
@@ -2271,7 +2276,7 @@ class Stripe extends Abstract {
       ...sharedFees,
       ...(shouldEstimateTax ? { estimatedTaxUnit, taxFeeUnit: taxes?.stableUnit } : {}),
       applicationUnitFee,
-      paymentProviderUnitFee,
+      stripeUnitFee,
       userUnitAmount,
       receiverUnitRevenue,
     };

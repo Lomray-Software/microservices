@@ -32,6 +32,11 @@ export interface IComputedTax {
 }
 
 export interface IParams extends IComputedTax {
+  refundedTransactionAmount: number;
+  refundedApplicationFeeAmount: number;
+  // Decomposed fees
+  applicationFee: number;
+  stripeFee: number;
   paymentStatus?: StripeTransactionStatus;
   checkoutStatus?: StripeCheckoutStatus;
   errorMessage?: string;
@@ -43,18 +48,26 @@ export interface IParams extends IComputedTax {
   feesPayer?: TransactionRole;
   // PaymentIntent charge id, must exist for refund
   chargeId?: string;
-  // Decomposed fees
-  applicationFee?: number;
-  paymentProviderFee?: number;
   extraFee?: number;
   extraRevenue?: number;
   // Amount that will charge for instant payout
   estimatedInstantPayoutFee?: number;
   // Original entity cost
   entityCost?: number;
-  // Refunded amount
-  refundedAmount?: number;
 }
+
+/**
+ * In whole cases this data is required and usable
+ */
+const defaultParams: Pick<
+  IParams,
+  'refundedTransactionAmount' | 'refundedApplicationFeeAmount' | 'applicationFee' | 'stripeFee'
+> = {
+  refundedTransactionAmount: 0,
+  refundedApplicationFeeAmount: 0,
+  applicationFee: 0,
+  stripeFee: 0,
+};
 
 @JSONSchema({
   properties: {
@@ -75,6 +88,16 @@ class Transaction {
   @Column({ type: 'varchar', length: 66 })
   @Length(1, 66)
   transactionId: string;
+
+  @JSONSchema({
+    description: `Stripe payment intent application fee id. Contain Stripe fee, collected by application (platform) fee,
+     tax. Transaction can be refunded with or without application fee: in this case for understanding
+     NET transaction amount check application fee status (refunded or not) and amount`,
+    example: 'fee_1OEqCzPBMR5FbqzbywqfYDwA',
+  })
+  @Column({ type: 'varchar', length: 66 })
+  @Length(1, 66)
+  applicationFeeId: string;
 
   @Column({ type: 'varchar', length: 100, default: '' })
   @IsUndefinable()
@@ -109,7 +132,8 @@ class Transaction {
    * Setup intent don't have card or bank account id
    */
   @JSONSchema({
-    description: 'Payment method that was used to charge',
+    description: `Payment method that was used to charge, for instance: card, bank account, etc.. Payment method is
+     stripe entity that attached to customer`,
     example: 'pm_1N0vl32eZvKYlo2CiORpHAvo',
   })
   @Column({ type: 'varchar', length: 27, default: null })
@@ -119,20 +143,25 @@ class Transaction {
   paymentMethodId: string | null;
 
   @JSONSchema({
-    description: 'Microservice entity',
+    description: `Microservice entity. Single line item (ticket, product) or for custom low-level workflow
+    (payment intent) - payment group`,
   })
   @Column({ type: 'varchar', length: 36 })
   @IsUndefinable()
   @Length(1, 36)
   entityId: string;
 
-  @JSONSchema({ description: 'Unit amount (e.g. 100$ = 10000 in unit' })
+  @JSONSchema({
+    description: `Processing amount, includes all fees, taxes. Presented in units,
+      for instance: $100 = 10000 unit`,
+  })
   @Column({ type: 'int' })
   @IsNumber()
   amount: number;
 
   @JSONSchema({
-    description: 'Sales tax or other, that should be paid to the government by tax collector',
+    description: `Sales tax or other, that should be paid to the government by tax collector. Tax included in the
+      payment intent amount and storing as collected fees amount.`,
   })
   @Column({ type: 'int', default: 0 })
   @IsUndefinable()
@@ -140,7 +169,8 @@ class Transaction {
   tax: number;
 
   @JSONSchema({
-    description: 'Fees: application, payment provider, etc..',
+    description: `Fees: application, stripe, amount that application collect as tax. Contain all amounts that
+    Platform is required or interested to grab from transaction`,
   })
   @Column({ type: 'int', default: 0 })
   @IsUndefinable()
@@ -158,7 +188,7 @@ class Transaction {
   @JSONSchema({
     description: 'Store data about payment connected account and etc.',
   })
-  @Column({ type: 'json', default: {} })
+  @Column({ type: 'json', default: defaultParams })
   @IsObject()
   @IsUndefinable()
   params: IParams;
