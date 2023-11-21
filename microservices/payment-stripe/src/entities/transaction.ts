@@ -37,6 +37,10 @@ export interface IParams extends IComputedTax {
   // Decomposed fees
   platformFee: number;
   stripeFee: number;
+  baseFee: number;
+  extraFee: number;
+  // Personal user fee. Receiver it's application fees with only debit extra fees. Sender it's application fees with only credit extra fees.
+  personalFee: number;
   paymentStatus?: StripeTransactionStatus;
   checkoutStatus?: StripeCheckoutStatus;
   errorMessage?: string;
@@ -48,7 +52,6 @@ export interface IParams extends IComputedTax {
   feesPayer?: TransactionRole;
   // PaymentIntent charge id, must exist for refund
   chargeId?: string;
-  extraFee?: number;
   extraRevenue?: number;
   // Amount that will charge for instant payout
   estimatedInstantPayoutFee?: number;
@@ -61,12 +64,21 @@ export interface IParams extends IComputedTax {
  */
 const defaultParams: Pick<
   IParams,
-  'refundedTransactionAmount' | 'refundedApplicationFeeAmount' | 'platformFee' | 'stripeFee'
+  | 'refundedTransactionAmount'
+  | 'refundedApplicationFeeAmount'
+  | 'platformFee'
+  | 'stripeFee'
+  | 'extraFee'
+  | 'baseFee'
+  | 'personalFee'
 > = {
   refundedTransactionAmount: 0,
   refundedApplicationFeeAmount: 0,
   platformFee: 0,
   stripeFee: 0,
+  extraFee: 0,
+  baseFee: 0,
+  personalFee: 0,
 };
 
 @JSONSchema({
@@ -185,15 +197,6 @@ class Transaction {
   @IsUndefinable()
   @IsNumber()
   fee: number;
-
-  @JSONSchema({
-    description:
-      "Personal user fee. Receiver it's application fees with only debit extra fees. Sender it's application fees with only credit extra fees.",
-  })
-  @Column({ type: 'int', default: 0 })
-  @IsUndefinable()
-  @IsNumber()
-  personalFee: number;
 
   @JSONSchema({
     description: 'Field for storing status of payment by the card or any other source',

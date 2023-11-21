@@ -2115,6 +2115,7 @@ class Stripe extends Abstract {
         platformFee: platformUnitFee,
         stripeFee: stripeFeeUnit,
         entityCost: entityUnitCost,
+        baseFee,
         ...(tax
           ? {
               ...sharedTaxData,
@@ -2132,10 +2133,10 @@ class Stripe extends Abstract {
         userId: senderCustomer.userId,
         type: TransactionType.CREDIT,
         amount: paymentIntentAmountUnit,
-        personalFee: baseFee + senderAdditionalFee,
         params: {
           ...transactionData.params,
           extraFee: senderAdditionalFee,
+          personalFee: baseFee + senderAdditionalFee,
         },
       }),
       this.transactionRepository.save({
@@ -2143,11 +2144,11 @@ class Stripe extends Abstract {
         userId: receiverUserId,
         type: TransactionType.DEBIT,
         amount: receiverUnitRevenue,
-        personalFee: baseFee + receiverAdditionalFee,
         // Amount that will be charge for instant payout
         params: {
           ...transactionData.params,
           extraFee: receiverAdditionalFee,
+          personalFee: baseFee + receiverAdditionalFee,
           extraRevenue: extraReceiverUnitRevenue,
           estimatedInstantPayoutFee: Math.round(receiverUnitRevenue * (instantPayoutPercent / 100)),
         },
