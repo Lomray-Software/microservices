@@ -2130,7 +2130,7 @@ class Stripe extends Abstract {
         userId: senderCustomer.userId,
         type: TransactionType.CREDIT,
         amount: paymentIntentAmountUnit,
-        // Fee should include extra fee, cause collected by collected fee
+        // Sender fee SHOULD include extra fee, cause collected by collected fee
         fee: transactionData.fee + senderAdditionalFee,
         params: {
           ...transactionData.params,
@@ -2142,7 +2142,7 @@ class Stripe extends Abstract {
         userId: receiverUserId,
         type: TransactionType.DEBIT,
         amount: receiverUnitRevenue,
-        // Fee should include extra fee, cause collected by collected fee
+        // Receiver fee SHOULD include extra fee, cause collected by collected fee
         fee: transactionData.fee + receiverAdditionalFee,
         // Amount that will be charge for instant payout
         params: {
