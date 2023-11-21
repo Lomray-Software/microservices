@@ -75,6 +75,7 @@ const defaultParams: Pick<
     Fee - Platform fee, Stripe fee (included in application fees).
     Platform fee - fee that grab Platform as revenue from transaction.
     Stripe fee - fee that Stripe takes from processing transaction.
+    Extra fee - apply to sender or/and receiver and included in transaction application fees, and in payment intent collected fees
   `,
   properties: {
     customer: { $ref: '#/definitions/Customer' },

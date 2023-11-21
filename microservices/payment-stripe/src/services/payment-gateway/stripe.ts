@@ -773,7 +773,7 @@ class Stripe extends Abstract {
         message: messages.getNotFoundMessage(
           'Failed to attach application fee to transaction. Application fee charge id',
         ),
-        payload: { eventName },
+        payload: { eventName, chargeId: transactionChargeId, applicationFeeId },
       });
     }
 
@@ -799,7 +799,7 @@ class Stripe extends Abstract {
         throw new BaseException({
           status: 500,
           message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
-          payload: { eventName },
+          payload: { eventName, transactionFee: transaction.fee, feeAmount: amount },
         });
       }
 
@@ -829,7 +829,7 @@ class Stripe extends Abstract {
         message: messages.getNotFoundMessage(
           'Failed to update refunded application fees. Debit or credit transaction',
         ),
-        payload: { eventName },
+        payload: { eventName, applicationFeeId },
       });
     }
 
@@ -846,7 +846,7 @@ class Stripe extends Abstract {
         throw new BaseException({
           status: 500,
           message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
-          payload: { eventName },
+          payload: { eventName, transactionFee: transaction.fee, feeAmount: amount },
         });
       }
 
@@ -886,7 +886,7 @@ class Stripe extends Abstract {
         message: messages.getNotFoundMessage(
           'Failed to update refunded application fees. Debit or credit transaction',
         ),
-        payload: { eventName },
+        payload: { eventName, applicationFeeId },
       });
     }
 
@@ -900,7 +900,7 @@ class Stripe extends Abstract {
         throw new BaseException({
           status: 500,
           message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
-          payload: { eventName },
+          payload: { eventName, transactionFee: transaction.fee, feeAmount: amount },
         });
       }
 
@@ -2130,6 +2130,8 @@ class Stripe extends Abstract {
         userId: senderCustomer.userId,
         type: TransactionType.CREDIT,
         amount: paymentIntentAmountUnit,
+        // Fee should include extra fee, cause collected by collected fee
+        fee: transactionData.fee + senderAdditionalFee,
         params: {
           ...transactionData.params,
           extraFee: senderAdditionalFee,
@@ -2140,6 +2142,8 @@ class Stripe extends Abstract {
         userId: receiverUserId,
         type: TransactionType.DEBIT,
         amount: receiverUnitRevenue,
+        // Fee should include extra fee, cause collected by collected fee
+        fee: transactionData.fee + receiverAdditionalFee,
         // Amount that will be charge for instant payout
         params: {
           ...transactionData.params,

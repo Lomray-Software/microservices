@@ -95,5 +95,7 @@ into your hosted endpoint listeners in the Stripe dashboard.
 3. Fee - Platform fee, Stripe fee (included in application fees).
 4. Platform fee - fee that grab Platform as revenue from transaction.
 5. Stripe fee - fee that Stripe takes from processing transaction.
+6. Extra fee - apply to sender or/and receiver and included in transaction application fees,
+   and in payment intent collected fees
 
 Rebuild: 1
