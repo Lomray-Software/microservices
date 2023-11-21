@@ -77,11 +77,11 @@ interface IPaymentIntentMetadata
   entityCost: string;
   cardId: string;
   feesPayer: TransactionRole;
-  applicationFee: string;
+  platformFee: string;
   receiverExtraFee: string;
   senderExtraFee: string;
   receiverExtraRevenue: string;
-  paymentProviderFee: string;
+  stripeFee: string;
   entityId?: string;
   title?: string;
   taxTransactionAmountWithTax?: number;
@@ -161,15 +161,9 @@ type TAvailablePaymentMethods =
   | StripeSdk.BankAccount.AvailablePayoutMethod[]
   | null;
 
-interface IPaymentIntentEvent {
-  success: Event;
-  inProcess: Event;
-  error: Event;
-}
-
 interface IPaymentIntentFees {
-  paymentProviderUnitFee: number;
-  applicationUnitFee: number;
+  stripeUnitFee: number;
+  platformUnitFee: number;
   userUnitAmount: number;
   receiverUnitRevenue: number;
   receiverAdditionalFee: number;
@@ -204,15 +198,6 @@ interface ICreateMultipleProductCheckoutParams {
  * Stripe payment provider
  */
 class Stripe extends Abstract {
-  /**
-   * Payment intent event name
-   */
-  private readonly paymentIntentEventName: IPaymentIntentEvent = {
-    [TransactionStatus.SUCCESS]: Event.PaymentIntentSuccess,
-    [TransactionStatus.IN_PROCESS]: Event.PaymentIntentInProcess,
-    [TransactionStatus.ERROR]: Event.PaymentIntentError,
-  };
-
   /**
    * Add new card
    * @description NOTES:
@@ -734,6 +719,18 @@ class Stripe extends Abstract {
         await this.handlePaymentIntent(event);
         break;
 
+      case 'application_fee.created':
+        await this.handleApplicationFeeCreated(event, 'application_fee.created');
+        break;
+
+      case 'application_fee.refund.updated':
+        await this.handleApplicationFeeRefundUpdated(event, 'application_fee.refund.updated');
+        break;
+
+      case 'application_fee.refunded':
+        await this.handleApplicationFeeRefunded(event, 'application_fee.refunded');
+        break;
+
       /**
        * Refund events
        */
@@ -758,8 +755,171 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Handles application fee created
+   */
+  public async handleApplicationFeeCreated(
+    event: StripeSdk.Event,
+    eventName: string,
+  ): Promise<void> {
+    const {
+      id: applicationFeeId,
+      amount,
+      originating_transaction: transactionChargeId,
+    } = event.data.object as StripeSdk.ApplicationFee;
+
+    if (!transactionChargeId) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage(
+          'Failed to attach application fee to transaction. Application fee charge id',
+        ),
+        payload: { eventName },
+      });
+    }
+
+    const chargeId = this.extractId(transactionChargeId);
+
+    const transactions = await this.transactionRepository
+      .createQueryBuilder('t')
+      .where("(t.params ->> 'chargeId') = :chargeId", { chargeId })
+      .getMany();
+
+    if (!transactions.length) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage(
+          'Failed to attach application fee to transaction. Debit or credit transaction',
+        ),
+        payload: { eventName },
+      });
+    }
+
+    transactions.forEach((transaction) => {
+      if (transaction.fee !== amount) {
+        throw new BaseException({
+          status: 500,
+          message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
+          payload: { eventName },
+        });
+      }
+
+      transaction.applicationFeeId = applicationFeeId;
+    });
+
+    await this.transactionRepository.save(transactions);
+  }
+
+  /**
+   * Handles application fee refund updated
+   */
+  public async handleApplicationFeeRefundUpdated(
+    event: StripeSdk.Event,
+    eventName: string,
+  ): Promise<void> {
+    const { fee } = event.data.object as StripeSdk.FeeRefund;
+
+    const applicationFeeId = this.extractId(fee);
+    const transactions = await this.transactionRepository.find({
+      applicationFeeId,
+    });
+
+    if (!transactions.length) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage(
+          'Failed to update refunded application fees. Debit or credit transaction',
+        ),
+        payload: { eventName },
+      });
+    }
+
+    const { amount, amount_refunded: refundedApplicationFeeAmount } =
+      await this.sdk.applicationFees.retrieve(applicationFeeId);
+
+    /**
+     * @TODO: create helper for updates check
+     */
+    let isUpdated = false;
+
+    transactions.forEach((transaction) => {
+      if (transaction.fee !== amount) {
+        throw new BaseException({
+          status: 500,
+          message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
+          payload: { eventName },
+        });
+      }
+
+      if (transaction.params.refundedApplicationFeeAmount !== refundedApplicationFeeAmount) {
+        transaction.params.refundedApplicationFeeAmount = refundedApplicationFeeAmount;
+        isUpdated = true;
+      }
+    });
+
+    if (!isUpdated) {
+      return;
+    }
+
+    await this.transactionRepository.save(transactions);
+  }
+
+  /**
+   * Handles application fee refunded
+   */
+  public async handleApplicationFeeRefunded(
+    event: StripeSdk.Event,
+    eventName: string,
+  ): Promise<void> {
+    const {
+      id: applicationFeeId,
+      amount,
+      amount_refunded: refundedApplicationFeeAmount,
+    } = event.data.object as StripeSdk.ApplicationFee;
+
+    const transactions = await this.transactionRepository.find({
+      applicationFeeId,
+    });
+
+    if (!transactions.length) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage(
+          'Failed to update refunded application fees. Debit or credit transaction',
+        ),
+        payload: { eventName },
+      });
+    }
+
+    let isUpdated = false;
+
+    /**
+     * @TODO: move out to separate helper (e.g. class calculation)
+     */
+    transactions.forEach((transaction) => {
+      if (transaction.fee !== amount) {
+        throw new BaseException({
+          status: 500,
+          message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
+          payload: { eventName },
+        });
+      }
+
+      if (transaction.params.refundedApplicationFeeAmount !== refundedApplicationFeeAmount) {
+        transaction.params.refundedApplicationFeeAmount = refundedApplicationFeeAmount;
+        isUpdated = true;
+      }
+    });
+
+    if (!isUpdated) {
+      return;
+    }
+
+    await this.transactionRepository.save(transactions);
+  }
+
+  /**
    * Handles payment method detach
-   * @description NOTE: Card and other payment methods should be removed in according subscribers
+   * @description Card and other payment methods should be removed in according subscribers
    * @TODO: Handle other payment methods if needed
    */
   public async handlePaymentMethodDetached(event: StripeSdk.Event): Promise<void> {
@@ -963,7 +1123,7 @@ class Stripe extends Abstract {
     const {
       status,
       payment_intent: paymentIntent,
-      amount_refunded: refundedAmount,
+      amount_refunded: refundedTransactionAmount,
       amount,
     } = event.data.object as StripeSdk.Charge;
 
@@ -989,18 +1149,13 @@ class Stripe extends Abstract {
 
     transactions.forEach((transaction) => {
       transaction.status =
-        refundedAmount !== amount ? TransactionStatus.PARTIAL_REFUNDED : TransactionStatus.REFUNDED;
-      transaction.params.refundedAmount = refundedAmount;
+        refundedTransactionAmount < amount
+          ? TransactionStatus.PARTIAL_REFUNDED
+          : TransactionStatus.REFUNDED;
+      transaction.params.refundedTransactionAmount = refundedTransactionAmount;
     });
 
     await this.transactionRepository.save(transactions);
-
-    for (const transaction of transactions) {
-      void Microservice.eventPublish(Event.RefundSuccess, {
-        transactionStatus: transaction.status,
-        transaction,
-      });
-    }
   }
 
   /**
@@ -1032,8 +1187,8 @@ class Stripe extends Abstract {
       feesPayer,
       cardId,
       entityCost,
-      applicationFee,
-      paymentProviderFee,
+      platformFee,
+      stripeFee,
       senderExtraFee,
       receiverExtraFee,
       receiverExtraRevenue,
@@ -1072,8 +1227,8 @@ class Stripe extends Abstract {
       fee: applicationFeeAmount || 0,
       params: {
         feesPayer,
-        applicationFee: this.toSmallestCurrencyUnit(Number(applicationFee)),
-        paymentProviderFee: this.toSmallestCurrencyUnit(paymentProviderFee),
+        platformFee: this.toSmallestCurrencyUnit(Number(platformFee)),
+        stripeFee: this.toSmallestCurrencyUnit(stripeFee),
         entityCost: this.toSmallestCurrencyUnit(Number(entityCost)),
         taxId,
         taxTransactionAmountWithTaxUnit: this.toSmallestCurrencyUnit(
@@ -1135,7 +1290,7 @@ class Stripe extends Abstract {
       });
     }
 
-    const savedTransactions = await Promise.all(
+    await Promise.all(
       transactions.map((transaction) => {
         if (!transaction.params.chargeId && latestCharge) {
           transaction.params.chargeId = this.extractId(latestCharge);
@@ -1155,26 +1310,11 @@ class Stripe extends Abstract {
         return this.transactionRepository.save(transaction);
       }),
     );
-
-    for (const transaction of savedTransactions) {
-      const transactionStatus = this.getStatus(status as unknown as StripeTransactionStatus);
-
-      const eventName = this.paymentIntentEventName?.[transactionStatus];
-
-      if (!eventName) {
-        return;
-      }
-
-      void Microservice.eventPublish(eventName as Event, {
-        transactionStatus,
-        transaction,
-      });
-    }
   }
 
   /**
    * Create instant payout
-   * NOTE: Should be called from the API
+   * @description Should be called from the API
    */
   public async instantPayout({
     userId,
@@ -1848,8 +1988,8 @@ class Stripe extends Abstract {
     const {
       userUnitAmount,
       receiverUnitRevenue,
-      applicationUnitFee,
-      paymentProviderUnitFee,
+      platformUnitFee,
+      stripeUnitFee: paymentIntentStripeFeeUnit,
       receiverAdditionalFee,
       extraReceiverUnitRevenue,
       senderAdditionalFee,
@@ -1901,7 +2041,7 @@ class Stripe extends Abstract {
       stripeFeeUnit = transactionFeeUnit;
       paymentIntentAmountUnit = processingAmountUnit;
     } else {
-      stripeFeeUnit = paymentProviderUnitFee;
+      stripeFeeUnit = paymentIntentStripeFeeUnit;
       paymentIntentAmountUnit = userUnitAmount;
     }
 
@@ -1922,8 +2062,8 @@ class Stripe extends Abstract {
       metadata: {
         // Original float entity cost
         entityCost,
-        paymentProviderFee: this.fromSmallestCurrencyUnit(stripeFeeUnit),
-        applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee),
+        stripeFee: this.fromSmallestCurrencyUnit(stripeFeeUnit),
+        platformFee: this.fromSmallestCurrencyUnit(platformUnitFee),
         receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
         senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
         receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue),
@@ -1966,12 +2106,12 @@ class Stripe extends Abstract {
       paymentMethodId,
       cardId: paymentMethodCardId,
       transactionId: stripePaymentIntent.id,
-      fee: applicationUnitFee + stripeFeeUnit + taxFeeUnit,
+      fee: platformUnitFee + stripeFeeUnit + taxFeeUnit,
       ...(tax ? { tax: tax.totalAmountUnit } : {}),
       params: {
         feesPayer,
-        applicationFee: applicationUnitFee,
-        paymentProviderFee: stripeFeeUnit,
+        platformFee: platformUnitFee,
+        stripeFee: stripeFeeUnit,
         entityCost: entityUnitCost,
         ...(tax
           ? {
@@ -2064,7 +2204,8 @@ class Stripe extends Abstract {
     } else {
       amountUnit =
         // Paid entity cost - already refunded amount
-        (debitTransaction.params.entityCost || 0) - (debitTransaction.params.refundedAmount || 0);
+        (debitTransaction.params.entityCost || 0) -
+        (debitTransaction.params.refundedTransactionAmount || 0);
     }
 
     if (!amountUnit) {
@@ -2080,7 +2221,9 @@ class Stripe extends Abstract {
     /* eslint-disable camelcase */
     const stripeRefund = await this.sdk.refunds.create({
       charge: debitTransaction.params.chargeId,
+      // From receiver connected account funds will be transferred to Platform, then refund
       reverse_transfer: true,
+      // Refund collected application fee, if - not: rest refund amount will be charged from receiver connected account
       refund_application_fee: false,
       amount: amountUnit,
       metadata: {
@@ -2192,9 +2335,9 @@ class Stripe extends Abstract {
    * 2. Payment percent - payment provider fee percent for single transaction
    * Fees calculation:
    * 1. User pays fee
-   * totalAmount = 106$, receiverReceiver = 100, taxFee = 3, applicationFee = 3
+   * totalAmount = 106$, receiverReceiver = 100, taxFee = 3, platformFee = 3
    * 2. Receiver pays fees
-   * totalAmount = 100$, receiverReceiver = 94, taxFee = 3, applicationFee = 3
+   * totalAmount = 100$, receiverReceiver = 94, taxFee = 3, platformFee = 3
    * @TODO: Move out to calculations
    */
   public async getPaymentIntentFees({
@@ -2235,10 +2378,10 @@ class Stripe extends Abstract {
     /**
      * How much percent from total amount will receive end user
      */
-    const applicationUnitFee = getPercentFromAmount(entityUnitCost, applicationPaymentPercent);
+    const platformUnitFee = getPercentFromAmount(entityUnitCost, applicationPaymentPercent);
 
     if (feesPayer === TransactionRole.SENDER) {
-      let userTempUnitAmount = entityUnitCost + applicationUnitFee + senderAdditionalFee;
+      let userTempUnitAmount = entityUnitCost + platformUnitFee + senderAdditionalFee;
       let userUnitAmount: number;
       let estimatedTaxUnit = 0;
 
@@ -2266,19 +2409,19 @@ class Stripe extends Abstract {
       return {
         ...sharedFees,
         ...(shouldEstimateTax ? { estimatedTaxUnit, taxFeeUnit: taxes?.stableUnit } : {}),
-        applicationUnitFee,
+        platformUnitFee,
         userUnitAmount,
-        paymentProviderUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
+        stripeUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
         receiverUnitRevenue: Math.round(
           entityUnitCost - receiverAdditionalFee + extraReceiverUnitRevenue,
         ),
       };
     }
 
-    let paymentProviderUnitFee = 0;
+    let stripeUnitFee = 0;
 
     if (withStripeFee) {
-      paymentProviderUnitFee = (
+      stripeUnitFee = (
         await Calculation.getStripeFeeAndProcessingAmount({
           amountUnit: entityUnitCost,
           feesPayer: TransactionRole.RECEIVER,
@@ -2298,8 +2441,8 @@ class Stripe extends Abstract {
 
     const receiverUnitRevenue = Math.round(
       entityUnitCost -
-        paymentProviderUnitFee -
-        applicationUnitFee -
+        stripeUnitFee -
+        platformUnitFee -
         receiverAdditionalFee +
         extraReceiverUnitRevenue,
     );
@@ -2307,8 +2450,8 @@ class Stripe extends Abstract {
     return {
       ...sharedFees,
       ...(shouldEstimateTax ? { estimatedTaxUnit, taxFeeUnit: taxes?.stableUnit } : {}),
-      applicationUnitFee,
-      paymentProviderUnitFee,
+      platformUnitFee,
+      stripeUnitFee,
       userUnitAmount,
       receiverUnitRevenue,
     };

@@ -289,9 +289,9 @@ describe('services/payment-gateway/stripe', () => {
 
     it('should correctly compute payment intent fees', async () => {
       const expectedResult = {
-        applicationUnitFee: 0,
+        platformUnitFee: 0,
         extraReceiverUnitRevenue: 0,
-        paymentProviderUnitFee: 61,
+        stripeUnitFee: 61,
         receiverAdditionalFee: 0,
         receiverUnitRevenue: 1000,
         senderAdditionalFee: 0,
@@ -308,9 +308,9 @@ describe('services/payment-gateway/stripe', () => {
 
     it('should correctly compute payment intent fees with application fees', async () => {
       const expectedResult = {
-        applicationUnitFee: 30,
+        platformUnitFee: 30,
         extraReceiverUnitRevenue: 0,
-        paymentProviderUnitFee: 62,
+        stripeUnitFee: 62,
         receiverAdditionalFee: 0,
         receiverUnitRevenue: 1000,
         senderAdditionalFee: 0,
@@ -328,9 +328,9 @@ describe('services/payment-gateway/stripe', () => {
 
     it('should correctly compute payment intent fees with application  and receiver additional fees', async () => {
       const expectedResult = {
-        applicationUnitFee: 30,
+        platformUnitFee: 30,
         extraReceiverUnitRevenue: 0,
-        paymentProviderUnitFee: 62,
+        stripeUnitFee: 62,
         receiverAdditionalFee: 60,
         receiverUnitRevenue: 940,
         senderAdditionalFee: 0,
