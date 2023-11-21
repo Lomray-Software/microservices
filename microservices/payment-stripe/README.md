@@ -84,4 +84,16 @@ Run stripe cli for test dev env:
 stripe listen --forward-to 'http://localhost:3000/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=connect'
 ```
 
+### <a id="webhooks"></a>WEBHOOKS:
+1. For cloud environment: Integrate all necessary and specified webhook endpoints from the payment factory Stripe service
+into your hosted endpoint listeners in the Stripe dashboard.
+2. For local development: use stripe-cli
+
+### <a id="webhooks"></a>DEFINITIONS:
+1. Application fees - collected amount by Platform from transaction.
+2. Tax - collected taxes (included in application fees).
+3. Fee - Platform fee, Stripe fee (included in application fees).
+4. Platform fee - fee that grab Platform as revenue from transaction.
+5. Stripe fee - fee that Stripe takes from processing transaction.
+
 Rebuild: 1
