@@ -1304,7 +1304,7 @@
     "alias": "payment-stripe.PaymentIntentFeesOutput",
     "title": "Payment Intent Fees Output",
     "schema": {
-      "paymentProviderFee": {
+      "stripeFee": {
         "in": {
           "admin": "allow"
         },
