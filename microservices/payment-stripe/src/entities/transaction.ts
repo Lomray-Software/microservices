@@ -35,7 +35,7 @@ export interface IParams extends IComputedTax {
   refundedTransactionAmount: number;
   refundedApplicationFeeAmount: number;
   // Decomposed fees
-  applicationFee: number;
+  platformFee: number;
   stripeFee: number;
   paymentStatus?: StripeTransactionStatus;
   checkoutStatus?: StripeCheckoutStatus;
@@ -61,15 +61,21 @@ export interface IParams extends IComputedTax {
  */
 const defaultParams: Pick<
   IParams,
-  'refundedTransactionAmount' | 'refundedApplicationFeeAmount' | 'applicationFee' | 'stripeFee'
+  'refundedTransactionAmount' | 'refundedApplicationFeeAmount' | 'platformFee' | 'stripeFee'
 > = {
   refundedTransactionAmount: 0,
   refundedApplicationFeeAmount: 0,
-  applicationFee: 0,
+  platformFee: 0,
   stripeFee: 0,
 };
 
 @JSONSchema({
+  description: `Transaction entity. Definitions: Application fees - collected amount by Platform from transaction.
+    Tax - collected taxes (included in application fees).
+    Fee - Platform fee, Stripe fee (included in application fees).
+    Platform fee - fee that grab Platform as revenue from transaction.
+    Stripe fee - fee that Stripe takes from processing transaction.
+  `,
   properties: {
     customer: { $ref: '#/definitions/Customer' },
     product: { $ref: '#/definitions/Product' },

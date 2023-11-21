@@ -77,7 +77,7 @@ interface IPaymentIntentMetadata
   entityCost: string;
   cardId: string;
   feesPayer: TransactionRole;
-  applicationFee: string;
+  platformFee: string;
   receiverExtraFee: string;
   senderExtraFee: string;
   receiverExtraRevenue: string;
@@ -163,7 +163,7 @@ type TAvailablePaymentMethods =
 
 interface IPaymentIntentFees {
   stripeUnitFee: number;
-  applicationUnitFee: number;
+  platformUnitFee: number;
   userUnitAmount: number;
   receiverUnitRevenue: number;
   receiverAdditionalFee: number;
@@ -1012,7 +1012,7 @@ class Stripe extends Abstract {
       feesPayer,
       cardId,
       entityCost,
-      applicationFee,
+      platformFee,
       stripeFee,
       senderExtraFee,
       receiverExtraFee,
@@ -1052,7 +1052,7 @@ class Stripe extends Abstract {
       fee: applicationFeeAmount || 0,
       params: {
         feesPayer,
-        applicationFee: this.toSmallestCurrencyUnit(Number(applicationFee)),
+        platformFee: this.toSmallestCurrencyUnit(Number(platformFee)),
         stripeFee: this.toSmallestCurrencyUnit(stripeFee),
         entityCost: this.toSmallestCurrencyUnit(Number(entityCost)),
         taxId,
@@ -1813,7 +1813,7 @@ class Stripe extends Abstract {
     const {
       userUnitAmount,
       receiverUnitRevenue,
-      applicationUnitFee,
+      platformUnitFee,
       stripeUnitFee: paymentIntentStripeFeeUnit,
       receiverAdditionalFee,
       extraReceiverUnitRevenue,
@@ -1888,7 +1888,7 @@ class Stripe extends Abstract {
         // Original float entity cost
         entityCost,
         stripeFee: this.fromSmallestCurrencyUnit(stripeFeeUnit),
-        applicationFee: this.fromSmallestCurrencyUnit(applicationUnitFee),
+        platformFee: this.fromSmallestCurrencyUnit(platformUnitFee),
         receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
         senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
         receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue),
@@ -1931,11 +1931,11 @@ class Stripe extends Abstract {
       paymentMethodId,
       cardId: paymentMethodCardId,
       transactionId: stripePaymentIntent.id,
-      fee: applicationUnitFee + stripeFeeUnit + taxFeeUnit,
+      fee: platformUnitFee + stripeFeeUnit + taxFeeUnit,
       ...(tax ? { tax: tax.totalAmountUnit } : {}),
       params: {
         feesPayer,
-        applicationFee: applicationUnitFee,
+        platformFee: platformUnitFee,
         stripeFee: stripeFeeUnit,
         entityCost: entityUnitCost,
         ...(tax
@@ -2160,9 +2160,9 @@ class Stripe extends Abstract {
    * 2. Payment percent - payment provider fee percent for single transaction
    * Fees calculation:
    * 1. User pays fee
-   * totalAmount = 106$, receiverReceiver = 100, taxFee = 3, applicationFee = 3
+   * totalAmount = 106$, receiverReceiver = 100, taxFee = 3, platformFee = 3
    * 2. Receiver pays fees
-   * totalAmount = 100$, receiverReceiver = 94, taxFee = 3, applicationFee = 3
+   * totalAmount = 100$, receiverReceiver = 94, taxFee = 3, platformFee = 3
    * @TODO: Move out to calculations
    */
   public async getPaymentIntentFees({
@@ -2203,10 +2203,10 @@ class Stripe extends Abstract {
     /**
      * How much percent from total amount will receive end user
      */
-    const applicationUnitFee = getPercentFromAmount(entityUnitCost, applicationPaymentPercent);
+    const platformUnitFee = getPercentFromAmount(entityUnitCost, applicationPaymentPercent);
 
     if (feesPayer === TransactionRole.SENDER) {
-      let userTempUnitAmount = entityUnitCost + applicationUnitFee + senderAdditionalFee;
+      let userTempUnitAmount = entityUnitCost + platformUnitFee + senderAdditionalFee;
       let userUnitAmount: number;
       let estimatedTaxUnit = 0;
 
@@ -2234,7 +2234,7 @@ class Stripe extends Abstract {
       return {
         ...sharedFees,
         ...(shouldEstimateTax ? { estimatedTaxUnit, taxFeeUnit: taxes?.stableUnit } : {}),
-        applicationUnitFee,
+        platformUnitFee,
         userUnitAmount,
         stripeUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
         receiverUnitRevenue: Math.round(
@@ -2267,7 +2267,7 @@ class Stripe extends Abstract {
     const receiverUnitRevenue = Math.round(
       entityUnitCost -
         stripeUnitFee -
-        applicationUnitFee -
+        platformUnitFee -
         receiverAdditionalFee +
         extraReceiverUnitRevenue,
     );
@@ -2275,7 +2275,7 @@ class Stripe extends Abstract {
     return {
       ...sharedFees,
       ...(shouldEstimateTax ? { estimatedTaxUnit, taxFeeUnit: taxes?.stableUnit } : {}),
-      applicationUnitFee,
+      platformUnitFee,
       stripeUnitFee,
       userUnitAmount,
       receiverUnitRevenue,

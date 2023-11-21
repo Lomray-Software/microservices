@@ -1312,7 +1312,7 @@
           "user": "allow"
         }
       },
-      "applicationFee": {
+      "platformFee": {
         "in": {
           "admin": "allow"
         },

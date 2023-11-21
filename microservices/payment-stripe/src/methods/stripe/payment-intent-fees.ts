@@ -45,7 +45,7 @@ class PaymentIntentFeesOutput {
   stripeFee: number;
 
   @IsNumber()
-  applicationFee: number;
+  platformFee: number;
 
   @IsNumber()
   userAmount: number;
