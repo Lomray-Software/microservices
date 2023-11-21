@@ -51,7 +51,7 @@ export interface IParams extends IComputedTax {
   // Application and stripe fees payer
   feesPayer?: TransactionRole;
   // PaymentIntent charge id, must exist for refund
-  chargeId?: string;
+  chargeId?: string | null;
   extraRevenue?: number;
   // Amount that will charge for instant payout
   estimatedInstantPayoutFee?: number;

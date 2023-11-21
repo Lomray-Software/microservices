@@ -122,6 +122,11 @@ abstract class Abstract {
   /**
    * @protected
    */
+  protected readonly manager: EntityManager;
+
+  /**
+   * @protected
+   */
   protected readonly sdk: StripeSdk;
 
   /**
@@ -149,6 +154,7 @@ abstract class Abstract {
     this.couponRepository = manager.getRepository(Coupon);
     this.methods = methods;
     this.sdk = new StripeSdk(apiKey, stripeConfig);
+    this.manager = manager;
   }
 
   /**

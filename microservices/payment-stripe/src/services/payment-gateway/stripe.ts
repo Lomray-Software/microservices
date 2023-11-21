@@ -721,6 +721,7 @@ class Stripe extends Abstract {
       case 'payment_intent.processing':
       case 'payment_intent.payment_failed':
       case 'payment_intent.succeeded':
+      case 'payment_intent.canceled':
         await this.handlePaymentIntent(event);
         break;
 
@@ -1165,112 +1166,108 @@ class Stripe extends Abstract {
 
   /**
    * Handles payment intent failure creation
-   * @description NOTES: Payment intent will be created with the failed status: card was declined -
+   * @description Payment intent will be created with the failed status: card was declined -
    * high fraud risk but stripe will throw error on creation and send webhook event with the creation
    */
   public async handlePaymentIntentFailureCreate(event: StripeSdk.Event): Promise<void> {
-    const {
-      id,
-      status,
-      metadata,
-      application_fee_amount: applicationFeeAmount,
-      amount,
-    } = event.data.object as StripeSdk.PaymentIntent;
+    await this.manager.transaction(async (entityManager) => {
+      const transactionRepository = entityManager.getRepository(Transaction);
+      const {
+        id,
+        status,
+        metadata,
+        amount,
+        latest_charge: latestCharge,
+      } = event.data.object as StripeSdk.PaymentIntent;
 
-    const transactions = await this.transactionRepository.find({ transactionId: id });
+      const transactions = await transactionRepository.find({ transactionId: id });
 
-    /**
-     * If transactions weren't created cause payment intent failed on create
-     */
-    if (transactions.length) {
-      return;
-    }
+      /**
+       * If transactions weren't created cause payment intent failed on create
+       */
+      if (transactions.length) {
+        return;
+      }
 
-    const {
-      entityId,
-      title,
-      feesPayer,
-      cardId,
-      entityCost,
-      platformFee,
-      stripeFee,
-      senderExtraFee,
-      receiverExtraFee,
-      receiverExtraRevenue,
-      senderId,
-      receiverId,
-      taxId,
-      taxTransactionAmountWithTax,
-      taxExpiresAt,
-      taxCreatedAt,
-      taxTotalAmount,
-      taxBehaviour,
-      taxFee,
-    } = metadata as unknown as IPaymentIntentMetadata;
-
-    const card = await this.cardRepository
-      .createQueryBuilder('card')
-      .where('card.userId = :userId AND card.id = :cardId', { userId: senderId, cardId })
-      .getOne();
-
-    if (!card) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Failed to create transaction. Card'),
-      });
-    }
-
-    /* eslint-enable camelcase */
-    const transactionData = {
-      entityId,
-      title,
-      paymentMethodId: CardRepository.extractPaymentMethodId(card),
-      cardId,
-      transactionId: id,
-      status: this.getStatus(status as StripeTransactionStatus),
-      // eslint-disable-next-line camelcase
-      fee: applicationFeeAmount || 0,
-      params: {
+      const {
+        entityId,
+        title,
         feesPayer,
-        platformFee: this.toSmallestCurrencyUnit(Number(platformFee)),
-        stripeFee: this.toSmallestCurrencyUnit(stripeFee),
-        entityCost: this.toSmallestCurrencyUnit(Number(entityCost)),
+        cardId,
+        entityCost,
+        platformFee,
+        stripeFee,
+        senderId,
+        receiverId,
         taxId,
-        taxTransactionAmountWithTaxUnit: this.toSmallestCurrencyUnit(
-          Number(taxTransactionAmountWithTax),
-        ),
         taxExpiresAt,
         taxCreatedAt,
-        taxTotalAmountUnit: this.toSmallestCurrencyUnit(Number(taxTotalAmount)),
         taxBehaviour,
-        ...(taxFee ? { taxFeeUnit: this.toSmallestCurrencyUnit(Number(taxFee)) } : {}),
-      },
-    };
+      } = metadata as unknown as IPaymentIntentMetadata;
 
-    await Promise.all([
-      this.transactionRepository.save({
-        ...transactionData,
-        userId: senderId,
-        type: TransactionType.CREDIT,
-        amount,
+      const card = await this.cardRepository
+        .createQueryBuilder('card')
+        .where('card.userId = :userId AND card.id = :cardId', { userId: senderId, cardId })
+        .getOne();
+
+      if (!card) {
+        throw new BaseException({
+          status: 500,
+          message: messages.getNotFoundMessage('Failed to create transaction. Card'),
+        });
+      }
+
+      /* eslint-enable camelcase */
+      const transactionData = {
+        entityId,
+        title,
+        paymentMethodId: CardRepository.extractPaymentMethodId(card),
+        cardId,
+        transactionId: id,
+        status: this.getStatus(status as StripeTransactionStatus),
+        // eslint-disable-next-line camelcase
+        // @TODO: check if payment stripe calculated data (from payment intent fees) is required
         params: {
-          ...transactionData.params,
-          extraFee: this.toSmallestCurrencyUnit(Number(senderExtraFee)),
+          feesPayer,
+          platformFee: this.toSmallestCurrencyUnit(platformFee),
+          stripeFee: this.toSmallestCurrencyUnit(stripeFee),
+          entityCost: this.toSmallestCurrencyUnit(entityCost),
+          taxId,
+          taxExpiresAt,
+          taxCreatedAt,
+          taxBehaviour,
+          ...(latestCharge ? { chargeId: this.extractId(latestCharge) } : {}),
         },
-      }),
-      this.transactionRepository.save({
-        ...transactionData,
-        userId: receiverId,
-        type: TransactionType.DEBIT,
-        amount,
-        // Amount that will be charge for instant payout
-        params: {
-          ...transactionData.params,
-          extraFee: this.toSmallestCurrencyUnit(Number(receiverExtraFee)),
-          extraRevenue: this.toSmallestCurrencyUnit(Number(receiverExtraRevenue)),
-        },
-      }),
-    ]);
+      };
+
+      await Promise.all([
+        transactionRepository.save({
+          ...transactionData,
+          userId: senderId,
+          type: TransactionType.CREDIT,
+          amount,
+          params: {
+            ...transactionData.params,
+          },
+        }),
+        transactionRepository.save({
+          ...transactionData,
+          userId: receiverId,
+          type: TransactionType.DEBIT,
+          amount,
+          params: {
+            ...transactionData.params,
+          },
+        }),
+      ]);
+
+      // Do not support update payment intent, only recharge via creating new payment
+      if (status !== StripeTransactionStatus.REQUIRES_PAYMENT_METHOD) {
+        return;
+      }
+
+      await this.sdk.paymentIntents.cancel(id);
+    });
   }
 
   /**
