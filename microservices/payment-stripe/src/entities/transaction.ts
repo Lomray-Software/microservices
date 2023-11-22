@@ -37,6 +37,10 @@ export interface IParams extends IComputedTax {
   // Decomposed fees
   platformFee: number;
   stripeFee: number;
+  baseFee: number;
+  extraFee: number;
+  // Personal user fee. Receiver it's application fees with only debit extra fees. Sender it's application fees with only credit extra fees.
+  personalFee: number;
   paymentStatus?: StripeTransactionStatus;
   checkoutStatus?: StripeCheckoutStatus;
   errorMessage?: string;
@@ -47,8 +51,7 @@ export interface IParams extends IComputedTax {
   // Application and stripe fees payer
   feesPayer?: TransactionRole;
   // PaymentIntent charge id, must exist for refund
-  chargeId?: string;
-  extraFee?: number;
+  chargeId?: string | null;
   extraRevenue?: number;
   // Amount that will charge for instant payout
   estimatedInstantPayoutFee?: number;
@@ -61,12 +64,21 @@ export interface IParams extends IComputedTax {
  */
 const defaultParams: Pick<
   IParams,
-  'refundedTransactionAmount' | 'refundedApplicationFeeAmount' | 'platformFee' | 'stripeFee'
+  | 'refundedTransactionAmount'
+  | 'refundedApplicationFeeAmount'
+  | 'platformFee'
+  | 'stripeFee'
+  | 'extraFee'
+  | 'baseFee'
+  | 'personalFee'
 > = {
   refundedTransactionAmount: 0,
   refundedApplicationFeeAmount: 0,
   platformFee: 0,
   stripeFee: 0,
+  extraFee: 0,
+  baseFee: 0,
+  personalFee: 0,
 };
 
 @JSONSchema({
@@ -75,6 +87,9 @@ const defaultParams: Pick<
     Fee - Platform fee, Stripe fee (included in application fees).
     Platform fee - fee that grab Platform as revenue from transaction.
     Stripe fee - fee that Stripe takes from processing transaction.
+    Extra fee - apply to sender or/and receiver and included in transaction application fees, and in payment intent collected fees
+    Base fee - platform + stripe + create tax transaction fee
+    Personal fee - base fee + personal (debit or credit extra fee)
   `,
   properties: {
     customer: { $ref: '#/definitions/Customer' },
@@ -175,8 +190,8 @@ class Transaction {
   tax: number;
 
   @JSONSchema({
-    description: `Fees: application, stripe, amount that application collect as tax. Contain all amounts that
-    Platform is required or interested to grab from transaction`,
+    description: `Total fees: application, stripe, amount that application collect, tax, debit and credit extra fees. Contain all amounts that
+    Platform is required or interested to grab from transaction. Should be the same as in Stripe`,
   })
   @Column({ type: 'int', default: 0 })
   @IsUndefinable()

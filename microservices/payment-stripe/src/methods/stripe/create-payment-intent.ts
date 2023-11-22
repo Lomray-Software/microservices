@@ -57,7 +57,7 @@ class PaymentIntentOutput {
 
 /**
  * Create PaymentIntent
- * NOTE: Must be called from API
+ * @description Must be called from API
  */
 const connectAccount = Endpoint.custom(
   () => ({

@@ -23,7 +23,7 @@ import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
 import Refund from '@entities/refund';
-import type { IComputedTax } from '@entities/transaction';
+import type { IComputedTax, IParams as ITransactionParams } from '@entities/transaction';
 import Transaction from '@entities/transaction';
 import composeBalance from '@helpers/compose-balance';
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
@@ -71,7 +71,8 @@ interface IPaymentIntentParams {
 }
 
 interface IPaymentIntentMetadata
-  extends Omit<IComputedTax, 'taxTransactionAmountWithTaxUnit' | 'taxTotalAmountUnit'> {
+  extends Omit<IComputedTax, 'taxTransactionAmountWithTaxUnit' | 'taxTotalAmountUnit'>,
+    Pick<ITransactionParams, 'baseFee'> {
   senderId: string;
   receiverId: string;
   entityCost: string;
@@ -79,9 +80,14 @@ interface IPaymentIntentMetadata
   feesPayer: TransactionRole;
   platformFee: string;
   receiverExtraFee: string;
+  receiverPersonalFee: string;
   senderExtraFee: string;
+  senderPersonalFee: string;
   receiverExtraRevenue: string;
+  receiverRevenue: string;
   stripeFee: string;
+  // Total collected fee (includes all fees and tax that collected via application fee)
+  fee: string;
   entityId?: string;
   title?: string;
   taxTransactionAmountWithTax?: number;
@@ -706,29 +712,32 @@ class Stripe extends Abstract {
         await this.handlePaymentMethodDetached(event);
         break;
 
-      case 'payment_intent.created':
-        await this.handlePaymentIntentFailureCreate(event);
-        break;
-
       /**
        * Payment events
        */
       case 'payment_intent.processing':
-      case 'payment_intent.payment_failed':
       case 'payment_intent.succeeded':
-        await this.handlePaymentIntent(event);
+      case 'payment_intent.canceled':
+        await this.handlePaymentIntent(event, event.type);
         break;
 
+      case 'payment_intent.payment_failed':
+        await this.handlePaymentIntentPaymentFailed(event);
+        break;
+
+      /**
+       * Application fee events
+       */
       case 'application_fee.created':
-        await this.handleApplicationFeeCreated(event, 'application_fee.created');
+        await this.handleApplicationFeeCreated(event, event.type);
         break;
 
       case 'application_fee.refund.updated':
-        await this.handleApplicationFeeRefundUpdated(event, 'application_fee.refund.updated');
+        await this.handleApplicationFeeRefundUpdated(event, event.type);
         break;
 
       case 'application_fee.refunded':
-        await this.handleApplicationFeeRefunded(event, 'application_fee.refunded');
+        await this.handleApplicationFeeRefunded(event, event.type);
         break;
 
       /**
@@ -773,7 +782,7 @@ class Stripe extends Abstract {
         message: messages.getNotFoundMessage(
           'Failed to attach application fee to transaction. Application fee charge id',
         ),
-        payload: { eventName },
+        payload: { eventName, chargeId: transactionChargeId, applicationFeeId },
       });
     }
 
@@ -799,7 +808,7 @@ class Stripe extends Abstract {
         throw new BaseException({
           status: 500,
           message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
-          payload: { eventName },
+          payload: { eventName, transactionFee: transaction.fee, feeAmount: amount },
         });
       }
 
@@ -829,7 +838,7 @@ class Stripe extends Abstract {
         message: messages.getNotFoundMessage(
           'Failed to update refunded application fees. Debit or credit transaction',
         ),
-        payload: { eventName },
+        payload: { eventName, applicationFeeId },
       });
     }
 
@@ -846,7 +855,7 @@ class Stripe extends Abstract {
         throw new BaseException({
           status: 500,
           message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
-          payload: { eventName },
+          payload: { eventName, transactionFee: transaction.fee, feeAmount: amount },
         });
       }
 
@@ -886,7 +895,7 @@ class Stripe extends Abstract {
         message: messages.getNotFoundMessage(
           'Failed to update refunded application fees. Debit or credit transaction',
         ),
-        payload: { eventName },
+        payload: { eventName, applicationFeeId },
       });
     }
 
@@ -900,7 +909,7 @@ class Stripe extends Abstract {
         throw new BaseException({
           status: 500,
           message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
-          payload: { eventName },
+          payload: { eventName, transactionFee: transaction.fee, feeAmount: amount },
         });
       }
 
@@ -1160,118 +1169,120 @@ class Stripe extends Abstract {
 
   /**
    * Handles payment intent failure creation
-   * @description NOTES: Payment intent will be created with the failed status: card was declined -
+   * @description Payment intent will be created with the failed status: card was declined -
    * high fraud risk but stripe will throw error on creation and send webhook event with the creation
    */
-  public async handlePaymentIntentFailureCreate(event: StripeSdk.Event): Promise<void> {
+  public async handlePaymentIntentPaymentFailed(event: StripeSdk.Event): Promise<void> {
     const {
       id,
       status,
       metadata,
-      application_fee_amount: applicationFeeAmount,
       amount,
+      latest_charge: latestCharge,
+      last_payment_error: lastPaymentError,
     } = event.data.object as StripeSdk.PaymentIntent;
 
-    const transactions = await this.transactionRepository.find({ transactionId: id });
+    await this.manager.transaction(async (entityManager) => {
+      const transactionRepository = entityManager.getRepository(Transaction);
 
-    /**
-     * If transactions weren't created cause payment intent failed on create
-     */
-    if (transactions.length) {
-      return;
-    }
+      const transactions = await transactionRepository.find({ transactionId: id });
 
-    const {
-      entityId,
-      title,
-      feesPayer,
-      cardId,
-      entityCost,
-      platformFee,
-      stripeFee,
-      senderExtraFee,
-      receiverExtraFee,
-      receiverExtraRevenue,
-      senderId,
-      receiverId,
-      taxId,
-      taxTransactionAmountWithTax,
-      taxExpiresAt,
-      taxCreatedAt,
-      taxTotalAmount,
-      taxBehaviour,
-      taxFee,
-    } = metadata as unknown as IPaymentIntentMetadata;
+      /**
+       * If transactions weren't created cause payment intent failed on create
+       */
+      if (transactions.length) {
+        return;
+      }
 
-    const card = await this.cardRepository
-      .createQueryBuilder('card')
-      .where('card.userId = :userId AND card.id = :cardId', { userId: senderId, cardId })
-      .getOne();
-
-    if (!card) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Failed to create transaction. Card'),
-      });
-    }
-
-    /* eslint-enable camelcase */
-    const transactionData = {
-      entityId,
-      title,
-      paymentMethodId: CardRepository.extractPaymentMethodId(card),
-      cardId,
-      transactionId: id,
-      status: this.getStatus(status as StripeTransactionStatus),
-      // eslint-disable-next-line camelcase
-      fee: applicationFeeAmount || 0,
-      params: {
+      const {
+        entityId,
+        title,
         feesPayer,
-        platformFee: this.toSmallestCurrencyUnit(Number(platformFee)),
-        stripeFee: this.toSmallestCurrencyUnit(stripeFee),
-        entityCost: this.toSmallestCurrencyUnit(Number(entityCost)),
+        cardId,
+        entityCost,
+        senderId,
+        receiverId,
         taxId,
-        taxTransactionAmountWithTaxUnit: this.toSmallestCurrencyUnit(
-          Number(taxTransactionAmountWithTax),
-        ),
         taxExpiresAt,
         taxCreatedAt,
-        taxTotalAmountUnit: this.toSmallestCurrencyUnit(Number(taxTotalAmount)),
         taxBehaviour,
-        ...(taxFee ? { taxFeeUnit: this.toSmallestCurrencyUnit(Number(taxFee)) } : {}),
-      },
-    };
+        receiverRevenue,
+      } = metadata as unknown as IPaymentIntentMetadata;
 
-    await Promise.all([
-      this.transactionRepository.save({
-        ...transactionData,
-        userId: senderId,
-        type: TransactionType.CREDIT,
-        amount,
+      const card = await entityManager
+        .getRepository(Card)
+        .createQueryBuilder('card')
+        .where('card.userId = :userId AND card.id = :cardId', { userId: senderId, cardId })
+        .getOne();
+
+      if (!card) {
+        throw new BaseException({
+          status: 500,
+          message: messages.getNotFoundMessage('Failed to create transaction. Card'),
+        });
+      }
+
+      /* eslint-enable camelcase */
+      const transactionData = {
+        entityId,
+        title,
+        paymentMethodId: CardRepository.extractPaymentMethodId(card),
+        cardId,
+        transactionId: id,
+        status: this.getStatus(status as StripeTransactionStatus),
+        // eslint-disable-next-line camelcase
         params: {
-          ...transactionData.params,
-          extraFee: this.toSmallestCurrencyUnit(Number(senderExtraFee)),
+          feesPayer,
+          entityCost: this.toSmallestCurrencyUnit(entityCost),
+          taxId,
+          taxExpiresAt,
+          taxCreatedAt,
+          taxBehaviour,
+          ...(latestCharge ? { chargeId: this.extractId(latestCharge) } : {}),
+          errorCode: lastPaymentError?.code,
+          errorMessage: lastPaymentError?.message,
+          declineCode: lastPaymentError?.decline_code,
         },
-      }),
-      this.transactionRepository.save({
-        ...transactionData,
-        userId: receiverId,
-        type: TransactionType.DEBIT,
-        amount,
-        // Amount that will be charge for instant payout
-        params: {
-          ...transactionData.params,
-          extraFee: this.toSmallestCurrencyUnit(Number(receiverExtraFee)),
-          extraRevenue: this.toSmallestCurrencyUnit(Number(receiverExtraRevenue)),
-        },
-      }),
-    ]);
+      };
+
+      await Promise.all([
+        transactionRepository.save(
+          transactionRepository.create({
+            ...transactionData,
+            userId: senderId,
+            type: TransactionType.CREDIT,
+            amount,
+            params: {
+              ...transactionData.params,
+            },
+          }),
+        ),
+        transactionRepository.save(
+          transactionRepository.create({
+            ...transactionData,
+            userId: receiverId,
+            type: TransactionType.DEBIT,
+            amount: this.toSmallestCurrencyUnit(receiverRevenue),
+            params: {
+              ...transactionData.params,
+            },
+          }),
+        ),
+      ]);
+
+      // Do not support update payment intent, only recharge via creating new payment
+      if (status !== StripeTransactionStatus.REQUIRES_PAYMENT_METHOD) {
+        return;
+      }
+
+      await this.sdk.paymentIntents.cancel(id);
+    });
   }
 
   /**
    * Handles payment intent statuses
    */
-  public async handlePaymentIntent(event: StripeSdk.Event): Promise<void> {
+  public async handlePaymentIntent(event: StripeSdk.Event, eventName: string): Promise<void> {
     const {
       id,
       status,
@@ -1279,37 +1290,46 @@ class Stripe extends Abstract {
       last_payment_error: lastPaymentError,
     } = event.data.object as StripeSdk.PaymentIntent;
 
-    const transactions = await this.transactionRepository.find({ transactionId: id });
+    await this.manager.transaction(async (entityManager) => {
+      const transactionRepository = entityManager.getRepository(Transaction);
 
-    if (!transactions.length) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage(
-          'Failed to handle payment intent. Debit or credit transaction',
-        ),
-      });
-    }
+      const transactions = await transactionRepository.find({ transactionId: id });
 
-    await Promise.all(
-      transactions.map((transaction) => {
-        if (!transaction.params.chargeId && latestCharge) {
-          transaction.params.chargeId = this.extractId(latestCharge);
-        }
+      if (!transactions.length) {
+        const errorMessage = messages.getNotFoundMessage(
+          `Failed to handle payment intent "${eventName}". Debit or credit transaction`,
+        );
 
-        transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
+        Log.error(errorMessage);
 
-        /**
-         * If payment intent failed
-         */
-        if (lastPaymentError) {
-          transaction.params.errorMessage = lastPaymentError.message;
-          transaction.params.errorCode = lastPaymentError.code;
-          transaction.params.declineCode = lastPaymentError.decline_code;
-        }
+        throw new BaseException({
+          status: 500,
+          message: errorMessage,
+          payload: { eventName },
+        });
+      }
 
-        return this.transactionRepository.save(transaction);
-      }),
-    );
+      await Promise.all(
+        transactions.map((transaction) => {
+          if (!transaction.params.chargeId && latestCharge) {
+            transaction.params.chargeId = this.extractId(latestCharge);
+          }
+
+          transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
+
+          /**
+           * If payment intent failed
+           */
+          if (lastPaymentError) {
+            transaction.params.errorMessage = lastPaymentError.message;
+            transaction.params.errorCode = lastPaymentError.code;
+            transaction.params.declineCode = lastPaymentError.decline_code;
+          }
+
+          return transactionRepository.save(transaction);
+        }),
+      );
+    });
   }
 
   /**
@@ -2055,6 +2075,10 @@ class Stripe extends Abstract {
       taxBehaviour: tax?.behaviour,
       totalTaxPercent: tax?.totalTaxPercent,
     };
+    const baseFeeUnit = platformUnitFee + stripeFeeUnit + taxFeeUnit;
+    const senderPersonalFeeUnit = baseFeeUnit + senderAdditionalFee;
+    const receiverPersonalFeeUnit = baseFeeUnit + receiverAdditionalFee;
+    const collectedFeeUnit = baseFeeUnit + senderAdditionalFee + receiverAdditionalFee;
 
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
@@ -2068,7 +2092,12 @@ class Stripe extends Abstract {
         senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
         receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue),
         cardId: paymentMethodCardId,
+        fee: this.fromSmallestCurrencyUnit(collectedFeeUnit),
         feesPayer,
+        receiverRevenue: this.fromSmallestCurrencyUnit(receiverUnitRevenue),
+        baseFee: this.fromSmallestCurrencyUnit(baseFeeUnit),
+        senderPersonalFee: this.fromSmallestCurrencyUnit(senderPersonalFeeUnit),
+        receiverPersonalFee: this.fromSmallestCurrencyUnit(receiverPersonalFeeUnit),
         senderId: senderCustomer.userId,
         receiverId: receiverUserId,
         ...(entityId ? { entityId } : {}),
@@ -2106,13 +2135,14 @@ class Stripe extends Abstract {
       paymentMethodId,
       cardId: paymentMethodCardId,
       transactionId: stripePaymentIntent.id,
-      fee: platformUnitFee + stripeFeeUnit + taxFeeUnit,
+      fee: collectedFeeUnit,
       ...(tax ? { tax: tax.totalAmountUnit } : {}),
       params: {
         feesPayer,
         platformFee: platformUnitFee,
         stripeFee: stripeFeeUnit,
         entityCost: entityUnitCost,
+        baseFee: baseFeeUnit,
         ...(tax
           ? {
               ...sharedTaxData,
@@ -2133,6 +2163,7 @@ class Stripe extends Abstract {
         params: {
           ...transactionData.params,
           extraFee: senderAdditionalFee,
+          personalFee: senderPersonalFeeUnit,
         },
       }),
       this.transactionRepository.save({
@@ -2144,6 +2175,7 @@ class Stripe extends Abstract {
         params: {
           ...transactionData.params,
           extraFee: receiverAdditionalFee,
+          personalFee: receiverPersonalFeeUnit,
           extraRevenue: extraReceiverUnitRevenue,
           estimatedInstantPayoutFee: Math.round(receiverUnitRevenue * (instantPayoutPercent / 100)),
         },
@@ -2165,7 +2197,7 @@ class Stripe extends Abstract {
 
   /**
    * Refund transaction (payment intent)
-   * @description NOTES:
+   * @description Workflow:
    * Sender payed 106.39$: 100$ - entity cost, 3.39$ - stripe fees, 3$ - platform application fee.
    * In the end of refund sender will receive 100$ and platform revenue will be 3$.
    */
@@ -2282,7 +2314,7 @@ class Stripe extends Abstract {
 
   /**
    * Returns positive int amount
-   * @description NOTE: Should return the positive integer representing how much
+   * @description Should return the positive integer representing how much
    * to charge in the smallest currency unit
    */
   public toSmallestCurrencyUnit(amount: number | string): number {
