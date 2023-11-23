@@ -61,6 +61,7 @@ export interface IParams extends IComputedTax {
   personalFee: number;
   destinationTransactionId?: string | null;
   transferId?: string | null;
+  transferDestinationConnectAccountId?: string;
   paymentStatus?: StripeTransactionStatus;
   checkoutStatus?: StripeCheckoutStatus;
   errorMessage?: string;

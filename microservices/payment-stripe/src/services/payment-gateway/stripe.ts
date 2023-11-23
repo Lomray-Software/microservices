@@ -33,10 +33,9 @@ import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
 import type ITax from '@interfaces/tax';
-import CardRepository from '@repositories/card';
 import type { ICardDataByFingerprintResult } from '@repositories/card';
+import CardRepository from '@repositories/card';
 import Calculation from '@services/calculation';
-import Abstract from './abstract';
 import type {
   IBankAccountParams,
   ICardParams,
@@ -44,6 +43,7 @@ import type {
   IPriceParams,
   IProductParams,
 } from './abstract';
+import Abstract from './abstract';
 
 export interface IStripeProductParams extends IProductParams {
   name: string;
@@ -1222,6 +1222,7 @@ class Stripe extends Abstract {
         cardId,
         transactionId: id,
         status: this.getStatus(status as StripeTransactionStatus),
+        ...(latestCharge ? { chargeId: this.extractId(latestCharge) } : {}),
         // eslint-disable-next-line camelcase
         params: {
           feesPayer,
@@ -1230,7 +1231,6 @@ class Stripe extends Abstract {
           taxExpiresAt,
           taxCreatedAt,
           taxBehaviour,
-          ...(latestCharge ? { chargeId: this.extractId(latestCharge) } : {}),
           errorCode: lastPaymentError?.code,
           errorMessage: lastPaymentError?.message,
           declineCode: lastPaymentError?.decline_code,
@@ -1280,6 +1280,7 @@ class Stripe extends Abstract {
       status,
       latest_charge: latestCharge,
       last_payment_error: lastPaymentError,
+      transfer_data: transferData,
     } = event.data.object as StripeSdk.PaymentIntent;
 
     await this.manager.transaction(async (entityManager) => {
@@ -1301,26 +1302,38 @@ class Stripe extends Abstract {
         });
       }
 
-      await Promise.all(
-        transactions.map((transaction) => {
-          if (!transaction.chargeId && latestCharge) {
-            transaction.chargeId = this.extractId(latestCharge);
-          }
+      transactions.forEach((transaction) => {
+        /**
+         * Attach related charge
+         */
+        if (!transaction.chargeId && latestCharge) {
+          transaction.chargeId = this.extractId(latestCharge);
+        }
 
-          transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
+        transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
 
-          /**
-           * If payment intent failed
-           */
-          if (lastPaymentError) {
-            transaction.params.errorMessage = lastPaymentError.message;
-            transaction.params.errorCode = lastPaymentError.code;
-            transaction.params.declineCode = lastPaymentError.decline_code;
-          }
+        /**
+         * Attach destination funds transfer connect account
+         */
+        if (!transaction.params.transferDestinationConnectAccountId && transferData?.destination) {
+          transaction.params.transferDestinationConnectAccountId = this.extractId(
+            transferData.destination,
+          );
+        }
 
-          return transactionRepository.save(transaction);
-        }),
-      );
+        if (!lastPaymentError) {
+          return;
+        }
+
+        /**
+         * Attach error data if it occurs
+         */
+        transaction.params.errorMessage = lastPaymentError.message;
+        transaction.params.errorCode = lastPaymentError.code;
+        transaction.params.declineCode = lastPaymentError.decline_code;
+      });
+
+      await transactionRepository.save(transactions);
     });
   }
 
@@ -2023,7 +2036,25 @@ class Stripe extends Abstract {
     }
 
     const transferId: string | null = transfer ? this.extractId(transfer) : null;
+    const isDestinationTransaction = transactions.some(
+      ({ params }) => params.transferDestinationConnectAccountId,
+    );
+    const destinationTransactionErrorMessage = messages.getNotFoundMessage(
+      'Failed to retrieve charge transfer destination transaction',
+    );
     let transferExpanded: StripeSdk.Transfer | null = null;
+
+    /**
+     * If transaction is destination and transfer was not retrieved
+     */
+    if (isDestinationTransaction && !transferId) {
+      Log.error(destinationTransactionErrorMessage);
+
+      throw new BaseException({
+        status: 500,
+        message: destinationTransactionErrorMessage,
+      });
+    }
 
     /**
      * Get destination transaction
@@ -2033,15 +2064,11 @@ class Stripe extends Abstract {
       transferExpanded = await this.sdk.transfers.retrieve(transferId);
 
       if (!transferExpanded?.destination_payment) {
-        const errorMessage = messages.getNotFoundMessage(
-          'Failed to retrieve charge transfer destination transaction',
-        );
-
-        Log.error(errorMessage);
+        Log.error(destinationTransactionErrorMessage);
 
         throw new BaseException({
           status: 500,
-          message: errorMessage,
+          message: destinationTransactionErrorMessage,
         });
       }
     }
