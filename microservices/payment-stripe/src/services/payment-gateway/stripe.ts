@@ -24,7 +24,7 @@ import Price from '@entities/price';
 import Product from '@entities/product';
 import Refund from '@entities/refund';
 import type { IComputedTax, IParams as ITransactionParams } from '@entities/transaction';
-import Transaction from '@entities/transaction';
+import Transaction, { defaultParams as defaultTransactionParams } from '@entities/transaction';
 import composeBalance from '@helpers/compose-balance';
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
@@ -713,25 +713,40 @@ class Stripe extends Abstract {
         break;
 
       /**
-       * Payment events
+       * Transfer events
+       */
+      case 'transfer.reversed':
+        const transferReversedHandlers = {
+          account: this.transferReversed(event),
+        };
+
+        await transferReversedHandlers?.[webhookType];
+        break;
+
+      /**
+       * Payment intent events
        */
       case 'payment_intent.processing':
       case 'payment_intent.succeeded':
       case 'payment_intent.canceled':
-        await this.handlePaymentIntent(event, event.type);
+        const paymentIntentProcessingSucceededCanceledHandlers = {
+          account: this.handlePaymentIntent(event),
+        };
+
+        await paymentIntentProcessingSucceededCanceledHandlers?.[webhookType];
         break;
 
       case 'payment_intent.payment_failed':
-        await this.handlePaymentIntentPaymentFailed(event);
+        const paymentIntentPaymentFailedHandlers = {
+          account: this.handlePaymentIntentPaymentFailed(event),
+        };
+
+        await paymentIntentPaymentFailedHandlers?.[webhookType];
         break;
 
       /**
        * Application fee events
        */
-      case 'application_fee.created':
-        await this.handleApplicationFeeCreated(event, event.type);
-        break;
-
       case 'application_fee.refund.updated':
         await this.handleApplicationFeeRefundUpdated(event, event.type);
         break;
@@ -764,55 +779,32 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Handles application fee created
+   * Transfer reversed
    */
-  public async handleApplicationFeeCreated(
-    event: StripeSdk.Event,
-    eventName: string,
-  ): Promise<void> {
-    const {
-      id: applicationFeeId,
-      amount,
-      originating_transaction: transactionChargeId,
-    } = event.data.object as StripeSdk.ApplicationFee;
-
-    if (!transactionChargeId) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage(
-          'Failed to attach application fee to transaction. Application fee charge id',
-        ),
-        payload: { eventName, chargeId: transactionChargeId, applicationFeeId },
-      });
-    }
-
-    const chargeId = this.extractId(transactionChargeId);
+  public async transferReversed(event: StripeSdk.Event): Promise<void> {
+    const { amount_reversed: reversedAmount, source_transaction: chargeId } = event.data
+      .object as StripeSdk.Transfer;
 
     const transactions = await this.transactionRepository
       .createQueryBuilder('t')
-      .where("(t.params ->> 'chargeId') = :chargeId", { chargeId })
+      .where('t.chargeId = :chargeId', { chargeId })
       .getMany();
 
     if (!transactions.length) {
+      const errorMessage = messages.getNotFoundMessage(
+        'Failed to hande transfer reversed. Debit or credit transaction',
+      );
+
+      Log.error(errorMessage);
+
       throw new BaseException({
         status: 500,
-        message: messages.getNotFoundMessage(
-          'Failed to attach application fee to transaction. Debit or credit transaction',
-        ),
-        payload: { eventName },
+        message: errorMessage,
       });
     }
 
     transactions.forEach((transaction) => {
-      if (transaction.fee !== amount) {
-        throw new BaseException({
-          status: 500,
-          message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
-          payload: { eventName, transactionFee: transaction.fee, feeAmount: amount },
-        });
-      }
-
-      transaction.applicationFeeId = applicationFeeId;
+      transaction.params.transferReversedAmount = reversedAmount;
     });
 
     await this.transactionRepository.save(transactions);
@@ -1282,7 +1274,7 @@ class Stripe extends Abstract {
   /**
    * Handles payment intent statuses
    */
-  public async handlePaymentIntent(event: StripeSdk.Event, eventName: string): Promise<void> {
+  public async handlePaymentIntent(event: StripeSdk.Event): Promise<void> {
     const {
       id,
       status,
@@ -1297,7 +1289,7 @@ class Stripe extends Abstract {
 
       if (!transactions.length) {
         const errorMessage = messages.getNotFoundMessage(
-          `Failed to handle payment intent "${eventName}". Debit or credit transaction`,
+          `Failed to handle payment intent "${event.type}". Debit or credit transaction`,
         );
 
         Log.error(errorMessage);
@@ -1305,14 +1297,14 @@ class Stripe extends Abstract {
         throw new BaseException({
           status: 500,
           message: errorMessage,
-          payload: { eventName },
+          payload: { eventName: event.type },
         });
       }
 
       await Promise.all(
         transactions.map((transaction) => {
-          if (!transaction.params.chargeId && latestCharge) {
-            transaction.params.chargeId = this.extractId(latestCharge);
+          if (!transaction.chargeId && latestCharge) {
+            transaction.chargeId = this.extractId(latestCharge);
           }
 
           transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
@@ -1955,6 +1947,124 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Attach to transactions charge refs (transfer, destination payment and related amounts)
+   */
+  public async attachToTransactionsChargeRefs(chargeId: string): Promise<void> {
+    const transactions = await this.transactionRepository
+      .createQueryBuilder('t')
+      .where('t.chargeId = :chargeId', { chargeId })
+      .getMany();
+
+    if (!transactions.length) {
+      const errorMessage = messages.getNotFoundMessage(
+        'Failed to get charge regs. Debit or credit transaction',
+      );
+
+      Log.error(errorMessage);
+
+      throw new BaseException({
+        status: 500,
+        message: errorMessage,
+        payload: {
+          transactions: transactions.map(({ transactionId, type, id }) => ({
+            transactionId,
+            type,
+            id,
+          })),
+        },
+      });
+    }
+
+    /**
+     * Get transfer and application fees
+     * @description Transfer only for destination charges.
+     * The reason for managing application fees here is that when an application fee is created,
+     * Stripe sends an event in parallel with the creation of the payment intent. Currently,
+     * the database does not support transactions at this moment.
+     */
+    const { transfer, application_fee: applicationFee } = await this.sdk.charges.retrieve(
+      chargeId,
+      {
+        expand: ['application_fee'],
+      },
+    );
+
+    const isApplicationFeeExpanded = this.checkIfApplicationFeeIsObject(applicationFee);
+
+    if (!isApplicationFeeExpanded) {
+      const errorMessage = 'Failed to expand charge application fee';
+
+      Log.error(errorMessage);
+
+      throw new BaseException({
+        status: 500,
+        message: errorMessage,
+        payload: { applicationFee },
+      });
+    }
+
+    const {
+      id: applicationFeeId,
+      amount: applicationFeeAmount,
+      amount_refunded: applicationFeeRefundedAmount,
+    } = applicationFee;
+
+    if (transactions.some(({ fee }) => fee !== applicationFeeAmount)) {
+      const errorMessage =
+        'Failed to update transaction application fee. Application fee do not equal to transaction fee';
+
+      Log.error(errorMessage);
+
+      throw new BaseException({
+        status: 500,
+        message: errorMessage,
+        payload: { applicationFee, transactionsFee: transactions.map(({ fee }) => ({ fee })) },
+      });
+    }
+
+    const transferId: string | null = transfer ? this.extractId(transfer) : null;
+    let transferExpanded: StripeSdk.Transfer | null = null;
+
+    /**
+     * Get destination transaction
+     * @description Only for destination charges (e.g. destination payment intent)
+     */
+    if (transferId) {
+      transferExpanded = await this.sdk.transfers.retrieve(transferId);
+
+      if (!transferExpanded?.destination_payment) {
+        const errorMessage = messages.getNotFoundMessage(
+          'Failed to retrieve charge transfer destination transaction',
+        );
+
+        Log.error(errorMessage);
+
+        throw new BaseException({
+          status: 500,
+          message: errorMessage,
+        });
+      }
+    }
+
+    const destinationTransaction: string | null =
+      transferId && transferExpanded ? this.extractId(transferExpanded) : null;
+
+    transactions.forEach((transaction) => {
+      transaction.applicationFeeId = applicationFeeId;
+      transaction.params.transferId = transferId;
+      transaction.params.refundedApplicationFeeAmount = applicationFeeRefundedAmount;
+
+      if (destinationTransaction) {
+        transaction.params.destinationTransactionId = this.extractId(destinationTransaction);
+        transaction.params.transferAmount = transferExpanded?.amount || 0;
+        transaction.params.transferReversedAmount = transferExpanded?.amount_reversed || 0;
+      }
+    });
+
+    await this.transactionRepository.save(transactions);
+  }
+
+  /**
    * Create PaymentIntent
    */
   public async createPaymentIntent({
@@ -2138,6 +2248,8 @@ class Stripe extends Abstract {
       fee: collectedFeeUnit,
       ...(tax ? { tax: tax.totalAmountUnit } : {}),
       params: {
+        // Handle override initial params from repository create
+        ...defaultTransactionParams,
         feesPayer,
         platformFee: platformUnitFee,
         stripeFee: stripeFeeUnit,
@@ -2155,31 +2267,37 @@ class Stripe extends Abstract {
     };
 
     const transactions = await Promise.all([
-      this.transactionRepository.save({
-        ...transactionData,
-        userId: senderCustomer.userId,
-        type: TransactionType.CREDIT,
-        amount: paymentIntentAmountUnit,
-        params: {
-          ...transactionData.params,
-          extraFee: senderAdditionalFee,
-          personalFee: senderPersonalFeeUnit,
-        },
-      }),
-      this.transactionRepository.save({
-        ...transactionData,
-        userId: receiverUserId,
-        type: TransactionType.DEBIT,
-        amount: receiverUnitRevenue,
-        // Amount that will be charge for instant payout
-        params: {
-          ...transactionData.params,
-          extraFee: receiverAdditionalFee,
-          personalFee: receiverPersonalFeeUnit,
-          extraRevenue: extraReceiverUnitRevenue,
-          estimatedInstantPayoutFee: Math.round(receiverUnitRevenue * (instantPayoutPercent / 100)),
-        },
-      }),
+      this.transactionRepository.save(
+        this.transactionRepository.create({
+          ...transactionData,
+          userId: senderCustomer.userId,
+          type: TransactionType.CREDIT,
+          amount: paymentIntentAmountUnit,
+          params: {
+            ...transactionData.params,
+            extraFee: senderAdditionalFee,
+            personalFee: senderPersonalFeeUnit,
+          },
+        }),
+      ),
+      this.transactionRepository.save(
+        this.transactionRepository.create({
+          ...transactionData,
+          userId: receiverUserId,
+          type: TransactionType.DEBIT,
+          amount: receiverUnitRevenue,
+          // Amount that will be charge for instant payout
+          params: {
+            ...transactionData.params,
+            extraFee: receiverAdditionalFee,
+            personalFee: receiverPersonalFeeUnit,
+            extraRevenue: extraReceiverUnitRevenue,
+            estimatedInstantPayoutFee: Math.round(
+              receiverUnitRevenue * (instantPayoutPercent / 100),
+            ),
+          },
+        }),
+      ),
     ]);
 
     /**
@@ -2220,7 +2338,7 @@ class Stripe extends Abstract {
       });
     }
 
-    if (!debitTransaction.params.chargeId) {
+    if (!debitTransaction.chargeId) {
       throw new BaseException({
         status: 400,
         message: "Transaction don't have related transfer id and can't be refunded.",
@@ -2252,7 +2370,7 @@ class Stripe extends Abstract {
      */
     /* eslint-disable camelcase */
     const stripeRefund = await this.sdk.refunds.create({
-      charge: debitTransaction.params.chargeId,
+      charge: debitTransaction.chargeId,
       // From receiver connected account funds will be transferred to Platform, then refund
       reverse_transfer: true,
       // Refund collected application fee, if - not: rest refund amount will be charged from receiver connected account
@@ -2890,6 +3008,19 @@ class Stripe extends Abstract {
       sender,
       receiver,
     };
+  }
+
+  /**
+   * Check if transfer is object
+   */
+  private checkIfApplicationFeeIsObject(
+    applicationFee?: StripeSdk.ApplicationFee | string | null,
+  ): applicationFee is StripeSdk.ApplicationFee {
+    if (!applicationFee || typeof applicationFee === 'string') {
+      return false;
+    }
+
+    return 'id' in applicationFee && applicationFee.object === 'application_fee';
   }
 }
 

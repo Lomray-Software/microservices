@@ -80,7 +80,7 @@ export interface IParams extends IComputedTax {
 /**
  * In whole cases this data is required and usable
  */
-const defaultParams: Pick<
+export const defaultParams: Pick<
   IParams,
   | 'refundedTransactionAmount'
   | 'refundedApplicationFeeAmount'
