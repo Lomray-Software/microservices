@@ -700,16 +700,28 @@ class Stripe extends Abstract {
        * Payment method events
        */
       case 'setup_intent.succeeded':
-        await this.handleSetupIntentSucceed(event);
+        const setupIntentSucceededHandlers = {
+          account: this.handleSetupIntentSucceed(event),
+        };
+
+        await setupIntentSucceededHandlers?.[webhookType];
         break;
 
       case 'payment_method.updated':
       case 'payment_method.automatically_updated':
-        await this.handlePaymentMethodUpdated(event);
+        const paymentMethodUpdatedAutomaticallyUpdatedHandlers = {
+          account: this.handlePaymentMethodUpdated(event),
+        };
+
+        await paymentMethodUpdatedAutomaticallyUpdatedHandlers?.[webhookType];
         break;
 
       case 'payment_method.detached':
-        await this.handlePaymentMethodDetached(event);
+        const paymentMethodDetachedHandlers = {
+          account: this.handlePaymentMethodDetached(event),
+        };
+
+        await paymentMethodDetachedHandlers?.[webhookType];
         break;
 
       /**
@@ -748,25 +760,41 @@ class Stripe extends Abstract {
        * Application fee events
        */
       case 'application_fee.refund.updated':
-        await this.handleApplicationFeeRefundUpdated(event);
+        const applicationFeeRefundUpdatedHandlers = {
+          account: this.handleApplicationFeeRefundUpdated(event),
+        };
+
+        await applicationFeeRefundUpdatedHandlers?.[webhookType];
         break;
 
       case 'application_fee.refunded':
-        await this.handleApplicationFeeRefunded(event);
+        const applicationFeeRefundedHandlers = {
+          account: this.handleApplicationFeeRefunded(event),
+        };
+
+        await applicationFeeRefundedHandlers?.[webhookType];
         break;
 
       /**
        * Refund events
        */
       case 'charge.refund.updated':
-        await this.handleRefundUpdated(event);
+        const chargeRefundUpdatedHandlers = {
+          account: this.handleRefundUpdated(event),
+        };
+
+        await chargeRefundUpdatedHandlers?.[webhookType];
         break;
 
       /**
        * Charge events
        */
       case 'charge.refunded':
-        await this.handleChargeRefunded(event);
+        const chargeRefundedHandlers = {
+          account: this.handleChargeRefunded(event),
+        };
+
+        await chargeRefundedHandlers?.[webhookType];
         break;
 
       /**
