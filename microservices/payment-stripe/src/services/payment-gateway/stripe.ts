@@ -1221,10 +1221,10 @@ class Stripe extends Abstract {
         transactionId: id,
         status: this.getStatus(status as StripeTransactionStatus),
         ...(latestCharge ? { chargeId: this.extractId(latestCharge) } : {}),
+        ...(taxTransactionId ? { taxTransactionId } : {}),
+        ...(taxCalculationId ? { taxCalculationId } : {}),
         // eslint-disable-next-line camelcase
         params: {
-          taxCalculationId,
-          taxTransactionId,
           feesPayer,
           entityCost: this.toSmallestCurrencyUnit(entityCost),
           errorCode: lastPaymentError?.code,
@@ -1233,7 +1233,9 @@ class Stripe extends Abstract {
           taxExpiresAt,
           taxCreatedAt,
           taxBehaviour,
-          taxAutoCalculateFee,
+          ...(taxAutoCalculateFee
+            ? { taxAutoCalculateFee: this.toSmallestCurrencyUnit(taxAutoCalculateFee) }
+            : {}),
         },
       };
 
@@ -1298,15 +1300,32 @@ class Stripe extends Abstract {
         });
       }
 
+      const { transactionId, taxCalculationId } = transactions?.[0];
+
+      let stripeTaxTransaction: StripeSdk.Tax.Transaction | null = null;
+
+      /**
+       * If tax collecting and payment intent succeeded - create tax transaction
+       * @description Create tax transaction cost is $0.5. Create only if payment intent succeeded
+       */
+      if (taxCalculationId && status === StripeTransactionStatus.SUCCEEDED) {
+        // Create tax transaction (for Stripe Tax reports)
+        stripeTaxTransaction = await this.sdk.tax.transactions.createFromCalculation({
+          calculation: taxCalculationId,
+          // Stripe payment intent id
+          reference: transactionId,
+        });
+      }
+
       transactions.forEach((transaction) => {
+        transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
+
         /**
          * Attach related charge
          */
         if (!transaction.chargeId && latestCharge) {
           transaction.chargeId = this.extractId(latestCharge);
         }
-
-        transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
 
         /**
          * Attach destination funds transfer connect account
@@ -1315,6 +1334,13 @@ class Stripe extends Abstract {
           transaction.params.transferDestinationConnectAccountId = this.extractId(
             transferData.destination,
           );
+        }
+
+        /**
+         * Attach tax transaction if reference
+         */
+        if (stripeTaxTransaction) {
+          transaction.taxTransactionId = stripeTaxTransaction.id;
         }
 
         if (!lastPaymentError) {
@@ -1328,6 +1354,17 @@ class Stripe extends Abstract {
         transaction.params.errorCode = lastPaymentError.code;
         transaction.params.declineCode = lastPaymentError.decline_code;
       });
+
+      if (stripeTaxTransaction) {
+        /**
+         * Sync payment intent with the microservice transactions
+         */
+        await this.sdk.paymentIntents.update(transactionId, {
+          metadata: {
+            taxTransactionId: stripeTaxTransaction?.id,
+          },
+        });
+      }
 
       await transactionRepository.save(transactions);
     });
@@ -2275,22 +2312,6 @@ class Stripe extends Abstract {
       },
     });
 
-    /* eslint-enable camelcase */
-    let stripeTaxTransaction: StripeSdk.Tax.Transaction | null = null;
-
-    // Create tax transaction (for Stripe Tax reports)
-    if (withTax) {
-      if (!tax?.id) {
-        // This case SHOULD NOT exist
-        Log.error('Tax id was not found for create tax transaction for payment intent with tax');
-      }
-
-      stripeTaxTransaction = await this.sdk.tax.transactions.createFromCalculation({
-        calculation: tax?.id as string,
-        reference: stripePaymentIntent.id,
-      });
-    }
-
     const transactionData = {
       entityId,
       title,
@@ -2299,7 +2320,6 @@ class Stripe extends Abstract {
       transactionId: stripePaymentIntent.id,
       fee: collectedFeeUnit,
       ...(tax ? { tax: tax.totalAmountUnit, taxCalculationId: tax.id } : {}),
-      ...(stripeTaxTransaction ? { taxTransactionId: stripeTaxTransaction?.id } : {}),
       params: {
         // Handle override initial params from repository create
         ...defaultTransactionParams,
@@ -2357,7 +2377,6 @@ class Stripe extends Abstract {
       metadata: {
         creditTransactionId: transactions?.[0]?.id,
         debitTransactionId: transactions?.[1]?.id,
-        ...(stripeTaxTransaction ? { taxTransactionId: stripeTaxTransaction?.id } : {}),
       },
     });
 
