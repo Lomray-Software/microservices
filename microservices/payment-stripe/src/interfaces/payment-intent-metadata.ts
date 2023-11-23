@@ -26,5 +26,5 @@ export interface IPaymentIntentMetadata
   taxFee?: number;
   totalTaxPercent?: number;
   taxAutoCalculateFee?: number;
-  taxTransactionId?: number;
+  taxTransactionId?: string | null;
 }

@@ -18,6 +18,7 @@ import TransactionType from '@constants/transaction-type';
 import type Customer from '@entities/customer';
 import type Product from '@entities/product';
 import IsValidStripeId from '@helpers/validators/is-stripe-id-valid';
+import type { IPaymentIntentMetadata } from '@interfaces/payment-intent-metadata';
 import type ITax from '@interfaces/tax';
 
 export interface IComputedTax {
@@ -43,7 +44,7 @@ export interface IComputedTax {
  * 3. PersonalFee - Personal user fee. For receiver, it's application fees with only debit extra fees.
  *  For sender, it's application fees with only credit extra fees.
  */
-export interface IParams extends IComputedTax {
+export interface IParams extends IComputedTax, Pick<IPaymentIntentMetadata, 'taxTransactionId'> {
   // Refunded original transaction/payment intent/charge
   refundedTransactionAmount: number;
   // Refunded Stripe collected fee

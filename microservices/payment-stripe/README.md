@@ -90,6 +90,7 @@ into your hosted endpoint listeners in the Stripe dashboard.
 2. For local development: use stripe-cli
 
 ### <a id="webhooks"></a>DEFINITIONS:
+#### <a id="webhooks"></a>Fees:
 1. Application fees - collected amount by Platform from transaction.
 2. Tax - collected taxes (included in application fees).
 3. Fee - Platform fee, Stripe fee (included in application fees).
@@ -100,4 +101,8 @@ into your hosted endpoint listeners in the Stripe dashboard.
 7. Base fee - platform + stripe + create tax transaction fee
 8. Personal fee - base fee + personal (debit or credit extra fee)
 
+#### <a id="webhooks"></a>Tax:
+1. Tax calculation (Tax Calculation API) - calculated by Stripe tax for transaction (e.g. payment intent)
+2. Tax transaction (Tax Transaction API) - Stripe tax transaction presented in Stripe Tax reports
+ 
 Rebuild: 1

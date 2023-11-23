@@ -2278,6 +2278,21 @@ class Stripe extends Abstract {
     });
 
     /* eslint-enable camelcase */
+    let stripeTaxTransaction: StripeSdk.Tax.Transaction | null = null;
+
+    // Create tax transaction (for Stripe Tax reports)
+    if (withTax) {
+      if (!tax?.id) {
+        // This case SHOULD NOT exist
+        Log.error('Tax id was not found for create tax transaction for payment intent with tax');
+      }
+
+      stripeTaxTransaction = await this.sdk.tax.transactions.createFromCalculation({
+        calculation: tax?.id as string,
+        reference: stripePaymentIntent.id,
+      });
+    }
+
     const transactionData = {
       entityId,
       title,
@@ -2303,6 +2318,7 @@ class Stripe extends Abstract {
               ...(taxFeeUnit ? { taxFeeUnit } : {}),
             }
           : {}),
+        ...(stripeTaxTransaction ? { taxTransactionId: stripeTaxTransaction?.id } : {}),
       },
     };
 
