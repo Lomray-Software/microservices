@@ -77,7 +77,11 @@ describe('services/calculation', () => {
 
       const [[, input]] = computePaymentIntentTaxStub.args;
 
-      expect(result).to.deep.equal({ tax: mockTax, feeUnit: configMock.taxes.stableUnit });
+      expect(result).to.deep.equal({
+        tax: mockTax,
+        createTaxTransactionFeeUnit: configMock.taxes.stableUnit,
+        autoCalculateFeeUnit: configMock.taxes.autoCalculateFeeUnit,
+      });
       expect(computePaymentIntentTaxStub).to.calledOnce;
       expect(input).to.deep.equal({
         entityId: mockParams.entityId,
@@ -96,7 +100,11 @@ describe('services/calculation', () => {
 
       const [[, input]] = computePaymentIntentTaxStub.args;
 
-      expect(result).to.deep.equal({ tax: mockTax, feeUnit: configMock.taxes.stableUnit });
+      expect(result).to.deep.equal({
+        tax: mockTax,
+        createTaxTransactionFeeUnit: configMock.taxes.stableUnit,
+        autoCalculateFeeUnit: configMock.taxes.autoCalculateFeeUnit,
+      });
       expect(computePaymentIntentTaxStub).to.calledOnce;
       expect(input).to.deep.equal({
         entityId: mockParams.entityId,
