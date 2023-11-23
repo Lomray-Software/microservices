@@ -94,6 +94,7 @@ interface IPaymentIntentMetadata
   taxTotalAmount?: number;
   taxFee?: number;
   totalTaxPercent?: number;
+  taxAutoCalculateFee?: number;
 }
 
 interface IRefundParams {
@@ -1221,6 +1222,7 @@ class Stripe extends Abstract {
         taxCreatedAt,
         taxBehaviour,
         receiverRevenue,
+        taxAutoCalculateFee,
       } = metadata as unknown as IPaymentIntentMetadata;
 
       const card = await entityManager
@@ -1253,6 +1255,7 @@ class Stripe extends Abstract {
           taxExpiresAt,
           taxCreatedAt,
           taxBehaviour,
+          taxAutoCalculateFee,
           errorCode: lastPaymentError?.code,
           errorMessage: lastPaymentError?.message,
           declineCode: lastPaymentError?.decline_code,
@@ -2053,7 +2056,10 @@ class Stripe extends Abstract {
       throw new BaseException({
         status: 500,
         message: errorMessage,
-        payload: { applicationFee, transactionsFee: transactions.map(({ fee }) => ({ fee })) },
+        payload: {
+          applicationFeeAmount,
+          transactionsFee: JSON.stringify(transactions.map(({ fee }) => ({ fee }))),
+        },
       });
     }
 
@@ -2189,7 +2195,7 @@ class Stripe extends Abstract {
     let taxFeeUnit = 0;
     let stripeFeeUnit: number | null;
     let paymentIntentAmountUnit: number | null;
-    let autoCalculateFeeUnit: number | null = null;
+    let taxAutoCalculateFeeUnit: number | null = null;
 
     if (withTax) {
       if (!entityId) {
@@ -2202,7 +2208,7 @@ class Stripe extends Abstract {
       const {
         tax: taxData,
         createTaxTransactionFeeUnit: taxFeeData,
-        autoCalculateFeeUnit: calculateFeeUnit,
+        autoCalculateFeeUnit,
       } = await Calculation.getPaymentIntentTax(this.sdk, {
         entityId,
         processingTransactionAmountUnit: userUnitAmount,
@@ -2210,7 +2216,7 @@ class Stripe extends Abstract {
         feesPayer,
       });
 
-      autoCalculateFeeUnit = calculateFeeUnit;
+      taxAutoCalculateFeeUnit = autoCalculateFeeUnit;
       tax = taxData;
       // Included in transaction tax fee unit that will be covered by fees payer
       taxFeeUnit = taxFeeData;
@@ -2237,12 +2243,13 @@ class Stripe extends Abstract {
       taxExpiresAt: tax?.expiresAt?.toISOString(),
       taxBehaviour: tax?.behaviour,
       totalTaxPercent: tax?.totalTaxPercent,
-      autoCalculateFeeUnit,
     };
+
     const baseFeeUnit = platformUnitFee + stripeFeeUnit + taxFeeUnit;
     const senderPersonalFeeUnit = baseFeeUnit + senderAdditionalFee;
     const receiverPersonalFeeUnit = baseFeeUnit + receiverAdditionalFee;
-    const collectedFeeUnit = baseFeeUnit + senderAdditionalFee + receiverAdditionalFee;
+    const collectedFeeUnit =
+      baseFeeUnit + senderAdditionalFee + receiverAdditionalFee + (tax?.totalAmountUnit || 0);
 
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
@@ -2272,6 +2279,9 @@ class Stripe extends Abstract {
               taxTransactionAmountWithTax: this.fromSmallestCurrencyUnit(
                 tax.transactionAmountWithTaxUnit,
               ),
+              ...(taxAutoCalculateFeeUnit
+                ? { taxAutoCalculateFee: this.fromSmallestCurrencyUnit(taxAutoCalculateFeeUnit) }
+                : {}),
               ...(taxFeeUnit ? { taxFee: this.fromSmallestCurrencyUnit(taxFeeUnit) } : {}),
               taxTotalAmount: this.fromSmallestCurrencyUnit(tax.totalAmountUnit),
             }
@@ -2314,6 +2324,7 @@ class Stripe extends Abstract {
               ...sharedTaxData,
               taxTransactionAmountWithTaxUnit: tax.transactionAmountWithTaxUnit,
               taxTotalAmountUnit: tax.totalAmountUnit,
+              ...(taxAutoCalculateFeeUnit ? { taxAutoCalculateFee: taxAutoCalculateFeeUnit } : {}),
               ...(taxFeeUnit ? { taxFeeUnit } : {}),
             }
           : {}),

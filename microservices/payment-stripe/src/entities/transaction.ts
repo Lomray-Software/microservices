@@ -29,7 +29,7 @@ export interface IComputedTax {
   taxBehaviour?: ITax['behaviour'];
   totalTaxPercent?: ITax['totalTaxPercent'];
   taxFeeUnit?: number;
-  autoCalculationFeeUnit?: number;
+  taxAutoCalculationFeeUnit?: number;
 }
 
 /**
