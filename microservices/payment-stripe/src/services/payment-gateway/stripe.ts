@@ -748,11 +748,11 @@ class Stripe extends Abstract {
        * Application fee events
        */
       case 'application_fee.refund.updated':
-        await this.handleApplicationFeeRefundUpdated(event, event.type);
+        await this.handleApplicationFeeRefundUpdated(event);
         break;
 
       case 'application_fee.refunded':
-        await this.handleApplicationFeeRefunded(event, event.type);
+        await this.handleApplicationFeeRefunded(event);
         break;
 
       /**
@@ -813,10 +813,7 @@ class Stripe extends Abstract {
   /**
    * Handles application fee refund updated
    */
-  public async handleApplicationFeeRefundUpdated(
-    event: StripeSdk.Event,
-    eventName: string,
-  ): Promise<void> {
+  public async handleApplicationFeeRefundUpdated(event: StripeSdk.Event): Promise<void> {
     const { fee } = event.data.object as StripeSdk.FeeRefund;
 
     const applicationFeeId = this.extractId(fee);
@@ -830,7 +827,7 @@ class Stripe extends Abstract {
         message: messages.getNotFoundMessage(
           'Failed to update refunded application fees. Debit or credit transaction',
         ),
-        payload: { eventName, applicationFeeId },
+        payload: { eventName: event.type, applicationFeeId },
       });
     }
 
@@ -846,8 +843,8 @@ class Stripe extends Abstract {
       if (transaction.fee !== amount) {
         throw new BaseException({
           status: 500,
-          message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
-          payload: { eventName, transactionFee: transaction.fee, feeAmount: amount },
+          message: `Handle webhook event "${event.type}" occur. Transaction fee is not equal to Stripe application fee`,
+          payload: { eventName: event.type, transactionFee: transaction.fee, feeAmount: amount },
         });
       }
 
@@ -867,10 +864,7 @@ class Stripe extends Abstract {
   /**
    * Handles application fee refunded
    */
-  public async handleApplicationFeeRefunded(
-    event: StripeSdk.Event,
-    eventName: string,
-  ): Promise<void> {
+  public async handleApplicationFeeRefunded(event: StripeSdk.Event): Promise<void> {
     const {
       id: applicationFeeId,
       amount,
@@ -887,7 +881,7 @@ class Stripe extends Abstract {
         message: messages.getNotFoundMessage(
           'Failed to update refunded application fees. Debit or credit transaction',
         ),
-        payload: { eventName, applicationFeeId },
+        payload: { eventName: event.type, applicationFeeId },
       });
     }
 
@@ -900,8 +894,8 @@ class Stripe extends Abstract {
       if (transaction.fee !== amount) {
         throw new BaseException({
           status: 500,
-          message: `Handle webhook event "${eventName}" occur. Transaction fee is not equal to Stripe application fee`,
-          payload: { eventName, transactionFee: transaction.fee, feeAmount: amount },
+          message: `Handle webhook event "${event.type}" occur. Transaction fee is not equal to Stripe application fee`,
+          payload: { eventName: event.type, transactionFee: transaction.fee, feeAmount: amount },
         });
       }
 
