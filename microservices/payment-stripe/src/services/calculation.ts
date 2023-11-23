@@ -154,6 +154,9 @@ class Calculation {
       tax?.tax_breakdown?.some((breakdown) => breakdown?.taxability_reason === 'not_collecting') &&
       !shouldIgnoreNotCollecting
     ) {
+      /**
+       * @TODO: CHECK how to prevent register user tax from not collecting registration
+       */
       throw new BaseException({
         status: 500,
         message: 'Failed to compute tax. One or more tax breakdown is not collecting.',
