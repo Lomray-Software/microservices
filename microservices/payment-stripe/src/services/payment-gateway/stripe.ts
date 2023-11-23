@@ -23,7 +23,6 @@ import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
 import Refund from '@entities/refund';
-import type { IComputedTax, IParams as ITransactionParams } from '@entities/transaction';
 import Transaction, { defaultParams as defaultTransactionParams } from '@entities/transaction';
 import composeBalance from '@helpers/compose-balance';
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
@@ -32,6 +31,7 @@ import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
+import type { IPaymentIntentMetadata } from '@interfaces/payment-intent-metadata';
 import type ITax from '@interfaces/tax';
 import type { ICardDataByFingerprintResult } from '@repositories/card';
 import CardRepository from '@repositories/card';
@@ -68,33 +68,6 @@ interface IPaymentIntentParams {
   // Extra receiver revenue percent from application payment percent
   extraReceiverRevenuePercent?: number;
   withTax?: boolean;
-}
-
-interface IPaymentIntentMetadata
-  extends Omit<IComputedTax, 'taxTransactionAmountWithTaxUnit' | 'taxTotalAmountUnit'>,
-    Pick<ITransactionParams, 'baseFee'> {
-  senderId: string;
-  receiverId: string;
-  entityCost: string;
-  cardId: string;
-  feesPayer: TransactionRole;
-  platformFee: string;
-  receiverExtraFee: string;
-  receiverPersonalFee: string;
-  senderExtraFee: string;
-  senderPersonalFee: string;
-  receiverExtraRevenue: string;
-  receiverRevenue: string;
-  stripeFee: string;
-  // Total collected fee (includes all fees and tax that collected via application fee)
-  fee: string;
-  entityId?: string;
-  title?: string;
-  taxTransactionAmountWithTax?: number;
-  taxTotalAmount?: number;
-  taxFee?: number;
-  totalTaxPercent?: number;
-  taxAutoCalculateFee?: number;
 }
 
 interface IRefundParams {
@@ -1223,6 +1196,7 @@ class Stripe extends Abstract {
         taxBehaviour,
         receiverRevenue,
         taxAutoCalculateFee,
+        taxTransactionId,
       } = metadata as unknown as IPaymentIntentMetadata;
 
       const card = await entityManager
@@ -1252,6 +1226,7 @@ class Stripe extends Abstract {
           feesPayer,
           entityCost: this.toSmallestCurrencyUnit(entityCost),
           taxId,
+          taxTransactionId,
           taxExpiresAt,
           taxCreatedAt,
           taxBehaviour,
