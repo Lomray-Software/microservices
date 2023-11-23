@@ -1,4 +1,4 @@
-import { IsTypeormDate, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
+import { IsNullable, IsTypeormDate, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
 import { Allow, IsEnum, IsNumber, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
@@ -29,18 +29,38 @@ export interface IComputedTax {
   taxBehaviour?: ITax['behaviour'];
   totalTaxPercent?: ITax['totalTaxPercent'];
   taxFeeUnit?: number;
+  autoCalculationFeeUnit?: number;
 }
 
+/**
+ * Transaction params
+ * @description Definitions:
+ * 1. TransferId - Stripe object is created when you move funds between Stripe accounts as part of Connect. Needed for comprehending
+ * the transaction state in situations involving the reversal of the full or partial transaction amount and refund with reversal.
+ * For instance: py_1OFKUmPBMR5FbqzbQT2N5juH
+ * 2. DestinationTransactionId - Stripe destination transaction id. Reference regarding the destination transaction on the connected account's side
+ * For instance:  tr_3OFKatAmQ4asS8PS0GlS9dUr
+ * 3. PersonalFee - Personal user fee. For receiver, it's application fees with only debit extra fees.
+ *  For sender, it's application fees with only credit extra fees.
+ */
 export interface IParams extends IComputedTax {
+  // Refunded original transaction/payment intent/charge
   refundedTransactionAmount: number;
+  // Refunded Stripe collected fee
   refundedApplicationFeeAmount: number;
-  // Decomposed fees
+  // Transferred amount (e.g. via destination payment intent)
+  transferAmount: number;
+  // Reversed transaction amount from DESTINATION (e.g. connect account) to source (e.g. Platform)
+  transferReversedAmount: number;
+  // Platform account fee
   platformFee: number;
+  // Stripe fee for processing transaction
   stripeFee: number;
   baseFee: number;
   extraFee: number;
-  // Personal user fee. Receiver it's application fees with only debit extra fees. Sender it's application fees with only credit extra fees.
   personalFee: number;
+  destinationTransactionId?: string | null;
+  transferId?: string | null;
   paymentStatus?: StripeTransactionStatus;
   checkoutStatus?: StripeCheckoutStatus;
   errorMessage?: string;
@@ -48,10 +68,8 @@ export interface IParams extends IComputedTax {
   errorCode?: string;
   // Example: generic_decline
   declineCode?: string;
-  // Application and stripe fees payer
+  // Stripe and platform fee payer
   feesPayer?: TransactionRole;
-  // PaymentIntent charge id, must exist for refund
-  chargeId?: string | null;
   extraRevenue?: number;
   // Amount that will charge for instant payout
   estimatedInstantPayoutFee?: number;
@@ -71,14 +89,18 @@ const defaultParams: Pick<
   | 'extraFee'
   | 'baseFee'
   | 'personalFee'
+  | 'transferAmount'
+  | 'transferReversedAmount'
 > = {
   refundedTransactionAmount: 0,
   refundedApplicationFeeAmount: 0,
+  transferReversedAmount: 0,
   platformFee: 0,
   stripeFee: 0,
   extraFee: 0,
   baseFee: 0,
   personalFee: 0,
+  transferAmount: 0,
 };
 
 @JSONSchema({
@@ -111,6 +133,17 @@ class Transaction {
   transactionId: string;
 
   @JSONSchema({
+    description:
+      'Represents a single attempt to move money into Platform Stripe account. Required for refunds, reversals, fees',
+    example: 'ch_3OFZJjAmQ4asS8PS1l9MLI4v',
+  })
+  @Column({ type: 'varchar', length: 66, default: null })
+  @Length(1, 66)
+  @IsUndefinable()
+  @IsNullable()
+  chargeId: string | null;
+
+  @JSONSchema({
     description: `Stripe payment intent application fee id. Contain Stripe fee, collected by application (platform) fee,
      tax. Transaction can be refunded with or without application fee: in this case for understanding
      NET transaction amount check application fee status (refunded or not) and amount`,
@@ -118,6 +151,8 @@ class Transaction {
   })
   @Column({ type: 'varchar', length: 66, default: null })
   @Length(1, 66)
+  @IsUndefinable()
+  @IsNullable()
   applicationFeeId: string | null;
 
   @Column({ type: 'varchar', length: 100, default: '' })
@@ -147,6 +182,7 @@ class Transaction {
   @IsValidStripeId()
   @Length(1, 66)
   @IsUndefinable()
+  @IsNullable()
   cardId: string | null;
 
   /**
