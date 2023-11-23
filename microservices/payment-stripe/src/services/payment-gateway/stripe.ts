@@ -1195,6 +1195,7 @@ class Stripe extends Abstract {
         taxBehaviour,
         receiverRevenue,
         taxAutoCalculateFee,
+        taxFee,
         taxTransactionId,
         taxCalculationId,
       } = metadata as unknown as IPaymentIntentMetadata;
@@ -1236,6 +1237,7 @@ class Stripe extends Abstract {
           ...(taxAutoCalculateFee
             ? { taxAutoCalculateFee: this.toSmallestCurrencyUnit(taxAutoCalculateFee) }
             : {}),
+          ...(taxFee ? { taxFee: this.toSmallestCurrencyUnit(taxFee) } : {}),
         },
       };
 
@@ -2330,7 +2332,7 @@ class Stripe extends Abstract {
         baseFee: baseFeeUnit,
         ...(Object.keys(sharedTaxData).length !== 0 ? { ...sharedTaxData } : {}),
         ...(taxAutoCalculateFeeUnit ? { taxAutoCalculateFee: taxAutoCalculateFeeUnit } : {}),
-        ...(taxFeeUnit ? { taxFeeUnit } : {}),
+        ...(taxFeeUnit ? { taxFee: taxFeeUnit } : {}),
         taxTransactionAmountWithTaxUnit: tax?.transactionAmountWithTaxUnit,
         taxTotalAmountUnit: tax?.totalAmountUnit,
       },

@@ -3,7 +3,13 @@ import type { IComputedTax, IParams as ITransactionParams } from '@entities/tran
 import type TransactionEntity from '@entities/transaction';
 
 export interface IPaymentIntentMetadata
-  extends Omit<IComputedTax, 'taxTransactionAmountWithTaxUnit' | 'taxTotalAmountUnit'>,
+  extends Omit<
+      IComputedTax,
+      | 'taxTransactionAmountWithTaxUnit'
+      | 'taxTotalAmountUnit'
+      | 'taxAutoCalculationFeeUnit'
+      | 'taxFeeUnit'
+    >,
     Pick<ITransactionParams, 'baseFee'>,
     Pick<TransactionEntity, 'taxTransactionId' | 'taxCalculationId'> {
   senderId: string;
