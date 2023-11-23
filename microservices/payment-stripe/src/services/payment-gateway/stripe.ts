@@ -1190,13 +1190,13 @@ class Stripe extends Abstract {
         entityCost,
         senderId,
         receiverId,
-        taxId,
         taxExpiresAt,
         taxCreatedAt,
         taxBehaviour,
         receiverRevenue,
         taxAutoCalculateFee,
         taxTransactionId,
+        taxCalculationId,
       } = metadata as unknown as IPaymentIntentMetadata;
 
       const card = await entityManager
@@ -1223,17 +1223,17 @@ class Stripe extends Abstract {
         ...(latestCharge ? { chargeId: this.extractId(latestCharge) } : {}),
         // eslint-disable-next-line camelcase
         params: {
+          taxCalculationId,
+          taxTransactionId,
           feesPayer,
           entityCost: this.toSmallestCurrencyUnit(entityCost),
-          taxId,
-          taxTransactionId,
+          errorCode: lastPaymentError?.code,
+          errorMessage: lastPaymentError?.message,
+          declineCode: lastPaymentError?.decline_code,
           taxExpiresAt,
           taxCreatedAt,
           taxBehaviour,
           taxAutoCalculateFee,
-          errorCode: lastPaymentError?.code,
-          errorMessage: lastPaymentError?.message,
-          declineCode: lastPaymentError?.decline_code,
         },
       };
 
@@ -1244,9 +1244,7 @@ class Stripe extends Abstract {
             userId: senderId,
             type: TransactionType.CREDIT,
             amount,
-            params: {
-              ...transactionData.params,
-            },
+            params: transactionData.params,
           }),
         ),
         transactionRepository.save(
@@ -1255,9 +1253,7 @@ class Stripe extends Abstract {
             userId: receiverId,
             type: TransactionType.DEBIT,
             amount: this.toSmallestCurrencyUnit(receiverRevenue),
-            params: {
-              ...transactionData.params,
-            },
+            params: transactionData.params,
           }),
         ),
       ]);
@@ -2213,7 +2209,6 @@ class Stripe extends Abstract {
      * Prevent type error cause on payment intent metadata and transaction params
      */
     const sharedTaxData = {
-      taxId: tax?.id,
       taxCreatedAt: tax?.createdAt?.toISOString(),
       taxExpiresAt: tax?.expiresAt?.toISOString(),
       taxBehaviour: tax?.behaviour,
@@ -2248,18 +2243,21 @@ class Stripe extends Abstract {
         receiverId: receiverUserId,
         ...(entityId ? { entityId } : {}),
         ...(title ? { description: title } : {}),
-        ...(tax
+        ...(tax?.id ? { taxCalculationId: tax?.id } : {}),
+        ...(Object.keys(sharedTaxData).length !== 0 ? { ...sharedTaxData } : {}),
+        ...(taxAutoCalculateFeeUnit
+          ? { taxAutoCalculateFee: this.fromSmallestCurrencyUnit(taxAutoCalculateFeeUnit) }
+          : {}),
+        ...(taxFeeUnit ? { taxFee: this.fromSmallestCurrencyUnit(taxFeeUnit) } : {}),
+        ...(tax?.transactionAmountWithTaxUnit
           ? {
-              ...sharedTaxData,
               taxTransactionAmountWithTax: this.fromSmallestCurrencyUnit(
-                tax.transactionAmountWithTaxUnit,
+                tax?.transactionAmountWithTaxUnit,
               ),
-              ...(taxAutoCalculateFeeUnit
-                ? { taxAutoCalculateFee: this.fromSmallestCurrencyUnit(taxAutoCalculateFeeUnit) }
-                : {}),
-              ...(taxFeeUnit ? { taxFee: this.fromSmallestCurrencyUnit(taxFeeUnit) } : {}),
-              taxTotalAmount: this.fromSmallestCurrencyUnit(tax.totalAmountUnit),
             }
+          : {}),
+        ...(tax?.totalAmountUnit
+          ? { taxTotalAmount: this.fromSmallestCurrencyUnit(tax?.totalAmountUnit) }
           : {}),
       },
       payment_method_types: [StripePaymentMethods.CARD],
@@ -2300,7 +2298,8 @@ class Stripe extends Abstract {
       cardId: paymentMethodCardId,
       transactionId: stripePaymentIntent.id,
       fee: collectedFeeUnit,
-      ...(tax ? { tax: tax.totalAmountUnit } : {}),
+      ...(tax ? { tax: tax.totalAmountUnit, taxCalculationId: tax.id } : {}),
+      ...(stripeTaxTransaction ? { taxTransactionId: stripeTaxTransaction?.id } : {}),
       params: {
         // Handle override initial params from repository create
         ...defaultTransactionParams,
@@ -2309,16 +2308,11 @@ class Stripe extends Abstract {
         stripeFee: stripeFeeUnit,
         entityCost: entityUnitCost,
         baseFee: baseFeeUnit,
-        ...(tax
-          ? {
-              ...sharedTaxData,
-              taxTransactionAmountWithTaxUnit: tax.transactionAmountWithTaxUnit,
-              taxTotalAmountUnit: tax.totalAmountUnit,
-              ...(taxAutoCalculateFeeUnit ? { taxAutoCalculateFee: taxAutoCalculateFeeUnit } : {}),
-              ...(taxFeeUnit ? { taxFeeUnit } : {}),
-            }
-          : {}),
-        ...(stripeTaxTransaction ? { taxTransactionId: stripeTaxTransaction?.id } : {}),
+        ...(Object.keys(sharedTaxData).length !== 0 ? { ...sharedTaxData } : {}),
+        ...(taxAutoCalculateFeeUnit ? { taxAutoCalculateFee: taxAutoCalculateFeeUnit } : {}),
+        ...(taxFeeUnit ? { taxFeeUnit } : {}),
+        taxTransactionAmountWithTaxUnit: tax?.transactionAmountWithTaxUnit,
+        taxTotalAmountUnit: tax?.totalAmountUnit,
       },
     };
 
@@ -2363,6 +2357,7 @@ class Stripe extends Abstract {
       metadata: {
         creditTransactionId: transactions?.[0]?.id,
         debitTransactionId: transactions?.[1]?.id,
+        ...(stripeTaxTransaction ? { taxTransactionId: stripeTaxTransaction?.id } : {}),
       },
     });
 

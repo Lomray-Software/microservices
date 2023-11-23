@@ -1,9 +1,11 @@
 import TransactionRole from '@constants/transaction-role';
-import { IComputedTax, IParams as ITransactionParams } from '@entities/transaction';
+import type { IComputedTax, IParams as ITransactionParams } from '@entities/transaction';
+import type TransactionEntity from '@entities/transaction';
 
 export interface IPaymentIntentMetadata
   extends Omit<IComputedTax, 'taxTransactionAmountWithTaxUnit' | 'taxTotalAmountUnit'>,
-    Pick<ITransactionParams, 'baseFee'> {
+    Pick<ITransactionParams, 'baseFee'>,
+    Pick<TransactionEntity, 'taxTransactionId' | 'taxCalculationId'> {
   senderId: string;
   receiverId: string;
   entityCost: string;
@@ -26,5 +28,4 @@ export interface IPaymentIntentMetadata
   taxFee?: number;
   totalTaxPercent?: number;
   taxAutoCalculateFee?: number;
-  taxTransactionId?: string | null;
 }

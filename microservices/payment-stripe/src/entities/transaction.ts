@@ -18,11 +18,12 @@ import TransactionType from '@constants/transaction-type';
 import type Customer from '@entities/customer';
 import type Product from '@entities/product';
 import IsValidStripeId from '@helpers/validators/is-stripe-id-valid';
-import type { IPaymentIntentMetadata } from '@interfaces/payment-intent-metadata';
 import type ITax from '@interfaces/tax';
 
+/**
+ * This calculation related to tax calculation id
+ */
 export interface IComputedTax {
-  taxId?: ITax['id'];
   taxTransactionAmountWithTaxUnit?: ITax['transactionAmountWithTaxUnit'];
   taxExpiresAt?: ITax['expiresAt'];
   taxCreatedAt?: ITax['createdAt'];
@@ -44,7 +45,7 @@ export interface IComputedTax {
  * 3. PersonalFee - Personal user fee. For receiver, it's application fees with only debit extra fees.
  *  For sender, it's application fees with only credit extra fees.
  */
-export interface IParams extends IComputedTax, Pick<IPaymentIntentMetadata, 'taxTransactionId'> {
+export interface IParams extends IComputedTax {
   // Refunded original transaction/payment intent/charge
   refundedTransactionAmount: number;
   // Refunded Stripe collected fee
@@ -106,15 +107,8 @@ export const defaultParams: Pick<
 };
 
 @JSONSchema({
-  description: `Transaction entity. Definitions: Application fees - collected amount by Platform from transaction.
-    Tax - collected taxes (included in application fees).
-    Fee - Platform fee, Stripe fee (included in application fees).
-    Platform fee - fee that grab Platform as revenue from transaction.
-    Stripe fee - fee that Stripe takes from processing transaction.
-    Extra fee - apply to sender or/and receiver and included in transaction application fees, and in payment intent collected fees
-    Base fee - platform + stripe + create tax transaction fee
-    Personal fee - base fee + personal (debit or credit extra fee)
-  `,
+  // Check payment stripe docs fo detailed description
+  description: 'Stipe transaction presentation',
   properties: {
     customer: { $ref: '#/definitions/Customer' },
     product: { $ref: '#/definitions/Product' },
@@ -133,6 +127,28 @@ class Transaction {
   @Column({ type: 'varchar', length: 66 })
   @Length(1, 66)
   transactionId: string;
+
+  @JSONSchema({
+    description:
+      'Stripe Tax Calculation API - calculated by Stripe tax for transaction (e.g. payment intent)',
+    example: 'taxcalc_1OFdOqFpQjUWTpHe3KV73alY',
+  })
+  @Column({ type: 'varchar', length: 66, default: null })
+  @Length(1, 66)
+  @IsUndefinable()
+  @IsNullable()
+  taxCalculationId: string | null;
+
+  @JSONSchema({
+    description:
+      'Stripe Tax Transaction API - Stripe tax transaction presented in Stripe Tax reports',
+    example: 'tax_1OFdOqFpQjUWTpHeIDJlZQwS',
+  })
+  @Column({ type: 'varchar', length: 66, default: null })
+  @Length(1, 66)
+  @IsUndefinable()
+  @IsNullable()
+  taxTransactionId: string | null;
 
   @JSONSchema({
     description:
