@@ -6,6 +6,7 @@ import TaxBehaviour from '@constants/tax-behaviour';
 import TransactionRole from '@constants/transaction-role';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import type ITax from '@interfaces/tax';
+import type ITaxes from '@interfaces/taxes';
 
 interface IGetPaymentIntentTaxParams {
   processingTransactionAmountUnit: number;
@@ -27,9 +28,9 @@ interface IGetStripeFeeAndProcessingAmountParams {
   feesPayer: TransactionRole;
 }
 
-interface IPaymentIntentTax {
+interface IPaymentIntentTax extends Pick<ITaxes, 'autoCalculateFeeUnit'> {
   tax: ITax;
-  feeUnit: number;
+  createTaxTransactionFeeUnit: number;
 }
 
 /**
@@ -75,7 +76,7 @@ class Calculation {
     }: IGetPaymentIntentTaxParams,
   ): Promise<IPaymentIntentTax> {
     const { taxes } = await remoteConfig();
-    const { stableUnit } = taxes!;
+    const { stableUnit, autoCalculateFeeUnit } = taxes!;
 
     const tax = await this.computePaymentIntentTax(sdk, {
       entityId,
@@ -87,7 +88,7 @@ class Calculation {
       paymentMethodId,
     });
 
-    return { tax, feeUnit: stableUnit };
+    return { tax, createTaxTransactionFeeUnit: stableUnit, autoCalculateFeeUnit };
   }
 
   /**
@@ -153,6 +154,9 @@ class Calculation {
       tax?.tax_breakdown?.some((breakdown) => breakdown?.taxability_reason === 'not_collecting') &&
       !shouldIgnoreNotCollecting
     ) {
+      /**
+       * @TODO: CHECK how to prevent register user tax from not collecting registration
+       */
       throw new BaseException({
         status: 500,
         message: 'Failed to compute tax. One or more tax breakdown is not collecting.',

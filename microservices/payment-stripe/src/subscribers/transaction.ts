@@ -24,12 +24,22 @@ class Transaction implements EntitySubscriberInterface<TransactionEntity> {
   /**
    * Handle Transaction event: after update
    */
-  public async afterUpdate({ entity }: UpdateEvent<TransactionEntity>): Promise<void> {
+  public async afterUpdate({
+    entity,
+    databaseEntity,
+    manager,
+    updatedColumns,
+  }: UpdateEvent<TransactionEntity>): Promise<void> {
     if (!entity) {
       return;
     }
 
-    await TransactionService.handleAfterUpdate(entity as TransactionEntity);
+    await TransactionService.handleAfterUpdate(
+      entity as TransactionEntity,
+      databaseEntity,
+      manager,
+      updatedColumns,
+    );
   }
 }
 

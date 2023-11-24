@@ -4,8 +4,10 @@
 interface ITaxes {
   // Estimated default tax percent
   defaultPercent: number;
-  // Stable cost unit for automatic compute tax
+  // Create tax transaction fee
   stableUnit: number;
+  // Tax auto Stripe calculation fee
+  autoCalculateFeeUnit: number;
 }
 
 export default ITaxes;
