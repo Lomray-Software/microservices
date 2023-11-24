@@ -48,7 +48,7 @@ export interface IComputedTax {
  */
 export interface IParams
   extends Omit<IComputedTax, 'taxAutoCalculationFeeUnit'>,
-    Pick<IPaymentIntentMetadata, 'taxAutoCalculateFee'> {
+    Pick<IPaymentIntentMetadata, 'taxAutoCalculateFee' | 'taxFee'> {
   // Refunded original transaction/payment intent/charge
   refundedTransactionAmount: number;
   // Refunded Stripe collected fee

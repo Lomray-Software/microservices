@@ -1234,10 +1234,12 @@ class Stripe extends Abstract {
           taxExpiresAt,
           taxCreatedAt,
           taxBehaviour,
-          ...(taxAutoCalculateFee
+          // Only if calculation was created provide tax calculation fee
+          ...(taxCalculationId && taxAutoCalculateFee
             ? { taxAutoCalculateFee: this.toSmallestCurrencyUnit(taxAutoCalculateFee) }
             : {}),
-          ...(taxFee ? { taxFee: this.toSmallestCurrencyUnit(taxFee) } : {}),
+          // Only if tax transaction was created provide tax fee
+          ...(taxTransactionId && taxFee ? { taxFee: this.toSmallestCurrencyUnit(taxFee) } : {}),
         },
       };
 
