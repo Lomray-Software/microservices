@@ -28,18 +28,18 @@ class Task {
 
   @JSONSchema({
     description:
-      'Entity id on which task process failed. Retry failed task process from this entity id',
+      'Last entity on which task process failed. Retry failed task process from this entity id',
   })
   @Column({ type: 'uuid', default: null })
   @Length(1, 36)
   @IsUndefinable()
   @IsNullable()
-  failTargetEntityId: string | null;
+  lastFailTargetEntityId: string | null;
 
   @JSONSchema({
     description: 'Current task status',
   })
-  @Column({ type: 'enum', enum: TaskStatus })
+  @Column({ type: 'enum', enum: TaskStatus, default: TaskStatus.INIT })
   @IsEnum(TaskStatus)
   status: TaskStatus;
 
@@ -63,6 +63,7 @@ class Task {
   @JoinColumn({ name: 'taskId' })
   @Type(() => Notice)
   @ValidateNested()
+  @IsUndefinable()
   notice: Notice;
 
   @JSONSchema({
@@ -72,6 +73,7 @@ class Task {
   @JoinColumn({ name: 'taskId' })
   @Type(() => Message)
   @ValidateNested()
+  @IsUndefinable()
   message: Message;
 }
 

@@ -1,0 +1,20 @@
+### Create task
+POST http://127.0.0.1:8001/ms/notification
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "task.create",
+  "params": {
+    "type": "noticeAll",
+    "notice": {
+      "title": "task notice all",
+      "description": "task notice all description",
+      "type": "announce",
+      "params": {
+        "status": "warning"
+      }
+    }
+  }
+}
