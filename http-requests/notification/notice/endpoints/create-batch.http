@@ -1,0 +1,16 @@
+### Create batch notices
+POST http://127.0.0.1:8001/ms/notification
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "notice.create-batch",
+  "params": {
+    "isForAll": true,
+    "title": "Notification for all users title",
+    "description": "Notification for all users description",
+    "status": "warning",
+    "type": "type"
+  }
+}

@@ -3,8 +3,9 @@ import type { Microservice, IEndpointHandler } from '@lomray/microservice-nodejs
 import CONST from '@constants/index';
 import EmailSend from '@methods/email/send';
 import CrudMessage from '@methods/messages/crud';
+import { createBatch as NoticeCreateBatch } from '@methods/notice/create-batch';
 import CrudNotice from '@methods/notice/crud';
-import HideAll from '@methods/notice/hide-all';
+import { hideAll as NoticeHideAll } from '@methods/notice/hide-all';
 import PhoneSend from '@methods/phone/send';
 import PushSend from '@methods/push/send';
 
@@ -16,7 +17,8 @@ export default (ms: Microservice): void => {
     message: CrudMessage,
     notice: {
       ...CrudNotice,
-      'hide-all': HideAll,
+      'hide-all': NoticeHideAll,
+      'create-batch': NoticeCreateBatch,
     },
   };
 
