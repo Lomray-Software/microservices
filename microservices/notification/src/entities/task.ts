@@ -59,7 +59,7 @@ class Task {
   @JSONSchema({
     description: 'Notice template id. That template will be used for users notify',
   })
-  @OneToOne('Notice', 'task')
+  @OneToOne('Notice', 'task', { onDelete: 'CASCADE', cascade: ['remove'] })
   @Type(() => Notice)
   @ValidateNested()
   @IsUndefinable()
@@ -68,7 +68,7 @@ class Task {
   @JSONSchema({
     description: 'Message template id. That template will be used for users notify',
   })
-  @OneToOne('Message', 'task')
+  @OneToOne('Message', 'task', { onDelete: 'CASCADE', cascade: ['remove'] })
   @Type(() => Message)
   @ValidateNested()
   @IsUndefinable()
