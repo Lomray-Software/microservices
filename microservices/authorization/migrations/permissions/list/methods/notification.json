@@ -231,18 +231,5 @@
     "createdAt": "2023-09-20T22:49:48.824Z",
     "modelOut": "notification.HideAllOutput",
     "methodFilters": []
-  },
-  {
-    "microservice": "notification",
-    "method": "notice.create-batch",
-    "description": "Create notices for large group or for all users",
-    "allowGroup": [
-      "admin"
-    ],
-    "denyGroup": [],
-    "createdAt": "2023-11-27T11:18:15.655Z",
-    "modelIn": "notification.CreateBatchInput",
-    "modelOut": "notification.CreateBatchOutput",
-    "methodFilters": []
   }
 ]
