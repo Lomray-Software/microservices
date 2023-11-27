@@ -1,4 +1,4 @@
-import { Api } from '@lomray/microservice-helpers';
+import { Api, Log } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import _ from 'lodash';
 import { EntityManager, getManager } from 'typeorm';
@@ -106,8 +106,8 @@ class Notice {
 
     if (usersCountError) {
       throw new BaseException({
-        status: 400,
-        message: 'Failed to send group notice. Unable to retrieve users count .',
+        status: 500,
+        message: 'Failed to send group notice. Unable to retrieve users count.',
       });
     }
 
@@ -124,15 +124,17 @@ class Notice {
         },
       });
 
-      if (!usersListResult?.list) {
-        return createdCount;
-      }
-
       if (usersListError) {
+        Log.error(usersListError.message);
+
         throw new BaseException({
           status: 400,
           message: `Failed to retrieve user list for offset ${offset}.`,
         });
+      }
+
+      if (!usersListResult?.list) {
+        return createdCount;
       }
 
       const entities = usersListResult.list.map(({ id: userId }) =>
