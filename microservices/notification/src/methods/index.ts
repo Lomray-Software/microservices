@@ -8,6 +8,7 @@ import CrudNotice from '@methods/notice/crud';
 import { hideAll as NoticeHideAll } from '@methods/notice/hide-all';
 import PhoneSend from '@methods/phone/send';
 import PushSend from '@methods/push/send';
+import CrudTask from '@methods/task/crud';
 
 /**
  * Register methods
@@ -20,6 +21,7 @@ export default (ms: Microservice): void => {
       'hide-all': NoticeHideAll,
       'create-batch': NoticeCreateBatch,
     },
+    task: CrudTask,
   };
 
   /**
