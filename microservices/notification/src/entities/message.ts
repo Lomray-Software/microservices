@@ -26,7 +26,7 @@ class Message {
   noticeId: string;
 
   @JSONSchema({
-    description: 'Define message relation and notice as template for task',
+    description: 'Define task relation and message as template for task',
   })
   @Column({ type: 'uuid', default: null })
   @Length(1, 36)
