@@ -1,9 +1,18 @@
 import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsArray, IsEnum, IsObject, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { Entity, Column, CreateDateColumn, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  CreateDateColumn,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 import NotifyType from '@constants/notify-type';
 import type Notice from '@entities/notice';
+import Task from '@entities/task';
 import type IAttachment from '@interfaces/message-attachment';
 
 @Entity()
@@ -60,6 +69,10 @@ class Message {
   @ManyToOne('Notice', 'messages', { onDelete: 'SET NULL' })
   @IsUndefinable()
   notice: Notice;
+
+  @OneToOne('Task', 'message')
+  @JoinColumn()
+  task: Task;
 }
 
 export default Message;
