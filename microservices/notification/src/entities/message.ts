@@ -29,6 +29,7 @@ class Message {
     description: 'Define task relation and message as template for task',
   })
   @Column({ type: 'uuid', default: null })
+  @JoinColumn()
   @Length(1, 36)
   @IsUndefinable()
   taskId: string | null;

@@ -1,6 +1,6 @@
 import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
-import { IsEnum, IsObject, Length, ValidateNested } from 'class-validator';
+import { IsEnum, IsObject, Length, ValidateNested, Allow } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -9,7 +9,6 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  JoinColumn,
 } from 'typeorm';
 import TaskStatus from '@constants/task-status';
 import TaskType from '@constants/task-type';
@@ -19,7 +18,7 @@ import Notice from '@entities/notice';
 @Entity()
 class Task {
   @PrimaryGeneratedColumn('uuid')
-  @Length(1, 36)
+  @Allow()
   id: string;
 
   @Column({ type: 'enum', enum: TaskType })
@@ -41,6 +40,7 @@ class Task {
   })
   @Column({ type: 'enum', enum: TaskStatus, default: TaskStatus.INIT })
   @IsEnum(TaskStatus)
+  @IsUndefinable()
   status: TaskStatus;
 
   @Column({ type: 'json', default: {} })
@@ -60,7 +60,6 @@ class Task {
     description: 'Notice template id. That template will be used for users notify',
   })
   @OneToOne('Notice', 'task')
-  @JoinColumn({ name: 'taskId' })
   @Type(() => Notice)
   @ValidateNested()
   @IsUndefinable()
@@ -70,7 +69,6 @@ class Task {
     description: 'Message template id. That template will be used for users notify',
   })
   @OneToOne('Message', 'task')
-  @JoinColumn({ name: 'taskId' })
   @Type(() => Message)
   @ValidateNested()
   @IsUndefinable()

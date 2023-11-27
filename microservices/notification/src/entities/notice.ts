@@ -9,6 +9,7 @@ import {
   Index,
   UpdateDateColumn,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import type Message from '@entities/message';
 
@@ -33,6 +34,7 @@ class Notice {
     description: 'Define task relation and notice as template for task',
   })
   @Column({ type: 'uuid', default: null })
+  @JoinColumn()
   @Length(1, 36)
   @IsUndefinable()
   taskId: string | null;
