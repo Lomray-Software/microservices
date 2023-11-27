@@ -87,7 +87,9 @@ class Notice {
         }),
       );
 
-      createdCount += (await repository.save(entities)).length;
+      await repository.save(entities);
+
+      createdCount += entities.length;
     }
 
     return createdCount;
@@ -143,7 +145,9 @@ class Notice {
         }),
       );
 
-      createdCount += (await repository.save(entities)).length;
+      await repository.save(entities);
+
+      createdCount += entities.length;
 
       offset += this.chunkSize;
     } while (offset < usersCountResult!.count);
