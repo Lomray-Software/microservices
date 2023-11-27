@@ -25,6 +25,14 @@ class Message {
   @IsString()
   noticeId: string;
 
+  @JSONSchema({
+    description: 'Define message relation and notice as template for task',
+  })
+  @Column({ type: 'uuid', default: null })
+  @Length(1, 36)
+  @IsUndefinable()
+  taskId: string | null;
+
   @Column({
     type: 'enum',
     enum: NotifyType,

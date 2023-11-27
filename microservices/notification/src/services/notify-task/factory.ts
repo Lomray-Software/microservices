@@ -5,6 +5,7 @@ import NoticeAll from './notice-all';
 
 /**
  * Notify task factory
+ * @description Call this factory in job for processing notify tasks
  */
 class Factory {
   /**

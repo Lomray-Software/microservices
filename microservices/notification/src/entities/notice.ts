@@ -1,5 +1,6 @@
 import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsBoolean, IsObject, Length } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Entity,
   Column,
@@ -27,6 +28,14 @@ class Notice {
   @IsNullable()
   @IsUndefinable()
   userId: string | null;
+
+  @JSONSchema({
+    description: 'Define task relation and notice as template for task',
+  })
+  @Column({ type: 'uuid', default: null })
+  @Length(1, 36)
+  @IsUndefinable()
+  taskId: string | null;
 
   @Column({ type: 'varchar' })
   @Length(1, 255)
