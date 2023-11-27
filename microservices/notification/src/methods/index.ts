@@ -19,7 +19,7 @@ export default (ms: Microservice): void => {
       ...CrudNotice,
       'hide-all': NoticeHideAll,
     },
-    task: CrudTask,
+    task: { ...CrudTask },
   };
 
   /**
