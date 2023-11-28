@@ -1,5 +1,5 @@
 import { Api, Log } from '@lomray/microservice-helpers';
-import { Repository } from 'typeorm';
+import type { Repository } from 'typeorm';
 import TaskType from '@constants/task-type';
 import NoticeEntity from '@entities/notice';
 import TaskEntity from '@entities/task';
@@ -58,13 +58,14 @@ class NoticeAll extends Abstract {
 
   /**
    * Handle send
+   * @description Get all users count and handle send errors
    */
   private async handleSend(task: TaskEntity): Promise<void> {
     const { result: usersCountResult, error: usersCountError } = await Api.get().users.user.count();
 
     if (usersCountError) {
       // Case where error target doesn't exist
-      throw new Error('Failed to send group notice. Unable to retrieve users count.');
+      throw new Error('Unable to retrieve users count.');
     }
 
     try {
@@ -78,12 +79,15 @@ class NoticeAll extends Abstract {
 
   /**
    * Send
+   * @description Send notices for all users via iteration
+   * If previous run task had error - run process from last error target id (page)
    */
   private async send({ lastFailTargetId }: TaskEntity, usersCount: number): Promise<void> {
+    const initPage = Number(lastFailTargetId) || 1;
     let offset = 0;
 
     // Start process from last error target id
-    this.currentPage = Math.floor(offset / this.chunkSize) + (Number(lastFailTargetId) || 1);
+    this.currentPage = Math.floor(offset / this.chunkSize) + initPage;
 
     do {
       const { result: usersListResult, error: usersListError } = await Api.get().users.user.list({
@@ -102,7 +106,7 @@ class NoticeAll extends Abstract {
       }
 
       // If all users were iterated - task done
-      if (!usersListResult?.list) {
+      if (!usersListResult?.list.length) {
         return;
       }
 
@@ -114,6 +118,9 @@ class NoticeAll extends Abstract {
       );
 
       offset += savedNotices.length;
+
+      // Update pagination
+      this.currentPage = Math.floor(offset / this.chunkSize) + initPage;
     } while (offset < usersCount);
   }
 }

@@ -83,7 +83,7 @@ abstract class Abstract {
     for (const task of this.tasks) {
       try {
         this.resetState();
-        await this.updateWaitingTask(task);
+        await this.updateWaitingTask(task.id);
 
         /**
          * Process task goal
@@ -109,57 +109,66 @@ abstract class Abstract {
    * Update task
    */
   private async updateCompletedTask(taskId: string): Promise<void> {
-    // Get last task version. Prevent remove related notices that were created in process
-    const updatedTask = await this.taskRepository.findOne(taskId);
+    const lastUpdatedTask = await this.getLastUpdatedTaskVersion(taskId, TaskStatus.COMPLETED);
 
-    if (!updatedTask) {
-      throw new Error('Failed to update task status to "completed". Task was not found.');
-    }
+    lastUpdatedTask.status = TaskStatus.COMPLETED;
 
-    updatedTask.status = TaskStatus.COMPLETED;
-
-    await this.taskRepository.save(updatedTask);
+    await this.taskRepository.save(lastUpdatedTask);
   }
 
   /**
    * Update failed task data
    */
   private async updateFailedTask(taskId: string, errorMessage: string): Promise<void> {
-    // Get last task version. Prevent remove related notices that were created in process
-    const updatedTask = await this.taskRepository.findOne(taskId);
+    const lastUpdatedTask = await this.getLastUpdatedTaskVersion(taskId, TaskStatus.FAILED);
 
-    if (!updatedTask) {
-      throw new Error('Failed to update task status to "failed". Task was not found.');
-    }
-
-    updatedTask.status = TaskStatus.FAILED;
-    updatedTask.lastFailTargetId = this.lastFailTargetId;
+    lastUpdatedTask.status = TaskStatus.FAILED;
+    lastUpdatedTask.lastFailTargetId = this.lastFailTargetId;
 
     // If task fail before execution process
     if (!this.lastFailTargetId) {
       Log.error(
-        `Task failed before execution process: "${updatedTask.id}", type "${updatedTask.type}"`,
+        `Task failed before execution process: "${lastUpdatedTask.id}", type "${lastUpdatedTask.type}"`,
       );
 
-      updatedTask.params.lastErrorMessage = errorMessage;
+      lastUpdatedTask.params.lastErrorMessage = errorMessage;
     }
 
-    await this.taskRepository.save(updatedTask);
+    await this.taskRepository.save(lastUpdatedTask);
   }
 
   /**
    * Update processing task data
    */
-  private async updateWaitingTask(task: TaskEntity): Promise<void> {
-    task.status = TaskStatus.WAITING;
+  private async updateWaitingTask(taskId: string): Promise<void> {
+    const lastUpdatedTask = await this.getLastUpdatedTaskVersion(taskId, TaskStatus.WAITING);
 
-    await this.taskRepository.save(task);
+    lastUpdatedTask.status = TaskStatus.WAITING;
+
+    await this.taskRepository.save(lastUpdatedTask);
+  }
+
+  /**
+   * Returns last task version
+   */
+  private async getLastUpdatedTaskVersion(
+    taskId: string,
+    updateStatus: string,
+  ): Promise<TaskEntity> {
+    // Get last task version. Prevent remove related notices that were created in process
+    const lastUpdatedTask = await this.taskRepository.findOne(taskId);
+
+    if (!lastUpdatedTask) {
+      throw new Error(`Failed to update task status to "${updateStatus}". Task was not found.`);
+    }
+
+    return lastUpdatedTask;
   }
 
   /**
    * Reset state
    */
-  private resetState() {
+  private resetState(): void {
     this.lastFailTargetId = null;
   }
 }
