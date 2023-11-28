@@ -123,16 +123,15 @@ abstract class Abstract {
    * Update failed task data
    */
   private async updateFailedTask(task: TaskEntity, errorMessage: string): Promise<void> {
+    task.status = TaskStatus.FAILED;
+    task.lastFailTargetId = this.lastFailTargetId;
+
     // If task fail before execution process
     if (!this.lastFailTargetId) {
       Log.error(`Task failed before execution process: "${task.id}", type "${task.type}"`);
 
-      return;
+      task.params.lastErrorMessage = errorMessage;
     }
-
-    task.params.lastErrorMessage = errorMessage;
-    task.lastFailTargetId = this.lastFailTargetId;
-    task.status = TaskStatus.FAILED;
 
     await this.taskRepository.save(task);
   }

@@ -43,19 +43,7 @@ class NoticeAll extends Abstract {
    * Process notice all users
    */
   protected async processTasks(task: TaskEntity): Promise<void> {
-    const taskTransactionRepository = this.manager.getRepository(TaskEntity);
-
-    /**
-     * Get task entity with notice template
-     */
-    const entity = await taskTransactionRepository.findOne(task.id, { relations: ['notice'] });
-
-    if (!entity) {
-      // Internal error
-      throw new Error('Task not found.');
-    }
-
-    const noticeTemplate = entity.notices.find(({ params }) => params.isTemplate);
+    const noticeTemplate = task.notices.find(({ params }) => params.isTemplate);
 
     if (!noticeTemplate) {
       // Internal error
@@ -67,7 +55,7 @@ class NoticeAll extends Abstract {
       params: { ...noticeTemplate.params, isTemplate: false },
     };
 
-    await this.handleSend(entity);
+    await this.handleSend(task);
   }
 
   /**
