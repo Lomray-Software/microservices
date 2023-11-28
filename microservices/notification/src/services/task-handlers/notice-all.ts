@@ -22,13 +22,6 @@ class NoticeAll extends Abstract {
   private currentPage = 0;
 
   /**
-   * @protected
-   */
-  protected init(): void {
-    this.noticeRepository = this.manager.getRepository(NoticeEntity);
-  }
-
-  /**
    * Take related tasks
    */
   public take(tasks: TaskEntity[]): boolean {
@@ -43,6 +36,8 @@ class NoticeAll extends Abstract {
    * Process notice all users
    */
   protected async processTasks(task: TaskEntity): Promise<void> {
+    this.noticeRepository = this.manager.getRepository(NoticeEntity);
+
     const noticeTemplate = task.notices.find(({ params }) => params.isTemplate);
 
     if (!noticeTemplate) {

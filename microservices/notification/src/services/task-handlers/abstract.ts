@@ -47,11 +47,6 @@ abstract class Abstract {
   }
 
   /**
-   * Init (prebuild services requirements)
-   */
-  protected abstract init(): Promise<void> | void;
-
-  /**
    * Process notify tasks
    */
   protected abstract processTasks(task: TaskEntity): Promise<void>;

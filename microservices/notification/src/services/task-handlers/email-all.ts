@@ -12,13 +12,6 @@ class EmailAll extends Abstract {
   private messageRepository: Repository<MessageEntity>;
 
   /**
-   * @protected
-   */
-  protected init(): void {
-    this.messageRepository = this.manager.getRepository(MessageEntity);
-  }
-
-  /**
    * Take related tasks
    */
   public take(tasks: TaskEntity[]): boolean {
@@ -33,6 +26,8 @@ class EmailAll extends Abstract {
    * Process email all users
    */
   protected processTasks(): Promise<void> {
+    this.messageRepository = this.manager.getRepository(MessageEntity);
+
     throw new BaseException({
       status: 501,
       message: 'Not implemented',

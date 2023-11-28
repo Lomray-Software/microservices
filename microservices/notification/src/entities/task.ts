@@ -37,7 +37,7 @@ class Task {
       entity id, page number and so on`,
     examples: ['0771fea0-cf98-4208-8dd6-a9288e9bdd73', '1'],
   })
-  @Column({ type: 'uuid', default: null })
+  @Column({ type: 'varchar', length: 36, default: null })
   @Length(1, 36)
   @IsUndefinable()
   @IsNullable()
