@@ -14,7 +14,7 @@ class NoticeAll extends Abstract {
   /**
    * @private
    */
-  private noticeTemplate: NoticeEntity;
+  private noticeTemplate: Partial<NoticeEntity>;
 
   /**
    * @private
@@ -45,9 +45,12 @@ class NoticeAll extends Abstract {
       throw new Error('Task notice template was not found.');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, ...rest } = noticeTemplate;
+
     this.noticeTemplate = {
-      ...noticeTemplate,
-      params: { ...noticeTemplate.params, isTemplate: false },
+      ...rest,
+      params: { ...rest.params, isTemplate: false },
     };
 
     await this.handleSend(task);
@@ -103,16 +106,14 @@ class NoticeAll extends Abstract {
         return;
       }
 
-      const personalNotices: NoticeEntity[] = [];
-
-      usersListResult.list.forEach(({ id: userId }) => {
-        personalNotices.push(this.noticeRepository.create({ ...this.noticeTemplate, userId }));
-      });
-
       // Will be saved in transaction
-      await this.noticeRepository.save(personalNotices);
+      const savedNotices = await this.noticeRepository.save(
+        usersListResult.list.map(({ id: userId }) =>
+          this.noticeRepository.create({ ...this.noticeTemplate, userId }),
+        ),
+      );
 
-      offset += personalNotices.length;
+      offset += savedNotices.length;
     } while (offset < usersCount);
   }
 }

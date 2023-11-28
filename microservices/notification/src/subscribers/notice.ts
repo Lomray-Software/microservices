@@ -16,8 +16,8 @@ class Notice implements EntitySubscriberInterface<NoticeEntity> {
   /**
    * 1. Send event
    */
-  public afterInsert({ entity }: InsertEvent<NoticeEntity>): Promise<void> | void {
-    void Microservice.eventPublish(Event.NotifyCreate, { entity });
+  public async afterInsert({ entity }: InsertEvent<NoticeEntity>): Promise<void> {
+    await Microservice.eventPublish(Event.NotifyCreate, { entity });
   }
 
   /**

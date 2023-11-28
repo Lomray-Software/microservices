@@ -109,9 +109,15 @@ abstract class Abstract {
    * Update task
    */
   private async updateCompletedTask(task: TaskEntity): Promise<void> {
-    task.status = TaskStatus.COMPLETED;
+    const updatedTask = await this.taskRepository.findOne(task.id);
 
-    await this.taskRepository.save(task);
+    if (!updatedTask) {
+      throw new Error('Failed to update task status to completed. Task was not found.');
+    }
+
+    updatedTask.status = TaskStatus.COMPLETED;
+
+    await this.taskRepository.save(updatedTask);
   }
 
   /**
