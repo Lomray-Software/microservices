@@ -26,7 +26,7 @@ class Task {
   type: TaskType;
 
   @JSONSchema({
-    description: `Last entity on which task process failed. Retry failed task process from this entity id. Can be presented as any id:
+    description: `Last target on which task process failed. Retry failed task process from this entity id. Can be presented as any id:
       entity id, page number and so on`,
     examples: ['0771fea0-cf98-4208-8dd6-a9288e9bdd73', '1'],
   })
