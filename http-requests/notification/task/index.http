@@ -9,15 +9,17 @@ Content-Type: application/json
   "params": {
     "fields": {
       "type": "noticeAll",
-      "notice": {
-        "title": "1 task notice all",
-        "description": "1 task notice all description",
-        "type": "announce",
-        "params": {
-          "status": "warning",
-          "isTemplate": true
+      "notices": [
+        {
+          "title": "1 task notice all",
+          "description": "1 task notice all description",
+          "type": "announce",
+          "params": {
+            "status": "warning",
+            "isTemplate": true
+          }
         }
-      }
+      ]
     }
   }
 }

@@ -19,11 +19,11 @@ class Task {
   private static async handleAttach(entity: TaskEntity, manager: EntityManager): Promise<void> {
     const attachRequests: Promise<void>[] = [];
 
-    if (entity?.notices.length) {
+    if (entity?.notices?.length) {
       attachRequests.push(this.createAndAttachNoticeTemplate(entity, manager));
     }
 
-    if (entity?.messages.length) {
+    if (entity?.messages?.length) {
       attachRequests.push(this.createAndAttachMessageTemplate(entity, manager));
     }
 
@@ -93,7 +93,7 @@ class Task {
     const noticeRepository = manager.getRepository(NoticeEntity);
     const notice = noticeRepository.create({
       ...entity.notices?.[0],
-      params: { ...entity.notices?.[0].params, isTemplate: false },
+      params: { ...entity.notices?.[0].params },
       taskId: entity.id,
     });
 
@@ -114,11 +114,7 @@ class Task {
       });
     }
 
-    try {
-      entity.notices = await noticeRepository.save([notice]);
-    } catch (e) {
-      console.error(111, e);
-    }
+    entity.notices = await noticeRepository.save([notice]);
   }
 }
 
