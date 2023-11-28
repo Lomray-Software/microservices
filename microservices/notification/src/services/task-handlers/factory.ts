@@ -52,12 +52,12 @@ class Factory {
     const counts = await Promise.all(services.map((s) => s.process()));
 
     return counts.reduce(
-      (acc, currentValue) => {
-        acc.total += currentValue.total;
-        acc.completed += currentValue.completed;
-        acc.failed += currentValue.failed;
+      (totalCounts, { total, completed, failed }) => {
+        totalCounts.total += total;
+        totalCounts.completed += completed;
+        totalCounts.failed += failed;
 
-        return acc;
+        return totalCounts;
       },
       { total: 0, completed: 0, failed: 0 },
     );
