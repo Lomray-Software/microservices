@@ -24,7 +24,8 @@ class EmailAll extends Abstract {
   public take(tasks: TaskEntity[]): boolean {
     return super.take(
       tasks,
-      ({ type, message }: TaskEntity) => type === TaskType.EMAIL_ALL && Boolean(message),
+      ({ type, messages }: TaskEntity) =>
+        type === TaskType.EMAIL_ALL && messages.some(({ params }) => params.isTemplate),
     );
   }
 

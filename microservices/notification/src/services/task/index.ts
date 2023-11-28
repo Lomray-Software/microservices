@@ -23,12 +23,19 @@ class Task {
     entity: TaskEntity,
     manager: EntityManager,
   ): Promise<void> {
-    if (!entity.message) {
+    if (!entity.messages.length) {
       return;
     }
 
+    if (entity.messages.length >= 2 || !entity.messages[0].params.isTemplate) {
+      throw new BaseException({
+        status: 400,
+        message: 'Expected single message template',
+      });
+    }
+
     const messageRepository = manager.getRepository(MessageEntity);
-    const message = messageRepository.create({ ...entity.message, taskId: entity.id });
+    const message = messageRepository.create({ ...entity.messages[0], taskId: entity.id });
 
     const errors = await validate(message, {
       whitelist: true,
@@ -44,7 +51,7 @@ class Task {
       });
     }
 
-    entity.message = await messageRepository.save(message);
+    entity.messages = await messageRepository.save([message]);
   }
 
   /**
@@ -54,12 +61,19 @@ class Task {
     entity: TaskEntity,
     manager: EntityManager,
   ): Promise<void> {
-    if (!entity.notice) {
+    if (!entity.notices.length) {
       return;
     }
 
+    if (entity.notices.length >= 2 || !entity.notices[0].params.isTemplate) {
+      throw new BaseException({
+        status: 400,
+        message: 'Expected single message template',
+      });
+    }
+
     const noticeRepository = manager.getRepository(NoticeEntity);
-    const notice = noticeRepository.create({ ...entity.notice, taskId: entity.id });
+    const notice = noticeRepository.create({ ...entity.notices[0], taskId: entity.id });
 
     const errors = await validate(notice, {
       whitelist: true,
@@ -75,7 +89,7 @@ class Task {
       });
     }
 
-    entity.notice = await noticeRepository.save(notice);
+    entity.notices = await noticeRepository.save([notice]);
   }
 }
 

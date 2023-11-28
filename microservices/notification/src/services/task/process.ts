@@ -39,8 +39,16 @@ class Process {
       taskRepository
         .createQueryBuilder('task')
         .where('task.status IN (:...statuses)', { statuses: [TaskStatus.INIT, TaskStatus.FAILED] })
-        .leftJoinAndSelect('task.notice', 'notice')
-        .leftJoinAndSelect('task.message', 'message'),
+        .leftJoinAndSelect(
+          'task.notice',
+          'notice',
+          "(notice.params ->> 'isTemplate')::boolean = true",
+        )
+        .leftJoinAndSelect(
+          'task.message',
+          'message',
+          "(message.params ->> 'isTemplate')::boolean = true",
+        ),
       (tasks) => this.process(tasks),
       {
         chunkSize: 3,

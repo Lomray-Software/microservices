@@ -14,6 +14,11 @@ class NoticeAll extends Abstract {
   /**
    * @private
    */
+  private noticeTemplate: NoticeEntity;
+
+  /**
+   * @private
+   */
   private currentPage = 0;
 
   /**
@@ -29,7 +34,8 @@ class NoticeAll extends Abstract {
   public take(tasks: TaskEntity[]): boolean {
     return super.take(
       tasks,
-      ({ type, notice }: TaskEntity) => type === TaskType.NOTICE_ALL && Boolean(notice),
+      ({ type, notices }: TaskEntity) =>
+        type === TaskType.NOTICE_ALL && notices.some(({ params }) => params.isTemplate),
     );
   }
 
@@ -49,10 +55,17 @@ class NoticeAll extends Abstract {
       throw new Error('Task not found.');
     }
 
-    if (!entity.notice) {
+    const noticeTemplate = entity.notices.find(({ params }) => params.isTemplate);
+
+    if (!noticeTemplate) {
       // Internal error
-      throw new Error('Task notice not found.');
+      throw new Error('Task notice template was not found.');
     }
+
+    this.noticeTemplate = {
+      ...noticeTemplate,
+      params: { ...noticeTemplate.params, isTemplate: false },
+    };
 
     await this.handleSend(entity);
   }
@@ -80,7 +93,7 @@ class NoticeAll extends Abstract {
   /**
    * Send
    */
-  private async send({ notice, lastFailTargetId }: TaskEntity, usersCount: number): Promise<void> {
+  private async send({ lastFailTargetId }: TaskEntity, usersCount: number): Promise<void> {
     let offset = 0;
 
     // Start process from last error target id
@@ -110,7 +123,7 @@ class NoticeAll extends Abstract {
       const personalNotices: NoticeEntity[] = [];
 
       usersListResult.list.forEach(({ id: userId }) => {
-        personalNotices.push(this.noticeRepository.create({ ...notice, userId }));
+        personalNotices.push(this.noticeRepository.create({ ...this.noticeTemplate, userId }));
       });
 
       // Will be saved in transaction

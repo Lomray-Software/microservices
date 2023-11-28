@@ -6,7 +6,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToOne,
+  JoinColumn,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -15,6 +16,13 @@ import TaskType from '@constants/task-type';
 import Message from '@entities/message';
 import Notice from '@entities/notice';
 
+@JSONSchema({
+  description: 'Task',
+  properties: {
+    notices: { $ref: '#/definitions/Notice', type: 'array' },
+    messages: { $ref: '#/definitions/Messages', type: 'array' },
+  },
+})
 @Entity()
 class Task {
   @PrimaryGeneratedColumn('uuid')
@@ -60,20 +68,22 @@ class Task {
   @JSONSchema({
     description: 'Notice template id. That template will be used for users notify',
   })
-  @OneToOne('Notice', 'task', { onDelete: 'CASCADE', cascade: ['remove'] })
+  @OneToMany('Notice', 'task', { onDelete: 'CASCADE', cascade: ['remove'] })
   @Type(() => Notice)
   @ValidateNested()
   @IsUndefinable()
-  notice: Notice;
+  @JoinColumn({ name: 'id', referencedColumnName: 'taskId' })
+  notices: Notice[];
 
   @JSONSchema({
     description: 'Message template id. That template will be used for users notify',
   })
-  @OneToOne('Message', 'task', { onDelete: 'CASCADE', cascade: ['remove'] })
+  @OneToMany('Message', 'task', { onDelete: 'CASCADE', cascade: ['remove'] })
   @Type(() => Message)
   @ValidateNested()
   @IsUndefinable()
-  message: Message;
+  @JoinColumn({ name: 'id', referencedColumnName: 'taskId' })
+  messages: Message[];
 }
 
 export default Task;

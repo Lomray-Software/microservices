@@ -14,7 +14,8 @@ Content-Type: application/json
         "description": "1 task notice all description",
         "type": "announce",
         "params": {
-          "status": "warning"
+          "status": "warning",
+          "isTemplate": true
         }
       }
     }
