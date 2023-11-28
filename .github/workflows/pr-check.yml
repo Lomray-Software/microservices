@@ -80,6 +80,9 @@ jobs:
     name: Sonarcube
     needs: [changed-microservices]
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.ref }}-sonarcube
+      cancel-in-progress: true
 
     strategy:
       matrix:
