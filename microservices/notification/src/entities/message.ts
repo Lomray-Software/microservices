@@ -83,8 +83,10 @@ class Message {
   @IsUndefinable()
   notice: Notice;
 
-  @ManyToOne('Task', 'messages')
-  @JoinColumn()
+  @ManyToOne('Task', 'messages', { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'taskId', referencedColumnName: 'id' })
+  @IsUndefinable()
+  @IsObject()
   task: Task;
 }
 

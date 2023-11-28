@@ -10,10 +10,28 @@ class Task {
    * Handles after insert
    */
   public static async handleAfterInsert(entity: TaskEntity, manager: EntityManager): Promise<void> {
-    await Promise.all([
-      this.createAndAttachNoticeTemplate(entity, manager),
-      this.createAndAttachMessageTemplate(entity, manager),
-    ]);
+    await this.handleAttach(entity, manager);
+  }
+
+  /**
+   * Handle attach
+   */
+  private static async handleAttach(entity: TaskEntity, manager: EntityManager): Promise<void> {
+    const attachRequests: Promise<void>[] = [];
+
+    if (entity?.notices.length) {
+      attachRequests.push(this.createAndAttachNoticeTemplate(entity, manager));
+    }
+
+    if (entity?.messages.length) {
+      attachRequests.push(this.createAndAttachMessageTemplate(entity, manager));
+    }
+
+    if (!attachRequests.length) {
+      return;
+    }
+
+    await Promise.all(attachRequests);
   }
 
   /**
@@ -23,19 +41,19 @@ class Task {
     entity: TaskEntity,
     manager: EntityManager,
   ): Promise<void> {
-    if (!entity.messages.length) {
+    if (!entity?.messages.length) {
       return;
     }
 
-    if (entity.messages.length >= 2 || !entity.messages[0].params.isTemplate) {
+    if (entity?.messages.length >= 2 || !entity.messages[0].params.isTemplate) {
       throw new BaseException({
         status: 400,
-        message: 'Expected single message template',
+        message: 'Expected single message template.',
       });
     }
 
     const messageRepository = manager.getRepository(MessageEntity);
-    const message = messageRepository.create({ ...entity.messages[0], taskId: entity.id });
+    const message = messageRepository.create({ ...entity.messages?.[0], taskId: entity.id });
 
     const errors = await validate(message, {
       whitelist: true,
@@ -61,19 +79,26 @@ class Task {
     entity: TaskEntity,
     manager: EntityManager,
   ): Promise<void> {
-    if (!entity.notices.length) {
+    if (!entity?.notices.length) {
       return;
     }
 
-    if (entity.notices.length >= 2 || !entity.notices[0].params.isTemplate) {
+    if (entity.notices.length >= 2 || !entity.notices?.[0].params.isTemplate) {
       throw new BaseException({
         status: 400,
-        message: 'Expected single message template',
+        message: 'Expected single message template.',
       });
     }
 
     const noticeRepository = manager.getRepository(NoticeEntity);
-    const notice = noticeRepository.create({ ...entity.notices[0], taskId: entity.id });
+    const notice = noticeRepository.create({
+      ...entity.notices?.[0],
+      params: { ...entity.notices?.[0].params, isTemplate: false },
+      taskId: entity.id,
+    });
+
+    console.log(entity);
+    console.log(notice);
 
     const errors = await validate(notice, {
       whitelist: true,
@@ -89,7 +114,11 @@ class Task {
       });
     }
 
-    entity.notices = await noticeRepository.save([notice]);
+    try {
+      entity.notices = await noticeRepository.save([notice]);
+    } catch (e) {
+      console.error(111, e);
+    }
   }
 }
 

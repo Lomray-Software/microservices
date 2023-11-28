@@ -6,7 +6,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -20,7 +19,7 @@ import Notice from '@entities/notice';
   description: 'Task',
   properties: {
     notices: { $ref: '#/definitions/Notice', type: 'array' },
-    messages: { $ref: '#/definitions/Messages', type: 'array' },
+    messages: { $ref: '#/definitions/Message', type: 'array' },
   },
 })
 @Entity()
@@ -68,21 +67,19 @@ class Task {
   @JSONSchema({
     description: 'Notice template id. That template will be used for users notify',
   })
-  @OneToMany('Notice', 'task', { onDelete: 'CASCADE', cascade: ['remove'] })
+  @OneToMany('Notice', 'task')
   @Type(() => Notice)
   @ValidateNested()
   @IsUndefinable()
-  @JoinColumn({ name: 'id', referencedColumnName: 'taskId' })
   notices: Notice[];
 
   @JSONSchema({
     description: 'Message template id. That template will be used for users notify',
   })
-  @OneToMany('Message', 'task', { onDelete: 'CASCADE', cascade: ['remove'] })
+  @OneToMany('Message', 'task')
   @Type(() => Message)
   @ValidateNested()
   @IsUndefinable()
-  @JoinColumn({ name: 'id', referencedColumnName: 'taskId' })
   messages: Message[];
 }
 

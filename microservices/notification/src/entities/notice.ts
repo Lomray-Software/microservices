@@ -10,6 +10,7 @@ import {
   UpdateDateColumn,
   OneToMany,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import type Message from '@entities/message';
 import Task from '@entities/task';
@@ -80,7 +81,10 @@ class Notice {
   @OneToMany('Message', 'notice')
   messages: Message[];
 
-  @ManyToOne('Task', 'notices')
+  @ManyToOne('Task', 'notices', { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'taskId', referencedColumnName: 'id' })
+  @IsUndefinable()
+  @IsObject()
   task: Task;
 }
 
