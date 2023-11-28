@@ -1,6 +1,7 @@
 import { ClassReturn } from '@lomray/client-helpers/interfaces/class-return';
 import { getManager } from 'typeorm';
 import TaskEntity from '@entities/task';
+import type IHandledCounts from '@interfaces/handled-counts';
 import Abstract from './abstract';
 import EmailAll from './email-all';
 import NoticeAll from './notice-all';
@@ -42,12 +43,23 @@ class Factory {
   /**
    * Auto process services
    */
-  public static async process(events: TaskEntity[]): Promise<number> {
+  public static async process(events: TaskEntity[]): Promise<IHandledCounts> {
     const services = Factory.init(events);
 
-    return (await Promise.all(services.map((s) => s.process()))).reduce(
-      (total, count) => total + count,
-      0,
+    /**
+     * Get total tasks processed counts from all processed services
+     */
+    const counts = await Promise.all(services.map((s) => s.process()));
+
+    return counts.reduce(
+      (acc, currentValue) => {
+        acc.total += currentValue.total;
+        acc.completed += currentValue.completed;
+        acc.failed += currentValue.failed;
+
+        return acc;
+      },
+      { total: 0, completed: 0, failed: 0 },
     );
   }
 }

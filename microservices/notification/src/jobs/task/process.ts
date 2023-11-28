@@ -1,10 +1,21 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { IsNumber } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
+import type IHandledCounts from '@interfaces/handled-counts';
 import ProcessService from '@services/task/process';
 
-class ProcessOutput {
+class ProcessOutput implements IHandledCounts {
+  @JSONSchema({
+    description: 'Total tasks processed',
+  })
   @IsNumber()
-  count: number;
+  total: number;
+
+  @IsNumber()
+  completed: number;
+
+  @IsNumber()
+  failed: number;
 }
 
 /**
@@ -15,9 +26,7 @@ const process = Endpoint.custom(
     output: ProcessOutput,
     description: 'Process tasks',
   }),
-  async () => ({
-    count: await ProcessService.init().checkoutAndProcess(),
-  }),
+  () => ProcessService.init().retrieveAndProcessTasks(),
 );
 
 export default process;
