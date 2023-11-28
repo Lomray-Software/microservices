@@ -8,7 +8,7 @@ export default class task1701115199116 implements MigrationInterface {
       `CREATE TYPE "public"."task_type_enum" AS ENUM('noticeAll', 'emailAll')`,
     );
     await queryRunner.query(
-      `CREATE TYPE "public"."task_status_enum" AS ENUM('init', 'failed', 'completed')`,
+      `CREATE TYPE "public"."task_status_enum" AS ENUM('init', 'failed', 'completed', 'waiting')`,
     );
     await queryRunner.query(
       `CREATE TABLE "task" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "type" "public"."task_type_enum" NOT NULL, "lastFailTargetId" uuid, "status" "public"."task_status_enum" NOT NULL DEFAULT 'init', "params" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "task(pk):id" PRIMARY KEY ("id"))`,
