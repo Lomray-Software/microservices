@@ -36,6 +36,7 @@ class Task {
 
   /**
    * Create and attach nested message template
+   * @TODO: update to last workflow version
    */
   private static async createAndAttachMessageTemplate(
     entity: TaskEntity,
