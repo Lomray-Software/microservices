@@ -20,6 +20,14 @@
           "admin": "allow"
         }
       },
+      "taskId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "type": {
         "in": {
           "admin": "allow"
@@ -53,6 +61,14 @@
         }
       },
       "text": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "attachments": {
         "in": {
           "admin": "allow"
         },
@@ -255,6 +271,14 @@
         "out": {
           "admin": "allow",
           "user": "allow"
+        }
+      },
+      "taskId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
         }
       },
       "title": {
@@ -463,10 +487,172 @@
           "admin": "allow"
         },
         "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-09-20T18:49:48.824Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.Task",
+    "title": "Task",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "lastFailTargetId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "status": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "notice": "notification.Notice",
+      "message": "notification.Message"
+    },
+    "createdAt": "2023-11-28T08:24:13.755Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.ListOutputParams.bbbcb6cef990d65df49a90e21dec6e66",
+    "title": "List Output Params",
+    "schema": {
+      "list": "notification.Task",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
           "admin": "allow"
         }
       }
     },
-    "createdAt": "2023-09-20T22:49:48.824Z"
+    "createdAt": "2023-11-28T08:24:13.755Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.ViewOutputParams.6cc49e5e15754ec8fd6013ccc05489d9",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "notification.Task"
+    },
+    "createdAt": "2023-11-28T08:24:13.755Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.CreateRequestParams.540b18ddac00a8a1654f4d3704c482bc",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "notification.Task"
+    },
+    "createdAt": "2023-11-28T08:24:13.755Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.CreateOutputParams.6cc49e5e15754ec8fd6013ccc05489d9",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "notification.Task"
+    },
+    "createdAt": "2023-11-28T08:24:13.755Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.UpdateRequestParams.540b18ddac00a8a1654f4d3704c482bc",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "notification.Task",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-11-28T08:24:13.755Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.UpdateOutputParams.6cc49e5e15754ec8fd6013ccc05489d9",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "notification.Task"
+    },
+    "createdAt": "2023-11-28T08:24:13.755Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.RemoveOutputParams.76da26644ee5b1db84b77f612d3aed27",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "notification.Task",
+      "entities": "notification.Task"
+    },
+    "createdAt": "2023-11-28T08:24:13.755Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.ProcessOutput",
+    "title": "Process Output",
+    "schema": {
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-11-28T08:24:13.755Z"
   }
 ]
