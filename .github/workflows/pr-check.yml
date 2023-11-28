@@ -75,3 +75,28 @@ jobs:
         run: npx @lomray/microservices-cli test
         env:
           ONLY: ${{ env.MICROSERVICE_NAME }}
+
+  sonarcube:
+    name: Sonarcube
+    needs: [changed-microservices]
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        microservice: ${{ fromJson(needs.changed-microservices.outputs.microservices) }}
+
+    env:
+      MICROSERVICE_NAME: ${{ matrix.microservice }}
+      WORK_DIR: "microservices/${{ matrix.microservice }}"
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_CLOUD_TOKEN }}
+        with:
+          projectBaseDir: ${{ env.WORK_DIR }}
