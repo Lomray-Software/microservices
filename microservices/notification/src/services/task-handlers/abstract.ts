@@ -96,6 +96,8 @@ abstract class Abstract {
         await this.processTasks(task);
 
         this.handledTasksCount += 1;
+
+        await this.updateCompletedTask(task);
       } catch (error) {
         Log.error(
           `Failed to handle task: "${task.id}", type "${task.type}". ${error?.message as string}`,
@@ -103,8 +105,6 @@ abstract class Abstract {
 
         await this.updateFailedTask(task, error?.message as string);
       }
-
-      await this.updateCompletedTask(task);
     }
 
     return this.handledTasksCount;
@@ -125,7 +125,7 @@ abstract class Abstract {
   private async updateFailedTask(task: TaskEntity, errorMessage: string): Promise<void> {
     // If task fail before execution process
     if (!this.lastFailTargetId) {
-      Log.error(`Task failed before execution process "${task.id}"`);
+      Log.error(`Task failed before execution process: "${task.id}", type "${task.type}"`);
 
       return;
     }

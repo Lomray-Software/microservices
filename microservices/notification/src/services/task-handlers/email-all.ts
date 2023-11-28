@@ -22,7 +22,10 @@ class EmailAll extends Abstract {
    * Take related tasks
    */
   public take(tasks: TaskEntity[]): boolean {
-    return super.take(tasks, ({ type }: TaskEntity) => type === TaskType.EMAIL_ALL);
+    return super.take(
+      tasks,
+      ({ type, message }: TaskEntity) => type === TaskType.EMAIL_ALL && Boolean(message),
+    );
   }
 
   /**

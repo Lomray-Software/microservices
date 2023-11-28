@@ -1,0 +1,34 @@
+### Step 1. Create task
+POST http://127.0.0.1:8001/ms/notification
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "task.create",
+  "params": {
+    "fields": {
+      "type": "noticeAll",
+      "notice": {
+        "title": "1 task notice all",
+        "description": "1 task notice all description",
+        "type": "announce",
+        "params": {
+          "status": "warning"
+        }
+      }
+    }
+  }
+}
+
+### Step 2. Execute cron task - task process
+POST http://127.0.0.1:8001/ms/notification
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "job.task.process",
+  "params": {
+  }
+}

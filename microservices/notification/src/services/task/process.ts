@@ -37,8 +37,10 @@ class Process {
 
     await Batch.find(
       taskRepository
-        .createQueryBuilder('t')
-        .where('t.status IN (:...statuses)', { statuses: [TaskStatus.INIT, TaskStatus.FAILED] }),
+        .createQueryBuilder('task')
+        .where('task.status IN (:...statuses)', { statuses: [TaskStatus.INIT, TaskStatus.FAILED] })
+        .leftJoinAndSelect('task.notice', 'notice')
+        .leftJoinAndSelect('task.message', 'message'),
       (tasks) => this.process(tasks),
       {
         chunkSize: 3,
