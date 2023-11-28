@@ -109,6 +109,7 @@ abstract class Abstract {
    * Update task
    */
   private async updateCompletedTask(task: TaskEntity): Promise<void> {
+    // Get last task version. Prevent remove related notices that were created in process
     const updatedTask = await this.taskRepository.findOne(task.id);
 
     if (!updatedTask) {
