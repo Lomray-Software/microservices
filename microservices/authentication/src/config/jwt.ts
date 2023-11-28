@@ -1,21 +1,16 @@
-import { RemoteConfig } from '@lomray/microservice-helpers';
-import CONST from '@constants/index';
-import type { IRemoteConfig } from '@interfaces/remote-config';
+import remote from '@config/remote';
 import type { IJwtParams } from '@services/tokens/jwt';
 
 export interface IJwtConfig extends IJwtParams {
   secretKey: string;
 }
 
-const jwtOptions = { ...CONST.MS_JWT_PARAMS, secretKey: CONST.MS_JWT_SECRET_KEY };
-
 /**
  * Get JWT options
  */
 const jwt = async (audience: string[] = []): Promise<IJwtConfig> => {
-  const remoteConfig = await RemoteConfig.get<IRemoteConfig>('config');
-
-  const result: IJwtConfig = { ...jwtOptions, ...(remoteConfig?.jwtOptions ?? {}) };
+  const remoteConfig = await remote();
+  const result: IJwtConfig = { ...remoteConfig.jwtOptions };
 
   if (audience.length) {
     result.options = {

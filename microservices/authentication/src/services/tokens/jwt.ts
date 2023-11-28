@@ -14,6 +14,7 @@ export interface IJwtParams {
   expirationRefresh?: number;
   algorithm?: Algorithm; // default: HS256
   options?: SignOptions;
+  cookieStrategy?: number;
 }
 
 /**
@@ -47,6 +48,12 @@ class Jwt {
    * @private
    */
   private options: SignOptions = {};
+
+  /**
+   * Cookie strategy
+   * See README.md - COOKIE_AUTH_STRATEGY
+   */
+  private readonly cookieStrategy: number = 3;
 
   /**
    * @constructor
@@ -127,7 +134,7 @@ class Jwt {
   /**
    * Try to find most suitable token by audience and request origin
    */
-  public findMostSuitableToken(tokens: string[], origin = 'unknown'): string {
+  public findMostSuitableToken(tokens: string[], origin = 'unknown'): string | undefined {
     let resultToken;
 
     for (const token of tokens) {
@@ -142,7 +149,17 @@ class Jwt {
       }
     }
 
-    return resultToken ?? tokens[0];
+    switch (this.cookieStrategy) {
+      case 3:
+        return;
+
+      case 2:
+        return resultToken;
+
+      case 1:
+      default:
+        return resultToken ?? tokens[0];
+    }
   }
 
   /**

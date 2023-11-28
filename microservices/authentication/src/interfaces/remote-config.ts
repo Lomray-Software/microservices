@@ -7,4 +7,5 @@ import type { IJwtConfig } from '@config/jwt';
 export interface IRemoteConfig {
   jwtOptions?: IJwtConfig;
   cookieOptions?: ICookiesConfig;
+  cookieStrategy?: number;
 }

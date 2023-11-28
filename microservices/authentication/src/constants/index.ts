@@ -10,6 +10,7 @@ const IS_SECURE_COOKIE = Boolean(Number(process.env.IS_SECURE_COOKIE || 1));
 const IS_HTTPONLY_COOKIE = Boolean(Number(process.env.IS_HTTPONLY_COOKIE || 1));
 const COOKIE_SAME_SITE = (process.env.COOKIE_SAME_SITE || undefined) as undefined;
 const COOKIE_DOMAIN = (process.env.COOKIE_DOMAIN || undefined) as undefined;
+const COOKIE_AUTH_STRATEGY = Number(process.env.COOKIE_AUTH_STRATEGY) || 2;
 
 const constants = {
   ...GetConstants({ msNameDefault, version, isBuild, packageName: name, withDb: true }),
@@ -19,6 +20,7 @@ const constants = {
   COOKIE_SAME_SITE,
   COOKIE_DOMAIN,
   IS_HTTPONLY_COOKIE,
+  COOKIE_AUTH_STRATEGY,
   // Expiration token in seconds. Default: 30 min
   DEFAULT_ACCESS_EXPIRATION: 1800,
   // Expiration refresh token in seconds. Default: 30 days
