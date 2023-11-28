@@ -97,9 +97,6 @@ class Task {
       taskId: entity.id,
     });
 
-    console.log(entity);
-    console.log(notice);
-
     const errors = await validate(notice, {
       whitelist: true,
       forbidNonWhitelisted: true,
