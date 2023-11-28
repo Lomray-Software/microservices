@@ -1,5 +1,6 @@
 import { Batch } from '@lomray/microservice-helpers';
 import { EntityManager, getManager } from 'typeorm';
+import TaskStatus from '@constants/task-status';
 import TaskEntity from '@entities/task';
 import Factory from '@services/task-handlers/factory';
 
@@ -34,7 +35,15 @@ class Process {
   public async checkoutAndProcess(): Promise<number> {
     const taskRepository = this.manager.getRepository(TaskEntity);
 
-    await Batch.find(taskRepository.createQueryBuilder('t'), (tasks) => this.process(tasks));
+    await Batch.find(
+      taskRepository
+        .createQueryBuilder('t')
+        .where('t.status IN (:...statuses)', { statuses: [TaskStatus.INIT, TaskStatus.FAILED] }),
+      (tasks) => this.process(tasks),
+      {
+        chunkSize: 3,
+      },
+    );
 
     return this.handledTasksCount;
   }

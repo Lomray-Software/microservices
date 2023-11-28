@@ -1,9 +1,23 @@
 import { BaseException } from '@lomray/microservice-nodejs-lib';
+import { Repository } from 'typeorm';
 import TaskType from '@constants/task-type';
+import MessageEntity from '@entities/message';
 import TaskEntity from '@entities/task';
 import Abstract from './abstract';
 
 class EmailAll extends Abstract {
+  /**
+   * @private
+   */
+  private messageRepository: Repository<MessageEntity>;
+
+  /**
+   * @protected
+   */
+  protected init(): void {
+    this.messageRepository = this.manager.getRepository(MessageEntity);
+  }
+
   /**
    * Take related tasks
    */
@@ -14,7 +28,7 @@ class EmailAll extends Abstract {
   /**
    * Process email all users
    */
-  public process(): Promise<number> {
+  protected processTasks(): Promise<void> {
     throw new BaseException({
       status: 501,
       message: 'Not implemented',
