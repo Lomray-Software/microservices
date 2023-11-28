@@ -17,11 +17,6 @@ jobs:
 
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
 
-      - name: Commitlint
-        run: |
-          npm install commitlint@latest @commitlint/config-conventional@latest
-          echo "${{ github.event.pull_request.title }}" | npx --no-install commitlint -g commitlint.config.js
-
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v35
@@ -34,6 +29,16 @@ jobs:
         run: npx @lomray/microservices-cli changed-microservices
         env:
           FILES: '${{ steps.changed-files.outputs.all_changed_files }}'
+
+  prtitle:
+    name: Check PR title
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Commit lint
+        run: |
+          npm install commitlint@latest @commitlint/config-conventional@latest
+          echo "${{ github.event.pull_request.title }}" | npx --no-install commitlint -g commitlint.config.js
 
   checks:
     name: Run code checks
