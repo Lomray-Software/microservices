@@ -92,13 +92,13 @@ abstract class Abstract {
 
         this.handledTasksCount += 1;
 
-        await this.updateCompletedTask(task);
+        await this.updateCompletedTask(task.id);
       } catch (error) {
         Log.error(
           `Failed to handle task: "${task.id}", type "${task.type}". ${error?.message as string}`,
         );
 
-        await this.updateFailedTask(task, error?.message as string);
+        await this.updateFailedTask(task.id, error?.message as string);
       }
     }
 
@@ -108,12 +108,12 @@ abstract class Abstract {
   /**
    * Update task
    */
-  private async updateCompletedTask(task: TaskEntity): Promise<void> {
+  private async updateCompletedTask(taskId: string): Promise<void> {
     // Get last task version. Prevent remove related notices that were created in process
-    const updatedTask = await this.taskRepository.findOne(task.id);
+    const updatedTask = await this.taskRepository.findOne(taskId);
 
     if (!updatedTask) {
-      throw new Error('Failed to update task status to completed. Task was not found.');
+      throw new Error('Failed to update task status to "completed". Task was not found.');
     }
 
     updatedTask.status = TaskStatus.COMPLETED;
@@ -124,18 +124,27 @@ abstract class Abstract {
   /**
    * Update failed task data
    */
-  private async updateFailedTask(task: TaskEntity, errorMessage: string): Promise<void> {
-    task.status = TaskStatus.FAILED;
-    task.lastFailTargetId = this.lastFailTargetId;
+  private async updateFailedTask(taskId: string, errorMessage: string): Promise<void> {
+    // Get last task version. Prevent remove related notices that were created in process
+    const updatedTask = await this.taskRepository.findOne(taskId);
+
+    if (!updatedTask) {
+      throw new Error('Failed to update task status to "failed". Task was not found.');
+    }
+
+    updatedTask.status = TaskStatus.FAILED;
+    updatedTask.lastFailTargetId = this.lastFailTargetId;
 
     // If task fail before execution process
     if (!this.lastFailTargetId) {
-      Log.error(`Task failed before execution process: "${task.id}", type "${task.type}"`);
+      Log.error(
+        `Task failed before execution process: "${updatedTask.id}", type "${updatedTask.type}"`,
+      );
 
-      task.params.lastErrorMessage = errorMessage;
+      updatedTask.params.lastErrorMessage = errorMessage;
     }
 
-    await this.taskRepository.save(task);
+    await this.taskRepository.save(updatedTask);
   }
 
   /**
