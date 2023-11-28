@@ -40,14 +40,14 @@ class Process {
         .createQueryBuilder('task')
         .where('task.status IN (:...statuses)', { statuses: [TaskStatus.INIT, TaskStatus.FAILED] })
         .leftJoinAndSelect(
-          'task.notice',
-          'notice',
-          "(notice.params ->> 'isTemplate')::boolean = true",
+          'task.notices',
+          'notices',
+          "(notices.params ->> 'isTemplate')::boolean = true",
         )
         .leftJoinAndSelect(
-          'task.message',
-          'message',
-          "(message.params ->> 'isTemplate')::boolean = true",
+          'task.messages',
+          'messages',
+          "(messages.params ->> 'isTemplate')::boolean = true",
         ),
       (tasks) => this.process(tasks),
       {
