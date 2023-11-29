@@ -1,7 +1,5 @@
-import type { IJsonQueryWhereFilter } from '@lomray/microservice-helpers';
 import { Api, Log } from '@lomray/microservice-helpers';
 import type IUser from '@lomray/microservices-client-api/interfaces/users/entities/user';
-import { JQOperator } from '@lomray/microservices-types/lib/src/query';
 import { In, Repository } from 'typeorm';
 import TaskMode from '@constants/task-mode';
 import TaskType from '@constants/task-type';
@@ -71,50 +69,18 @@ class EmailAll extends Abstract {
     usersCount: number,
   ): Promise<void> {
     const sendService = await Factory.create(this.messageRepository);
-    const initPage = Number(lastFailTargetId) || 1;
     let offset = 0;
 
     // Start process from last error target id
-    this.currentPage = Math.floor(offset / this.chunkSize) + initPage;
+    this.currentPage = Number(lastFailTargetId) || 1;
 
     do {
-      // Apply where clause to users list query
-      let where: IJsonQueryWhereFilter<IUser<string>> | null = null;
-
-      /**
-       * Find all sent emails and get all users with emails
-       * @description If full check up mode all users will be re-checked
-       */
-      if (lastFailTargetId && mode !== TaskMode.FULL_CHECK_UP) {
-        const sentEmails = await this.messageRepository
-          .createQueryBuilder('message')
-          .where('message.taskId = :taskId', { taskId: this.messageTemplate.taskId })
-          .andWhere(
-            "message.params ->> 'isTemplated' IS NOT NULL AND (message.params ->> 'isTemplated')::boolean = false",
-          )
-          .getMany();
-
-        if (sentEmails.some(({ to }) => !to)) {
-          throw new Error('Invalid sent emails recipient was found.');
-        }
-
-        where = sentEmails.length
-          ? ({
-              // Select users from chunk page only that did not receive emails
-              email: {
-                [JQOperator.notIn]: sentEmails.map(({ to }) => to) as string[],
-              },
-            } as IJsonQueryWhereFilter<IUser<string>>)
-          : null;
-      }
-
       const { result: usersListResult, error: usersListError } = await Api.get().users.user.list({
         query: {
           attributes: ['id', 'email', 'createdAt'],
           page: this.currentPage,
           pageSize: this.chunkSize,
           orderBy: { createdAt: 'ASC' },
-          ...(where ? { where } : {}),
         },
       });
 
@@ -139,39 +105,43 @@ class EmailAll extends Abstract {
        */
       const processUsers: Pick<IUser, 'id' | 'email'>[] = [];
 
-      if (mode === TaskMode.FULL_CHECK_UP) {
+      if (
+        mode === TaskMode.FULL_CHECK_UP ||
+        (lastFailTargetId && this.currentPage === Number(lastFailTargetId))
+      ) {
         /**
          * If full microservices will down - task SHOULD NOT be executed again
          * for the same users. So, we need to check if notices exist for these users.
          * In this case Last Error Target may not saved
          */
-        const userIds = usersListResult.list.map(({ id }) => id);
+        const emails = usersListResult.list.map(({ email }) => email);
         const existingEmails = await this.messageRepository.find({
           select: ['to', 'taskId'],
-          where: { to: In(userIds), taskId: this.messageTemplate.taskId },
+          where: { to: In(emails), taskId: this.messageTemplate.taskId },
         });
 
-        const notEmailedUserIds = userIds.filter(
-          (userId) => !existingEmails.some(({ to }) => to === userId),
+        const notEmailedEmails = emails.filter(
+          (email) => !existingEmails.some(({ to }) => to === email),
         );
 
-        if (notEmailedUserIds.length === this.chunkSize) {
+        if (notEmailedEmails.length === 0) {
+          this.currentPage += 1;
           continue;
         }
 
-        const notNoticedUsers = notEmailedUserIds.map((id) => {
-          const user = usersListResult.list.find(({ id: userId }) => userId === id);
+        const notEmailedUsers = notEmailedEmails.map((email) => {
+          const user = usersListResult.list.find(({ email: userEmail }) => userEmail === email);
 
-          return { email: user?.email, id };
+          return { email, id: user?.id as string };
         });
 
-        processUsers.push(...notNoticedUsers);
+        processUsers.push(...notEmailedUsers);
       } else {
         processUsers.push(...usersListResult.list.map(({ id, email }) => ({ id, email })));
       }
 
       // Send service will be automatically create not template messages
-      const sendResults = await Promise.all(
+      const savedEmails = await Promise.all(
         processUsers.map(({ email }) =>
           sendService.send({
             html: this.messageTemplate.html as string,
@@ -183,10 +153,10 @@ class EmailAll extends Abstract {
         ),
       );
 
-      offset += sendResults.length;
+      offset += savedEmails.length;
 
       // Update pagination
-      this.currentPage = Math.floor(offset / this.chunkSize) + initPage;
+      this.currentPage += 1;
     } while (offset < usersCount);
   }
 }

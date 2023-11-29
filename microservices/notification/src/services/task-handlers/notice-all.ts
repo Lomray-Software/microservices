@@ -58,11 +58,10 @@ class NoticeAll extends Abstract {
     { lastFailTargetId, mode }: TaskEntity,
     usersCount: number,
   ): Promise<void> {
-    const initPage = Number(lastFailTargetId) || 1;
     let offset = 0;
 
     // Start process from last error target id
-    this.currentPage = Math.floor(offset / this.chunkSize) + initPage;
+    this.currentPage = Number(lastFailTargetId) || 1;
 
     do {
       const { result: usersListResult, error: usersListError } = await Api.get().users.user.list({
@@ -90,7 +89,11 @@ class NoticeAll extends Abstract {
        */
       const processUsers: string[] = [];
 
-      if (mode === TaskMode.FULL_CHECK_UP) {
+      if (
+        mode === TaskMode.FULL_CHECK_UP ||
+        // full checkup current users chuck if last fail target id is current page
+        (lastFailTargetId && this.currentPage === Number(lastFailTargetId))
+      ) {
         /**
          * If full microservices will down - task SHOULD NOT be executed again
          * for the same users. So, we need to check if notices exist for these users.
@@ -109,7 +112,8 @@ class NoticeAll extends Abstract {
         /**
          * If notices exist for all current chunk users - continue to next chunk
          */
-        if (notNoticedUserIds.length === this.chunkSize) {
+        if (notNoticedUserIds.length === 0) {
+          this.currentPage += 1;
           continue;
         }
 
@@ -128,7 +132,7 @@ class NoticeAll extends Abstract {
       offset += savedNotices.length;
 
       // Update pagination
-      this.currentPage = Math.floor(offset / this.chunkSize) + initPage;
+      this.currentPage += 1;
     } while (offset < usersCount);
   }
 }
