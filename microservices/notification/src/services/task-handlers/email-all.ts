@@ -3,6 +3,7 @@ import { Repository } from 'typeorm';
 import TaskType from '@constants/task-type';
 import MessageEntity from '@entities/message';
 import TaskEntity from '@entities/task';
+import Factory from '@services/email-provider/factory';
 import Abstract from './abstract';
 
 class EmailAll extends Abstract {
@@ -14,7 +15,7 @@ class EmailAll extends Abstract {
   /**
    * @private
    */
-  private messageTemplate: Partial<MessageEntity>;
+  private messageTemplate: Omit<MessageEntity, 'id'>;
 
   /**
    * @private
@@ -53,6 +54,10 @@ class EmailAll extends Abstract {
       params: { ...rest.params, isTemplate: false },
     };
 
+    if (!this.messageTemplate.text || !this.messageTemplate.subject || !this.messageTemplate.html) {
+      throw new Error('Invalid message template.');
+    }
+
     await this.handleSend(task);
   }
 
@@ -78,6 +83,7 @@ class EmailAll extends Abstract {
    * If previous run task had error - run process from last error target id (page)
    */
   private async send({ lastFailTargetId }: TaskEntity, usersCount: number): Promise<void> {
+    const sendService = await Factory.create(this.messageRepository);
     const initPage = Number(lastFailTargetId) || 1;
     let offset = 0;
 
@@ -87,7 +93,7 @@ class EmailAll extends Abstract {
     do {
       const { result: usersListResult, error: usersListError } = await Api.get().users.user.list({
         query: {
-          attributes: ['id', 'createdAt'],
+          attributes: ['id', 'email', 'createdAt'],
           page: this.currentPage,
           pageSize: this.chunkSize,
           orderBy: { createdAt: 'ASC' },
@@ -100,19 +106,29 @@ class EmailAll extends Abstract {
         throw new Error(usersListError.message);
       }
 
+      if (usersListResult?.list.some(({ email }) => !email)) {
+        // Throw internal error
+        throw new Error('Some users have no email.');
+      }
+
       // If all users were iterated - task done
       if (!usersListResult?.list.length) {
         return;
       }
 
-      // Will be saved in transaction
-      const savedNotices = await this.messageRepository.save(
-        usersListResult.list.map(({ id: userId }) =>
-          this.messageRepository.create({ ...this.messageRepository, userId }),
+      // Send service will be automatically create not template messages
+      const sendResults = await Promise.all([
+        usersListResult.list.map(({ email }) =>
+          sendService.send({
+            html: this.messageTemplate.html as string,
+            text: this.messageTemplate.text,
+            subject: this.messageTemplate.subject,
+            to: [email as string],
+          }),
         ),
-      );
+      ]);
 
-      offset += savedNotices.length;
+      offset += sendResults.length;
 
       // Update pagination
       this.currentPage = Math.floor(offset / this.chunkSize) + initPage;
