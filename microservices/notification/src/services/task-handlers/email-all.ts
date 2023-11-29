@@ -1,5 +1,6 @@
 import { Api, Log } from '@lomray/microservice-helpers';
 import type IUser from '@lomray/microservices-client-api/interfaces/users/entities/user';
+import _ from 'lodash';
 import { In, Repository } from 'typeorm';
 import TaskMode from '@constants/task-mode';
 import TaskType from '@constants/task-type';
@@ -115,21 +116,20 @@ class EmailAll extends Abstract {
          * In this case Last Error Target may not saved
          */
         const emails = usersListResult.list.map(({ email }) => email);
-        const existingEmails = await this.messageRepository.find({
+        const sentEmails = await this.messageRepository.find({
           select: ['to', 'taskId'],
           where: { to: In(emails), taskId: this.messageTemplate.taskId },
         });
-
-        const notEmailedEmails = emails.filter(
-          (email) => !existingEmails.some(({ to }) => to === email),
+        const notEmailedUsersEmail = _.compact(
+          emails.filter((email) => !sentEmails.some(({ to }) => to === email)),
         );
 
-        if (notEmailedEmails.length === 0) {
+        if (notEmailedUsersEmail.length === 0) {
           this.currentPage += 1;
           continue;
         }
 
-        const notEmailedUsers = notEmailedEmails.map((email) => {
+        const notEmailedUsers = notEmailedUsersEmail.map((email) => {
           const user = usersListResult.list.find(({ email: userEmail }) => userEmail === email);
 
           return { email, id: user?.id as string };

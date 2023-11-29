@@ -100,13 +100,12 @@ class NoticeAll extends Abstract {
          * In this case Last Error Target may not saved
          */
         const userIds = usersListResult.list.map(({ id }) => id);
-        const existingNotices = await this.noticeRepository.find({
+        const sentNotices = await this.noticeRepository.find({
           select: ['userId', 'taskId'],
           where: { userId: In(userIds), taskId: this.noticeTemplate.taskId },
         });
-
         const notNoticedUserIds = userIds.filter(
-          (userId) => !existingNotices.some(({ userId: id }) => id === userId),
+          (userId) => !sentNotices.some(({ userId: id }) => id === userId),
         );
 
         /**
