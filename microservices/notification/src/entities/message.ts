@@ -20,6 +20,7 @@ interface IParams {
 }
 
 @JSONSchema({
+  title: 'Message',
   description:
     'If message is template than it should not be sent as separate message. It should be used as template for task messages.',
   properties: {

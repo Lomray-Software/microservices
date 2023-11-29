@@ -16,7 +16,7 @@ import Message from '@entities/message';
 import Notice from '@entities/notice';
 
 @JSONSchema({
-  description: 'Task',
+  title: 'Task',
   properties: {
     notices: { $ref: '#/definitions/Notice', type: 'array' },
     messages: { $ref: '#/definitions/Message', type: 'array' },

@@ -21,7 +21,7 @@ interface IParams {
 }
 
 @JSONSchema({
-  description: 'Notice',
+  title: 'Notice',
   properties: {
     task: { $ref: '#/definitions/Task' },
   },
