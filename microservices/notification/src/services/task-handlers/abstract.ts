@@ -6,7 +6,7 @@ import TaskEntity from '@entities/task';
 import type IHandledCounts from '@interfaces/handled-counts';
 
 /**
- * Abstract class for notify tasks
+ * Abstract class for tasks processing
  */
 abstract class Abstract {
   /**
@@ -20,7 +20,7 @@ abstract class Abstract {
   protected lastFailTargetId: string | null = null;
 
   /**
-   * Tasks
+   * @protected
    */
   protected readonly chunkSize = 50;
 
@@ -30,7 +30,7 @@ abstract class Abstract {
   protected currentPage = 0;
 
   /**
-   * Tasks
+   * @protected
    */
   protected readonly tasks: TaskEntity[] = [];
 
@@ -147,15 +147,20 @@ abstract class Abstract {
     const lastUpdatedTask = await this.getLastUpdatedTaskVersion(taskId, TaskStatus.FAILED);
 
     lastUpdatedTask.status = TaskStatus.FAILED;
-    lastUpdatedTask.lastFailTargetId = this.lastFailTargetId;
+    lastUpdatedTask.params.lastErrorMessage = errorMessage;
 
-    // If task fail before execution process
     if (!this.lastFailTargetId) {
+      // If task fail before execution process
       Log.error(
-        `Task failed before execution process: "${lastUpdatedTask.id}", type "${lastUpdatedTask.type}"`,
+        `Task failed before execution process: "${lastUpdatedTask.id}", type "${lastUpdatedTask.type}".`,
       );
-
-      lastUpdatedTask.params.lastErrorMessage = errorMessage;
+    } else {
+      /**
+       * If task failed during execution process and then failed before execution process.
+       * DO NOT rewrite target reference
+       * @description Case: failed to get user page 2, then failed to start send process at all
+       */
+      lastUpdatedTask.lastFailTargetId = this.lastFailTargetId;
     }
 
     await this.taskRepository.save(lastUpdatedTask);
