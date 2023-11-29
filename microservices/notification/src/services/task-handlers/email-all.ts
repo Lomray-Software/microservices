@@ -110,11 +110,6 @@ class EmailAll extends Abstract {
         mode === TaskMode.FULL_CHECK_UP ||
         (lastFailTargetId && this.currentPage === Number(lastFailTargetId))
       ) {
-        /**
-         * If full microservices will down - task SHOULD NOT be executed again
-         * for the same users. So, we need to check if notices exist for these users.
-         * In this case Last Error Target may not saved
-         */
         const emails = usersListResult.list.map(({ email }) => email);
         const sentEmails = await this.messageRepository.find({
           select: ['to', 'taskId'],
@@ -124,6 +119,7 @@ class EmailAll extends Abstract {
           emails.filter((email) => !sentEmails.some(({ to }) => to === email)),
         );
 
+        // If emails exist for all current chunk users - continue to next chunk
         if (notEmailedUsersEmail.length === 0) {
           this.currentPage += 1;
           continue;

@@ -94,11 +94,6 @@ class NoticeAll extends Abstract {
         // full checkup current users chuck if last fail target id is current page
         (lastFailTargetId && this.currentPage === Number(lastFailTargetId))
       ) {
-        /**
-         * If full microservices will down - task SHOULD NOT be executed again
-         * for the same users. So, we need to check if notices exist for these users.
-         * In this case Last Error Target may not saved
-         */
         const userIds = usersListResult.list.map(({ id }) => id);
         const sentNotices = await this.noticeRepository.find({
           select: ['userId', 'taskId'],
@@ -108,9 +103,7 @@ class NoticeAll extends Abstract {
           (userId) => !sentNotices.some(({ userId: id }) => id === userId),
         );
 
-        /**
-         * If notices exist for all current chunk users - continue to next chunk
-         */
+        // If notices exist for all current chunk users - continue to next chunk
         if (notNoticedUserIds.length === 0) {
           this.currentPage += 1;
           continue;
