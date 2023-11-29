@@ -9,12 +9,14 @@ import type IAttachment from '@interfaces/message-attachment';
  */
 export interface IEmailParams {
   to: string[];
-  replyTo?: string;
   subject: string;
   text: string;
   html: string;
+  replyTo?: string;
   from?: string;
   attachments?: IAttachment[];
+  // Only for internal usage
+  taskId?: string;
 }
 
 /**

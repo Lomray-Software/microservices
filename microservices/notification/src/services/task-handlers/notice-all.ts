@@ -25,11 +25,7 @@ class NoticeAll extends Abstract {
    * Take related tasks
    */
   public take(tasks: TaskEntity[]): boolean {
-    return super.take(
-      tasks,
-      ({ type, notices }: TaskEntity) =>
-        type === TaskType.NOTICE_ALL && notices.some(({ params }) => params.isTemplate),
-    );
+    return super.take(tasks, ({ type }: TaskEntity) => type === TaskType.NOTICE_ALL);
   }
 
   /**

@@ -181,6 +181,22 @@
         "out": {
           "admin": "allow"
         }
+      },
+      "attachments": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "taskId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
       }
     },
     "createdAt": "2022-04-14T05:34:31.136Z"

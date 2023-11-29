@@ -26,11 +26,7 @@ class EmailAll extends Abstract {
    * Take related tasks
    */
   public take(tasks: TaskEntity[]): boolean {
-    return super.take(
-      tasks,
-      ({ type, messages }: TaskEntity) =>
-        type === TaskType.EMAIL_ALL && messages.some(({ params }) => params.isTemplate),
-    );
+    return super.take(tasks, ({ type }: TaskEntity) => type === TaskType.EMAIL_ALL);
   }
 
   /**
@@ -117,7 +113,7 @@ class EmailAll extends Abstract {
       }
 
       // Send service will be automatically create not template messages
-      const sendResults = await Promise.all([
+      const sendResults = await Promise.all(
         usersListResult.list.map(({ email }) =>
           sendService.send({
             html: this.messageTemplate.html as string,
@@ -126,7 +122,9 @@ class EmailAll extends Abstract {
             to: [email as string],
           }),
         ),
-      ]);
+      );
+
+      console.log('sendResults', sendResults);
 
       offset += sendResults.length;
 

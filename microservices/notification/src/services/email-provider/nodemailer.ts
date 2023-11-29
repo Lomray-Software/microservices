@@ -12,7 +12,16 @@ class Nodemailer extends Abstract {
    */
   public async send(params: IEmailParams): Promise<boolean> {
     const { defaultEmailFrom } = this.params;
-    const { to, subject, text, html, replyTo, attachments, from = defaultEmailFrom } = params;
+    const {
+      to,
+      subject,
+      text,
+      html,
+      replyTo,
+      attachments,
+      from = defaultEmailFrom,
+      taskId,
+    } = params;
 
     const info = await this.transporter.sendMail({
       from,
@@ -28,6 +37,7 @@ class Nodemailer extends Abstract {
 
     const message = this.messageRepository.create({
       type: NotifyType.EMAIL,
+      taskId,
       from,
       to: to.join(', '),
       text,
