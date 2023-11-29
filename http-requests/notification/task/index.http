@@ -1,4 +1,4 @@
-### Step 1. Create task
+### Step 1.1 Create notice all task
 POST http://127.0.0.1:8001/ms/notification
 Accept: application/json
 Content-Type: application/json
@@ -16,6 +16,32 @@ Content-Type: application/json
           "type": "announce",
           "params": {
             "status": "warning",
+            "isTemplate": true
+          }
+        }
+      ]
+    }
+  }
+}
+
+### Step 1.2. Create email all task
+POST http://127.0.0.1:8001/ms/notification
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "task.create",
+  "params": {
+    "fields": {
+      "type": "emailAll",
+      "messages": [
+        {
+          "html": "<p>1 task email all</p>",
+          "subject": "1 task email all subject",
+          "text": "1 task email all text",
+          "type": "email",
+          "params": {
             "isTemplate": true
           }
         }

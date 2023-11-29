@@ -40,6 +40,7 @@ describe('services/email-provider/nodemailer', () => {
     expect(sendMail).to.calledOnceWith(paramsMock);
     expect(message).to.deep.equal({
       from: paramsMock.from,
+      html: '<strong>Html</strong>',
       params: {
         messageId: messageIdMock,
       },
@@ -86,6 +87,7 @@ describe('services/email-provider/nodemailer', () => {
       text: 'Text',
       to: 'to@email.com, another@email.com',
       type: 'email',
+      html: '<strong>Html</strong>',
       attachments,
     });
   });

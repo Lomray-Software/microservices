@@ -65,7 +65,7 @@ class Task {
   updatedAt: Date;
 
   @JSONSchema({
-    description: 'Notice template id. That template will be used for users notify',
+    description: 'Notice template and created from this task notices',
   })
   @OneToMany('Notice', 'task')
   @Type(() => Notice)
@@ -74,7 +74,7 @@ class Task {
   notices: Notice[];
 
   @JSONSchema({
-    description: 'Message template id. That template will be used for users notify',
+    description: 'Message template and created from this task messages',
   })
   @OneToMany('Message', 'task')
   @Type(() => Message)

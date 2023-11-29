@@ -15,6 +15,11 @@ import {
 import type Message from '@entities/message';
 import Task from '@entities/task';
 
+interface IParams {
+  isTemplate?: boolean;
+  [key: string]: any;
+}
+
 @JSONSchema({
   description: 'Notice',
   properties: {
@@ -68,7 +73,7 @@ class Notice {
   @Column({ type: 'json', default: {} })
   @IsObject()
   @IsUndefinable()
-  params: Record<string, any>;
+  params: IParams;
 
   @IsTypeormDate()
   @CreateDateColumn()

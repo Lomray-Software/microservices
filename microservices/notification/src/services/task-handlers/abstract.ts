@@ -1,4 +1,4 @@
-import { Log } from '@lomray/microservice-helpers';
+import { Api, Log } from '@lomray/microservice-helpers';
 import _ from 'lodash';
 import { EntityManager, Repository } from 'typeorm';
 import TaskStatus from '@constants/task-status';
@@ -23,6 +23,11 @@ abstract class Abstract {
    * Tasks
    */
   protected readonly chunkSize = 50;
+
+  /**
+   * @protected
+   */
+  protected currentPage = 0;
 
   /**
    * Tasks
@@ -53,19 +58,19 @@ abstract class Abstract {
   protected abstract processTasks(task: TaskEntity): Promise<void>;
 
   /**
-   * Get and handle events
+   * Get and handle tasks
    */
-  public take(events: TaskEntity[], conditionCallback?: (event: TaskEntity) => boolean): boolean {
-    if (!conditionCallback) {
+  public take(tasks: TaskEntity[], conditionCallback?: (task: TaskEntity) => boolean): boolean {
+    if (typeof conditionCallback !== 'function') {
       return false;
     }
 
-    _.remove(events, (event) => {
-      if (!conditionCallback(event)) {
+    _.remove(tasks, (task) => {
+      if (!conditionCallback(task)) {
         return false;
       }
 
-      this.tasks.push(event);
+      this.tasks.push(task);
 
       return true;
     });
@@ -105,6 +110,20 @@ abstract class Abstract {
     }
 
     return this.handledCounts;
+  }
+
+  /**
+   * Get total users count
+   */
+  protected async getTotalUsersCount(): Promise<number> {
+    const { result: usersCountResult, error: usersCountError } = await Api.get().users.user.count();
+
+    if (usersCountError) {
+      // Internal error. Case where error target doesn't exist
+      throw new Error('Unable to retrieve total users count.');
+    }
+
+    return usersCountResult!.count;
   }
 
   /**
@@ -181,6 +200,7 @@ abstract class Abstract {
    */
   private resetState(): void {
     this.lastFailTargetId = null;
+    this.currentPage = 0;
   }
 }
 
