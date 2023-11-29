@@ -2,13 +2,14 @@ import { Batch } from '@lomray/microservice-helpers';
 import { EntityManager, getManager } from 'typeorm';
 import TaskStatus from '@constants/task-status';
 import TaskEntity from '@entities/task';
+import type IHandledCounts from '@interfaces/handled-counts';
 import Factory from '@services/task-handlers/factory';
 
 class Process {
   /**
    * @private
    */
-  private handledTasksCount = 0;
+  private handledCounts: IHandledCounts = { total: 0, failed: 0, completed: 0 };
 
   /**
    * @private
@@ -32,7 +33,7 @@ class Process {
   /**
    * Handles process start
    */
-  public async checkoutAndProcess(): Promise<number> {
+  public async retrieveAndProcessTasks(): Promise<IHandledCounts> {
     const taskRepository = this.manager.getRepository(TaskEntity);
 
     await Batch.find(
@@ -55,7 +56,7 @@ class Process {
       },
     );
 
-    return this.handledTasksCount;
+    return this.handledCounts;
   }
 
   /**
@@ -66,7 +67,7 @@ class Process {
       return;
     }
 
-    this.handledTasksCount += await Factory.process(tasks);
+    this.handledCounts = await Factory.process(tasks);
   }
 }
 

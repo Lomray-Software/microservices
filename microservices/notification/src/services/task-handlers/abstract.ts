@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { EntityManager, Repository } from 'typeorm';
 import TaskStatus from '@constants/task-status';
 import TaskEntity from '@entities/task';
+import type IHandledCounts from '@interfaces/handled-counts';
 
 /**
  * Abstract class for notify tasks
@@ -11,7 +12,7 @@ abstract class Abstract {
   /**
    * @protected
    */
-  protected handledTasksCount = 0;
+  protected handledCounts: IHandledCounts = { total: 0, completed: 0, failed: 0 };
 
   /**
    * @protected
@@ -75,9 +76,9 @@ abstract class Abstract {
   /**
    * Process payment orders
    */
-  public async process(): Promise<number> {
+  public async process(): Promise<IHandledCounts> {
     if (!this.tasks.length) {
-      return this.handledTasksCount;
+      return this.handledCounts;
     }
 
     for (const task of this.tasks) {
@@ -90,8 +91,9 @@ abstract class Abstract {
          */
         await this.processTasks(task);
 
-        this.handledTasksCount += 1;
-
+        /**
+         * Sequence required
+         */
         await this.updateCompletedTask(task.id);
       } catch (error) {
         Log.error(
@@ -102,7 +104,7 @@ abstract class Abstract {
       }
     }
 
-    return this.handledTasksCount;
+    return this.handledCounts;
   }
 
   /**
@@ -114,6 +116,9 @@ abstract class Abstract {
     lastUpdatedTask.status = TaskStatus.COMPLETED;
 
     await this.taskRepository.save(lastUpdatedTask);
+
+    // Update completed tasks count
+    this.handledCounts.completed += 1;
   }
 
   /**
@@ -135,6 +140,9 @@ abstract class Abstract {
     }
 
     await this.taskRepository.save(lastUpdatedTask);
+
+    // Update failed tasks count
+    this.handledCounts.failed += 1;
   }
 
   /**
@@ -146,6 +154,9 @@ abstract class Abstract {
     lastUpdatedTask.status = TaskStatus.WAITING;
 
     await this.taskRepository.save(lastUpdatedTask);
+
+    // Update total handled tasks count
+    this.handledCounts.total += 1;
   }
 
   /**
