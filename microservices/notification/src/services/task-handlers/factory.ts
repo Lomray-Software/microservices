@@ -1,5 +1,5 @@
 import { ClassReturn } from '@lomray/client-helpers/interfaces/class-return';
-import { getManager } from 'typeorm';
+import { EntityManager, getManager } from 'typeorm';
 import TaskEntity from '@entities/task';
 import type IHandledCounts from '@interfaces/handled-counts';
 import Abstract from './abstract';
@@ -19,20 +19,20 @@ class Factory {
   /**
    * Handle task init services
    */
-  public static init(events: TaskEntity[]): Abstract[] {
+  public static init(tasks: TaskEntity[], manager: EntityManager = getManager()): Abstract[] {
     const matchedServices: Abstract[] = [];
 
     /**
      * Init services
      */
     for (const service of Factory.services) {
-      const serviceInstance = new service(getManager());
+      const serviceInstance = new service(manager);
 
-      if (!events.length) {
+      if (!tasks.length) {
         break;
       }
 
-      if (serviceInstance.take(events)) {
+      if (serviceInstance.take(tasks)) {
         matchedServices.push(serviceInstance);
       }
     }
@@ -43,8 +43,8 @@ class Factory {
   /**
    * Auto process services
    */
-  public static async process(events: TaskEntity[]): Promise<IHandledCounts> {
-    const services = Factory.init(events);
+  public static async process(tasks: TaskEntity[]): Promise<IHandledCounts> {
+    const services = Factory.init(tasks);
 
     /**
      * Get total tasks processed counts from all processed services

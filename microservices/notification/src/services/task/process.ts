@@ -52,7 +52,7 @@ class Process {
         ),
       (tasks) => this.process(tasks),
       {
-        chunkSize: 3,
+        chunkSize: 10,
       },
     );
 

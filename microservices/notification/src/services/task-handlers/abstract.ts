@@ -58,19 +58,19 @@ abstract class Abstract {
   protected abstract processTasks(task: TaskEntity): Promise<void>;
 
   /**
-   * Get and handle events
+   * Get and handle tasks
    */
-  public take(events: TaskEntity[], conditionCallback?: (event: TaskEntity) => boolean): boolean {
-    if (!conditionCallback) {
+  public take(tasks: TaskEntity[], conditionCallback?: (task: TaskEntity) => boolean): boolean {
+    if (typeof conditionCallback !== 'function') {
       return false;
     }
 
-    _.remove(events, (event) => {
-      if (!conditionCallback(event)) {
+    _.remove(tasks, (task) => {
+      if (!conditionCallback(task)) {
         return false;
       }
 
-      this.tasks.push(event);
+      this.tasks.push(task);
 
       return true;
     });
