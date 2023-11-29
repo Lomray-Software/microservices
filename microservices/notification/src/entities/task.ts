@@ -59,8 +59,9 @@ class Task {
 
   @JSONSchema({
     description: `Default - checks based on last target error. Full check up - checks all entities for each chunk.
-      Case example: If microservice will down and some tasks were not completed. You MUST run task in full check up mode for preventing
-      duplicate notices, messages ans so on.`,
+      Case example: If whole backend will down and some tasks were not completed. You MUST run task in full check up mode for preventing
+      duplicate notices, messages ans so on.
+      Full check up mode - will take longer time for process all task requirements.`,
   })
   @Column({ type: 'enum', enum: TaskMode, default: TaskMode.DEFAULT })
   @IsEnum(TaskMode)
