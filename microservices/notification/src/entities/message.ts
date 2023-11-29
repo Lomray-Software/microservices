@@ -1,5 +1,5 @@
-import { IsTypeormDate, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
-import { Allow, IsArray, IsEnum, IsObject, IsString, Length } from 'class-validator';
+import { IsNullable, IsTypeormDate, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
+import { Allow, IsArray, IsEnum, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Entity,
@@ -32,9 +32,11 @@ class Message {
   @Allow()
   id: string;
 
-  @Column()
-  @IsString()
-  noticeId: string;
+  @Column({ type: 'uuid', default: null })
+  @Length(1, 36)
+  @IsUndefinable()
+  @IsNullable()
+  noticeId: string | null;
 
   @JSONSchema({
     description: 'Define task relation and message as template for task',
@@ -42,21 +44,15 @@ class Message {
   @Column({ type: 'uuid', default: null })
   @Length(1, 36)
   @IsUndefinable()
+  @IsNullable()
   taskId: string | null;
-
-  @Column({
-    type: 'enum',
-    enum: NotifyType,
-  })
-  @IsEnum(NotifyType)
-  type: NotifyType;
 
   @JSONSchema({
     description: 'Can be nullable if message presented as template.',
   })
   @Column({ type: 'varchar', default: null })
   @Length(1, 255)
-  @IsValidate(Message, (e: Message) => Message.isTemplate(e))
+  @IsValidate(Message, (e: Message) => !Message.isTemplate(e))
   from: string | null;
 
   @JSONSchema({
@@ -64,8 +60,15 @@ class Message {
   })
   @Column({ type: 'varchar', default: null })
   @Length(1, 255)
-  @IsValidate(Message, (e: Message) => Message.isTemplate(e))
+  @IsValidate(Message, (e: Message) => !Message.isTemplate(e))
   to: string | null;
+
+  @Column({
+    type: 'enum',
+    enum: NotifyType,
+  })
+  @IsEnum(NotifyType)
+  type: NotifyType;
 
   @Column({ type: 'varchar' })
   @Length(0, 255)
@@ -75,6 +78,12 @@ class Message {
   @Column({ type: 'text' })
   @Length(1)
   text: string;
+
+  @Column({ type: 'text', default: null })
+  @Length(1)
+  @IsUndefinable()
+  @IsNullable()
+  html: string | null;
 
   @Column({ type: 'json', default: [] })
   @IsArray()
@@ -103,8 +112,11 @@ class Message {
   /**
    * Check if message is template
    */
-  public static isTemplate({ params }: Message): boolean {
-    return Boolean(params.isTemplate);
+  public static isTemplate(message: Message): boolean {
+    console.log(Boolean(message?.params?.isTemplate));
+
+    // Params can be not provided
+    return Boolean(message?.params?.isTemplate);
   }
 }
 

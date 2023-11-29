@@ -28,7 +28,11 @@ class Task {
     }
 
     if (!attachRequests.length) {
-      return;
+      throw new BaseException({
+        status: 400,
+        message: 'Expected one message or notice template.',
+        payload: { messages: entity.messages, notices: entity.notices },
+      });
     }
 
     await Promise.all(attachRequests);
@@ -54,7 +58,11 @@ class Task {
     }
 
     const messageRepository = manager.getRepository(MessageEntity);
-    const message = messageRepository.create({ ...entity.messages?.[0], taskId: entity.id });
+    const message = messageRepository.create({
+      ...entity.messages?.[0],
+      params: { ...entity.messages?.[0].params },
+      taskId: entity.id,
+    });
 
     const errors = await validate(message, {
       whitelist: true,
