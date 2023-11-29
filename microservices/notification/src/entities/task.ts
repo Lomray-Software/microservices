@@ -10,13 +10,21 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import TaskMode from '@constants/task-mode';
 import TaskStatus from '@constants/task-status';
 import TaskType from '@constants/task-type';
 import Message from '@entities/message';
 import Notice from '@entities/notice';
 
+interface IParams {
+  lastErrorMessage?: string;
+  [key: string]: any;
+}
+
 @JSONSchema({
   title: 'Task',
+  description: `If microservice down and some tasks were not completed. You MUST run task in full check up mode for preventing
+    duplicate notices, messages ans so on.`,
   properties: {
     notices: { $ref: '#/definitions/Notice', type: 'array' },
     messages: { $ref: '#/definitions/Message', type: 'array' },
@@ -51,10 +59,15 @@ class Task {
   @IsUndefinable()
   status: TaskStatus;
 
+  @Column({ type: 'enum', enum: TaskMode, default: TaskMode.DEFAULT })
+  @IsEnum(TaskMode)
+  @IsUndefinable()
+  mode: TaskMode;
+
   @Column({ type: 'json', default: {} })
   @IsObject()
   @IsUndefinable()
-  params: Record<string, any>;
+  params: IParams;
 
   @IsTypeormDate()
   @CreateDateColumn()

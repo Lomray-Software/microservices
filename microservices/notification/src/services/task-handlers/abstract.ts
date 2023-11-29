@@ -54,11 +54,17 @@ abstract class Abstract {
 
   /**
    * Process notify tasks
+   * @description Prepare data for execution
    */
   protected abstract processTasks(task: TaskEntity): Promise<void>;
 
   /**
-   * Get and handle tasks
+   * Execute task goal: send notices, emails and so on
+   */
+  protected abstract executeTask(task: TaskEntity, usersCount: number): Promise<void>;
+
+  /**
+   * Grab related tasks
    */
   public take(tasks: TaskEntity[], conditionCallback?: (task: TaskEntity) => boolean): boolean {
     if (typeof conditionCallback !== 'function') {
@@ -79,7 +85,7 @@ abstract class Abstract {
   }
 
   /**
-   * Process payment orders
+   * Process execution of grabbed tasks
    */
   public async process(): Promise<IHandledCounts> {
     if (!this.tasks.length) {
@@ -113,9 +119,25 @@ abstract class Abstract {
   }
 
   /**
+   * Handle process task execution
+   * @description Get all users count and execute task
+   */
+  protected async handleProcessTaskExecution(task: TaskEntity): Promise<void> {
+    const usersCount = await this.getTotalUsersCount();
+
+    try {
+      await this.executeTask(task, usersCount);
+    } catch (error) {
+      this.lastFailTargetId = this.currentPage.toString();
+
+      throw error;
+    }
+  }
+
+  /**
    * Get total users count
    */
-  protected async getTotalUsersCount(): Promise<number> {
+  private async getTotalUsersCount(): Promise<number> {
     const { result: usersCountResult, error: usersCountError } = await Api.get().users.user.count();
 
     if (usersCountError) {
@@ -127,7 +149,7 @@ abstract class Abstract {
   }
 
   /**
-   * Update task
+   * Update task status to completed
    */
   private async updateCompletedTask(taskId: string): Promise<void> {
     const lastUpdatedTask = await this.getLastUpdatedTaskVersion(taskId, TaskStatus.COMPLETED);

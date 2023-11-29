@@ -2,7 +2,8 @@ import type { IJsonQueryWhereFilter } from '@lomray/microservice-helpers';
 import { Api, Log } from '@lomray/microservice-helpers';
 import type IUser from '@lomray/microservices-client-api/interfaces/users/entities/user';
 import { JQOperator } from '@lomray/microservices-types/lib/src/query';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+import TaskMode from '@constants/task-mode';
 import TaskType from '@constants/task-type';
 import MessageEntity from '@entities/message';
 import TaskEntity from '@entities/task';
@@ -57,31 +58,18 @@ class EmailAll extends Abstract {
       throw new Error('Invalid message template.');
     }
 
-    await this.handleSend(task);
+    await this.handleProcessTaskExecution(task);
   }
 
   /**
-   * Handle send
-   * @description Get all users count and handle send errors
-   */
-  private async handleSend(task: TaskEntity): Promise<void> {
-    const usersCount = await this.getTotalUsersCount();
-
-    try {
-      await this.send(task, usersCount);
-    } catch (error) {
-      this.lastFailTargetId = this.currentPage.toString();
-
-      throw error;
-    }
-  }
-
-  /**
-   * Send
+   * Execute task
    * @description Send notices for all users via iteration
    * If previous run task had error - run process from last error target id (page)
    */
-  private async send({ lastFailTargetId }: TaskEntity, usersCount: number): Promise<void> {
+  protected async executeTask(
+    { lastFailTargetId, mode }: TaskEntity,
+    usersCount: number,
+  ): Promise<void> {
     const sendService = await Factory.create(this.messageRepository);
     const initPage = Number(lastFailTargetId) || 1;
     let offset = 0;
@@ -93,8 +81,11 @@ class EmailAll extends Abstract {
       // Apply where clause to users list query
       let where: IJsonQueryWhereFilter<IUser<string>> | null = null;
 
-      // Find all sent emails and get all users with emails
-      if (lastFailTargetId) {
+      /**
+       * Find all sent emails and get all users with emails
+       * @description If full check up mode all users will be re-checked
+       */
+      if (lastFailTargetId && mode !== TaskMode.FULL_CHECK_UP) {
         const sentEmails = await this.messageRepository
           .createQueryBuilder('message')
           .where('message.taskId = :taskId', { taskId: this.messageTemplate.taskId })
@@ -143,9 +134,45 @@ class EmailAll extends Abstract {
         return;
       }
 
+      /**
+       * Users that will be processed in current chunk
+       */
+      const processUsers: Pick<IUser, 'id' | 'email'>[] = [];
+
+      if (mode === TaskMode.FULL_CHECK_UP) {
+        /**
+         * If full microservices will down - task SHOULD NOT be executed again
+         * for the same users. So, we need to check if notices exist for these users.
+         * In this case Last Error Target may not saved
+         */
+        const userIds = usersListResult.list.map(({ id }) => id);
+        const existingEmails = await this.messageRepository.find({
+          select: ['to', 'taskId'],
+          where: { to: In(userIds), taskId: this.messageTemplate.taskId },
+        });
+
+        const notEmailedUserIds = userIds.filter(
+          (userId) => !existingEmails.some(({ to }) => to === userId),
+        );
+
+        if (notEmailedUserIds.length === this.chunkSize) {
+          continue;
+        }
+
+        const notNoticedUsers = notEmailedUserIds.map((id) => {
+          const user = usersListResult.list.find(({ id: userId }) => userId === id);
+
+          return { email: user?.email, id };
+        });
+
+        processUsers.push(...notNoticedUsers);
+      } else {
+        processUsers.push(...usersListResult.list.map(({ id, email }) => ({ id, email })));
+      }
+
       // Send service will be automatically create not template messages
       const sendResults = await Promise.all(
-        usersListResult.list.map(({ email }) =>
+        processUsers.map(({ email }) =>
           sendService.send({
             html: this.messageTemplate.html as string,
             taskId: this.messageTemplate.taskId as string,

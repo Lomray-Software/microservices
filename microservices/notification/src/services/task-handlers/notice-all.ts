@@ -1,5 +1,7 @@
 import { Api, Log } from '@lomray/microservice-helpers';
 import type { Repository } from 'typeorm';
+import { In } from 'typeorm';
+import TaskMode from '@constants/task-mode';
 import TaskType from '@constants/task-type';
 import NoticeEntity from '@entities/notice';
 import TaskEntity from '@entities/task';
@@ -29,7 +31,7 @@ class NoticeAll extends Abstract {
   protected async processTasks(task: TaskEntity): Promise<void> {
     this.noticeRepository = this.manager.getRepository(NoticeEntity);
 
-    const noticeTemplate = task.notices.find(({ params }) => params.isTemplate);
+    const noticeTemplate = task.notices?.find(({ params }) => params.isTemplate);
 
     if (!noticeTemplate) {
       // Internal error
@@ -44,31 +46,18 @@ class NoticeAll extends Abstract {
       params: { ...rest.params, isTemplate: false },
     };
 
-    await this.handleSend(task);
+    await this.handleProcessTaskExecution(task);
   }
 
   /**
-   * Handle send
-   * @description Get all users count and handle send errors
-   */
-  private async handleSend(task: TaskEntity): Promise<void> {
-    const usersCount = await this.getTotalUsersCount();
-
-    try {
-      await this.send(task, usersCount);
-    } catch (error) {
-      this.lastFailTargetId = this.currentPage.toString();
-
-      throw error;
-    }
-  }
-
-  /**
-   * Send
+   * Execute task
    * @description Send notices for all users via iteration
    * If previous run task had error - run process from last error target id (page)
    */
-  private async send({ lastFailTargetId }: TaskEntity, usersCount: number): Promise<void> {
+  protected async executeTask(
+    { lastFailTargetId, mode }: TaskEntity,
+    usersCount: number,
+  ): Promise<void> {
     const initPage = Number(lastFailTargetId) || 1;
     let offset = 0;
 
@@ -96,9 +85,42 @@ class NoticeAll extends Abstract {
         return;
       }
 
+      /**
+       * Users that will be processed in current chunk
+       */
+      const processUsers: string[] = [];
+
+      if (mode === TaskMode.FULL_CHECK_UP) {
+        /**
+         * If full microservices will down - task SHOULD NOT be executed again
+         * for the same users. So, we need to check if notices exist for these users.
+         * In this case Last Error Target may not saved
+         */
+        const userIds = usersListResult.list.map(({ id }) => id);
+        const existingNotices = await this.noticeRepository.find({
+          select: ['userId', 'taskId'],
+          where: { userId: In(userIds), taskId: this.noticeTemplate.taskId },
+        });
+
+        const notNoticedUserIds = userIds.filter(
+          (userId) => !existingNotices.some(({ userId: id }) => id === userId),
+        );
+
+        /**
+         * If notices exist for all current chunk users - continue to next chunk
+         */
+        if (notNoticedUserIds.length === this.chunkSize) {
+          continue;
+        }
+
+        processUsers.push(...notNoticedUserIds);
+      } else {
+        processUsers.push(...usersListResult.list.map(({ id }) => id));
+      }
+
       // Will be saved in transaction
       const savedNotices = await this.noticeRepository.save(
-        usersListResult.list.map(({ id: userId }) =>
+        processUsers.map((userId) =>
           this.noticeRepository.create({ ...this.noticeTemplate, userId }),
         ),
       );
