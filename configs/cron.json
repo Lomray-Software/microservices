@@ -52,5 +52,13 @@
       "allowErrorCodes": [-33485],
       "responseTemplate": "<%= `deleted: ${deleted.length}` %>"
     }
+  },
+  {
+    "rule": "* * * * *",
+    "method": "notification.job.task.process",
+    "description": "Process tasks",
+    "payload": {
+      "responseTemplate": "<%= `Process tasks counts: total is ${total}, completed is ${completed} and failed is ${failed}` %>"
+    }
   }
 ]

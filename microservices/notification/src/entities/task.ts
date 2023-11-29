@@ -1,25 +1,31 @@
 import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
-import { IsEnum, IsObject, Length, ValidateNested } from 'class-validator';
+import { IsEnum, IsObject, Length, ValidateNested, Allow } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-  JoinColumn,
 } from 'typeorm';
 import TaskStatus from '@constants/task-status';
 import TaskType from '@constants/task-type';
 import Message from '@entities/message';
 import Notice from '@entities/notice';
 
+@JSONSchema({
+  description: 'Task',
+  properties: {
+    notices: { $ref: '#/definitions/Notice', type: 'array' },
+    messages: { $ref: '#/definitions/Message', type: 'array' },
+  },
+})
 @Entity()
 class Task {
   @PrimaryGeneratedColumn('uuid')
-  @Length(1, 36)
+  @Allow()
   id: string;
 
   @Column({ type: 'enum', enum: TaskType })
@@ -27,20 +33,22 @@ class Task {
   type: TaskType;
 
   @JSONSchema({
-    description:
-      'Entity id on which task process failed. Retry failed task process from this entity id',
+    description: `Last target on which task process failed. Retry failed task process from this entity id. Can be presented as any id:
+      entity id, page number and so on`,
+    examples: ['0771fea0-cf98-4208-8dd6-a9288e9bdd73', '1'],
   })
-  @Column({ type: 'uuid', default: null })
+  @Column({ type: 'varchar', length: 36, default: null })
   @Length(1, 36)
   @IsUndefinable()
   @IsNullable()
-  failTargetEntityId: string | null;
+  lastFailTargetId: string | null;
 
   @JSONSchema({
     description: 'Current task status',
   })
-  @Column({ type: 'enum', enum: TaskStatus })
+  @Column({ type: 'enum', enum: TaskStatus, default: TaskStatus.INIT })
   @IsEnum(TaskStatus)
+  @IsUndefinable()
   status: TaskStatus;
 
   @Column({ type: 'json', default: {} })
@@ -59,20 +67,20 @@ class Task {
   @JSONSchema({
     description: 'Notice template id. That template will be used for users notify',
   })
-  @OneToOne('Notice', 'task')
-  @JoinColumn({ name: 'taskId' })
+  @OneToMany('Notice', 'task')
   @Type(() => Notice)
   @ValidateNested()
-  notice: Notice;
+  @IsUndefinable()
+  notices: Notice[];
 
   @JSONSchema({
     description: 'Message template id. That template will be used for users notify',
   })
-  @OneToOne('Message', 'task')
-  @JoinColumn({ name: 'taskId' })
+  @OneToMany('Message', 'task')
   @Type(() => Message)
   @ValidateNested()
-  message: Message;
+  @IsUndefinable()
+  messages: Message[];
 }
 
 export default Task;

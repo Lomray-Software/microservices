@@ -9,9 +9,18 @@ import {
   Index,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import type Message from '@entities/message';
+import Task from '@entities/task';
 
+@JSONSchema({
+  description: 'Notice',
+  properties: {
+    task: { $ref: '#/definitions/Task' },
+  },
+})
 @Entity()
 class Notice {
   @PrimaryGeneratedColumn('uuid')
@@ -71,6 +80,12 @@ class Notice {
 
   @OneToMany('Message', 'notice')
   messages: Message[];
+
+  @ManyToOne('Task', 'notices', { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'taskId', referencedColumnName: 'id' })
+  @IsUndefinable()
+  @IsObject()
+  task: Task;
 }
 
 export default Notice;

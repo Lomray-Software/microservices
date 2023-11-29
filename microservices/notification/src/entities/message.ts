@@ -7,7 +7,6 @@ import {
   CreateDateColumn,
   PrimaryGeneratedColumn,
   ManyToOne,
-  OneToOne,
   JoinColumn,
 } from 'typeorm';
 import NotifyType from '@constants/notify-type';
@@ -15,6 +14,12 @@ import type Notice from '@entities/notice';
 import Task from '@entities/task';
 import type IAttachment from '@interfaces/message-attachment';
 
+@JSONSchema({
+  description: 'Message',
+  properties: {
+    task: { $ref: '#/definitions/Task' },
+  },
+})
 @Entity()
 class Message {
   @PrimaryGeneratedColumn('uuid')
@@ -78,8 +83,10 @@ class Message {
   @IsUndefinable()
   notice: Notice;
 
-  @OneToOne('Task', 'message')
-  @JoinColumn()
+  @ManyToOne('Task', 'messages', { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'taskId', referencedColumnName: 'id' })
+  @IsUndefinable()
+  @IsObject()
   task: Task;
 }
 

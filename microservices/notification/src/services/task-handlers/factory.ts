@@ -1,4 +1,7 @@
-import TaskType from '@constants/task-type';
+import { ClassReturn } from '@lomray/client-helpers/interfaces/class-return';
+import { getManager } from 'typeorm';
+import TaskEntity from '@entities/task';
+import type IHandledCounts from '@interfaces/handled-counts';
 import Abstract from './abstract';
 import EmailAll from './email-all';
 import NoticeAll from './notice-all';
@@ -9,19 +12,55 @@ import NoticeAll from './notice-all';
  */
 class Factory {
   /**
-   * Create notify task
+   * Task services
    */
-  public static create(notifyTaskType: TaskType): Abstract {
-    switch (notifyTaskType) {
-      case TaskType.NOTICE_ALL:
-        return new NoticeAll();
+  protected static services: ClassReturn<Abstract>[] = [NoticeAll, EmailAll];
 
-      case TaskType.EMAIL_ALL:
-        return new EmailAll();
+  /**
+   * Handle task init services
+   */
+  public static init(events: TaskEntity[]): Abstract[] {
+    const matchedServices: Abstract[] = [];
 
-      default:
-        throw new Error(`Unknown notify type: ${notifyTaskType as string}`);
+    /**
+     * Init services
+     */
+    for (const service of Factory.services) {
+      const serviceInstance = new service(getManager());
+
+      if (!events.length) {
+        break;
+      }
+
+      if (serviceInstance.take(events)) {
+        matchedServices.push(serviceInstance);
+      }
     }
+
+    return matchedServices;
+  }
+
+  /**
+   * Auto process services
+   */
+  public static async process(events: TaskEntity[]): Promise<IHandledCounts> {
+    const services = Factory.init(events);
+
+    /**
+     * Get total tasks processed counts from all processed services
+     */
+    const counts = await Promise.all(services.map((s) => s.process()));
+
+    return counts.reduce(
+      (totalCounts, { total, completed, failed }) => {
+        totalCounts.total += total;
+        totalCounts.completed += completed;
+        totalCounts.failed += failed;
+
+        return totalCounts;
+      },
+      { total: 0, completed: 0, failed: 0 },
+    );
   }
 }
 

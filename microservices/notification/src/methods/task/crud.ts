@@ -1,6 +1,6 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { getRepository } from 'typeorm';
-import Task from '@entities/notice';
+import Task from '@entities/task';
 
 /**
  * CRUD controller for Task entities
