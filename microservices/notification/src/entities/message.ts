@@ -113,8 +113,6 @@ class Message {
    * Check if message is template
    */
   public static isTemplate(message: Message): boolean {
-    console.log(Boolean(message?.params?.isTemplate));
-
     // Params can be not provided
     return Boolean(message?.params?.isTemplate);
   }
