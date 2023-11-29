@@ -23,8 +23,6 @@ interface IParams {
 
 @JSONSchema({
   title: 'Task',
-  description: `If microservice down and some tasks were not completed. You MUST run task in full check up mode for preventing
-    duplicate notices, messages ans so on.`,
   properties: {
     notices: { $ref: '#/definitions/Notice', type: 'array' },
     messages: { $ref: '#/definitions/Message', type: 'array' },
@@ -59,6 +57,11 @@ class Task {
   @IsUndefinable()
   status: TaskStatus;
 
+  @JSONSchema({
+    description: `Default - checks based on last target error. Full check up - checks all entities for each chunk.
+      Case example: If microservice will down and some tasks were not completed. You MUST run task in full check up mode for preventing
+      duplicate notices, messages ans so on.`,
+  })
   @Column({ type: 'enum', enum: TaskMode, default: TaskMode.DEFAULT })
   @IsEnum(TaskMode)
   @IsUndefinable()
