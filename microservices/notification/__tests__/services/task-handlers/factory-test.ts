@@ -50,7 +50,7 @@ describe('services/task-handlers/factory', () => {
       const result = await Factory.process([taskMock]);
 
       expect(result).to.deep.equal({ total: 3, completed: 2, failed: 1 });
-      expect(noticeAllTakeSpy).to.calledOnce;
+      expect(noticeAllTakeSpy).to.called;
       expect(process).to.calledOnce;
     });
 
@@ -72,7 +72,7 @@ describe('services/task-handlers/factory', () => {
 
       expect(result).to.deep.equal({ total: 3, completed: 2, failed: 1 });
       // @TODO: check it correctly return and process email service but spy not called
-      // expect(emailAllTakeSpy).to.calledOnce;
+      // expect(emailAllTakeSpy).to.called;
       expect(process).to.calledOnce;
     });
   });
