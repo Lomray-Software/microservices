@@ -48,7 +48,12 @@ class EmailAll extends Abstract {
       params: { ...rest.params, isTemplate: false },
     };
 
-    if (!this.messageTemplate.text || !this.messageTemplate.subject || !this.messageTemplate.html) {
+    if (
+      !this.messageTemplate.text ||
+      !this.messageTemplate.subject ||
+      !this.messageTemplate.html ||
+      !this.messageTemplate.html
+    ) {
       throw new Error('Invalid message template.');
     }
 
@@ -90,12 +95,15 @@ class EmailAll extends Abstract {
 
       // Find all sent emails and get all users with emails
       if (lastFailTargetId) {
-        const sentEmails = await this.messageRepository.find({
-          select: ['id', 'taskId', 'to'],
-          where: {
-            taskId: this.messageTemplate.taskId,
-          },
-        });
+        const sentEmails = await this.messageRepository
+          .createQueryBuilder('message')
+          .where('message.taskId = :taskId', { taskId: this.messageTemplate.taskId })
+          .andWhere(
+            "message.params ->> 'isTemplated' IS NOT NULL AND (message.params ->> 'isTemplated')::boolean = false",
+          )
+          .getMany();
+
+        console.log('sentEmails', sentEmails);
 
         if (sentEmails.some(({ to }) => !to)) {
           throw new Error('Invalid sent emails recipient was found.');
@@ -142,6 +150,7 @@ class EmailAll extends Abstract {
         usersListResult.list.map(({ email }) =>
           sendService.send({
             html: this.messageTemplate.html as string,
+            taskId: this.messageTemplate.taskId as string,
             text: this.messageTemplate.text,
             subject: this.messageTemplate.subject,
             to: [email as string],
