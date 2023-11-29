@@ -61,15 +61,10 @@ class NoticeAll extends Abstract {
    * @description Get all users count and handle send errors
    */
   private async handleSend(task: TaskEntity): Promise<void> {
-    const { result: usersCountResult, error: usersCountError } = await Api.get().users.user.count();
-
-    if (usersCountError) {
-      // Case where error target doesn't exist
-      throw new Error('Unable to retrieve users count.');
-    }
+    const usersCount = await this.getTotalUsersCount();
 
     try {
-      await this.send(task, usersCountResult!.count);
+      await this.send(task, usersCount);
     } catch (error) {
       this.lastFailTargetId = this.currentPage.toString();
 

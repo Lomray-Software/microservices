@@ -11,9 +11,15 @@ class ProcessOutput implements IHandledCounts {
   @IsNumber()
   total: number;
 
+  @JSONSchema({
+    description: 'Total tasks completed',
+  })
   @IsNumber()
   completed: number;
 
+  @JSONSchema({
+    description: 'Total tasks failed',
+  })
   @IsNumber()
   failed: number;
 }

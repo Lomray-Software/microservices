@@ -1,4 +1,4 @@
-import { Log } from '@lomray/microservice-helpers';
+import { Api, Log } from '@lomray/microservice-helpers';
 import _ from 'lodash';
 import { EntityManager, Repository } from 'typeorm';
 import TaskStatus from '@constants/task-status';
@@ -105,6 +105,20 @@ abstract class Abstract {
     }
 
     return this.handledCounts;
+  }
+
+  /**
+   * Get total users count
+   */
+  protected async getTotalUsersCount(): Promise<number> {
+    const { result: usersCountResult, error: usersCountError } = await Api.get().users.user.count();
+
+    if (usersCountError) {
+      // Internal error. Case where error target doesn't exist
+      throw new Error('Unable to retrieve total users count.');
+    }
+
+    return usersCountResult!.count;
   }
 
   /**
