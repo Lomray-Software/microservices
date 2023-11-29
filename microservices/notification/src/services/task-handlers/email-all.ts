@@ -103,8 +103,6 @@ class EmailAll extends Abstract {
           )
           .getMany();
 
-        console.log('sentEmails', sentEmails);
-
         if (sentEmails.some(({ to }) => !to)) {
           throw new Error('Invalid sent emails recipient was found.');
         }
