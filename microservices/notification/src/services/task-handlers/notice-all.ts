@@ -17,11 +17,6 @@ class NoticeAll extends Abstract {
   private noticeTemplate: Partial<NoticeEntity>;
 
   /**
-   * @private
-   */
-  private currentPage = 0;
-
-  /**
    * Take related tasks
    */
   public take(tasks: TaskEntity[]): boolean {

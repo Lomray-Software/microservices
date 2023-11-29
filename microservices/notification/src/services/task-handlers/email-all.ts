@@ -1,4 +1,7 @@
+import type { IJsonQueryWhereFilter } from '@lomray/microservice-helpers';
 import { Api, Log } from '@lomray/microservice-helpers';
+import type IUser from '@lomray/microservices-client-api/interfaces/users/entities/user';
+import { JQOperator } from '@lomray/microservices-types/lib/src/query';
 import { Repository } from 'typeorm';
 import TaskType from '@constants/task-type';
 import MessageEntity from '@entities/message';
@@ -16,11 +19,6 @@ class EmailAll extends Abstract {
    * @private
    */
   private messageTemplate: Omit<MessageEntity, 'id'>;
-
-  /**
-   * @private
-   */
-  private currentPage = 0;
 
   /**
    * Take related tasks
@@ -87,12 +85,39 @@ class EmailAll extends Abstract {
     this.currentPage = Math.floor(offset / this.chunkSize) + initPage;
 
     do {
+      // Apply where clause to users list query
+      let where: IJsonQueryWhereFilter<IUser<string>> | null = null;
+
+      // Find all sent emails and get all users with emails
+      if (lastFailTargetId) {
+        const sentEmails = await this.messageRepository.find({
+          select: ['id', 'taskId', 'to'],
+          where: {
+            taskId: this.messageTemplate.taskId,
+          },
+        });
+
+        if (sentEmails.some(({ to }) => !to)) {
+          throw new Error('Invalid sent emails recipient was found.');
+        }
+
+        where = sentEmails.length
+          ? ({
+              // Select users from chunk page only that did not receive emails
+              email: {
+                [JQOperator.notIn]: sentEmails.map(({ to }) => to) as string[],
+              },
+            } as IJsonQueryWhereFilter<IUser<string>>)
+          : null;
+      }
+
       const { result: usersListResult, error: usersListError } = await Api.get().users.user.list({
         query: {
           attributes: ['id', 'email', 'createdAt'],
           page: this.currentPage,
           pageSize: this.chunkSize,
           orderBy: { createdAt: 'ASC' },
+          ...(where ? { where } : {}),
         },
       });
 
@@ -123,8 +148,6 @@ class EmailAll extends Abstract {
           }),
         ),
       );
-
-      console.log('sendResults', sendResults);
 
       offset += sendResults.length;
 

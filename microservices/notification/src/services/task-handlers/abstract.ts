@@ -25,6 +25,11 @@ abstract class Abstract {
   protected readonly chunkSize = 50;
 
   /**
+   * @protected
+   */
+  protected currentPage = 0;
+
+  /**
    * Tasks
    */
   protected readonly tasks: TaskEntity[] = [];
@@ -195,6 +200,7 @@ abstract class Abstract {
    */
   private resetState(): void {
     this.lastFailTargetId = null;
+    this.currentPage = 0;
   }
 }
 
