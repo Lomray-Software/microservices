@@ -2,6 +2,7 @@ import { Api, Log } from '@lomray/microservice-helpers';
 import _ from 'lodash';
 import { EntityManager, Repository } from 'typeorm';
 import TaskStatus from '@constants/task-status';
+import Message from '@entities/message';
 import TaskEntity from '@entities/task';
 import type IHandledCounts from '@interfaces/handled-counts';
 
@@ -106,6 +107,13 @@ abstract class Abstract {
     }
 
     return this.handledCounts;
+  }
+
+  /**
+   * Check is message template valid
+   */
+  protected checkIsMessageTemplateValid(template: Partial<Message>): boolean {
+    return !(!template.text || !template.subject || !template.html || !template.taskId);
   }
 
   /**

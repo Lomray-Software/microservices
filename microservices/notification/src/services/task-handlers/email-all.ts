@@ -53,12 +53,7 @@ class EmailAll extends Abstract {
       params: { ...rest.params, isTemplate: false },
     };
 
-    if (
-      !this.messageTemplate.text ||
-      !this.messageTemplate.subject ||
-      !this.messageTemplate.html ||
-      !this.messageTemplate.taskId
-    ) {
+    if (!this.checkIsMessageTemplateValid(this.messageTemplate)) {
       throw new Error('Invalid message template.');
     }
 
