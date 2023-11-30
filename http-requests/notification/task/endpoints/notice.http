@@ -1,0 +1,43 @@
+### Create email all task with full check up mode
+POST http://127.0.0.1:8001/ms/notification
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "notice.create",
+  "params": {
+    "fields": [
+      {
+        "userId": "6e6ed89f-637f-4fd6-86c2-95ef706cacf3",
+        "title": "1 task notice all",
+        "description": "1 task notice all description",
+        "type": "announce",
+        "params": {
+          "status": "warning",
+          "isTemplate": true
+        }
+      },
+      {
+        "userId": "5b86356f-bea2-469b-8a82-7566f369a1e0",
+        "title": "2 task notice all",
+        "description": "2 task notice all description",
+        "type": "announce",
+        "params": {
+          "status": "warning",
+          "isTemplate": true
+        }
+      },
+      {
+        "userId": "6e6ed89f-637f-4fd6-86c2-95ef706cacf3",
+        "title": "3 task notice all",
+        "description": "3 task notice all description",
+        "type": "announce",
+        "params": {
+          "status": "warning",
+          "isTemplate": true
+        }
+      }
+    ]
+  }
+}

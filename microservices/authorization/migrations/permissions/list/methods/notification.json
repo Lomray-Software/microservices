@@ -231,5 +231,95 @@
     "createdAt": "2023-09-20T22:49:48.824Z",
     "modelOut": "notification.HideAllOutput",
     "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "task.count",
+    "description": "Returns count of Task by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-11-28T08:24:13.755Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "task.list",
+    "description": "Returns list of Task by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-11-28T08:24:13.755Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "notification.ListOutputParams.bbbcb6cef990d65df49a90e21dec6e66",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "task.view",
+    "description": "Returns Task by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-11-28T08:24:13.755Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "notification.ViewOutputParams.6cc49e5e15754ec8fd6013ccc05489d9",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "task.create",
+    "description": "Create a new Task",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-11-28T08:24:13.755Z",
+    "modelIn": "notification.CreateRequestParams.540b18ddac00a8a1654f4d3704c482bc",
+    "modelOut": "notification.CreateOutputParams.6cc49e5e15754ec8fd6013ccc05489d9",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "task.update",
+    "description": "Update Task by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-11-28T08:24:13.755Z",
+    "modelIn": "notification.UpdateRequestParams.540b18ddac00a8a1654f4d3704c482bc",
+    "modelOut": "notification.UpdateOutputParams.6cc49e5e15754ec8fd6013ccc05489d9",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "task.remove",
+    "description": "Remove Task by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-11-28T08:24:13.755Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "notification.RemoveOutputParams.76da26644ee5b1db84b77f612d3aed27",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "job.task.process",
+    "description": "Process tasks",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-11-28T08:24:13.755Z",
+    "modelOut": "notification.ProcessOutput",
+    "methodFilters": []
   }
 ]

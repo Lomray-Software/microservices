@@ -2,7 +2,7 @@ import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsBoolean, IsNumber } from 'class-validator';
 import Notice from '@services/notice';
 
-export class HideAllOutput {
+class HideAllOutput {
   @IsBoolean()
   status: boolean;
 
@@ -22,4 +22,4 @@ const hideAll = Endpoint.custom(
   ({ payload }) => Notice.init().hideAll(payload?.authentication?.userId as string),
 );
 
-export default hideAll;
+export { hideAll, HideAllOutput };

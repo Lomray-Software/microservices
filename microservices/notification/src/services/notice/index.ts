@@ -1,6 +1,6 @@
 import { EntityManager, getManager } from 'typeorm';
 import NoticeEntity from '@entities/notice';
-import { HideAllOutput } from '@methods/notice/hide-all';
+import type { HideAllOutput } from '@methods/notice/hide-all';
 
 /**
  * Notice service

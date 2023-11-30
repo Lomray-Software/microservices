@@ -1,5 +1,6 @@
 import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { Allow, IsBoolean, IsObject, Length } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Entity,
   Column,
@@ -8,9 +9,23 @@ import {
   Index,
   UpdateDateColumn,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import type Message from '@entities/message';
+import Task from '@entities/task';
 
+interface IParams {
+  isTemplate?: boolean;
+  [key: string]: any;
+}
+
+@JSONSchema({
+  title: 'Notice',
+  properties: {
+    task: { $ref: '#/definitions/Task' },
+  },
+})
 @Entity()
 class Notice {
   @PrimaryGeneratedColumn('uuid')
@@ -27,6 +42,14 @@ class Notice {
   @IsNullable()
   @IsUndefinable()
   userId: string | null;
+
+  @JSONSchema({
+    description: 'Define task relation and notice as template for task',
+  })
+  @Column({ type: 'uuid', default: null })
+  @Length(1, 36)
+  @IsUndefinable()
+  taskId: string | null;
 
   @Column({ type: 'varchar' })
   @Length(1, 255)
@@ -50,7 +73,7 @@ class Notice {
   @Column({ type: 'json', default: {} })
   @IsObject()
   @IsUndefinable()
-  params: Record<string, any>;
+  params: IParams;
 
   @IsTypeormDate()
   @CreateDateColumn()
@@ -62,6 +85,12 @@ class Notice {
 
   @OneToMany('Message', 'notice')
   messages: Message[];
+
+  @ManyToOne('Task', 'notices', { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'taskId', referencedColumnName: 'id' })
+  @IsUndefinable()
+  @IsObject()
+  task: Task;
 }
 
 export default Notice;
