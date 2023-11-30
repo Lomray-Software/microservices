@@ -159,13 +159,12 @@ class EmailAll extends Abstract {
 
       // Send service will be automatically create not template messages
       const savedEmails = await Promise.all(
-        processUsers.map(({ email, id }) =>
+        processUsers.map(({ email }) =>
           sendService.send({
             html: this.messageTemplate.html as string,
             taskId: this.messageTemplate.taskId as string,
             text: this.messageTemplate.text,
             subject: this.messageTemplate.subject,
-            userId: id,
             to: [email as string],
           }),
         ),

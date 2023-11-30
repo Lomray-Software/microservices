@@ -77,7 +77,7 @@ class EmailGroup extends Abstract {
         .createQueryBuilder('recipient')
         .leftJoin('recipient.message', 'message')
         // Send email for recipients that did not receive emails yet
-        .where('recipient.taskId = :taskId AND message.userId IS NULL', {
+        .where('recipient.taskId = :taskId AND message.id IS NULL', {
           taskId: this.messageTemplate.taskId,
         }),
       (recipients) => this.executeTask(sendService, recipients),
@@ -125,7 +125,7 @@ class EmailGroup extends Abstract {
           taskId: this.messageTemplate.taskId as string,
           text: this.messageTemplate.text,
           subject: this.messageTemplate.subject,
-          userId: id,
+          recipient: recipients.find(({ userId }) => userId === id),
           to: [email as string],
         }),
       ),

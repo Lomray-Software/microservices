@@ -2,6 +2,7 @@ import nodemailer from 'nodemailer';
 import { Repository } from 'typeorm';
 import EmailProvider from '@constants/email-provider';
 import Message from '@entities/message';
+import Recipient from '@entities/recipient';
 import type IAttachment from '@interfaces/message-attachment';
 
 /**
@@ -17,7 +18,7 @@ export interface IEmailParams {
   attachments?: IAttachment[];
   // Only for internal usage
   taskId?: string;
-  userId?: string;
+  recipient?: Recipient;
 }
 
 /**

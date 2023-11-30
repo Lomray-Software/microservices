@@ -19,9 +19,9 @@ class Nodemailer extends Abstract {
       html,
       replyTo,
       attachments,
-      from = defaultEmailFrom,
       taskId,
-      userId,
+      recipient,
+      from = defaultEmailFrom,
     } = params;
 
     const info = await this.transporter.sendMail({
@@ -39,7 +39,6 @@ class Nodemailer extends Abstract {
     const message = this.messageRepository.create({
       type: NotifyType.EMAIL,
       taskId,
-      userId,
       from,
       to: to.join(', '),
       text,
@@ -47,6 +46,7 @@ class Nodemailer extends Abstract {
       subject,
       params: info,
       attachments,
+      recipient,
     });
 
     await this.messageRepository.save(message);

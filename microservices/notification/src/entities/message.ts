@@ -52,15 +52,6 @@ class Message {
   taskId: string | null;
 
   @JSONSchema({
-    description: 'User that receive email',
-  })
-  @Column({ type: 'uuid', default: null })
-  @Length(1, 36)
-  @IsUndefinable()
-  @IsNullable()
-  userId: string | null;
-
-  @JSONSchema({
     description: 'Can be nullable if message presented as template.',
   })
   @Column({ type: 'varchar', default: null })
@@ -69,7 +60,7 @@ class Message {
   from: string | null;
 
   @JSONSchema({
-    description: `It can be email, phone, userId. Can be nullable if message presented as template. `,
+    description: `It can be email, phone, userId. Can be nullable if message presented as template.`,
   })
   @Column({ type: 'varchar', default: null })
   @Length(1, 255)
