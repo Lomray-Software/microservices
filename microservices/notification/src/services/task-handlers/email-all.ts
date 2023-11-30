@@ -1,5 +1,6 @@
 import { Api, Log } from '@lomray/microservice-helpers';
 import type IUser from '@lomray/microservices-client-api/interfaces/users/entities/user';
+import { JQOperator } from '@lomray/microservices-types/lib/src/query';
 import _ from 'lodash';
 import { In, Repository } from 'typeorm';
 import TaskMode from '@constants/task-mode';
@@ -65,7 +66,7 @@ class EmailAll extends Abstract {
    * @description Get all users count and execute task
    */
   private async sendEmailToAllUsers(task: TaskEntity): Promise<void> {
-    const usersCount = await this.getTotalUsersCount();
+    const usersCount = await this.getTotalUsersCount(true);
 
     try {
       await this.executeEmailAllTask(task, usersCount);
@@ -98,6 +99,11 @@ class EmailAll extends Abstract {
           page: this.currentPage,
           pageSize: this.chunkSize,
           orderBy: { createdAt: 'ASC' },
+          where: {
+            email: {
+              [JQOperator.isNotNULL]: null,
+            },
+          },
         },
       });
 

@@ -1,4 +1,5 @@
 import { Api, Log } from '@lomray/microservice-helpers';
+import { JQOperator } from '@lomray/microservices-types/lib/src/query';
 import _ from 'lodash';
 import { EntityManager, Repository } from 'typeorm';
 import TaskStatus from '@constants/task-status';
@@ -118,9 +119,22 @@ abstract class Abstract {
 
   /**
    * Get total users count
+   * @description Users without email - facebook users that does not give access for their email
    */
-  protected async getTotalUsersCount(): Promise<number> {
-    const { result: usersCountResult, error: usersCountError } = await Api.get().users.user.count();
+  protected async getTotalUsersCount(excludeUsersWithoutEmail = false): Promise<number> {
+    const { result: usersCountResult, error: usersCountError } = await Api.get().users.user.count(
+      excludeUsersWithoutEmail
+        ? {
+            query: {
+              where: {
+                email: {
+                  [JQOperator.isNotNULL]: null,
+                },
+              },
+            },
+          }
+        : undefined,
+    );
 
     if (usersCountError) {
       // Internal error. Case where error target doesn't exist
