@@ -74,3 +74,4 @@ __AWS Memory__: ~140 MB
 
 ### Use [CLI](https://github.com/Lomray-Software/microservices-cli) to start your own art.
 
+Rebuild: 1
