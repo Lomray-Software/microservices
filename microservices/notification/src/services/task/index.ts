@@ -17,6 +17,7 @@ class Task {
 
   /**
    * Handle attach
+   * @description Required attachment for task entity
    */
   private static async handleAttach(entity: TaskEntity, manager: EntityManager): Promise<void> {
     if (entity.type === TaskType.NOTICE_ALL) {
