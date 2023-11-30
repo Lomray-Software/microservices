@@ -10,16 +10,24 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import TaskMode from '@constants/task-mode';
 import TaskStatus from '@constants/task-status';
 import TaskType from '@constants/task-type';
 import Message from '@entities/message';
 import Notice from '@entities/notice';
+import Recipient from '@entities/recipient';
+
+interface IParams {
+  lastErrorMessage?: string;
+  [key: string]: any;
+}
 
 @JSONSchema({
-  description: 'Task',
+  title: 'Task',
   properties: {
     notices: { $ref: '#/definitions/Notice', type: 'array' },
     messages: { $ref: '#/definitions/Message', type: 'array' },
+    recipients: { $ref: '#/definitions/Recipient', type: 'array' },
   },
 })
 @Entity()
@@ -51,10 +59,21 @@ class Task {
   @IsUndefinable()
   status: TaskStatus;
 
+  @JSONSchema({
+    description: `Default - checks based on last target error. Full check up - checks all entities for each chunk.
+      Case example: If whole backend will down and some tasks were not completed. You MUST run task in full check up mode for preventing
+      duplicate notices, messages ans so on.
+      Full check up mode - will take longer time for process all task requirements.`,
+  })
+  @Column({ type: 'enum', enum: TaskMode, default: TaskMode.DEFAULT })
+  @IsEnum(TaskMode)
+  @IsUndefinable()
+  mode: TaskMode;
+
   @Column({ type: 'json', default: {} })
   @IsObject()
   @IsUndefinable()
-  params: Record<string, any>;
+  params: IParams;
 
   @IsTypeormDate()
   @CreateDateColumn()
@@ -81,6 +100,16 @@ class Task {
   @ValidateNested()
   @IsUndefinable()
   messages: Message[];
+
+  @JSONSchema({
+    description:
+      'Recipient group that should receive task template entity (email message and so on)',
+  })
+  @OneToMany('Recipient', 'task')
+  @Type(() => Recipient)
+  @ValidateNested()
+  @IsUndefinable()
+  recipients: Recipient[];
 }
 
 export default Task;

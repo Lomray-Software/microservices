@@ -15,11 +15,11 @@ describe('services/task-handlers/abstract', () => {
   const sandbox = sinon.createSandbox();
   const taskNotFoundErrorMessageMock = 'Task not found.';
   let apiGet: sinon.SinonStub;
-  let abstract: NoticeAll;
+  let abstractNoticeAll: NoticeAll;
 
   beforeEach(() => {
     TypeormMock.sandbox.reset();
-    abstract = new NoticeAll(TypeormMock.entityManager);
+    abstractNoticeAll = new NoticeAll(TypeormMock.entityManager);
     apiGet = sinon.stub(Api, 'get');
   });
 
@@ -30,11 +30,11 @@ describe('services/task-handlers/abstract', () => {
 
   describe('take', () => {
     it('should take 1 notice all task', () => {
-      expect(abstract.take([taskMock])).to.be.true;
+      expect(abstractNoticeAll.take([taskMock])).to.be.true;
     });
 
     it('should take 0 notice all task', () => {
-      expect(abstract.take([{ ...taskMock, type: TaskType.EMAIL_ALL }])).to.be.false;
+      expect(abstractNoticeAll.take([{ ...taskMock, type: TaskType.EMAIL_ALL }])).to.be.false;
     });
   });
 
@@ -50,7 +50,7 @@ describe('services/task-handlers/abstract', () => {
         },
       });
 
-      const result = await abstract['getTotalUsersCount']();
+      const result = await abstractNoticeAll['getTotalUsersCount']();
 
       expect(result).to.equal(1);
     });
@@ -60,7 +60,10 @@ describe('services/task-handlers/abstract', () => {
     it('should correctly call and get last updated task version', async () => {
       TypeormMock.entityManager.findOne.returns(taskMock);
 
-      const result = await abstract['getLastUpdatedTaskVersion']('task-id', TaskStatus.WAITING);
+      const result = await abstractNoticeAll['getLastUpdatedTaskVersion'](
+        'task-id',
+        TaskStatus.WAITING,
+      );
 
       expect(result).to.deep.equal(taskMock);
     });
@@ -69,7 +72,9 @@ describe('services/task-handlers/abstract', () => {
       TypeormMock.entityManager.findOne.returns(undefined);
 
       expect(
-        await waitResult(abstract['getLastUpdatedTaskVersion']('task-id', TaskStatus.WAITING)),
+        await waitResult(
+          abstractNoticeAll['getLastUpdatedTaskVersion']('task-id', TaskStatus.WAITING),
+        ),
       ).to.throw('Failed to update task status to "waiting". Task was not found.');
     });
   });
@@ -81,7 +86,7 @@ describe('services/task-handlers/abstract', () => {
 
       TypeormMock.entityManager.findOne.returns(taskMock);
 
-      await abstract['updateWaitingTask'].call(
+      await abstractNoticeAll['updateWaitingTask'].call(
         {
           handledCounts,
           getLastUpdatedTaskVersion: getLastUpdatedTaskVersionStub,
@@ -105,7 +110,7 @@ describe('services/task-handlers/abstract', () => {
 
       expect(
         await waitResult(
-          abstract['updateWaitingTask'].call(
+          abstractNoticeAll['updateWaitingTask'].call(
             {
               handledCounts,
               getLastUpdatedTaskVersion: getLastUpdatedTaskVersionStub,
@@ -128,7 +133,7 @@ describe('services/task-handlers/abstract', () => {
 
       TypeormMock.entityManager.findOne.returns(taskMock);
 
-      await abstract['updateFailedTask'].call(
+      await abstractNoticeAll['updateFailedTask'].call(
         {
           handledCounts,
           getLastUpdatedTaskVersion: getLastUpdatedTaskVersionStub,
@@ -153,7 +158,7 @@ describe('services/task-handlers/abstract', () => {
 
       expect(
         await waitResult(
-          abstract['updateFailedTask'].call(
+          abstractNoticeAll['updateFailedTask'].call(
             {
               handledCounts,
               getLastUpdatedTaskVersion: getLastUpdatedTaskVersionStub,
@@ -177,7 +182,7 @@ describe('services/task-handlers/abstract', () => {
 
       TypeormMock.entityManager.findOne.returns(taskMock);
 
-      await abstract['updateCompletedTask'].call(
+      await abstractNoticeAll['updateCompletedTask'].call(
         {
           handledCounts,
           getLastUpdatedTaskVersion: getLastUpdatedTaskVersionStub,
@@ -202,7 +207,7 @@ describe('services/task-handlers/abstract', () => {
 
       expect(
         await waitResult(
-          abstract['updateCompletedTask'].call(
+          abstractNoticeAll['updateCompletedTask'].call(
             {
               handledCounts,
               getLastUpdatedTaskVersion: getLastUpdatedTaskVersionStub,
@@ -220,20 +225,18 @@ describe('services/task-handlers/abstract', () => {
 
   describe('resetState', () => {
     it('should correctly reset state', () => {
-      abstract['lastFailTargetId'] = 'target-id';
-      abstract['currentPage'] = 1;
+      abstractNoticeAll['lastFailTargetId'] = 'target-id';
 
-      abstract['resetState']();
+      abstractNoticeAll['resetState']();
 
-      expect(abstract['lastFailTargetId']).to.be.null;
-      expect(abstract['currentPage']).to.equal(0);
+      expect(abstractNoticeAll['lastFailTargetId']).to.be.null;
     });
   });
 
   describe('process', () => {
     it('should return if task length is 0', async () => {
       const handledCounts = { ...handledCountsMock };
-      const result = await abstract.process.call({ tasks: [], handledCounts });
+      const result = await abstractNoticeAll.process.call({ tasks: [], handledCounts });
 
       expect(result).to.deep.equal({ total: 0, completed: 0, failed: 0 });
     });
@@ -249,7 +252,7 @@ describe('services/task-handlers/abstract', () => {
         .stub()
         .resolves({ ...handledCounts, total: 1, completed: 1 });
 
-      await abstract.process.call(
+      await abstractNoticeAll.process.call(
         {
           tasks: [taskMock],
           take: takeStub,

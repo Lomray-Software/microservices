@@ -6,7 +6,7 @@ import TaskEntity from '@entities/task';
 import type IHandledCounts from '@interfaces/handled-counts';
 
 /**
- * Abstract class for notify tasks
+ * Abstract class for tasks processing
  */
 abstract class Abstract {
   /**
@@ -20,17 +20,12 @@ abstract class Abstract {
   protected lastFailTargetId: string | null = null;
 
   /**
-   * Tasks
+   * @protected
    */
   protected readonly chunkSize = 50;
 
   /**
    * @protected
-   */
-  protected currentPage = 0;
-
-  /**
-   * Tasks
    */
   protected readonly tasks: TaskEntity[] = [];
 
@@ -54,11 +49,12 @@ abstract class Abstract {
 
   /**
    * Process notify tasks
+   * @description Prepare data for execution
    */
   protected abstract processTasks(task: TaskEntity): Promise<void>;
 
   /**
-   * Get and handle tasks
+   * Grab related tasks
    */
   public take(tasks: TaskEntity[], conditionCallback?: (task: TaskEntity) => boolean): boolean {
     if (typeof conditionCallback !== 'function') {
@@ -79,7 +75,7 @@ abstract class Abstract {
   }
 
   /**
-   * Process payment orders
+   * Process execution of grabbed tasks
    */
   public async process(): Promise<IHandledCounts> {
     if (!this.tasks.length) {
@@ -127,7 +123,7 @@ abstract class Abstract {
   }
 
   /**
-   * Update task
+   * Update task status to completed
    */
   private async updateCompletedTask(taskId: string): Promise<void> {
     const lastUpdatedTask = await this.getLastUpdatedTaskVersion(taskId, TaskStatus.COMPLETED);
@@ -147,15 +143,20 @@ abstract class Abstract {
     const lastUpdatedTask = await this.getLastUpdatedTaskVersion(taskId, TaskStatus.FAILED);
 
     lastUpdatedTask.status = TaskStatus.FAILED;
-    lastUpdatedTask.lastFailTargetId = this.lastFailTargetId;
+    lastUpdatedTask.params.lastErrorMessage = errorMessage;
 
-    // If task fail before execution process
     if (!this.lastFailTargetId) {
+      // If task fail before execution process
       Log.error(
-        `Task failed before execution process: "${lastUpdatedTask.id}", type "${lastUpdatedTask.type}"`,
+        `Task failed before execution process: "${lastUpdatedTask.id}", type "${lastUpdatedTask.type}".`,
       );
-
-      lastUpdatedTask.params.lastErrorMessage = errorMessage;
+    } else {
+      /**
+       * If task failed during execution process and then failed before execution process.
+       * DO NOT rewrite target reference
+       * @description Case: failed to get user page 2, then failed to start send process at all
+       */
+      lastUpdatedTask.lastFailTargetId = this.lastFailTargetId;
     }
 
     await this.taskRepository.save(lastUpdatedTask);
@@ -200,7 +201,6 @@ abstract class Abstract {
    */
   private resetState(): void {
     this.lastFailTargetId = null;
-    this.currentPage = 0;
   }
 }
 

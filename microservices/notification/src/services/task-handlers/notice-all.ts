@@ -1,5 +1,7 @@
 import { Api, Log } from '@lomray/microservice-helpers';
 import type { Repository } from 'typeorm';
+import { In } from 'typeorm';
+import TaskMode from '@constants/task-mode';
 import TaskType from '@constants/task-type';
 import NoticeEntity from '@entities/notice';
 import TaskEntity from '@entities/task';
@@ -17,6 +19,11 @@ class NoticeAll extends Abstract {
   private noticeTemplate: Partial<NoticeEntity>;
 
   /**
+   * @private
+   */
+  private currentPage = 1;
+
+  /**
    * Take related tasks
    */
   public take(tasks: TaskEntity[]): boolean {
@@ -29,7 +36,7 @@ class NoticeAll extends Abstract {
   protected async processTasks(task: TaskEntity): Promise<void> {
     this.noticeRepository = this.manager.getRepository(NoticeEntity);
 
-    const noticeTemplate = task.notices.find(({ params }) => params.isTemplate);
+    const noticeTemplate = task.notices?.find(({ params }) => params.isTemplate);
 
     if (!noticeTemplate) {
       // Internal error
@@ -44,18 +51,18 @@ class NoticeAll extends Abstract {
       params: { ...rest.params, isTemplate: false },
     };
 
-    await this.handleSend(task);
+    await this.sendNoticeToAllUsers(task);
   }
 
   /**
-   * Handle send
-   * @description Get all users count and handle send errors
+   * Send notice to all users
+   * @description Get all users count and execute task
    */
-  private async handleSend(task: TaskEntity): Promise<void> {
+  private async sendNoticeToAllUsers(task: TaskEntity): Promise<void> {
     const usersCount = await this.getTotalUsersCount();
 
     try {
-      await this.send(task, usersCount);
+      await this.executeTask(task, usersCount);
     } catch (error) {
       this.lastFailTargetId = this.currentPage.toString();
 
@@ -64,16 +71,18 @@ class NoticeAll extends Abstract {
   }
 
   /**
-   * Send
+   * Execute task
    * @description Send notices for all users via iteration
    * If previous run task had error - run process from last error target id (page)
    */
-  private async send({ lastFailTargetId }: TaskEntity, usersCount: number): Promise<void> {
-    const initPage = Number(lastFailTargetId) || 1;
+  protected async executeTask(
+    { lastFailTargetId, mode }: TaskEntity,
+    usersCount: number,
+  ): Promise<void> {
     let offset = 0;
 
     // Start process from last error target id
-    this.currentPage = Math.floor(offset / this.chunkSize) + initPage;
+    this.currentPage = Number(lastFailTargetId) || 1;
 
     do {
       const { result: usersListResult, error: usersListError } = await Api.get().users.user.list({
@@ -96,9 +105,39 @@ class NoticeAll extends Abstract {
         return;
       }
 
+      /**
+       * Users that will be processed in current chunk
+       */
+      const processUsers: string[] = [];
+
+      if (
+        mode === TaskMode.FULL_CHECK_UP ||
+        // full checkup current users chuck if last fail target id is current page
+        (lastFailTargetId && this.currentPage === Number(lastFailTargetId))
+      ) {
+        const userIds = usersListResult.list.map(({ id }) => id);
+        const sentNotices = await this.noticeRepository.find({
+          select: ['userId', 'taskId'],
+          where: { userId: In(userIds), taskId: this.noticeTemplate.taskId },
+        });
+        const notNoticedUserIds = userIds.filter(
+          (userId) => !sentNotices.some(({ userId: id }) => id === userId),
+        );
+
+        // If notices exist for all current chunk users - continue to next chunk
+        if (notNoticedUserIds.length === 0) {
+          this.currentPage += 1;
+          continue;
+        }
+
+        processUsers.push(...notNoticedUserIds);
+      } else {
+        processUsers.push(...usersListResult.list.map(({ id }) => id));
+      }
+
       // Will be saved in transaction
       const savedNotices = await this.noticeRepository.save(
-        usersListResult.list.map(({ id: userId }) =>
+        processUsers.map((userId) =>
           this.noticeRepository.create({ ...this.noticeTemplate, userId }),
         ),
       );
@@ -106,7 +145,7 @@ class NoticeAll extends Abstract {
       offset += savedNotices.length;
 
       // Update pagination
-      this.currentPage = Math.floor(offset / this.chunkSize) + initPage;
+      this.currentPage += 1;
     } while (offset < usersCount);
   }
 }

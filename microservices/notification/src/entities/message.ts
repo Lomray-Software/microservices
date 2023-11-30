@@ -8,9 +8,11 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  OneToOne,
 } from 'typeorm';
 import NotifyType from '@constants/notify-type';
 import type Notice from '@entities/notice';
+import Recipient from '@entities/recipient';
 import Task from '@entities/task';
 import type IAttachment from '@interfaces/message-attachment';
 
@@ -20,10 +22,12 @@ interface IParams {
 }
 
 @JSONSchema({
+  title: 'Message',
   description:
     'If message is template than it should not be sent as separate message. It should be used as template for task messages.',
   properties: {
     task: { $ref: '#/definitions/Task' },
+    recipient: { $ref: '#/definitions/Recipient' },
   },
 })
 @Entity()
@@ -56,7 +60,7 @@ class Message {
   from: string | null;
 
   @JSONSchema({
-    description: `It can be email, phone, userId. Can be nullable if message presented as template. `,
+    description: `It can be email, phone, userId. Can be nullable if message presented as template.`,
   })
   @Column({ type: 'varchar', default: null })
   @Length(1, 255)
@@ -108,6 +112,11 @@ class Message {
   @IsUndefinable()
   @IsObject()
   task: Task;
+
+  @OneToOne('Recipient', 'message', { onDelete: 'SET NULL' })
+  @IsUndefinable()
+  @IsObject()
+  recipient: Recipient;
 
   /**
    * Check if message is template

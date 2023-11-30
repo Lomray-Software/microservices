@@ -1,8 +1,8 @@
-import type { IJsonQueryWhereFilter } from '@lomray/microservice-helpers';
 import { Api, Log } from '@lomray/microservice-helpers';
 import type IUser from '@lomray/microservices-client-api/interfaces/users/entities/user';
-import { JQOperator } from '@lomray/microservices-types/lib/src/query';
-import { Repository } from 'typeorm';
+import _ from 'lodash';
+import { In, Repository } from 'typeorm';
+import TaskMode from '@constants/task-mode';
 import TaskType from '@constants/task-type';
 import MessageEntity from '@entities/message';
 import TaskEntity from '@entities/task';
@@ -19,6 +19,11 @@ class EmailAll extends Abstract {
    * @private
    */
   private messageTemplate: Omit<MessageEntity, 'id'>;
+
+  /**
+   * @private
+   */
+  private currentPage = 1;
 
   /**
    * Take related tasks
@@ -52,23 +57,23 @@ class EmailAll extends Abstract {
       !this.messageTemplate.text ||
       !this.messageTemplate.subject ||
       !this.messageTemplate.html ||
-      !this.messageTemplate.html
+      !this.messageTemplate.taskId
     ) {
       throw new Error('Invalid message template.');
     }
 
-    await this.handleSend(task);
+    await this.sendEmailToAllUsers(task);
   }
 
   /**
-   * Handle send
-   * @description Get all users count and handle send errors
+   * Send email to all users
+   * @description Get all users count and execute task
    */
-  private async handleSend(task: TaskEntity): Promise<void> {
+  private async sendEmailToAllUsers(task: TaskEntity): Promise<void> {
     const usersCount = await this.getTotalUsersCount();
 
     try {
-      await this.send(task, usersCount);
+      await this.executeTask(task, usersCount);
     } catch (error) {
       this.lastFailTargetId = this.currentPage.toString();
 
@@ -77,53 +82,27 @@ class EmailAll extends Abstract {
   }
 
   /**
-   * Send
+   * Execute task
    * @description Send notices for all users via iteration
    * If previous run task had error - run process from last error target id (page)
    */
-  private async send({ lastFailTargetId }: TaskEntity, usersCount: number): Promise<void> {
+  protected async executeTask(
+    { lastFailTargetId, mode }: TaskEntity,
+    usersCount: number,
+  ): Promise<void> {
     const sendService = await Factory.create(this.messageRepository);
-    const initPage = Number(lastFailTargetId) || 1;
     let offset = 0;
 
     // Start process from last error target id
-    this.currentPage = Math.floor(offset / this.chunkSize) + initPage;
+    this.currentPage = Number(lastFailTargetId) || 1;
 
     do {
-      // Apply where clause to users list query
-      let where: IJsonQueryWhereFilter<IUser<string>> | null = null;
-
-      // Find all sent emails and get all users with emails
-      if (lastFailTargetId) {
-        const sentEmails = await this.messageRepository
-          .createQueryBuilder('message')
-          .where('message.taskId = :taskId', { taskId: this.messageTemplate.taskId })
-          .andWhere(
-            "message.params ->> 'isTemplated' IS NOT NULL AND (message.params ->> 'isTemplated')::boolean = false",
-          )
-          .getMany();
-
-        if (sentEmails.some(({ to }) => !to)) {
-          throw new Error('Invalid sent emails recipient was found.');
-        }
-
-        where = sentEmails.length
-          ? ({
-              // Select users from chunk page only that did not receive emails
-              email: {
-                [JQOperator.notIn]: sentEmails.map(({ to }) => to) as string[],
-              },
-            } as IJsonQueryWhereFilter<IUser<string>>)
-          : null;
-      }
-
       const { result: usersListResult, error: usersListError } = await Api.get().users.user.list({
         query: {
           attributes: ['id', 'email', 'createdAt'],
           page: this.currentPage,
           pageSize: this.chunkSize,
           orderBy: { createdAt: 'ASC' },
-          ...(where ? { where } : {}),
         },
       });
 
@@ -143,9 +122,44 @@ class EmailAll extends Abstract {
         return;
       }
 
+      /**
+       * Users that will be processed in current chunk
+       */
+      const processUsers: Pick<IUser, 'id' | 'email'>[] = [];
+
+      if (
+        mode === TaskMode.FULL_CHECK_UP ||
+        (lastFailTargetId && this.currentPage === Number(lastFailTargetId))
+      ) {
+        const emails = usersListResult.list.map(({ email }) => email);
+        const sentEmails = await this.messageRepository.find({
+          select: ['to', 'taskId'],
+          where: { to: In(emails), taskId: this.messageTemplate.taskId },
+        });
+        const notEmailedUsersEmail = _.compact(
+          emails.filter((email) => !sentEmails.some(({ to }) => to === email)),
+        );
+
+        // If emails exist for all current chunk users - continue to next chunk
+        if (notEmailedUsersEmail.length === 0) {
+          this.currentPage += 1;
+          continue;
+        }
+
+        const notEmailedUsers = notEmailedUsersEmail.map((email) => {
+          const user = usersListResult.list.find(({ email: userEmail }) => userEmail === email);
+
+          return { email, id: user?.id as string };
+        });
+
+        processUsers.push(...notEmailedUsers);
+      } else {
+        processUsers.push(...usersListResult.list.map(({ id, email }) => ({ id, email })));
+      }
+
       // Send service will be automatically create not template messages
-      const sendResults = await Promise.all(
-        usersListResult.list.map(({ email }) =>
+      const savedEmails = await Promise.all(
+        processUsers.map(({ email }) =>
           sendService.send({
             html: this.messageTemplate.html as string,
             taskId: this.messageTemplate.taskId as string,
@@ -156,10 +170,10 @@ class EmailAll extends Abstract {
         ),
       );
 
-      offset += sendResults.length;
+      offset += savedEmails.length;
 
       // Update pagination
-      this.currentPage = Math.floor(offset / this.chunkSize) + initPage;
+      this.currentPage += 1;
     } while (offset < usersCount);
   }
 }
