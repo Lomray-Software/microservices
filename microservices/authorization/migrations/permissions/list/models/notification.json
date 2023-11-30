@@ -28,14 +28,6 @@
           "admin": "allow"
         }
       },
-      "type": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
       "from": {
         "in": {
           "admin": "allow"
@@ -52,6 +44,14 @@
           "admin": "allow"
         }
       },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "subject": {
         "in": {
           "admin": "allow"
@@ -61,6 +61,14 @@
         }
       },
       "text": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "html": {
         "in": {
           "admin": "allow"
         },
@@ -99,7 +107,9 @@
         "out": {
           "admin": "allow"
         }
-      }
+      },
+      "task": "notification.Task",
+      "recipient": "notification.Recipient"
     },
     "createdAt": "2022-04-14T05:34:31.136Z"
   },
@@ -181,25 +191,9 @@
         "out": {
           "admin": "allow"
         }
-      },
-      "attachments": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
-      "taskId": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.136Z"
+    "createdAt": "2022-04-14T01:34:31.136Z"
   },
   {
     "microservice": "notification",
@@ -215,7 +209,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.136Z"
+    "createdAt": "2022-04-14T01:34:31.136Z"
   },
   {
     "microservice": "notification",
@@ -239,7 +233,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.136Z"
+    "createdAt": "2022-04-14T01:34:31.136Z"
   },
   {
     "microservice": "notification",
@@ -255,7 +249,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.136Z"
+    "createdAt": "2022-04-14T01:34:31.136Z"
   },
   {
     "microservice": "notification",
@@ -359,9 +353,10 @@
         "out": {
           "admin": "allow"
         }
-      }
+      },
+      "task": "notification.Task"
     },
-    "createdAt": "2023-02-02T17:50:12.559Z"
+    "createdAt": "2023-02-02T13:50:12.559Z"
   },
   {
     "microservice": "notification",
@@ -379,7 +374,7 @@
         }
       }
     },
-    "createdAt": "2023-02-02T17:50:12.559Z"
+    "createdAt": "2023-02-02T13:50:12.559Z"
   },
   {
     "microservice": "notification",
@@ -388,7 +383,7 @@
     "schema": {
       "entity": "notification.Notice"
     },
-    "createdAt": "2023-02-02T17:50:12.559Z"
+    "createdAt": "2023-02-02T13:50:12.559Z"
   },
   {
     "microservice": "notification",
@@ -397,7 +392,7 @@
     "schema": {
       "fields": "notification.Notice"
     },
-    "createdAt": "2023-02-02T17:50:12.559Z"
+    "createdAt": "2023-02-02T13:50:12.559Z"
   },
   {
     "microservice": "notification",
@@ -406,7 +401,7 @@
     "schema": {
       "entity": "notification.Notice"
     },
-    "createdAt": "2023-02-02T17:50:12.559Z"
+    "createdAt": "2023-02-02T13:50:12.559Z"
   },
   {
     "microservice": "notification",
@@ -424,7 +419,7 @@
         }
       }
     },
-    "createdAt": "2023-02-02T17:50:12.559Z"
+    "createdAt": "2023-02-02T13:50:12.559Z"
   },
   {
     "microservice": "notification",
@@ -433,7 +428,7 @@
     "schema": {
       "entity": "notification.Notice"
     },
-    "createdAt": "2023-02-02T17:50:12.559Z"
+    "createdAt": "2023-02-02T13:50:12.559Z"
   },
   {
     "microservice": "notification",
@@ -443,7 +438,7 @@
       "deleted": "notification.Notice",
       "entities": "notification.Notice"
     },
-    "createdAt": "2023-02-02T17:50:12.559Z"
+    "createdAt": "2023-02-02T13:50:12.559Z"
   },
   {
     "microservice": "notification",
@@ -467,7 +462,7 @@
         }
       }
     },
-    "createdAt": "2023-02-02T17:50:12.559Z"
+    "createdAt": "2023-02-02T13:50:12.559Z"
   },
   {
     "microservice": "notification",
@@ -483,7 +478,7 @@
         }
       }
     },
-    "createdAt": "2023-02-02T17:50:12.559Z"
+    "createdAt": "2023-02-02T13:50:12.559Z"
   },
   {
     "microservice": "notification",
@@ -546,6 +541,14 @@
           "admin": "allow"
         }
       },
+      "mode": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "params": {
         "in": {
           "admin": "allow"
@@ -570,10 +573,11 @@
           "admin": "allow"
         }
       },
-      "notice": "notification.Notice",
-      "message": "notification.Message"
+      "notices": "notification.Notice",
+      "messages": "notification.Message",
+      "recipients": "notification.Recipient"
     },
-    "createdAt": "2023-11-28T08:24:13.755Z"
+    "createdAt": "2023-11-30T08:10:03.620Z"
   },
   {
     "microservice": "notification",
@@ -590,7 +594,7 @@
         }
       }
     },
-    "createdAt": "2023-11-28T08:24:13.755Z"
+    "createdAt": "2023-11-30T08:10:03.620Z"
   },
   {
     "microservice": "notification",
@@ -599,7 +603,7 @@
     "schema": {
       "entity": "notification.Task"
     },
-    "createdAt": "2023-11-28T08:24:13.755Z"
+    "createdAt": "2023-11-30T08:10:03.620Z"
   },
   {
     "microservice": "notification",
@@ -608,7 +612,7 @@
     "schema": {
       "fields": "notification.Task"
     },
-    "createdAt": "2023-11-28T08:24:13.755Z"
+    "createdAt": "2023-11-30T08:10:03.620Z"
   },
   {
     "microservice": "notification",
@@ -617,7 +621,7 @@
     "schema": {
       "entity": "notification.Task"
     },
-    "createdAt": "2023-11-28T08:24:13.755Z"
+    "createdAt": "2023-11-30T08:10:03.620Z"
   },
   {
     "microservice": "notification",
@@ -634,7 +638,7 @@
         }
       }
     },
-    "createdAt": "2023-11-28T08:24:13.755Z"
+    "createdAt": "2023-11-30T08:10:03.620Z"
   },
   {
     "microservice": "notification",
@@ -643,7 +647,7 @@
     "schema": {
       "entity": "notification.Task"
     },
-    "createdAt": "2023-11-28T08:24:13.755Z"
+    "createdAt": "2023-11-30T08:10:03.620Z"
   },
   {
     "microservice": "notification",
@@ -653,14 +657,30 @@
       "deleted": "notification.Task",
       "entities": "notification.Task"
     },
-    "createdAt": "2023-11-28T08:24:13.755Z"
+    "createdAt": "2023-11-30T08:10:03.620Z"
   },
   {
     "microservice": "notification",
     "alias": "notification.ProcessOutput",
     "title": "Process Output",
     "schema": {
-      "count": {
+      "total": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "completed": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "failed": {
         "in": {
           "admin": "allow"
         },
@@ -669,6 +689,48 @@
         }
       }
     },
-    "createdAt": "2023-11-28T08:24:13.755Z"
+    "createdAt": "2023-11-30T08:10:03.620Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.Recipient",
+    "title": "Recipient",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "taskId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "messageId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "task": "notification.Task",
+      "message": "notification.Message"
+    },
+    "createdAt": "2023-11-30T08:10:03.620Z"
   }
 ]
