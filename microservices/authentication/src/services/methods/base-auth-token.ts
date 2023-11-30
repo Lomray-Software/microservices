@@ -1,6 +1,6 @@
 import Cookie from '@lomray/cookie';
-import cookiesConf from '@config/cookies';
 import type { IJwtConfig } from '@config/jwt';
+import remote from '@config/remote';
 import Jwt from '@services/tokens/jwt';
 
 /**
@@ -53,15 +53,10 @@ abstract class BaseAuthToken {
 
     const parsedCookies = Cookie.parse(cookies, { multiValuedCookies: true });
     const tokens = parsedCookies?.['jwt-access'] ?? [];
+    const service = await this.getJwtService();
 
     // try to find right token by compare audience
-    if (tokens.length > 1) {
-      const service = await this.getJwtService();
-
-      return service.findMostSuitableToken(tokens, origin);
-    }
-
-    return tokens[0];
+    return service.findMostSuitableToken(tokens, origin);
   }
 
   /**
@@ -71,7 +66,10 @@ abstract class BaseAuthToken {
     if (!this.jwtService) {
       const { secretKey, ...jwtOptions } = this.jwtConfig;
 
-      const { domain } = await cookiesConf();
+      const {
+        cookieStrategy,
+        cookieOptions: { domain },
+      } = await remote();
 
       this.jwtService = new Jwt(secretKey, {
         ...jwtOptions,
@@ -79,6 +77,7 @@ abstract class BaseAuthToken {
           ...(jwtOptions?.options ?? {}),
           ...Jwt.getAudience([domain], jwtOptions?.options),
         },
+        cookieStrategy,
       });
     }
 

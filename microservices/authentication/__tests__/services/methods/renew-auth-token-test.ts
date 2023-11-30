@@ -18,9 +18,10 @@ const { RenewAuthToken } = rewiremock.proxy<{ RenewAuthToken: typeof OriginalRen
 describe('services/methods/renew-auth-token', () => {
   const repository = TypeormMock.entityManager.getRepository(Token);
   const userId = 'test-id';
-  const jwtConfig = { secretKey: 'secret' };
-  const service = new RenewAuthToken(repository, jwtConfig);
-  const jwtService = new Jwt(jwtConfig.secretKey);
+  const secretKey = 'secret';
+  const jwtConfig = { options: { audience: ['testing'] } };
+  const service = new RenewAuthToken(repository, { ...jwtConfig, secretKey });
+  const jwtService = new Jwt(secretKey, jwtConfig);
   const tokenId = 'token-id';
 
   afterEach(() => {
@@ -121,8 +122,8 @@ describe('services/methods/renew-auth-token', () => {
   });
 
   it('should throw error: jwt not valid', async () => {
-    const jwtFailedService = new Jwt('another-key');
-    const jwExpiredService = new Jwt(jwtConfig.secretKey, { expirationRefresh: 0 });
+    const jwtFailedService = new Jwt('another-key', jwtConfig);
+    const jwExpiredService = new Jwt(secretKey, { ...jwtConfig, expirationRefresh: 0 });
     const { access, refresh } = jwtFailedService.create('test-id');
     const { access: correctAccessToken, refresh: correctRefreshToken } =
       jwtService.create('test-id-2');

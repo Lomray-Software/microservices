@@ -31,6 +31,7 @@ This microservice provides authentication mechanism for microservices.
 - `IS_HTTPONLY_COOKIE` - Set httpOnly cookie for `returnType: cookies`. Default: `1`
 - `COOKIE_SAME_SITE` - Set sameSite cookie for `returnType: cookies`. Default: `undefined`
 - `COOKIE_DOMAIN` - Set cookie domain for `returnType: cookies`. Default: `undefined`
+- `COOKIE_AUTH_STRATEGY` - Try to find most suitable token by audience and request origin. 3 - full match by audience and origin, 2 - 3 or match by audience, 1 - 3 or 2 or any jwt token in cookies. Default: `2`
 - [See full list `COMMON ENVIRONMENTS`](https://github.com/Lomray-Software/microservice-helpers#common-environments)
 
 ### <a id="how-to-run"></a>HOW TO RUN:
