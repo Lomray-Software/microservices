@@ -19,6 +19,11 @@ class NoticeAll extends Abstract {
   private noticeTemplate: Partial<NoticeEntity>;
 
   /**
+   * @private
+   */
+  private currentPage = 1;
+
+  /**
    * Take related tasks
    */
   public take(tasks: TaskEntity[]): boolean {
@@ -46,7 +51,23 @@ class NoticeAll extends Abstract {
       params: { ...rest.params, isTemplate: false },
     };
 
-    await this.handleProcessTaskExecution(task);
+    await this.sendNoticeToAllUsers(task);
+  }
+
+  /**
+   * Send notice to all users
+   * @description Get all users count and execute task
+   */
+  private async sendNoticeToAllUsers(task: TaskEntity): Promise<void> {
+    const usersCount = await this.getTotalUsersCount();
+
+    try {
+      await this.executeTask(task, usersCount);
+    } catch (error) {
+      this.lastFailTargetId = this.currentPage.toString();
+
+      throw error;
+    }
   }
 
   /**

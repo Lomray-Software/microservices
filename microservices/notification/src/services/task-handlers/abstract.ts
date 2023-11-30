@@ -27,11 +27,6 @@ abstract class Abstract {
   /**
    * @protected
    */
-  protected currentPage = 0;
-
-  /**
-   * @protected
-   */
   protected readonly tasks: TaskEntity[] = [];
 
   /**
@@ -57,11 +52,6 @@ abstract class Abstract {
    * @description Prepare data for execution
    */
   protected abstract processTasks(task: TaskEntity): Promise<void>;
-
-  /**
-   * Execute task goal: send notices, emails and so on
-   */
-  protected abstract executeTask(task: TaskEntity, usersCount: number): Promise<void>;
 
   /**
    * Grab related tasks
@@ -119,25 +109,9 @@ abstract class Abstract {
   }
 
   /**
-   * Handle process task execution
-   * @description Get all users count and execute task
-   */
-  protected async handleProcessTaskExecution(task: TaskEntity): Promise<void> {
-    const usersCount = await this.getTotalUsersCount();
-
-    try {
-      await this.executeTask(task, usersCount);
-    } catch (error) {
-      this.lastFailTargetId = this.currentPage.toString();
-
-      throw error;
-    }
-  }
-
-  /**
    * Get total users count
    */
-  private async getTotalUsersCount(): Promise<number> {
+  protected async getTotalUsersCount(): Promise<number> {
     const { result: usersCountResult, error: usersCountError } = await Api.get().users.user.count();
 
     if (usersCountError) {
@@ -227,7 +201,6 @@ abstract class Abstract {
    */
   private resetState(): void {
     this.lastFailTargetId = null;
-    this.currentPage = 0;
   }
 }
 

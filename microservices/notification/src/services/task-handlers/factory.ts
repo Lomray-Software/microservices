@@ -4,6 +4,7 @@ import TaskEntity from '@entities/task';
 import type IHandledCounts from '@interfaces/handled-counts';
 import Abstract from './abstract';
 import EmailAll from './email-all';
+import EmailGroup from './email-group';
 import NoticeAll from './notice-all';
 
 /**
@@ -14,7 +15,7 @@ class Factory {
   /**
    * Task services
    */
-  protected static services: ClassReturn<Abstract>[] = [NoticeAll, EmailAll];
+  protected static services: ClassReturn<Abstract>[] = [NoticeAll, EmailAll, EmailGroup];
 
   /**
    * Handle task init services

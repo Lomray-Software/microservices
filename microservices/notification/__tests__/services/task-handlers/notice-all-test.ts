@@ -41,19 +41,19 @@ describe('services/task-handlers/abstract', () => {
     };
 
     it('should correctly process tasks', async () => {
-      const handleProcessTaskExecutionStub = sandbox.stub();
+      const sendNoticeToAllUsersStub = sandbox.stub();
 
       await noticeAll['processTasks'].call(
         {
           manager: TypeormMock.entityManager,
-          handleProcessTaskExecution: handleProcessTaskExecutionStub,
+          sendNoticeToAllUsers: sendNoticeToAllUsersStub,
         },
         taskWithNotices,
       );
 
       expect(TypeormMock.entityManager.getRepository).to.be.called;
-      expect(handleProcessTaskExecutionStub).to.be.calledOnce;
-      expect(handleProcessTaskExecutionStub).to.be.calledWith(taskWithNotices);
+      expect(sendNoticeToAllUsersStub).to.be.calledOnce;
+      expect(sendNoticeToAllUsersStub).to.be.calledWith(taskWithNotices);
     });
 
     it('should throw error: task notice template was not found', async () => {

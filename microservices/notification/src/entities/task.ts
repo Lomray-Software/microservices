@@ -15,6 +15,7 @@ import TaskStatus from '@constants/task-status';
 import TaskType from '@constants/task-type';
 import Message from '@entities/message';
 import Notice from '@entities/notice';
+import Recipient from '@entities/recipient';
 
 interface IParams {
   lastErrorMessage?: string;
@@ -26,6 +27,7 @@ interface IParams {
   properties: {
     notices: { $ref: '#/definitions/Notice', type: 'array' },
     messages: { $ref: '#/definitions/Message', type: 'array' },
+    recipients: { $ref: '#/definitions/Recipient', type: 'array' },
   },
 })
 @Entity()
@@ -98,6 +100,16 @@ class Task {
   @ValidateNested()
   @IsUndefinable()
   messages: Message[];
+
+  @JSONSchema({
+    description:
+      'Recipient group that should receive task template entity (email message and so on)',
+  })
+  @OneToMany('Recipient', 'task')
+  @Type(() => Recipient)
+  @ValidateNested()
+  @IsUndefinable()
+  recipients: Recipient[];
 }
 
 export default Task;
