@@ -68,7 +68,7 @@ class EmailAll extends Abstract {
     const usersCount = await this.getTotalUsersCount();
 
     try {
-      await this.executeTask(task, usersCount);
+      await this.executeEmailAllTask(task, usersCount);
     } catch (error) {
       this.lastFailTargetId = this.currentPage.toString();
 
@@ -81,7 +81,7 @@ class EmailAll extends Abstract {
    * @description Send notices for all users via iteration
    * If previous run task had error - run process from last error target id (page)
    */
-  protected async executeTask(
+  protected async executeEmailAllTask(
     { lastFailTargetId, mode }: TaskEntity,
     usersCount: number,
   ): Promise<void> {

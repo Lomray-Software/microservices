@@ -62,7 +62,7 @@ class NoticeAll extends Abstract {
     const usersCount = await this.getTotalUsersCount();
 
     try {
-      await this.executeTask(task, usersCount);
+      await this.executeNoticeAllTask(task, usersCount);
     } catch (error) {
       this.lastFailTargetId = this.currentPage.toString();
 
@@ -75,7 +75,7 @@ class NoticeAll extends Abstract {
    * @description Send notices for all users via iteration
    * If previous run task had error - run process from last error target id (page)
    */
-  protected async executeTask(
+  protected async executeNoticeAllTask(
     { lastFailTargetId, mode }: TaskEntity,
     usersCount: number,
   ): Promise<void> {
