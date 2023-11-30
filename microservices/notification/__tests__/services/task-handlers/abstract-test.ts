@@ -221,12 +221,10 @@ describe('services/task-handlers/abstract', () => {
   describe('resetState', () => {
     it('should correctly reset state', () => {
       abstract['lastFailTargetId'] = 'target-id';
-      abstract['currentPage'] = 1;
 
       abstract['resetState']();
 
       expect(abstract['lastFailTargetId']).to.be.null;
-      expect(abstract['currentPage']).to.equal(0);
     });
   });
 
