@@ -17,6 +17,7 @@ export interface IEmailParams {
   attachments?: IAttachment[];
   // Only for internal usage
   taskId?: string;
+  userId?: string;
 }
 
 /**

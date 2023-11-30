@@ -8,9 +8,11 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  OneToOne,
 } from 'typeorm';
 import NotifyType from '@constants/notify-type';
 import type Notice from '@entities/notice';
+import Recipient from '@entities/recipient';
 import Task from '@entities/task';
 import type IAttachment from '@interfaces/message-attachment';
 
@@ -25,6 +27,7 @@ interface IParams {
     'If message is template than it should not be sent as separate message. It should be used as template for task messages.',
   properties: {
     task: { $ref: '#/definitions/Task' },
+    recipient: { $ref: '#/definitions/Recipient' },
   },
 })
 @Entity()
@@ -47,6 +50,15 @@ class Message {
   @IsUndefinable()
   @IsNullable()
   taskId: string | null;
+
+  @JSONSchema({
+    description: 'User that receive email',
+  })
+  @Column({ type: 'uuid', default: null })
+  @Length(1, 36)
+  @IsUndefinable()
+  @IsNullable()
+  userId: string | null;
 
   @JSONSchema({
     description: 'Can be nullable if message presented as template.',
@@ -109,6 +121,11 @@ class Message {
   @IsUndefinable()
   @IsObject()
   task: Task;
+
+  @OneToOne('Recipient', 'message', { onDelete: 'SET NULL' })
+  @IsUndefinable()
+  @IsObject()
+  recipient: Recipient;
 
   /**
    * Check if message is template

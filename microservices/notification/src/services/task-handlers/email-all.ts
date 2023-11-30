@@ -21,6 +21,11 @@ class EmailAll extends Abstract {
   private messageTemplate: Omit<MessageEntity, 'id'>;
 
   /**
+   * @private
+   */
+  private currentPage = 1;
+
+  /**
    * Take related tasks
    */
   public take(tasks: TaskEntity[]): boolean {
@@ -52,12 +57,28 @@ class EmailAll extends Abstract {
       !this.messageTemplate.text ||
       !this.messageTemplate.subject ||
       !this.messageTemplate.html ||
-      !this.messageTemplate.html
+      !this.messageTemplate.taskId
     ) {
       throw new Error('Invalid message template.');
     }
 
-    await this.handleProcessTaskExecution(task);
+    await this.sendEmailToAllUsers(task);
+  }
+
+  /**
+   * Send email to all users
+   * @description Get all users count and execute task
+   */
+  private async sendEmailToAllUsers(task: TaskEntity): Promise<void> {
+    const usersCount = await this.getTotalUsersCount();
+
+    try {
+      await this.executeTask(task, usersCount);
+    } catch (error) {
+      this.lastFailTargetId = this.currentPage.toString();
+
+      throw error;
+    }
   }
 
   /**
@@ -138,12 +159,13 @@ class EmailAll extends Abstract {
 
       // Send service will be automatically create not template messages
       const savedEmails = await Promise.all(
-        processUsers.map(({ email }) =>
+        processUsers.map(({ email, id }) =>
           sendService.send({
             html: this.messageTemplate.html as string,
             taskId: this.messageTemplate.taskId as string,
             text: this.messageTemplate.text,
             subject: this.messageTemplate.subject,
+            userId: id,
             to: [email as string],
           }),
         ),

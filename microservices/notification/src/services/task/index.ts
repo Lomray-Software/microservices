@@ -1,8 +1,10 @@
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { validate } from 'class-validator';
 import { EntityManager } from 'typeorm';
+import TaskType from '@constants/task-type';
 import MessageEntity from '@entities/message';
 import NoticeEntity from '@entities/notice';
+import RecipientEntity from '@entities/recipient';
 import TaskEntity from '@entities/task';
 
 class Task {
@@ -17,40 +19,87 @@ class Task {
    * Handle attach
    */
   private static async handleAttach(entity: TaskEntity, manager: EntityManager): Promise<void> {
-    const attachRequests: Promise<void>[] = [];
+    if (entity.type === TaskType.NOTICE_ALL) {
+      await this.createAndAttachNoticeTemplate(entity, manager);
 
-    if (entity?.notices?.length) {
-      attachRequests.push(this.createAndAttachNoticeTemplate(entity, manager));
+      return;
     }
 
-    if (entity?.messages?.length) {
-      attachRequests.push(this.createAndAttachMessageTemplate(entity, manager));
+    if (entity.type === TaskType.EMAIL_ALL) {
+      await this.createAndAttachMessageTemplate(entity, manager);
+
+      return;
     }
 
-    if (!attachRequests.length) {
+    if (entity.type !== TaskType.EMAIL_GROUP) {
       throw new BaseException({
         status: 400,
-        message: 'Expected one message or notice template.',
-        payload: { messages: entity.messages, notices: entity.notices },
+        message: 'Unexpected task type.',
       });
     }
 
-    await Promise.all(attachRequests);
+    await Promise.all([
+      this.createAndAttachRecipients(entity, manager),
+      this.createAndAttachMessageTemplate(entity, manager),
+    ]);
+  }
+
+  /**
+   * Create and attach recipients
+   */
+  private static async createAndAttachRecipients(
+    entity: TaskEntity,
+    manager: EntityManager,
+  ): Promise<void> {
+    if (!entity?.recipients.length) {
+      throw new BaseException({
+        status: 400,
+        message: 'Expected at least one recipient.',
+      });
+    }
+
+    const recipientRepository = manager.getRepository(RecipientEntity);
+
+    const recipients = entity.recipients.map((recipient) =>
+      recipientRepository.create({
+        ...recipient,
+        taskId: entity.id,
+      }),
+    );
+
+    const errors = await Promise.all(
+      recipients.map((recipient) =>
+        validate(recipient, {
+          whitelist: true,
+          forbidNonWhitelisted: true,
+          validationError: { target: false },
+        }),
+      ),
+    );
+
+    if (errors.some((entityErrors) => entityErrors.length > 0)) {
+      throw new BaseException({
+        status: 422,
+        message: 'Validation failed for one or more recipients.',
+        payload: errors,
+      });
+    }
+
+    entity.recipients = await recipientRepository.save(recipients);
   }
 
   /**
    * Create and attach nested message template
-   * @TODO: update to last workflow version
    */
   private static async createAndAttachMessageTemplate(
     entity: TaskEntity,
     manager: EntityManager,
   ): Promise<void> {
-    if (!entity?.messages.length) {
-      return;
-    }
-
-    if (entity?.messages.length >= 2 || !entity.messages[0].params.isTemplate) {
+    if (
+      !entity?.messages.length ||
+      entity?.messages.length >= 2 ||
+      !entity.messages[0].params.isTemplate
+    ) {
       throw new BaseException({
         status: 400,
         message: 'Expected single message template.',
@@ -88,11 +137,11 @@ class Task {
     entity: TaskEntity,
     manager: EntityManager,
   ): Promise<void> {
-    if (!entity?.notices.length) {
-      return;
-    }
-
-    if (entity.notices.length >= 2 || !entity.notices?.[0].params.isTemplate) {
+    if (
+      !entity?.notices.length ||
+      entity.notices.length >= 2 ||
+      !entity.notices?.[0].params.isTemplate
+    ) {
       throw new BaseException({
         status: 400,
         message: 'Expected single message template.',
