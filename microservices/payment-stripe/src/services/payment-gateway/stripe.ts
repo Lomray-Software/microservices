@@ -1889,7 +1889,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles customer update
-   * @description NOTE: Connect account event
+   * @description Connect account event
    */
   public async handleAccountUpdated(event: StripeSdk.Event) {
     /* eslint-disable camelcase */
@@ -1898,24 +1898,26 @@ class Stripe extends Abstract {
       payouts_enabled: isPayoutEnabled,
       charges_enabled: isChargesEnabled,
       capabilities,
+      business_profile,
     } = event.data.object as StripeSdk.Account;
 
     const customer = await this.getCustomerByAccountId(id);
 
     if (!customer) {
       throw new BaseException({
-        status: 500,
+        status: 404,
         message: messages.getNotFoundMessage('Customer'),
       });
     }
 
     /**
      * Check if customer can accept payment
-     * NOTE: Check if user correctly and verify setup connect account
+     * @description Check if user correctly and verify setup connect account
      */
     customer.params.isPayoutEnabled = isPayoutEnabled;
     customer.params.transferCapabilityStatus = capabilities?.transfers || 'inactive';
     customer.params.isVerified = isChargesEnabled && capabilities?.transfers === 'active';
+    customer.params.accountSupportPhoneNumber = business_profile?.support_phone;
 
     await this.customerRepository.save(customer);
     /* eslint-enable camelcase */
