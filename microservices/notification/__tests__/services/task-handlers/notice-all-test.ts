@@ -8,7 +8,7 @@ import { taskMock } from '@__mocks__/task';
 import TaskType from '@constants/task-type';
 import NoticeAll from '@services/task-handlers/notice-all';
 
-describe('services/task-handlers/abstract', () => {
+describe('services/task-handlers/notice-all', () => {
   const sandbox = sinon.createSandbox();
   let apiGet: sinon.SinonStub;
   let noticeAll: NoticeAll;
