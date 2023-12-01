@@ -38,7 +38,7 @@ class EmailGroup extends Abstract {
     this.messageRepository = this.manager.getRepository(MessageEntity);
     this.recipientRepository = this.manager.getRepository(RecipientEntity);
 
-    const messageTemplate = task.messages.find(({ params }) => params.isTemplate);
+    const messageTemplate = task.messages?.find(({ params }) => params.isTemplate);
 
     if (!messageTemplate) {
       // Internal error
