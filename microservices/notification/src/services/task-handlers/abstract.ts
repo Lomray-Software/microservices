@@ -1,5 +1,5 @@
 import { Api, Log } from '@lomray/microservice-helpers';
-import { JQOperator } from '@lomray/microservices-types/lib/src/query';
+import { JQOperator } from '@lomray/microservices-types';
 import _ from 'lodash';
 import { EntityManager, Repository } from 'typeorm';
 import TaskStatus from '@constants/task-status';
