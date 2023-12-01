@@ -1,6 +1,6 @@
 import { Api, Log } from '@lomray/microservice-helpers';
 import type IUser from '@lomray/microservices-client-api/interfaces/users/entities/user';
-import { JQOperator } from '@lomray/microservices-types/lib/src/query';
+import { JQOperator } from '@lomray/microservices-types';
 import _ from 'lodash';
 import { In, Repository } from 'typeorm';
 import TaskMode from '@constants/task-mode';
