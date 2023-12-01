@@ -7,6 +7,7 @@ import { attach as IdentityProviderAttach } from '@methods/identity-provider/att
 import CrudIdentityProvider from '@methods/identity-provider/crud';
 import { signIn as IdentityProviderSignIn } from '@methods/identity-provider/sign-in';
 import CrudProfile from '@methods/profile/crud';
+import { activeUsers as UserActiveUsers } from '@methods/user/active-users';
 import { changeLogin as UserChangeLogin } from '@methods/user/change-login';
 import { changePassword as UserChangePassword } from '@methods/user/change-password';
 import { checkUsername as UserCheckUsername } from '@methods/user/check-username';
@@ -21,7 +22,10 @@ import { signUp as UserSignUp } from '@methods/user/sign-up';
  */
 export default (ms: Microservice): void => {
   const crud = {
-    user: CrudUser,
+    user: {
+      ...CrudUser,
+      'active-users': UserActiveUsers,
+    },
     profile: CrudProfile,
     'identity-provider': CrudIdentityProvider,
     'confirm-code': CrudConfirmCode,
