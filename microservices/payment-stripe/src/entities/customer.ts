@@ -29,6 +29,8 @@ export interface IParams {
   isPayoutEnabled?: boolean;
   // If user have card that can be used for payment intent charges
   hasDefaultPaymentMethod?: boolean;
+  // Used for contact platform with user connect account
+  accountSupportPhoneNumber?: string | null;
 }
 
 @JSONSchema({
