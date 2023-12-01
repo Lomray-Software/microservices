@@ -38,7 +38,7 @@ class EmailGroup extends Abstract {
     this.messageRepository = this.manager.getRepository(MessageEntity);
     this.recipientRepository = this.manager.getRepository(RecipientEntity);
 
-    const messageTemplate = task.messages.find(({ params }) => params.isTemplate);
+    const messageTemplate = task.messages?.find(({ params }) => params.isTemplate);
 
     if (!messageTemplate) {
       // Internal error
@@ -102,19 +102,21 @@ class EmailGroup extends Abstract {
       },
     });
 
-    if (usersListError) {
-      Log.error(usersListError.message);
+    if (usersListError || !usersListResult) {
+      Log.error(usersListError?.message);
 
-      throw new Error(usersListError.message);
+      throw new Error(usersListError?.message);
     }
 
-    if (usersListResult?.list.some(({ email }) => !email)) {
+    const { list: users } = usersListResult;
+
+    if (users.some(({ email }) => !email)) {
       // Throw internal error
       throw new Error('Some users have no email.');
     }
 
     await Promise.all(
-      usersListResult!.list.map(({ email, id }) =>
+      users.map(({ email, id }) =>
         sendService.send({
           html: this.messageTemplate.html as string,
           taskId: this.messageTemplate.taskId as string,
