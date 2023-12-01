@@ -7,6 +7,7 @@ import { taskMock } from '@__mocks__/task';
 import TaskType from '@constants/task-type';
 import Message from '@entities/message';
 import Recipient from '@entities/recipient';
+import type AbstractEmailProvider from '@services/email-provider/abstract';
 import EmailGroup from '@services/task-handlers/email-group';
 
 describe('services/task-handlers/email-group', () => {
@@ -89,6 +90,26 @@ describe('services/task-handlers/email-group', () => {
 
       expect(sendEmailToRecipientsStub).to.calledOnce;
       expect(checkIsMessageTemplateValidStub).to.calledOnce;
+    });
+  });
+
+  describe('executeTask', () => {
+    it('should throw error: users API error', async () => {
+      apiGet.returns({
+        users: {
+          user: {
+            list() {
+              return { error: { message: 'Users API error.' } };
+            },
+          },
+        },
+      });
+
+      expect(
+        await waitResult(
+          emailGroup['executeTask']({} as AbstractEmailProvider, [{}] as Recipient[]),
+        ),
+      ).to.throw('Users API error.');
     });
   });
 });
