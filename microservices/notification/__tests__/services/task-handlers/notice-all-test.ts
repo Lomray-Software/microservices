@@ -64,4 +64,37 @@ describe('services/task-handlers/notice-all', () => {
       ).to.throw('Task notice template was not found.');
     });
   });
+
+  describe('sendNoticeToAllUsers', () => {
+    it('should correctly send notice to all users', async () => {
+      const getTotalUsersCountStub = sandbox.stub();
+      const executeNoticeAllTaskStub = sandbox.stub();
+
+      await noticeAll['sendNoticeToAllUsers'].call(
+        {
+          getTotalUsersCount: getTotalUsersCountStub,
+          executeNoticeAllTask: executeNoticeAllTaskStub,
+          currentPage: 1,
+        },
+        taskMock,
+      );
+
+      expect(getTotalUsersCountStub).to.calledOnce;
+      expect(getTotalUsersCountStub.args[0][0]).to.equal(undefined);
+      expect(executeNoticeAllTaskStub).to.calledOnce;
+    });
+
+    it('should throw error: failed to send notice to all users', async () => {
+      const getTotalUsersCountStub = sandbox.stub().throws(new Error('Failed to get users count'));
+
+      expect(
+        await waitResult(
+          noticeAll['sendNoticeToAllUsers'].call(
+            { getTotalUsersCount: getTotalUsersCountStub },
+            taskMock,
+          ),
+        ),
+      ).to.throw('Failed to get users count');
+    });
+  });
 });
