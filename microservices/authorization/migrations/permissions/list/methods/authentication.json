@@ -145,5 +145,18 @@
     "createdAt": "2022-04-14T05:34:31.238Z",
     "modelOut": "RemoteConfigOutput",
     "methodFilters": []
+  },
+  {
+    "microservice": "authentication",
+    "method": "token.count",
+    "description": "Returns count of Token by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-12-01T11:41:51.921Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
   }
 ]
