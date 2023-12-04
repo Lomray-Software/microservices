@@ -27,6 +27,7 @@ export interface IParams {
   isChargeRefundable: boolean;
   currency: TCurrency;
   issuedAt: Date;
+  balanceTransactionId?: string | null;
   networkReasonCode?: string | null; // 10.4
   paymentMethodType?: string | null; // card
   paymentMethodBrand?: string | null; // visa
@@ -40,8 +41,8 @@ export interface IParams {
  */
 @JSONSchema({
   title: 'Dispute (chargeback)',
-  description:
-    'A dispute occurs when a customer questions your charge with their card issuer. When this happens, you have the opportunity to respond to the dispute with evidence that shows that the charge is legitimate.',
+  description: `A dispute occurs when a customer questions your charge with their card issuer. When this happens, you have the opportunity to respond to the dispute with evidence that shows that the charge is legitimate.
+    If balance transaction occur - dispute is original chargeback, if not - dispute is injury chargeback`,
   properties: {
     evidenceDetails: { $ref: '#/definitions/EvidenceDetails' },
   },
@@ -72,11 +73,40 @@ class Dispute {
 
   @JSONSchema({
     description: 'Disputed transaction amount. Cannot be greater than transaction amount',
+    example: 10639,
   })
   @Column({ type: 'int' })
   @IsNumber()
   @Min(0)
   amount: number;
+
+  @JSONSchema({
+    description: 'Total already charged amount from the account (platform or connected account)',
+    example: -10639,
+  })
+  @Column({ type: 'int', default: 0 })
+  @IsNumber()
+  @Min(0)
+  chargedAmount: number;
+
+  @JSONSchema({
+    description:
+      'Total already charged fee from the account (platform or connected account). For instance: stable dispute fee',
+    example: 1500,
+  })
+  @Column({ type: 'int', default: 0 })
+  @IsNumber()
+  @Min(0)
+  chargedFees: number;
+
+  @JSONSchema({
+    description:
+      'New worth of the account (platform or connected account) after dispute related to this transaction',
+    example: -12139,
+  })
+  @Column({ type: 'int', default: 0 })
+  @IsNumber()
+  netWorth: number;
 
   @JSONSchema({
     description: 'Required reason',

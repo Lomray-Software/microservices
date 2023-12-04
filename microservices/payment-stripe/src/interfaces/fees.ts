@@ -1,5 +1,6 @@
 interface IFees {
-  stableUnit: number;
+  stablePaymentUnit: number;
+  stableDisputeFeeUnit: number;
   paymentPercent: number;
   instantPayoutPercent: number;
 }
