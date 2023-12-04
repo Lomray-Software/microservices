@@ -733,7 +733,7 @@ class Stripe extends Abstract {
        */
       case 'charge.refunded':
         const chargeRefundedHandlers = {
-          account: this.handleChargeRefunded(event),
+          account: webhookHandlers.charge.handleChargeRefunded(event, this.manager),
         };
 
         await chargeRefundedHandlers?.[webhookType];
@@ -1050,48 +1050,6 @@ class Stripe extends Abstract {
     }
 
     await this.refundRepository.save(refund);
-  }
-
-  /**
-   * Handles charge refunded
-   */
-  public async handleChargeRefunded(event: StripeSdk.Event): Promise<void> {
-    const {
-      status,
-      payment_intent: paymentIntent,
-      amount_refunded: refundedTransactionAmount,
-      amount,
-    } = event.data.object as StripeSdk.Charge;
-
-    if (!paymentIntent || !status) {
-      throw new BaseException({
-        status: 500,
-        message: "Payment intent id or refund status wasn't provided.",
-      });
-    }
-
-    const transactions = await this.transactionRepository.find({
-      transactionId: this.extractId(paymentIntent),
-    });
-
-    if (!transactions.length) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage(
-          'Failed to handle charge refunded event. Debit or credit transaction',
-        ),
-      });
-    }
-
-    transactions.forEach((transaction) => {
-      transaction.status =
-        refundedTransactionAmount < amount
-          ? TransactionStatus.PARTIAL_REFUNDED
-          : TransactionStatus.REFUNDED;
-      transaction.params.refundedTransactionAmount = refundedTransactionAmount;
-    });
-
-    await this.transactionRepository.save(transactions);
   }
 
   /**

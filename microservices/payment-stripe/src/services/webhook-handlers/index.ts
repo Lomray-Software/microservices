@@ -1,3 +1,4 @@
+import Charge from './charge';
 import Customer from './customer';
 import Dispute from './dispute';
 
@@ -20,11 +21,18 @@ class WebhookHandlers {
   public readonly dispute: Dispute;
 
   /**
+   * @public
+   */
+  public readonly charge: Charge;
+
+  /**
    * @constructor
+   * @TODO: provide manager
    */
   private constructor() {
     this.customer = new Customer();
     this.dispute = new Dispute();
+    this.charge = new Charge();
   }
 
   /**
