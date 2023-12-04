@@ -30,7 +30,7 @@ This microservice provides payments mechanism for stipe.
 - `MS_PAYMENT_METHODS` - Payment methods allowed using in Stripe. Default: `'["bancontact", "card"]'`
 - `MS_WEBHOOK_KEYS` - Stripe webhook keys to connect ms and work with stripe webhook service. Example: `{"myId":"whsec_c6332a6b339173127d2e6c813112e2f2323b4b2b10eea5ac17c5649a60cf335e"}`
 - `MS_PAYOUT_COEFF` - Number for calculating amount of money for transferring to the product owners. Default: `0.3`
-- `MS_FEES` - Fees that takes while creating payment intent. Default: `'{ "stableUnit": 30, "paymentPercent": 2.9 }'`
+- `MS_FEES` - Fees that takes while creating payment intent. Default: `'{ "stablePaymentUnit": 30, "paymentPercent": 2.9 }'`
 - [See full list `COMMON ENVIRONMENTS`](https://github.com/Lomray-Software/microservice-helpers#common-environments)
 
 ### <a id="how-to-run"></a>HOW TO RUN:
