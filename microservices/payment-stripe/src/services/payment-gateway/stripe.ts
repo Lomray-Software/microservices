@@ -255,7 +255,7 @@ class Stripe extends Abstract {
 
   /**
    * Add bank account
-   * @description NOTE: Usage example - integration tests
+   * @description Usage example - integration tests
    * @TODO: Integrate with stripe
    */
   public async addBankAccount({
@@ -318,7 +318,7 @@ class Stripe extends Abstract {
 
   /**
    * Remove Customer from db and stripe
-   * NOTE: Usage example - integration tests
+   * @description Usage example - integration tests
    */
   public async removeCustomer(userId: string): Promise<boolean> {
     const customer = await this.customerRepository.findOne({ userId });
@@ -482,7 +482,8 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Create ConnectAccount make redirect to account link and save stripeConnectAccount in customer
+   * Connect account
+   * @description Create ConnectAccount make redirect to account link and save stripeConnectAccount in customer
    */
   public async connectAccount(
     userId: string,
