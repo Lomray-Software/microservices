@@ -1105,9 +1105,8 @@ class Stripe extends Abstract {
       reason,
       is_charge_refundable: isChargeRefundable,
       created: issuedAt,
+      metadata,
     } = event.data.object as StripeSdk.Dispute;
-
-    console.log(999);
 
     if (!paymentIntent || !status) {
       throw new BaseException({
@@ -1133,6 +1132,7 @@ class Stripe extends Abstract {
           transactionId,
           status: Parser.parseStripeDisputeStatus(status as StripeDisputeStatus),
           reason: Parser.parseStripeDisputeReason(reason as StripeDisputeReason),
+          metadata,
           params: {
             issuedAt: new Date(Number(issuedAt)),
             currency: currency as TCurrency,
@@ -1141,8 +1141,7 @@ class Stripe extends Abstract {
         }),
       );
 
-      console.log(111, disputeEntity);
-      const ee = await evidenceDetailsRepository.save(
+      await evidenceDetailsRepository.save(
         evidenceDetailsRepository.create({
           disputeId: disputeEntity.id,
           isPastBy: evidenceDetails.past_due,
@@ -1151,8 +1150,6 @@ class Stripe extends Abstract {
           ...(evidenceDetails.due_by ? { dueBy: new Date(evidenceDetails.due_by * 1000) } : {}),
         }),
       );
-
-      console.log(222, ee);
     });
   }
 
