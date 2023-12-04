@@ -741,7 +741,7 @@ class Stripe extends Abstract {
 
       case 'charge.dispute.created':
         const chargeDisputeCreatedHandlers = {
-          account: webhookHandlers.dispute.handleChargeDisputeCreated(event, this.manager),
+          account: webhookHandlers.charge.handleChargeDisputeCreated(event, this.manager),
         };
 
         await chargeDisputeCreatedHandlers?.[webhookType];
@@ -751,7 +751,7 @@ class Stripe extends Abstract {
       case 'charge.dispute.closed':
       case 'charge.dispute.funds_reinstated':
         const chargeDisputeUpdatedClosedFundsReinstatedHandlers = {
-          account: webhookHandlers.dispute.handleChargeDisputeUpdated(event, this.manager),
+          account: webhookHandlers.charge.handleChargeDisputeUpdated(event, this.manager),
         };
 
         await chargeDisputeUpdatedClosedFundsReinstatedHandlers?.[webhookType];

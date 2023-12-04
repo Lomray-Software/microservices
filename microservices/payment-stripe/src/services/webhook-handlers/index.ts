@@ -1,24 +1,16 @@
 import Charge from './charge';
 import Customer from './customer';
-import Dispute from './dispute';
 
 /**
  * Webhook handlers
  * @description Webhook handlers for Stripe events
- * Each service related to event object that it represents
- * @example event.object is Dispute, so Dispute service should handle it, event if route is charge.dispute.created
- * Decomposed logic from payment stripe service
+ * @example charge.dispute.created - services should be charge
  */
 class WebhookHandlers {
   /**
    * @public
    */
   public readonly customer: Customer;
-
-  /**
-   * @public
-   */
-  public readonly dispute: Dispute;
 
   /**
    * @public
@@ -31,7 +23,6 @@ class WebhookHandlers {
    */
   private constructor() {
     this.customer = new Customer();
-    this.dispute = new Dispute();
     this.charge = new Charge();
   }
 
