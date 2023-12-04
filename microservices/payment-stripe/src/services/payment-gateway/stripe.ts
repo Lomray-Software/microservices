@@ -36,6 +36,7 @@ import type ITax from '@interfaces/tax';
 import type { ICardDataByFingerprintResult } from '@repositories/card';
 import CardRepository from '@repositories/card';
 import Calculation from '@services/calculation';
+import Parser from '@services/parser';
 import type {
   IBankAccountParams,
   ICardParams,
@@ -331,43 +332,6 @@ class Stripe extends Abstract {
     await this.customerRepository.remove(customer);
 
     return true;
-  }
-
-  /**
-   * Get unified transaction status
-   */
-  public getStatus(stripeStatus: StripeTransactionStatus): TransactionStatus {
-    switch (stripeStatus) {
-      case StripeTransactionStatus.SUCCEEDED:
-      case StripeTransactionStatus.PAID:
-        return TransactionStatus.SUCCESS;
-
-      case StripeTransactionStatus.UNPAID:
-      case StripeTransactionStatus.REQUIRES_CONFIRMATION:
-        return TransactionStatus.REQUIRED_PAYMENT;
-
-      case StripeTransactionStatus.ERROR:
-      case StripeTransactionStatus.PAYMENT_FAILED:
-      case StripeTransactionStatus.CANCELED:
-      case StripeTransactionStatus.REQUIRES_PAYMENT_METHOD:
-        return TransactionStatus.ERROR;
-
-      case StripeTransactionStatus.NO_PAYMENT_REQUIRED:
-      case StripeTransactionStatus.PROCESSING:
-        return TransactionStatus.IN_PROCESS;
-
-      case StripeTransactionStatus.REFUND_SUCCEEDED:
-        return TransactionStatus.REFUNDED;
-
-      case StripeTransactionStatus.REFUND_PENDING:
-        return TransactionStatus.REFUND_IN_PROCESS;
-
-      case StripeTransactionStatus.REFUND_CANCELED:
-        return TransactionStatus.REFUND_CANCELED;
-
-      case StripeTransactionStatus.REFUND_FAILED:
-        return TransactionStatus.REFUND_FAILED;
-    }
   }
 
   /**
@@ -1094,7 +1058,7 @@ class Stripe extends Abstract {
       });
     }
 
-    const refundStatus = this.getStatus(status as unknown as StripeTransactionStatus);
+    const refundStatus = Parser.parseStripeTransactionStatus(status as StripeTransactionStatus);
 
     if (!refundStatus) {
       throw new BaseException({
@@ -1220,7 +1184,7 @@ class Stripe extends Abstract {
         paymentMethodId: CardRepository.extractPaymentMethodId(card),
         cardId,
         transactionId: id,
-        status: this.getStatus(status as StripeTransactionStatus),
+        status: Parser.parseStripeTransactionStatus(status as StripeTransactionStatus),
         ...(latestCharge ? { chargeId: this.extractId(latestCharge) } : {}),
         ...(taxTransactionId ? { taxTransactionId } : {}),
         ...(taxCalculationId ? { taxCalculationId } : {}),
@@ -1322,7 +1286,7 @@ class Stripe extends Abstract {
       }
 
       transactions.forEach((transaction) => {
-        transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
+        transaction.status = Parser.parseStripeTransactionStatus(status as StripeTransactionStatus);
 
         /**
          * Attach related charge
@@ -1943,7 +1907,7 @@ class Stripe extends Abstract {
     await this.transactionRepository.update(
       { transactionId: id },
       {
-        status: this.getStatus(paymentStatus as StripeTransactionStatus),
+        status: Parser.parseStripeTransactionStatus(paymentStatus as StripeTransactionStatus),
         amount: amountTotal,
         params: {
           checkoutStatus: status as StripeCheckoutStatus,
@@ -2463,7 +2427,7 @@ class Stripe extends Abstract {
       transactionId,
       amount: stripeRefund.amount,
       status: stripeRefund.status
-        ? this.getStatus(stripeRefund.status as StripeTransactionStatus)
+        ? Parser.parseStripeTransactionStatus(stripeRefund.status as StripeTransactionStatus)
         : TransactionStatus.INITIAL,
       ...(entityId ? { entityId } : {}),
       params: {
