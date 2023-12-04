@@ -5,7 +5,7 @@ export default class dispute1701685975841 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "evidence_details" ("disputeId" uuid NOT NULL, "hasEvidence" boolean NOT NULL DEFAULT false, "submissionCount" integer NOT NULL DEFAULT '0', "dueBy" TIMESTAMP NOT NULL, "pastBy" TIMESTAMP NOT NULL, CONSTRAINT "REL_edb7e9169a873456c25e71eb02" UNIQUE ("disputeId"), CONSTRAINT "PK_edb7e9169a873456c25e71eb022" PRIMARY KEY ("disputeId"))`,
+      `CREATE TABLE "evidence_details" ("disputeId" uuid NOT NULL, "hasEvidence" boolean NOT NULL DEFAULT false, "submissionCount" integer NOT NULL DEFAULT '0', "dueBy" TIMESTAMP, "pastBy" TIMESTAMP NOT NULL, CONSTRAINT "REL_edb7e9169a873456c25e71eb02" UNIQUE ("disputeId"), CONSTRAINT "PK_edb7e9169a873456c25e71eb022" PRIMARY KEY ("disputeId"))`,
     );
     await queryRunner.query(
       `CREATE TYPE "public"."dispute_reason_enum" AS ENUM('bankCannotProcess', 'checkReturned', 'creditNotProcessed', 'customerInitiated', 'debitNotAuthorized', 'duplicate', 'fraudulent', 'general', 'incorrectAccountDetails', 'insufficientFunds', 'productNotReceived', 'productUnacceptable', 'subscriptionCanceled', 'unrecognized')`,

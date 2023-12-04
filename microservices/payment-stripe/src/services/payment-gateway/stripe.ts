@@ -11,6 +11,8 @@ import CouponDuration from '@constants/coupon-duration';
 import RefundAmountType from '@constants/refund-amount-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
+import StripeDisputeReason from '@constants/stripe-dispute-reason';
+import StripeDisputeStatus from '@constants/stripe-dispute-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionRole from '@constants/transaction-role';
@@ -20,6 +22,8 @@ import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Coupon from '@entities/coupon';
 import Customer from '@entities/customer';
+import Dispute from '@entities/dispute';
+import EvidenceDetails from '@entities/evidence-details';
 import Price from '@entities/price';
 import Product from '@entities/product';
 import Refund from '@entities/refund';
@@ -735,6 +739,14 @@ class Stripe extends Abstract {
         await chargeRefundedHandlers?.[webhookType];
         break;
 
+      case 'charge.dispute.created':
+        const chargeDisputeCreatedHandlers = {
+          account: this.handleChargeDisputeCreated(event),
+        };
+
+        await chargeDisputeCreatedHandlers?.[webhookType];
+        break;
+
       /**
        * Customer events
        */
@@ -1075,6 +1087,79 @@ class Stripe extends Abstract {
     }
 
     await this.refundRepository.save(refund);
+  }
+
+  /**
+   * Handles charge dispute created
+   */
+  public async handleChargeDisputeCreated(event: StripeSdk.Event): Promise<void> {
+    const {
+      id,
+      evidence_details: evidenceDetails,
+      currency,
+      amount,
+      payment_intent: paymentIntent,
+      status,
+      reason,
+      is_charge_refundable: isChargeRefundable,
+      created: issuedAt,
+    } = event.data.object as StripeSdk.Dispute;
+
+    await this.manager.transaction(async (entityManager) => {
+      if (!paymentIntent || !status) {
+        throw new BaseException({
+          status: 500,
+          message: "Dispute was not handled. Payment intent or dispute status wasn't provided.",
+        });
+      }
+
+      const disputeRepository = entityManager.getRepository(Dispute);
+      const evidenceDetailsRepository = entityManager.getRepository(EvidenceDetails);
+      const transactionRepository = entityManager.getRepository(Transaction);
+
+      /**
+       * Get transactions by payment intent id
+       */
+      const transactionId = this.extractId(paymentIntent);
+
+      const transactions = await transactionRepository.find({
+        transactionId,
+      });
+
+      if (!transactions.length) {
+        throw new BaseException({
+          status: 500,
+          message: messages.getNotFoundMessage(
+            'Dispute was not handled. Debit or credit transaction.',
+          ),
+        });
+      }
+
+      const disputeEntity = await disputeRepository.save(
+        disputeRepository.create({
+          disputeId: id,
+          amount,
+          transactionId,
+          status: Parser.parseStripeDisputeStatus(status as StripeDisputeStatus),
+          reason: Parser.parseStripeDisputeReason(reason as StripeDisputeReason),
+          issuedAt,
+          params: {
+            currency: currency as TCurrency,
+            isChargeRefundable,
+          },
+        }),
+      );
+
+      await evidenceDetailsRepository.save(
+        evidenceDetailsRepository.create({
+          disputeId: disputeEntity.id,
+          pastBy: evidenceDetails.past_due,
+          dueBy: evidenceDetails.due_by,
+          submissionCount: evidenceDetails.submission_count,
+          hasEvidence: evidenceDetails.has_evidence,
+        }),
+      );
+    });
   }
 
   /**
