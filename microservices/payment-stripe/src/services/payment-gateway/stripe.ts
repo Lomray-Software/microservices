@@ -1091,6 +1091,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles charge dispute created
+   * @description Should create microservice dispute and related evidence details
    */
   public async handleChargeDisputeCreated(event: StripeSdk.Event): Promise<void> {
     const {

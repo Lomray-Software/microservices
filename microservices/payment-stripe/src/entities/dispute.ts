@@ -38,7 +38,7 @@ export interface IParams {
  * Transaction id is not unique (presented as debit and credit transactions)
  */
 @JSONSchema({
-  title: 'Dispute',
+  title: 'Dispute (chargeback)',
   description:
     'A dispute occurs when a customer questions your charge with their card issuer. When this happens, you have the opportunity to respond to the dispute with evidence that shows that the charge is legitimate.',
   properties: {
