@@ -1,6 +1,8 @@
 import { Log } from '@lomray/microservice-helpers';
 import DisputeReason from '@constants/dispute-reason';
+import DisputeStatus from '@constants/dispute-status';
 import StripeDisputeReason from '@constants/stripe-dispute-reason';
+import StripeDisputeStatus from '@constants/stripe-dispute-status';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionStatus from '@constants/transaction-status';
 
@@ -12,6 +14,39 @@ declare function assert(status: never): never;
  * Decomposed payment stripe logic
  */
 class Parser {
+  /**
+   * Parse Stripe dispute status
+   */
+  public static parseStripeDisputeStatus(stripeStatus: StripeDisputeStatus): DisputeStatus {
+    switch (stripeStatus) {
+      case StripeDisputeStatus.NEEDS_RESPONSE:
+        return DisputeStatus.NEEDS_RESPONSE;
+
+      case StripeDisputeStatus.LOST:
+        return DisputeStatus.LOST;
+
+      case StripeDisputeStatus.UNDER_REVIEW:
+        return DisputeStatus.UNDER_REVIEW;
+
+      case StripeDisputeStatus.WARNING_CLOSED:
+        return DisputeStatus.WARNING_CLOSED;
+
+      case StripeDisputeStatus.WON:
+        return DisputeStatus.WON;
+
+      case StripeDisputeStatus.WARNING_NEEDS_RESPONSE:
+        return DisputeStatus.WARNING_NEEDS_RESPONSE;
+
+      case StripeDisputeStatus.WARNING_UNDER_REVIEW:
+        return DisputeStatus.WARNING_UNDER_REVIEW;
+
+      default:
+        Log.error(`Unknown Stripe dispute status: ${stripeStatus as string}`);
+
+        assert(stripeStatus);
+    }
+  }
+
   /**
    * Parse Stripe dispute reason
    */
