@@ -11,8 +11,6 @@ import CouponDuration from '@constants/coupon-duration';
 import RefundAmountType from '@constants/refund-amount-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
-import StripeDisputeReason from '@constants/stripe-dispute-reason';
-import StripeDisputeStatus from '@constants/stripe-dispute-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionRole from '@constants/transaction-role';
@@ -22,8 +20,6 @@ import BankAccount from '@entities/bank-account';
 import Card from '@entities/card';
 import Coupon from '@entities/coupon';
 import Customer from '@entities/customer';
-import Dispute from '@entities/dispute';
-import EvidenceDetails from '@entities/evidence-details';
 import Price from '@entities/price';
 import Product from '@entities/product';
 import Refund from '@entities/refund';
@@ -41,8 +37,8 @@ import type ITax from '@interfaces/tax';
 import type { ICardDataByFingerprintResult } from '@repositories/card';
 import CardRepository from '@repositories/card';
 import Calculation from '@services/calculation';
-import DisputeService from '@services/dispute';
 import Parser from '@services/parser';
+import WebhookHandlers from '@services/webhook-handlers';
 import type {
   IBankAccountParams,
   ICardParams,
@@ -744,7 +740,7 @@ class Stripe extends Abstract {
 
       case 'charge.dispute.created':
         const chargeDisputeCreatedHandlers = {
-          account: this.handleChargeDisputeCreated(event),
+          account: WebhookHandlers.handleChargeDisputeCreated(event, this.manager),
         };
 
         await chargeDisputeCreatedHandlers?.[webhookType];
@@ -754,7 +750,7 @@ class Stripe extends Abstract {
       case 'charge.dispute.closed':
       case 'charge.dispute.funds_reinstated':
         const chargeDisputeUpdatedClosedFundsReinstatedHandlers = {
-          account: this.handleChargeDisputeUpdated(event),
+          account: WebhookHandlers.handleChargeDisputeUpdated(event, this.manager),
         };
 
         await chargeDisputeUpdatedClosedFundsReinstatedHandlers?.[webhookType];
@@ -764,7 +760,7 @@ class Stripe extends Abstract {
        * Customer events
        */
       case 'customer.updated':
-        await this.handleCustomerUpdated(event);
+        await WebhookHandlers.handleCustomerUpdated(event, this.manager);
         break;
     }
   }
@@ -941,53 +937,6 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Handles customer update
-   */
-  public async handleCustomerUpdated(event: StripeSdk.Event): Promise<void> {
-    const { id, invoice_settings: invoiceSettings } = event.data.object as StripeSdk.Customer;
-
-    /**
-     * @TODO: Investigate why relations return empty array
-     */
-    const customer = await this.customerRepository.findOne({ customerId: id });
-
-    if (!customer) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Customer'),
-      });
-    }
-
-    const cards = await this.cardRepository.find({
-      userId: customer.userId,
-    });
-
-    /**
-     * Update cards default statuses on change default card for charge
-     */
-
-    await Promise.all(
-      cards.map((card) => {
-        card.isDefault =
-          CardRepository.extractPaymentMethodId(card) === invoiceSettings.default_payment_method;
-
-        return this.cardRepository.save(card);
-      }),
-    );
-
-    /**
-     * If customer has default payment method, and it's exist in stripe
-     */
-    if (customer.params.hasDefaultPaymentMethod && invoiceSettings.default_payment_method) {
-      return;
-    }
-
-    customer.params.hasDefaultPaymentMethod = Boolean(invoiceSettings.default_payment_method);
-
-    await this.customerRepository.save(customer);
-  }
-
-  /**
    * Handles payment method update
    * @description Expected card that can be setup via setupIntent
    */
@@ -1100,117 +1049,6 @@ class Stripe extends Abstract {
     }
 
     await this.refundRepository.save(refund);
-  }
-
-  /**
-   * Handles charge dispute updated
-   */
-  public async handleChargeDisputeUpdated(event: StripeSdk.Event): Promise<void> {
-    const dispute = event.data.object as StripeSdk.Dispute;
-
-    if (!dispute?.payment_intent || !dispute.status) {
-      throw new BaseException({
-        status: 500,
-        message: "Dispute was not handled. Payment intent or dispute status wasn't provided.",
-        payload: { eventName: event.type },
-      });
-    }
-
-    await this.manager.transaction(async (entityManager) => {
-      const disputeRepository = entityManager.getRepository(Dispute);
-      const transactionId = this.extractId(
-        dispute.payment_intent as string | StripeSdk.PaymentIntent,
-      );
-
-      const disputeEntity = await disputeRepository.findOne({
-        relations: ['evidenceDetails'],
-        where: {
-          transactionId,
-        },
-      });
-
-      if (!disputeEntity) {
-        throw new BaseException({
-          status: 500,
-          message: messages.getNotFoundMessage('Dispute was not updated. Dispute not found.'),
-          payload: {
-            transactionId,
-            eventName: event.type,
-          },
-        });
-      }
-
-      await DisputeService.update(disputeEntity, dispute, entityManager);
-    });
-  }
-
-  /**
-   * Handles charge dispute created
-   * @description Should create microservice dispute and related evidence details
-   */
-  public async handleChargeDisputeCreated(event: StripeSdk.Event): Promise<void> {
-    const {
-      id,
-      evidence_details: evidenceDetails,
-      currency,
-      amount,
-      payment_intent: paymentIntent,
-      status,
-      reason,
-      is_charge_refundable: isChargeRefundable,
-      created: issuedAt,
-      metadata,
-      balance_transactions: balanceTransactions,
-    } = event.data.object as StripeSdk.Dispute;
-
-    if (!paymentIntent || !status) {
-      throw new BaseException({
-        status: 500,
-        message: "Dispute was not handled. Payment intent or dispute status wasn't provided.",
-      });
-    }
-
-    await this.manager.transaction(async (entityManager) => {
-      const disputeRepository = entityManager.getRepository(Dispute);
-      const evidenceDetailsRepository = entityManager.getRepository(EvidenceDetails);
-
-      /**
-       * Get transactions by payment intent id
-       * @description Stripe send events in parallel, so at this moment transactions may not exist in db
-       */
-      const transactionId = this.extractId(paymentIntent);
-      const { chargedAmount, chargedFees, netWorth } =
-        DisputeService.getChargedAmounts(balanceTransactions);
-
-      const disputeEntity = await disputeRepository.save(
-        disputeRepository.create({
-          disputeId: id,
-          amount,
-          transactionId,
-          status: Parser.parseStripeDisputeStatus(status as StripeDisputeStatus),
-          reason: Parser.parseStripeDisputeReason(reason as StripeDisputeReason),
-          metadata,
-          chargedAmount,
-          chargedFees,
-          netWorth,
-          params: {
-            issuedAt: new Date(Number(issuedAt)),
-            currency: currency as TCurrency,
-            isChargeRefundable,
-          },
-        }),
-      );
-
-      await evidenceDetailsRepository.save(
-        evidenceDetailsRepository.create({
-          disputeId: disputeEntity.id,
-          isPastBy: evidenceDetails.past_due,
-          submissionCount: evidenceDetails.submission_count,
-          hasEvidence: evidenceDetails.has_evidence,
-          ...(evidenceDetails.due_by ? { dueBy: new Date(evidenceDetails.due_by * 1000) } : {}),
-        }),
-      );
-    });
   }
 
   /**
@@ -2969,6 +2807,7 @@ class Stripe extends Abstract {
 
   /**
    * Returns id or extracted id from data
+   * @TODO: remove and use helper: extract id from stripe instance
    */
   private extractId<T extends { id: string }>(data: string | T): string {
     return typeof data === 'string' ? data : data.id;
