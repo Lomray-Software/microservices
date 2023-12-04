@@ -35,11 +35,13 @@ import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
+import IFees from '@interfaces/fees';
 import type { IPaymentIntentMetadata } from '@interfaces/payment-intent-metadata';
 import type ITax from '@interfaces/tax';
 import type { ICardDataByFingerprintResult } from '@repositories/card';
 import CardRepository from '@repositories/card';
 import Calculation from '@services/calculation';
+import DisputeService from '@services/dispute';
 import Parser from '@services/parser';
 import type {
   IBankAccountParams,
@@ -748,6 +750,14 @@ class Stripe extends Abstract {
         await chargeDisputeCreatedHandlers?.[webhookType];
         break;
 
+      case 'charge.dispute.updated':
+        const chargeDisputeUpdatedHandlers = {
+          account: this.handleChargeDisputeUpdated(event),
+        };
+
+        await chargeDisputeUpdatedHandlers?.[webhookType];
+        break;
+
       /**
        * Customer events
        */
@@ -1091,6 +1101,46 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Handles charge dispute updated
+   */
+  public async handleChargeDisputeUpdated(event: StripeSdk.Event): Promise<void> {
+    const dispute = event.data.object as StripeSdk.Dispute;
+
+    if (!dispute?.payment_intent || !dispute.status) {
+      throw new BaseException({
+        status: 500,
+        message: "Dispute was not handled. Payment intent or dispute status wasn't provided.",
+      });
+    }
+
+    await this.manager.transaction(async (entityManager) => {
+      const disputeRepository = entityManager.getRepository(Dispute);
+      const transactionId = this.extractId(
+        dispute.payment_intent as string | StripeSdk.PaymentIntent,
+      );
+
+      const disputeEntity = await disputeRepository.findOne({
+        relations: ['evidenceDetails'],
+        where: {
+          transactionId,
+        },
+      });
+
+      if (!disputeEntity) {
+        throw new BaseException({
+          status: 500,
+          message: messages.getNotFoundMessage('Dispute was not updated. Dispute not found.'),
+          payload: {
+            transactionId,
+          },
+        });
+      }
+
+      await DisputeService.update(disputeEntity, dispute, entityManager);
+    });
+  }
+
+  /**
    * Handles charge dispute created
    * @description Should create microservice dispute and related evidence details
    */
@@ -1106,6 +1156,7 @@ class Stripe extends Abstract {
       is_charge_refundable: isChargeRefundable,
       created: issuedAt,
       metadata,
+      balance_transactions: balanceTransactions,
     } = event.data.object as StripeSdk.Dispute;
 
     if (!paymentIntent || !status) {
@@ -1124,6 +1175,8 @@ class Stripe extends Abstract {
        * @description Stripe send events in parallel, so at this moment transactions may not exist in db
        */
       const transactionId = this.extractId(paymentIntent);
+      const { chargedAmount, chargedFees, netWorth } =
+        DisputeService.getChargedAmounts(balanceTransactions);
 
       const disputeEntity = await disputeRepository.save(
         disputeRepository.create({
@@ -1133,6 +1186,9 @@ class Stripe extends Abstract {
           status: Parser.parseStripeDisputeStatus(status as StripeDisputeStatus),
           reason: Parser.parseStripeDisputeReason(reason as StripeDisputeReason),
           metadata,
+          chargedAmount,
+          chargedFees,
+          netWorth,
           params: {
             issuedAt: new Date(Number(issuedAt)),
             currency: currency as TCurrency,
@@ -2191,7 +2247,7 @@ class Stripe extends Abstract {
     withTax,
   }: IPaymentIntentParams): Promise<[Transaction, Transaction]> {
     const { fees } = await remoteConfig();
-    const { instantPayoutPercent = 1 } = fees!;
+    const { instantPayoutPercent = 1 } = fees as IFees;
 
     const { sender: senderCustomer, receiver: receiverCustomer } =
       await this.getAndValidateTransactionContributors(userId, receiverId);
@@ -2222,6 +2278,8 @@ class Stripe extends Abstract {
      */
     const entityUnitCost = this.toSmallestCurrencyUnit(entityCost);
 
+    console.log(entityUnitCost);
+
     /**
      * Calculate fees
      */
@@ -2243,6 +2301,7 @@ class Stripe extends Abstract {
       withStripeFee: !withTax,
     });
 
+    console.log(userUnitAmount);
     /**
      * Group up payment intent data
      */

@@ -14,7 +14,7 @@ export default class dispute1701685975841 implements MigrationInterface {
       `CREATE TYPE "public"."dispute_status_enum" AS ENUM('warningNeedsResponse', 'warningUnderReview', 'warningClosed', 'needsResponse', 'underReview', 'won', 'lost')`,
     );
     await queryRunner.query(
-      `CREATE TABLE "dispute" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "transactionId" character varying(66), "disputeId" character varying(66) NOT NULL, "amount" integer NOT NULL, "reason" "public"."dispute_reason_enum" NOT NULL, "status" "public"."dispute_status_enum" NOT NULL, "params" json NOT NULL DEFAULT '{}', "metadata" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_e2f1f4741f2094ce789b0a7c5b3" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "dispute" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "transactionId" character varying(66), "disputeId" character varying(66) NOT NULL, "amount" integer NOT NULL, "chargedAmount" integer NOT NULL DEFAULT '0', "chargedFees" integer NOT NULL DEFAULT '0', "netWorth" integer NOT NULL DEFAULT '0', "reason" "public"."dispute_reason_enum" NOT NULL, "status" "public"."dispute_status_enum" NOT NULL, "params" json NOT NULL DEFAULT '{}', "metadata" json NOT NULL DEFAULT '{}', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_e2f1f4741f2094ce789b0a7c5b3" PRIMARY KEY ("id"))`,
     );
     await queryRunner.query(
       `ALTER TABLE "evidence_details" ADD CONSTRAINT "FK_edb7e9169a873456c25e71eb022" FOREIGN KEY ("disputeId") REFERENCES "dispute"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
