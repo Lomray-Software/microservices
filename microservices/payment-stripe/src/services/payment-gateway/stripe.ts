@@ -593,6 +593,7 @@ class Stripe extends Abstract {
     webhookType: string,
   ): Promise<void> {
     const event = this.sdk.webhooks.constructEvent(payload, signature, webhookKey);
+    const webhookHandlers = WebhookHandlers.init();
 
     switch (event.type) {
       /**
@@ -740,7 +741,7 @@ class Stripe extends Abstract {
 
       case 'charge.dispute.created':
         const chargeDisputeCreatedHandlers = {
-          account: WebhookHandlers.handleChargeDisputeCreated(event, this.manager),
+          account: webhookHandlers.dispute.handleChargeDisputeCreated(event, this.manager),
         };
 
         await chargeDisputeCreatedHandlers?.[webhookType];
@@ -750,7 +751,7 @@ class Stripe extends Abstract {
       case 'charge.dispute.closed':
       case 'charge.dispute.funds_reinstated':
         const chargeDisputeUpdatedClosedFundsReinstatedHandlers = {
-          account: WebhookHandlers.handleChargeDisputeUpdated(event, this.manager),
+          account: webhookHandlers.dispute.handleChargeDisputeUpdated(event, this.manager),
         };
 
         await chargeDisputeUpdatedClosedFundsReinstatedHandlers?.[webhookType];
@@ -760,7 +761,7 @@ class Stripe extends Abstract {
        * Customer events
        */
       case 'customer.updated':
-        await WebhookHandlers.handleCustomerUpdated(event, this.manager);
+        await webhookHandlers.customer.handleCustomerUpdated(event, this.manager);
         break;
     }
   }

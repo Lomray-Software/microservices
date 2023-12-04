@@ -3,27 +3,23 @@ import StripeSdk from 'stripe';
 import { EntityManager } from 'typeorm';
 import StripeDisputeReason from '@constants/stripe-dispute-reason';
 import StripeDisputeStatus from '@constants/stripe-dispute-status';
-import CustomerEntity from '@entities/customer';
-import Dispute from '@entities/dispute';
+import DisputeEntity from '@entities/dispute';
 import EvidenceDetails from '@entities/evidence-details';
 import extractIdFromStripeInstance from '@helpers/extract-id-from-stripe-instance';
 import messages from '@helpers/validators/messages';
 import TCurrency from '@interfaces/currency';
-import CardRepository from '@repositories/card';
 import DisputeService from '@services/dispute';
 import Parser from '@services/parser';
 
 /**
- * Webhook handlers
- * @description Webhook handlers for Stripe events
- * Decomposed logic from payment stripe service
+ * Dispute webhook handlers
  */
-class WebhookHandlers {
+class Dispute {
   /**
    * Handles charge dispute created
    * @description Should create microservice dispute and related evidence details
    */
-  public static async handleChargeDisputeCreated(
+  public async handleChargeDisputeCreated(
     event: StripeSdk.Event,
     manager: EntityManager,
   ): Promise<void> {
@@ -49,7 +45,7 @@ class WebhookHandlers {
     }
 
     await manager.transaction(async (entityManager) => {
-      const disputeRepository = entityManager.getRepository(Dispute);
+      const disputeRepository = entityManager.getRepository(DisputeEntity);
       const evidenceDetailsRepository = entityManager.getRepository(EvidenceDetails);
 
       /**
@@ -94,7 +90,7 @@ class WebhookHandlers {
   /**
    * Handles charge dispute updated
    */
-  public static async handleChargeDisputeUpdated(
+  public async handleChargeDisputeUpdated(
     event: StripeSdk.Event,
     manager: EntityManager,
   ): Promise<void> {
@@ -109,7 +105,7 @@ class WebhookHandlers {
     }
 
     await manager.transaction(async (entityManager) => {
-      const disputeRepository = entityManager.getRepository(Dispute);
+      const disputeRepository = entityManager.getRepository(DisputeEntity);
       const transactionId = extractIdFromStripeInstance(
         dispute.payment_intent as string | StripeSdk.PaymentIntent,
       );
@@ -135,60 +131,6 @@ class WebhookHandlers {
       await DisputeService.update(disputeEntity, dispute, entityManager);
     });
   }
-
-  /**
-   * Handles customer update
-   */
-  public static async handleCustomerUpdated(
-    event: StripeSdk.Event,
-    manager: EntityManager, // Required if manger is transaction manager
-  ): Promise<void> {
-    await manager.transaction(async (entityManager) => {
-      const customerRepository = entityManager.getRepository(CustomerEntity);
-      const cardRepository = entityManager.getCustomRepository(CardRepository);
-      const { id, invoice_settings: invoiceSettings } = event.data.object as StripeSdk.Customer;
-
-      /**
-       * @TODO: Investigate why relations return empty array
-       */
-      const customer = await customerRepository.findOne({ customerId: id });
-
-      if (!customer) {
-        throw new BaseException({
-          status: 500,
-          message: messages.getNotFoundMessage('Customer'),
-        });
-      }
-
-      const cards = await cardRepository.find({
-        userId: customer.userId,
-      });
-
-      /**
-       * Update cards default statuses on change default card for charge
-       */
-
-      await Promise.all(
-        cards.map((card) => {
-          card.isDefault =
-            CardRepository.extractPaymentMethodId(card) === invoiceSettings.default_payment_method;
-
-          return cardRepository.save(card);
-        }),
-      );
-
-      /**
-       * If customer has default payment method, and it's exist in stripe
-       */
-      if (customer.params.hasDefaultPaymentMethod && invoiceSettings.default_payment_method) {
-        return;
-      }
-
-      customer.params.hasDefaultPaymentMethod = Boolean(invoiceSettings.default_payment_method);
-
-      await customerRepository.save(customer);
-    });
-  }
 }
 
-export default WebhookHandlers;
+export default Dispute;
