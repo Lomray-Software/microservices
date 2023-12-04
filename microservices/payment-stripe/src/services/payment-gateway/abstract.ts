@@ -13,7 +13,8 @@ import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
 import Refund from '@entities/refund';
-import Transaction, { IParams as ITransactionEntityParams } from '@entities/transaction';
+import Transaction from '@entities/transaction';
+import type { IParams as ITransactionEntityParams } from '@entities/transaction';
 import messages from '@helpers/validators/messages';
 
 export interface ICardParams {
