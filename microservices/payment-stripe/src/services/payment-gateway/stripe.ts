@@ -1112,6 +1112,7 @@ class Stripe extends Abstract {
       throw new BaseException({
         status: 500,
         message: "Dispute was not handled. Payment intent or dispute status wasn't provided.",
+        payload: { eventName: event.type },
       });
     }
 
@@ -1134,6 +1135,7 @@ class Stripe extends Abstract {
           message: messages.getNotFoundMessage('Dispute was not updated. Dispute not found.'),
           payload: {
             transactionId,
+            eventName: event.type,
           },
         });
       }
