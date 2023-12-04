@@ -26,6 +26,7 @@ export interface IParams {
    */
   isChargeRefundable: boolean;
   currency: TCurrency;
+  issuedAt: Date;
   networkReasonCode?: string | null; // 10.4
   paymentMethodType?: string | null; // card
   paymentMethodBrand?: string | null; // visa
@@ -106,13 +107,6 @@ class Dispute {
   @IsObject()
   @IsUndefinable()
   metadata: IMetadata;
-
-  @JSONSchema({
-    description: 'Original disputed issued date',
-  })
-  @Column({ type: 'timestamp' })
-  @IsTypeormDate()
-  issuedAt: Date;
 
   @JSONSchema({
     description: 'Received from Stripe date',

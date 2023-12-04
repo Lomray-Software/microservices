@@ -1107,35 +1107,24 @@ class Stripe extends Abstract {
       created: issuedAt,
     } = event.data.object as StripeSdk.Dispute;
 
-    await this.manager.transaction(async (entityManager) => {
-      if (!paymentIntent || !status) {
-        throw new BaseException({
-          status: 500,
-          message: "Dispute was not handled. Payment intent or dispute status wasn't provided.",
-        });
-      }
+    console.log(999);
 
+    if (!paymentIntent || !status) {
+      throw new BaseException({
+        status: 500,
+        message: "Dispute was not handled. Payment intent or dispute status wasn't provided.",
+      });
+    }
+
+    await this.manager.transaction(async (entityManager) => {
       const disputeRepository = entityManager.getRepository(Dispute);
       const evidenceDetailsRepository = entityManager.getRepository(EvidenceDetails);
-      const transactionRepository = entityManager.getRepository(Transaction);
 
       /**
        * Get transactions by payment intent id
+       * @description Stripe send events in parallel, so at this moment transactions may not exist in db
        */
       const transactionId = this.extractId(paymentIntent);
-
-      const transactions = await transactionRepository.find({
-        transactionId,
-      });
-
-      if (!transactions.length) {
-        throw new BaseException({
-          status: 500,
-          message: messages.getNotFoundMessage(
-            'Dispute was not handled. Debit or credit transaction.',
-          ),
-        });
-      }
 
       const disputeEntity = await disputeRepository.save(
         disputeRepository.create({
@@ -1144,23 +1133,26 @@ class Stripe extends Abstract {
           transactionId,
           status: Parser.parseStripeDisputeStatus(status as StripeDisputeStatus),
           reason: Parser.parseStripeDisputeReason(reason as StripeDisputeReason),
-          issuedAt,
           params: {
+            issuedAt: new Date(Number(issuedAt)),
             currency: currency as TCurrency,
             isChargeRefundable,
           },
         }),
       );
 
-      await evidenceDetailsRepository.save(
+      console.log(111, disputeEntity);
+      const ee = await evidenceDetailsRepository.save(
         evidenceDetailsRepository.create({
           disputeId: disputeEntity.id,
-          pastBy: evidenceDetails.past_due,
-          dueBy: evidenceDetails.due_by,
+          isPastBy: evidenceDetails.past_due,
           submissionCount: evidenceDetails.submission_count,
           hasEvidence: evidenceDetails.has_evidence,
+          ...(evidenceDetails.due_by ? { dueBy: new Date(evidenceDetails.due_by * 1000) } : {}),
         }),
       );
+
+      console.log(222, ee);
     });
   }
 

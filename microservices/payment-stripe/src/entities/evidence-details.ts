@@ -2,7 +2,7 @@ import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsBoolean, IsNumber, IsObject, Length, Min } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { Column, Entity, PrimaryColumn, JoinColumn, OneToOne } from 'typeorm';
-import Dispute from '@entities/dispute';
+import type Dispute from '@entities/dispute';
 
 @JSONSchema({
   title: 'Evidence details',
@@ -50,10 +50,10 @@ class EvidenceDetails {
     description:
       'Whether the last evidence submission was submitted past the due date. Defaults to false if no evidence submissions have occurred. If true, then delivery of the latest evidence is not guaranteed.',
   })
-  @Column({ type: 'timestamp' })
-  @IsTypeormDate()
+  @Column({ type: 'boolean' })
+  @IsBoolean()
   @IsUndefinable()
-  pastBy: Date;
+  isPastBy: boolean;
 
   @OneToOne('Dispute', 'evidenceDetails')
   @IsObject()
