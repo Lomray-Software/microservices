@@ -552,7 +552,7 @@ class Stripe extends Abstract {
 
   /**
    * Returns account link
-   * @description NOTE: Use when user needs to update connect account data
+   * @description Use when user needs to update connect account data
    */
   public async getConnectAccountLink(
     userId: string,
