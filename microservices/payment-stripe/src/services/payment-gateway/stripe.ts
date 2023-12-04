@@ -1353,7 +1353,8 @@ class Stripe extends Abstract {
         });
       }
 
-      const { transactionId, taxCalculationId } = transactions?.[0];
+      // Sonar warning
+      const { transactionId, taxCalculationId } = transactions?.[0] || {};
 
       let stripeTaxTransaction: StripeSdk.Tax.Transaction | null = null;
 
