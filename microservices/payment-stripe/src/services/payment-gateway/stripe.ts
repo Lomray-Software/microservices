@@ -1941,7 +1941,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles connect account deleted
-   * @description NOTE: Connect account event
+   * @description Connect account event
    */
   public async handleExternalAccountDeleted(event: StripeSdk.Event): Promise<void> {
     const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
