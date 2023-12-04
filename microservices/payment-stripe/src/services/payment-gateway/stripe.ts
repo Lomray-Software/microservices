@@ -2278,8 +2278,6 @@ class Stripe extends Abstract {
      */
     const entityUnitCost = this.toSmallestCurrencyUnit(entityCost);
 
-    console.log(entityUnitCost);
-
     /**
      * Calculate fees
      */
@@ -2301,7 +2299,6 @@ class Stripe extends Abstract {
       withStripeFee: !withTax,
     });
 
-    console.log(userUnitAmount);
     /**
      * Group up payment intent data
      */
