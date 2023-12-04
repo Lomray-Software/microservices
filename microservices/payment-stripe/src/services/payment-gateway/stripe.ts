@@ -751,11 +751,13 @@ class Stripe extends Abstract {
         break;
 
       case 'charge.dispute.updated':
-        const chargeDisputeUpdatedHandlers = {
+      case 'charge.dispute.closed':
+      case 'charge.dispute.funds_reinstated':
+        const chargeDisputeUpdatedClosedFundsReinstatedHandlers = {
           account: this.handleChargeDisputeUpdated(event),
         };
 
-        await chargeDisputeUpdatedHandlers?.[webhookType];
+        await chargeDisputeUpdatedClosedFundsReinstatedHandlers?.[webhookType];
         break;
 
       /**
