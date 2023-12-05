@@ -1,4 +1,5 @@
 import { EntityManager } from 'typeorm';
+import Account from './account';
 import ApplicationFee from './application-fee';
 import Charge from './charge';
 import Customer from './customer';
@@ -49,6 +50,11 @@ class WebhookHandlers {
   public readonly setupIntent: SetupIntent;
 
   /**
+   * @public
+   */
+  public readonly account: Account;
+
+  /**
    * @constructor
    */
   private constructor(manager: EntityManager) {
@@ -59,6 +65,7 @@ class WebhookHandlers {
     this.transfer = new Transfer(manager);
     this.paymentMethod = new PaymentMethod(manager);
     this.setupIntent = new SetupIntent(manager);
+    this.account = new Account(manager);
   }
 
   /**

@@ -33,6 +33,7 @@ import TCurrency from '@interfaces/currency';
 import IFees from '@interfaces/fees';
 import type ITax from '@interfaces/tax';
 import CardRepository from '@repositories/card';
+import CustomerRepository from '@repositories/customer';
 import Calculation from '@services/calculation';
 import Parser from '@services/parser';
 import WebhookHandlers from '@services/webhook-handlers';
@@ -606,7 +607,7 @@ class Stripe extends Abstract {
        */
       case 'account.updated':
         const accountUpdatedHandlers = {
-          connect: this.handleAccountUpdated(event),
+          connect: webhookHandlers.account.handleAccountUpdated(event),
         };
 
         await accountUpdatedHandlers?.[webhookType];
@@ -987,8 +988,9 @@ class Stripe extends Abstract {
       });
     }
 
-    const { userId, params } = await this.getCustomerByAccountId(
+    const { userId, params } = await CustomerRepository.getCustomerByAccountId(
       this.extractId(externalAccount.account),
+      this.manager,
     );
 
     if (!this.isExternalAccountIsBankAccount(externalAccount)) {
@@ -1111,42 +1113,6 @@ class Stripe extends Abstract {
     }
 
     await this.bankAccountRepository.remove(bankAccount);
-  }
-
-  /**
-   * Handles customer update
-   * @description Connect account event
-   */
-  public async handleAccountUpdated(event: StripeSdk.Event) {
-    /* eslint-disable camelcase */
-    const {
-      id,
-      payouts_enabled: isPayoutEnabled,
-      charges_enabled: isChargesEnabled,
-      capabilities,
-      business_profile,
-    } = event.data.object as StripeSdk.Account;
-
-    const customer = await this.getCustomerByAccountId(id);
-
-    if (!customer) {
-      throw new BaseException({
-        status: 404,
-        message: messages.getNotFoundMessage('Customer'),
-      });
-    }
-
-    /**
-     * Check if customer can accept payment
-     * @description Check if user correctly and verify setup connect account
-     */
-    customer.params.isPayoutEnabled = isPayoutEnabled;
-    customer.params.transferCapabilityStatus = capabilities?.transfers || 'inactive';
-    customer.params.isVerified = isChargesEnabled && capabilities?.transfers === 'active';
-    customer.params.accountSupportPhoneNumber = business_profile?.support_phone;
-
-    await this.customerRepository.save(customer);
-    /* eslint-enable camelcase */
   }
 
   /**
@@ -2147,27 +2113,8 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Returns customer by account id
-   */
-  private async getCustomerByAccountId(accountId: string): Promise<Customer> {
-    const customer = await this.customerRepository
-      .createQueryBuilder('customer')
-      .where("customer.params ->> 'accountId' = :accountId", { accountId })
-      .getOne();
-
-    if (!customer) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Customer'),
-      });
-    }
-
-    return customer;
-  }
-
-  /**
    * Returns card by card id
-   * NOTE: Uses to search related connect account (external account) data
+   * @description Uses to search related connect account (external account) data
    */
   private getCardById(cardId: string): Promise<Card | undefined> {
     return this.cardRepository
@@ -2178,7 +2125,7 @@ class Stripe extends Abstract {
 
   /**
    * Returns bank account by bank account id
-   * NOTE: Uses to search related connect account (external account) data
+   * @description Uses to search related connect account (external account) data
    */
   private getBankAccountById(bankAccountId: string): Promise<BankAccount | undefined> {
     return this.bankAccountRepository
