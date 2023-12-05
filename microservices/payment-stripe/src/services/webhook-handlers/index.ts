@@ -4,6 +4,7 @@ import Charge from './charge';
 import Customer from './customer';
 import PaymentIntent from './payment-intent';
 import PaymentMethod from './payment-method';
+import SetupIntent from './setup-intent';
 import Transfer from './transfer';
 
 /**
@@ -43,6 +44,11 @@ class WebhookHandlers {
   public readonly paymentMethod: PaymentMethod;
 
   /**
+   * @public
+   */
+  public readonly setupIntent: SetupIntent;
+
+  /**
    * @constructor
    */
   private constructor(manager: EntityManager) {
@@ -52,6 +58,7 @@ class WebhookHandlers {
     this.paymentIntent = new PaymentIntent(manager);
     this.transfer = new Transfer(manager);
     this.paymentMethod = new PaymentMethod(manager);
+    this.setupIntent = new SetupIntent(manager);
   }
 
   /**
