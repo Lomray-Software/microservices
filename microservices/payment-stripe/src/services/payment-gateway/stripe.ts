@@ -32,7 +32,6 @@ import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
 import IFees from '@interfaces/fees';
-import type { IPaymentIntentMetadata } from '@interfaces/payment-intent-metadata';
 import type ITax from '@interfaces/tax';
 import type { ICardDataByFingerprintResult } from '@repositories/card';
 import CardRepository from '@repositories/card';
@@ -684,7 +683,7 @@ class Stripe extends Abstract {
       case 'payment_intent.succeeded':
       case 'payment_intent.canceled':
         const paymentIntentProcessingSucceededCanceledHandlers = {
-          account: this.handlePaymentIntent(event),
+          account: webhookHandlers.paymentIntent.handlePaymentIntent(event, this.sdk),
         };
 
         await paymentIntentProcessingSucceededCanceledHandlers?.[webhookType];
@@ -692,7 +691,7 @@ class Stripe extends Abstract {
 
       case 'payment_intent.payment_failed':
         const paymentIntentPaymentFailedHandlers = {
-          account: this.handlePaymentIntentPaymentFailed(event),
+          account: webhookHandlers.paymentIntent.handlePaymentIntentPaymentFailed(event, this.sdk),
         };
 
         await paymentIntentPaymentFailedHandlers?.[webhookType];
@@ -900,226 +899,6 @@ class Stripe extends Abstract {
       expired,
       lastDigits,
       cardId: card.id,
-    });
-  }
-
-  /**
-   * Handles payment intent failure creation
-   * @description Payment intent will be created with the failed status: card was declined -
-   * high fraud risk but stripe will throw error on creation and send webhook event with the creation
-   */
-  public async handlePaymentIntentPaymentFailed(event: StripeSdk.Event): Promise<void> {
-    const {
-      id,
-      status,
-      metadata,
-      amount,
-      latest_charge: latestCharge,
-      last_payment_error: lastPaymentError,
-    } = event.data.object as StripeSdk.PaymentIntent;
-
-    await this.manager.transaction(async (entityManager) => {
-      const transactionRepository = entityManager.getRepository(Transaction);
-
-      const transactions = await transactionRepository.find({ transactionId: id });
-
-      /**
-       * If transactions weren't created cause payment intent failed on create
-       */
-      if (transactions.length) {
-        return;
-      }
-
-      const {
-        entityId,
-        title,
-        feesPayer,
-        cardId,
-        entityCost,
-        senderId,
-        receiverId,
-        taxExpiresAt,
-        taxCreatedAt,
-        taxBehaviour,
-        receiverRevenue,
-        taxAutoCalculateFee,
-        taxFee,
-        taxTransactionId,
-        taxCalculationId,
-      } = metadata as unknown as IPaymentIntentMetadata;
-
-      const card = await entityManager
-        .getRepository(Card)
-        .createQueryBuilder('card')
-        .where('card.userId = :userId AND card.id = :cardId', { userId: senderId, cardId })
-        .getOne();
-
-      if (!card) {
-        throw new BaseException({
-          status: 500,
-          message: messages.getNotFoundMessage('Failed to create transaction. Card'),
-        });
-      }
-
-      /* eslint-enable camelcase */
-      const transactionData = {
-        entityId,
-        title,
-        paymentMethodId: CardRepository.extractPaymentMethodId(card),
-        cardId,
-        transactionId: id,
-        status: Parser.parseStripeTransactionStatus(status as StripeTransactionStatus),
-        ...(latestCharge ? { chargeId: this.extractId(latestCharge) } : {}),
-        ...(taxTransactionId ? { taxTransactionId } : {}),
-        ...(taxCalculationId ? { taxCalculationId } : {}),
-        // eslint-disable-next-line camelcase
-        params: {
-          feesPayer,
-          entityCost: this.toSmallestCurrencyUnit(entityCost),
-          errorCode: lastPaymentError?.code,
-          errorMessage: lastPaymentError?.message,
-          declineCode: lastPaymentError?.decline_code,
-          taxExpiresAt,
-          taxCreatedAt,
-          taxBehaviour,
-          // Only if calculation was created provide tax calculation fee
-          ...(taxCalculationId && taxAutoCalculateFee
-            ? { taxAutoCalculateFee: this.toSmallestCurrencyUnit(taxAutoCalculateFee) }
-            : {}),
-          // Only if tax transaction was created provide tax fee
-          ...(taxTransactionId && taxFee ? { taxFee: this.toSmallestCurrencyUnit(taxFee) } : {}),
-        },
-      };
-
-      await Promise.all([
-        transactionRepository.save(
-          transactionRepository.create({
-            ...transactionData,
-            userId: senderId,
-            type: TransactionType.CREDIT,
-            amount,
-            params: transactionData.params,
-          }),
-        ),
-        transactionRepository.save(
-          transactionRepository.create({
-            ...transactionData,
-            userId: receiverId,
-            type: TransactionType.DEBIT,
-            amount: this.toSmallestCurrencyUnit(receiverRevenue),
-            params: transactionData.params,
-          }),
-        ),
-      ]);
-
-      // Do not support update payment intent, only recharge via creating new payment
-      if (status !== StripeTransactionStatus.REQUIRES_PAYMENT_METHOD) {
-        return;
-      }
-
-      await this.sdk.paymentIntents.cancel(id);
-    });
-  }
-
-  /**
-   * Handles payment intent statuses
-   */
-  public async handlePaymentIntent(event: StripeSdk.Event): Promise<void> {
-    const {
-      id,
-      status,
-      latest_charge: latestCharge,
-      last_payment_error: lastPaymentError,
-      transfer_data: transferData,
-    } = event.data.object as StripeSdk.PaymentIntent;
-
-    await this.manager.transaction(async (entityManager) => {
-      const transactionRepository = entityManager.getRepository(Transaction);
-
-      const transactions = await transactionRepository.find({ transactionId: id });
-
-      if (!transactions.length) {
-        const errorMessage = messages.getNotFoundMessage(
-          `Failed to handle payment intent "${event.type}". Debit or credit transaction`,
-        );
-
-        Log.error(errorMessage);
-
-        throw new BaseException({
-          status: 500,
-          message: errorMessage,
-          payload: { eventName: event.type },
-        });
-      }
-
-      // Sonar warning
-      const { transactionId, taxCalculationId } = transactions?.[0] || {};
-
-      let stripeTaxTransaction: StripeSdk.Tax.Transaction | null = null;
-
-      /**
-       * If tax collecting and payment intent succeeded - create tax transaction
-       * @description Create tax transaction cost is $0.5. Create only if payment intent succeeded
-       */
-      if (taxCalculationId && status === StripeTransactionStatus.SUCCEEDED) {
-        // Create tax transaction (for Stripe Tax reports)
-        stripeTaxTransaction = await this.sdk.tax.transactions.createFromCalculation({
-          calculation: taxCalculationId,
-          // Stripe payment intent id
-          reference: transactionId,
-        });
-      }
-
-      transactions.forEach((transaction) => {
-        transaction.status = Parser.parseStripeTransactionStatus(status as StripeTransactionStatus);
-
-        /**
-         * Attach related charge
-         */
-        if (!transaction.chargeId && latestCharge) {
-          transaction.chargeId = this.extractId(latestCharge);
-        }
-
-        /**
-         * Attach destination funds transfer connect account
-         */
-        if (!transaction.params.transferDestinationConnectAccountId && transferData?.destination) {
-          transaction.params.transferDestinationConnectAccountId = this.extractId(
-            transferData.destination,
-          );
-        }
-
-        /**
-         * Attach tax transaction if reference
-         */
-        if (stripeTaxTransaction) {
-          transaction.taxTransactionId = stripeTaxTransaction.id;
-        }
-
-        if (!lastPaymentError) {
-          return;
-        }
-
-        /**
-         * Attach error data if it occurs
-         */
-        transaction.params.errorMessage = lastPaymentError.message;
-        transaction.params.errorCode = lastPaymentError.code;
-        transaction.params.declineCode = lastPaymentError.decline_code;
-      });
-
-      if (stripeTaxTransaction) {
-        /**
-         * Sync payment intent with the microservice transactions
-         */
-        await this.sdk.paymentIntents.update(transactionId, {
-          metadata: {
-            taxTransactionId: stripeTaxTransaction?.id,
-          },
-        });
-      }
-
-      await transactionRepository.save(transactions);
     });
   }
 
