@@ -16,6 +16,7 @@ enum TransactionStatus {
   REFUND_CANCELED = 'refundCanceled',
   REFUND_IN_PROCESS = 'refundInProcess',
   ERROR = 'error',
+  DISPUTED = 'disputed',
 }
 
 export default TransactionStatus;

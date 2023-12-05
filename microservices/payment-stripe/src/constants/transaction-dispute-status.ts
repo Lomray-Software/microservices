@@ -1,7 +1,7 @@
 enum TransactionDisputeStatus {
   NOT_DISPUTED = 'notDisputed',
-  DISPUTED = 'disputed',
-  DISPUTE_CLOSED = 'disputeClosed',
+  OPEN = 'open',
+  CLOSED = 'closed',
 }
 
 export default TransactionDisputeStatus;

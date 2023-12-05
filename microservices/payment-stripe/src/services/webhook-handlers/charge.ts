@@ -3,7 +3,7 @@ import StripeSdk from 'stripe';
 import { EntityManager } from 'typeorm';
 import StripeDisputeReason from '@constants/stripe-dispute-reason';
 import StripeDisputeStatus from '@constants/stripe-dispute-status';
-import StripeTransactionStatus from '@constants/stripe-transaction-status';
+import StripeRefundStatus from '@constants/stripe-refund-status';
 import TransactionStatus from '@constants/transaction-status';
 import DisputeEntity from '@entities/dispute';
 import EvidenceDetailsEntity from '@entities/evidence-details';
@@ -223,7 +223,7 @@ class Charge {
       });
     }
 
-    const refundStatus = Parser.parseStripeTransactionStatus(status as StripeTransactionStatus);
+    const refundStatus = Parser.parseStripeRefundStatus(status as StripeRefundStatus);
 
     if (!refundStatus) {
       throw new BaseException({

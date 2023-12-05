@@ -8,9 +8,11 @@ import BalanceType from '@constants/balance-type';
 import BusinessType from '@constants/business-type';
 import CouponDuration from '@constants/coupon-duration';
 import RefundAmountType from '@constants/refund-amount-type';
+import RefundStatus from '@constants/refund-status';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
+import StripeRefundStatus from '@constants/stripe-refund-status';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionRole from '@constants/transaction-role';
 import TransactionStatus from '@constants/transaction-status';
@@ -182,7 +184,7 @@ interface ICreateMultipleProductCheckoutParams {
 class Stripe extends Abstract {
   /**
    * Add new card
-   * @description NOTES:
+   * @description Definitions:
    * 1. Usage example - only in integration tests
    * 2. Use setup intent for live-mode
    * 3. For creating card manually with the sensitive data such as digits, cvc. Platform
@@ -1673,8 +1675,8 @@ class Stripe extends Abstract {
       transactionId,
       amount: stripeRefund.amount,
       status: stripeRefund.status
-        ? Parser.parseStripeTransactionStatus(stripeRefund.status as StripeTransactionStatus)
-        : TransactionStatus.INITIAL,
+        ? Parser.parseStripeRefundStatus(stripeRefund.status as StripeRefundStatus)
+        : RefundStatus.INITIAL,
       ...(entityId ? { entityId } : {}),
       params: {
         refundId: stripeRefund.id,

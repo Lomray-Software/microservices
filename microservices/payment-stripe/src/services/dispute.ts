@@ -6,6 +6,7 @@ import { EntityManager } from 'typeorm';
 import DisputeStatus from '@constants/dispute-status';
 import StripeDisputeReason from '@constants/stripe-dispute-reason';
 import StripeDisputeStatus from '@constants/stripe-dispute-status';
+import TransactionStatus from '@constants/transaction-status';
 import DisputeEntity from '@entities/dispute';
 import TransactionEntity from '@entities/transaction';
 import Parser from '@services/parser';
@@ -133,10 +134,13 @@ class Dispute {
       Parser.parseStripeDisputeStatusToTransactionDisputeStatus(disputeStatus);
 
     transactions.forEach((transaction) => {
-      if (transaction.disputeStatus === transactionDisputeStatus) {
+      const isDisputeStatusNotChanged = transaction.disputeStatus === transactionDisputeStatus;
+
+      if (isDisputeStatusNotChanged && transaction.status === TransactionStatus.DISPUTED) {
         return;
       }
 
+      transaction.status = TransactionStatus.DISPUTED;
       transaction.disputeStatus = transactionDisputeStatus;
       isUpdated = true;
     });
