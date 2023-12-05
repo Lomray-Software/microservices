@@ -12,6 +12,7 @@ import {
 } from 'typeorm';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
+import TransactionDisputeStatus from '@constants/transaction-dispute-status';
 import TransactionRole from '@constants/transaction-role';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
@@ -263,6 +264,19 @@ class Transaction {
   @IsEnum(TransactionStatus)
   @IsUndefinable()
   status: TransactionStatus;
+
+  @JSONSchema({
+    description:
+      'Transaction can not be refunded during dispute, but if dispute closed - can be refunded',
+  })
+  @Column({
+    type: 'enum',
+    enum: TransactionDisputeStatus,
+    default: TransactionDisputeStatus.NOT_DISPUTED,
+  })
+  @IsEnum(TransactionDisputeStatus)
+  @IsUndefinable()
+  disputeStatus: TransactionDisputeStatus;
 
   @JSONSchema({
     description: 'Store data about payment connected account and etc.',

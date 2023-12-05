@@ -17,8 +17,8 @@ class Dispute implements EntitySubscriberInterface<DisputeEntity> {
   /**
    * Handle Refund event: after insert
    */
-  public async afterInsert({ entity }: InsertEvent<DisputeEntity>): Promise<void> {
-    await DisputeService.handleAfterCreate(entity);
+  public async afterInsert({ entity, manager }: InsertEvent<DisputeEntity>): Promise<void> {
+    await DisputeService.handleAfterCreate(entity, manager);
   }
 
   /**

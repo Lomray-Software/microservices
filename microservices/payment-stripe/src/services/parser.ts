@@ -4,6 +4,7 @@ import DisputeStatus from '@constants/dispute-status';
 import StripeDisputeReason from '@constants/stripe-dispute-reason';
 import StripeDisputeStatus from '@constants/stripe-dispute-status';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
+import TransactionDisputeStatus from '@constants/transaction-dispute-status';
 import TransactionStatus from '@constants/transaction-status';
 
 declare function assert(status: never): never;
@@ -14,6 +15,26 @@ declare function assert(status: never): never;
  * Decomposed payment stripe logic
  */
 class Parser {
+  /**
+   * Parse Stripe dispute status
+   */
+  public static parseStripeDisputeStatusToTransactionDisputeStatus(
+    stripeStatus?: DisputeStatus | null,
+  ): TransactionDisputeStatus {
+    if (!stripeStatus) {
+      return TransactionDisputeStatus.NOT_DISPUTED;
+    }
+
+    switch (stripeStatus) {
+      case DisputeStatus.LOST:
+      case DisputeStatus.WON:
+        return TransactionDisputeStatus.DISPUTE_CLOSED;
+
+      default:
+        return TransactionDisputeStatus.DISPUTED;
+    }
+  }
+
   /**
    * Parse Stripe dispute status
    */
