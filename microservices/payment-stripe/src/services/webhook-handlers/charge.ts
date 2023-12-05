@@ -3,9 +3,11 @@ import StripeSdk from 'stripe';
 import { EntityManager } from 'typeorm';
 import StripeDisputeReason from '@constants/stripe-dispute-reason';
 import StripeDisputeStatus from '@constants/stripe-dispute-status';
+import StripeRefundStatus from '@constants/stripe-refund-status';
 import TransactionStatus from '@constants/transaction-status';
 import DisputeEntity from '@entities/dispute';
-import EvidenceDetails from '@entities/evidence-details';
+import EvidenceDetailsEntity from '@entities/evidence-details';
+import RefundEntity from '@entities/refund';
 import TransactionEntity from '@entities/transaction';
 import extractIdFromStripeInstance from '@helpers/extract-id-from-stripe-instance';
 import messages from '@helpers/validators/messages';
@@ -17,6 +19,18 @@ import Parser from '@services/parser';
  * Charge webhook handler
  */
 class Charge {
+  /**
+   * @private
+   */
+  private readonly manager: EntityManager;
+
+  /**
+   * @constructor
+   */
+  public constructor(manager: EntityManager) {
+    this.manager = manager;
+  }
+
   /**
    * Handles charge refunded
    */
@@ -91,7 +105,7 @@ class Charge {
 
     await manager.transaction(async (entityManager) => {
       const disputeRepository = entityManager.getRepository(DisputeEntity);
-      const evidenceDetailsRepository = entityManager.getRepository(EvidenceDetails);
+      const evidenceDetailsRepository = entityManager.getRepository(EvidenceDetailsEntity);
 
       /**
        * Get transactions by payment intent id
@@ -175,6 +189,57 @@ class Charge {
 
       await DisputeService.update(disputeEntity, dispute, entityManager);
     });
+  }
+
+  /**
+   * Handles refund updated
+   */
+  public async handleRefundUpdated(event: StripeSdk.Event, manager: EntityManager): Promise<void> {
+    const refundRepository = manager.getRepository(RefundEntity);
+    const {
+      id,
+      status,
+      reason,
+      failure_reason: failedReason,
+      payment_intent: paymentIntent,
+    } = event.data.object as StripeSdk.Refund;
+
+    if (!paymentIntent || !status) {
+      throw new BaseException({
+        status: 500,
+        message: "Payment intent id or refund status wasn't provided.",
+      });
+    }
+
+    const refund = await refundRepository
+      .createQueryBuilder('r')
+      .where("r.params ->> 'refundId' = :refundId", { refundId: id })
+      .getOne();
+
+    if (!refund) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Failed to update refund. Refund'),
+      });
+    }
+
+    const refundStatus = Parser.parseStripeRefundStatus(status as StripeRefundStatus);
+
+    if (!refundStatus) {
+      throw new BaseException({
+        status: 500,
+        message: 'Failed to get transaction status for refund.',
+      });
+    }
+
+    refund.status = refundStatus;
+    refund.params.errorReason = failedReason;
+
+    if (reason && refund.params.reason !== reason) {
+      refund.params.reason = reason;
+    }
+
+    await refundRepository.save(refund);
   }
 }
 

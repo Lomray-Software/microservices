@@ -1,8 +1,10 @@
 import { Log } from '@lomray/microservice-helpers';
 import DisputeReason from '@constants/dispute-reason';
 import DisputeStatus from '@constants/dispute-status';
+import RefundStatus from '@constants/refund-status';
 import StripeDisputeReason from '@constants/stripe-dispute-reason';
 import StripeDisputeStatus from '@constants/stripe-dispute-status';
+import StripeRefundStatus from '@constants/stripe-refund-status';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionStatus from '@constants/transaction-status';
 
@@ -14,6 +16,33 @@ declare function assert(status: never): never;
  * Decomposed payment stripe logic
  */
 class Parser {
+  /**
+   * Parse Stripe refund status
+   */
+  public static parseStripeRefundStatus(stripeStatus: StripeRefundStatus): RefundStatus {
+    switch (stripeStatus) {
+      case StripeRefundStatus.SUCCEEDED:
+        return RefundStatus.SUCCESS;
+
+      case StripeRefundStatus.PENDING:
+        return RefundStatus.IN_PROCESS;
+
+      case StripeRefundStatus.FAILED:
+        return RefundStatus.ERROR;
+
+      case StripeRefundStatus.CANCELED:
+        return RefundStatus.CANCELED;
+
+      case StripeRefundStatus.REQUIRES_ACTION:
+        return RefundStatus.REQUIRES_ACTION;
+
+      default:
+        Log.error(`Unknown Stripe refund status: ${stripeStatus as string}`);
+
+        assert(stripeStatus);
+    }
+  }
+
   /**
    * Parse Stripe dispute status
    */

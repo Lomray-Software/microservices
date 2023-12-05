@@ -5,7 +5,7 @@ import StripePaymentMethods from '@constants/stripe-payment-methods';
 import TaxBehaviour from '@constants/tax-behaviour';
 import TransactionRole from '@constants/transaction-role';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
-import IFees from '@interfaces/fees';
+import type IFees from '@interfaces/fees';
 import type ITax from '@interfaces/tax';
 import type ITaxes from '@interfaces/taxes';
 

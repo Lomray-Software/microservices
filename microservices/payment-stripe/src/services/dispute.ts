@@ -1,10 +1,13 @@
+import { Log } from '@lomray/microservice-helpers';
 import { Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
 import StripeSdk from 'stripe';
 import { EntityManager } from 'typeorm';
+import DisputeStatus from '@constants/dispute-status';
 import StripeDisputeReason from '@constants/stripe-dispute-reason';
 import StripeDisputeStatus from '@constants/stripe-dispute-status';
 import DisputeEntity from '@entities/dispute';
+import TransactionEntity from '@entities/transaction';
 import Parser from '@services/parser';
 
 /**
@@ -28,14 +31,20 @@ class Dispute {
     manager: EntityManager,
   ): Promise<void> {
     disputeEntity.amount = amount;
-    disputeEntity.status = Parser.parseStripeDisputeStatus(status as StripeDisputeStatus);
-    disputeEntity.reason = Parser.parseStripeDisputeReason(reason as StripeDisputeReason);
     disputeEntity.metadata = metadata;
     disputeEntity.params.balanceTransactionId = balanceTransactions?.[0]?.id;
     disputeEntity.params.isChargeRefundable = isChargeRefundable;
     disputeEntity.evidenceDetails.submissionCount = evidenceDetails.submission_count;
     disputeEntity.evidenceDetails.isPastBy = evidenceDetails.past_due;
     disputeEntity.evidenceDetails.hasEvidence = evidenceDetails.has_evidence;
+    disputeEntity.reason = Parser.parseStripeDisputeReason(reason as StripeDisputeReason);
+
+    const disputeStatus = Parser.parseStripeDisputeStatus(status as StripeDisputeStatus);
+
+    // Stripe can send under review status after won or lost dispute
+    if (![DisputeStatus.LOST, DisputeStatus.WON].includes(disputeEntity.status)) {
+      disputeEntity.status = disputeStatus;
+    }
 
     if (evidenceDetails.due_by) {
       disputeEntity.evidenceDetails.dueBy = new Date(evidenceDetails.due_by * 1000);
@@ -48,6 +57,7 @@ class Dispute {
     disputeEntity.netWorth = netWorth;
 
     await manager.getRepository(DisputeEntity).save(disputeEntity);
+    await Dispute.updateTransactionsDisputeStatus(manager, disputeEntity.transactionId);
   }
 
   /**
@@ -71,8 +81,14 @@ class Dispute {
   /**
    * Handle after create
    */
-  public static async handleAfterCreate(entity: DisputeEntity): Promise<void> {
-    await Microservice.eventPublish(Event.DisputeCreated, entity);
+  public static async handleAfterCreate(
+    entity: DisputeEntity,
+    manager: EntityManager,
+  ): Promise<void> {
+    await Promise.all([
+      Dispute.updateTransactionsDisputeStatus(manager, entity.transactionId),
+      Microservice.eventPublish(Event.DisputeCreated, entity),
+    ]);
   }
 
   /**
@@ -80,6 +96,49 @@ class Dispute {
    */
   public static async handleAfterUpdate(entity: DisputeEntity): Promise<void> {
     await Microservice.eventPublish(Event.DisputeUpdated, entity);
+  }
+
+  /**
+   * Update transactions dispute status
+   */
+  private static async updateTransactionsDisputeStatus(
+    manager: EntityManager,
+    transactionId?: string | null,
+  ): Promise<void> {
+    if (!transactionId) {
+      return;
+    }
+
+    const transactionRepository = manager.getRepository(TransactionEntity);
+
+    const transactions = await transactionRepository.find({
+      where: {
+        transactionId,
+      },
+    });
+
+    if (!transactions.length) {
+      Log.error('Failed to update transaction dispute status. Transactions were not found.');
+
+      return;
+    }
+
+    let isUpdated = false;
+
+    transactions.forEach((transaction) => {
+      if (transaction.isDisputed) {
+        return;
+      }
+
+      transaction.isDisputed = true;
+      isUpdated = true;
+    });
+
+    if (!isUpdated) {
+      return;
+    }
+
+    await transactionRepository.save(transactions);
   }
 }
 

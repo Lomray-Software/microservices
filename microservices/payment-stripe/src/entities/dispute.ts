@@ -101,7 +101,7 @@ class Dispute {
 
   @JSONSchema({
     description:
-      'New worth of the account (platform or connected account) after dispute related to this transaction',
+      'Dispute new worth related to the account (platform or connected account) after dispute related to this transaction',
     example: -12139,
   })
   @Column({ type: 'int', default: 0 })

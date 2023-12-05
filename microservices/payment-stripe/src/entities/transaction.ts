@@ -1,5 +1,5 @@
 import { IsNullable, IsTypeormDate, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
-import { Allow, IsEnum, IsNumber, IsObject, Length } from 'class-validator';
+import { Allow, IsBoolean, IsEnum, IsNumber, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -10,6 +10,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import ChargeRefundStatus from '@constants/charge-refund-status';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionRole from '@constants/transaction-role';
@@ -112,7 +113,8 @@ export const defaultParams: Pick<
 
 @JSONSchema({
   // Check payment stripe docs fo detailed description
-  description: 'Stipe transaction presentation',
+  description:
+    'Stipe transaction presentation. Disputed transaction can be refundable if disputed charge have is refundable to true',
   properties: {
     customer: { $ref: '#/definitions/Customer' },
     product: { $ref: '#/definitions/Product' },
@@ -257,12 +259,29 @@ class Transaction {
   fee: number;
 
   @JSONSchema({
-    description: 'Field for storing status of payment by the card or any other source',
+    description: 'Field for storing status of payment by the card or any other source.',
   })
   @Column({ type: 'enum', enum: TransactionStatus, default: TransactionStatus.INITIAL })
   @IsEnum(TransactionStatus)
   @IsUndefinable()
   status: TransactionStatus;
+
+  @JSONSchema({
+    description:
+      'If transaction was fail refund on second partial refund - this status indicate real refund state.',
+  })
+  @Column({ type: 'enum', enum: ChargeRefundStatus, default: ChargeRefundStatus.NO_REFUND })
+  @IsEnum(ChargeRefundStatus)
+  @IsUndefinable()
+  chargeRefundStatus: ChargeRefundStatus;
+
+  @JSONSchema({
+    description: 'Does transaction was disputed. Chargeback or injury occur.',
+  })
+  @Column({ type: 'boolean', default: false })
+  @IsBoolean()
+  @IsUndefinable()
+  isDisputed: boolean;
 
   @JSONSchema({
     description: 'Store data about payment connected account and etc.',
