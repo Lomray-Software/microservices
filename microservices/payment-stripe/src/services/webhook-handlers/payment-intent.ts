@@ -5,7 +5,7 @@ import StripeSdk from 'stripe';
 import { EntityManager, Repository } from 'typeorm';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionType from '@constants/transaction-type';
-import Card from '@entities/card';
+import CardEntity from '@entities/card';
 import TransactionEntity from '@entities/transaction';
 import extractIdFromStripeInstance from '@helpers/extract-id-from-stripe-instance';
 import messages from '@helpers/validators/messages';
@@ -186,7 +186,7 @@ class PaymentIntent {
       } = metadata as unknown as IPaymentIntentMetadata;
 
       const card = await entityManager
-        .getRepository(Card)
+        .getRepository(CardEntity)
         .createQueryBuilder('card')
         .where('card.userId = :userId AND card.id = :cardId', { userId: senderId, cardId })
         .getOne();

@@ -5,13 +5,14 @@ import StripeSdk from 'stripe';
 import { EntityManager, Repository } from 'typeorm';
 import remoteConfig from '@config/remote';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
-import Card from '@entities/card';
+import CardEntity from '@entities/card';
 import CustomerEntity from '@entities/customer';
 import extractIdFromStripeInstance from '@helpers/extract-id-from-stripe-instance';
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import messages from '@helpers/validators/messages';
-import CardRepository, { ICardDataByFingerprintResult } from '@repositories/card';
+import CardRepository from '@repositories/card';
+import type { ICardDataByFingerprintResult } from '@repositories/card';
 
 /**
  * Setup intent Webhook Handler
@@ -161,7 +162,7 @@ class SetupIntent {
    */
   private async detachOrRenewWithDetachDuplicatedCard(
     paymentMethodId: string,
-    cardEntity: Card,
+    cardEntity: CardEntity,
     { entity }: ICardDataByFingerprintResult,
     sdk: StripeSdk,
   ): Promise<void> {

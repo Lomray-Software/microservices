@@ -6,7 +6,7 @@ import StripeDisputeStatus from '@constants/stripe-dispute-status';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionStatus from '@constants/transaction-status';
 import DisputeEntity from '@entities/dispute';
-import EvidenceDetails from '@entities/evidence-details';
+import EvidenceDetailsEntity from '@entities/evidence-details';
 import RefundEntity from '@entities/refund';
 import TransactionEntity from '@entities/transaction';
 import extractIdFromStripeInstance from '@helpers/extract-id-from-stripe-instance';
@@ -105,7 +105,7 @@ class Charge {
 
     await manager.transaction(async (entityManager) => {
       const disputeRepository = entityManager.getRepository(DisputeEntity);
-      const evidenceDetailsRepository = entityManager.getRepository(EvidenceDetails);
+      const evidenceDetailsRepository = entityManager.getRepository(EvidenceDetailsEntity);
 
       /**
        * Get transactions by payment intent id
