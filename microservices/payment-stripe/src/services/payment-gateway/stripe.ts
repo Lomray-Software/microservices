@@ -671,7 +671,7 @@ class Stripe extends Abstract {
        */
       case 'transfer.reversed':
         const transferReversedHandlers = {
-          account: this.transferReversed(event),
+          account: webhookHandlers.transfer.transferReversed(event),
         };
 
         await transferReversedHandlers?.[webhookType];
@@ -767,38 +767,6 @@ class Stripe extends Abstract {
         await webhookHandlers.customer.handleCustomerUpdated(event, this.manager);
         break;
     }
-  }
-
-  /**
-   * Transfer reversed
-   */
-  public async transferReversed(event: StripeSdk.Event): Promise<void> {
-    const { amount_reversed: reversedAmount, source_transaction: chargeId } = event.data
-      .object as StripeSdk.Transfer;
-
-    const transactions = await this.transactionRepository
-      .createQueryBuilder('t')
-      .where('t.chargeId = :chargeId', { chargeId })
-      .getMany();
-
-    if (!transactions.length) {
-      const errorMessage = messages.getNotFoundMessage(
-        'Failed to hande transfer reversed. Debit or credit transaction',
-      );
-
-      Log.error(errorMessage);
-
-      throw new BaseException({
-        status: 500,
-        message: errorMessage,
-      });
-    }
-
-    transactions.forEach((transaction) => {
-      transaction.params.transferReversedAmount = reversedAmount;
-    });
-
-    await this.transactionRepository.save(transactions);
   }
 
   /**

@@ -9,7 +9,7 @@ import Card from '@entities/card';
 import TransactionEntity from '@entities/transaction';
 import extractIdFromStripeInstance from '@helpers/extract-id-from-stripe-instance';
 import messages from '@helpers/validators/messages';
-import { IPaymentIntentMetadata } from '@interfaces/payment-intent-metadata';
+import type { IPaymentIntentMetadata } from '@interfaces/payment-intent-metadata';
 import CardRepository from '@repositories/card';
 import Parser from '@services/parser';
 
