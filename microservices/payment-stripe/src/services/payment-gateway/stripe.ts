@@ -184,7 +184,7 @@ class Stripe extends Abstract {
    * Add new card
    * @description NOTES:
    * 1. Usage example - only in integration tests
-   * 2. Use setup intent for livemode
+   * 2. Use setup intent for live-mode
    * 3. For creating card manually with the sensitive data such as digits, cvc. Platform
    * account must be eligible for PCI (Payment Card Industry Data Security Standards)
    */
@@ -598,109 +598,120 @@ class Stripe extends Abstract {
       /**
        * Checkout session events
        */
-      case 'checkout.session.completed':
+      case 'checkout.session.completed': {
         await this.handleTransactionCompleted(event);
         break;
+      }
 
       /**
        * Account events
        */
-      case 'account.updated':
+      case 'account.updated': {
         const accountUpdatedHandlers = {
           connect: webhookHandlers.account.handleAccountUpdated(event),
         };
 
         await accountUpdatedHandlers?.[webhookType];
         break;
+      }
 
-      case 'account.external_account.created':
+      case 'account.external_account.created': {
         const accountExternalAccountCreatedHandlers = {
           connect: this.handleExternalAccountCreated(event),
         };
 
         await accountExternalAccountCreatedHandlers?.[webhookType];
         break;
+      }
 
-      case 'account.external_account.updated':
+      case 'account.external_account.updated': {
         const accountExternalAccountUpdatedHandlers = {
           connect: this.handleExternalAccountUpdated(event),
         };
 
         await accountExternalAccountUpdatedHandlers?.[webhookType];
         break;
+      }
 
-      case 'account.external_account.deleted':
+      case 'account.external_account.deleted': {
         const accountExternalAccountDeletedHandlers = {
           connect: this.handleExternalAccountDeleted(event),
         };
 
         await accountExternalAccountDeletedHandlers?.[webhookType];
         break;
+      }
 
       /**
        * Payment method events
        */
-      case 'setup_intent.succeeded':
+      case 'setup_intent.succeeded': {
         const setupIntentSucceededHandlers = {
           account: webhookHandlers.setupIntent.handleSetupIntentSucceed(event, this.sdk),
         };
 
         await setupIntentSucceededHandlers?.[webhookType];
         break;
+      }
 
       case 'payment_method.updated':
-      case 'payment_method.automatically_updated':
+      case 'payment_method.automatically_updated': {
         const paymentMethodUpdatedAutomaticallyUpdatedHandlers = {
           account: webhookHandlers.paymentMethod.handlePaymentMethodUpdated(event),
         };
 
         await paymentMethodUpdatedAutomaticallyUpdatedHandlers?.[webhookType];
         break;
+      }
 
-      case 'payment_method.detached':
+      case 'payment_method.detached': {
         const paymentMethodDetachedHandlers = {
           account: webhookHandlers.paymentMethod.handlePaymentMethodDetached(event),
         };
 
         await paymentMethodDetachedHandlers?.[webhookType];
         break;
+      }
 
       /**
        * Transfer events
        */
-      case 'transfer.reversed':
+      case 'transfer.reversed': {
         const transferReversedHandlers = {
           account: webhookHandlers.transfer.transferReversed(event),
         };
 
         await transferReversedHandlers?.[webhookType];
         break;
+      }
 
       /**
        * Payment intent events
        */
       case 'payment_intent.processing':
       case 'payment_intent.succeeded':
-      case 'payment_intent.canceled':
+      case 'payment_intent.canceled': {
         const paymentIntentProcessingSucceededCanceledHandlers = {
           account: webhookHandlers.paymentIntent.handlePaymentIntent(event, this.sdk),
         };
 
         await paymentIntentProcessingSucceededCanceledHandlers?.[webhookType];
         break;
+      }
 
-      case 'payment_intent.payment_failed':
+      case 'payment_intent.payment_failed': {
         const paymentIntentPaymentFailedHandlers = {
           account: webhookHandlers.paymentIntent.handlePaymentIntentPaymentFailed(event, this.sdk),
         };
 
         await paymentIntentPaymentFailedHandlers?.[webhookType];
         break;
+      }
 
       /**
        * Application fee events
        */
-      case 'application_fee.refund.updated':
+      case 'application_fee.refund.updated': {
         const applicationFeeRefundUpdatedHandlers = {
           account: webhookHandlers.applicationFee.handleApplicationFeeRefundUpdated(
             event,
@@ -710,61 +721,68 @@ class Stripe extends Abstract {
 
         await applicationFeeRefundUpdatedHandlers?.[webhookType];
         break;
+      }
 
-      case 'application_fee.refunded':
+      case 'application_fee.refunded': {
         const applicationFeeRefundedHandlers = {
           account: webhookHandlers.applicationFee.handleApplicationFeeRefunded(event),
         };
 
         await applicationFeeRefundedHandlers?.[webhookType];
         break;
+      }
 
       /**
        * Refund events
        */
-      case 'charge.refund.updated':
+      case 'charge.refund.updated': {
         const chargeRefundUpdatedHandlers = {
           account: webhookHandlers.charge.handleRefundUpdated(event, this.manager),
         };
 
         await chargeRefundUpdatedHandlers?.[webhookType];
         break;
+      }
 
       /**
        * Charge events
        */
-      case 'charge.refunded':
+      case 'charge.refunded': {
         const chargeRefundedHandlers = {
           account: webhookHandlers.charge.handleChargeRefunded(event, this.manager),
         };
 
         await chargeRefundedHandlers?.[webhookType];
         break;
+      }
 
-      case 'charge.dispute.created':
+      case 'charge.dispute.created': {
         const chargeDisputeCreatedHandlers = {
           account: webhookHandlers.charge.handleChargeDisputeCreated(event, this.manager),
         };
 
         await chargeDisputeCreatedHandlers?.[webhookType];
         break;
+      }
 
       case 'charge.dispute.updated':
       case 'charge.dispute.closed':
-      case 'charge.dispute.funds_reinstated':
+      case 'charge.dispute.funds_reinstated': {
         const chargeDisputeUpdatedClosedFundsReinstatedHandlers = {
           account: webhookHandlers.charge.handleChargeDisputeUpdated(event, this.manager),
         };
 
         await chargeDisputeUpdatedClosedFundsReinstatedHandlers?.[webhookType];
         break;
+      }
 
       /**
        * Customer events
        */
-      case 'customer.updated':
+      case 'customer.updated': {
         await webhookHandlers.customer.handleCustomerUpdated(event, this.manager);
         break;
+      }
     }
   }
 
