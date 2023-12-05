@@ -50,6 +50,7 @@ import Abstract from './abstract';
 export interface IStripeProductParams extends IProductParams {
   name: string;
   description?: string;
+  // @TODO: Expected: Images urls?
   images?: string[];
 }
 
