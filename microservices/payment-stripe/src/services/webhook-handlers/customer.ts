@@ -10,6 +10,18 @@ import CardRepository from '@repositories/card';
  */
 class Customer {
   /**
+   * @private
+   */
+  private readonly manager: EntityManager;
+
+  /**
+   * @constructor
+   */
+  public constructor(manager: EntityManager) {
+    this.manager = manager;
+  }
+
+  /**
    * Handles customer update
    */
   public async handleCustomerUpdated(

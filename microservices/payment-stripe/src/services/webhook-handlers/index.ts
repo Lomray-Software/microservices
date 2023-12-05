@@ -1,3 +1,5 @@
+import { EntityManager } from 'typeorm';
+import ApplicationFee from './application-fee';
 import Charge from './charge';
 import Customer from './customer';
 
@@ -18,19 +20,24 @@ class WebhookHandlers {
   public readonly charge: Charge;
 
   /**
-   * @constructor
-   * @TODO: provide manager
+   * @public
    */
-  private constructor() {
-    this.customer = new Customer();
-    this.charge = new Charge();
+  public readonly applicationFee: ApplicationFee;
+
+  /**
+   * @constructor
+   */
+  private constructor(manager: EntityManager) {
+    this.customer = new Customer(manager);
+    this.charge = new Charge(manager);
+    this.applicationFee = new ApplicationFee(manager);
   }
 
   /**
    * Init service
    */
-  public static init(): WebhookHandlers {
-    return new WebhookHandlers();
+  public static init(manager: EntityManager): WebhookHandlers {
+    return new WebhookHandlers(manager);
   }
 }
 

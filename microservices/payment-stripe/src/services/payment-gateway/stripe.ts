@@ -593,7 +593,7 @@ class Stripe extends Abstract {
     webhookType: string,
   ): Promise<void> {
     const event = this.sdk.webhooks.constructEvent(payload, signature, webhookKey);
-    const webhookHandlers = WebhookHandlers.init();
+    const webhookHandlers = WebhookHandlers.init(this.manager);
 
     switch (event.type) {
       /**
@@ -703,7 +703,10 @@ class Stripe extends Abstract {
        */
       case 'application_fee.refund.updated':
         const applicationFeeRefundUpdatedHandlers = {
-          account: this.handleApplicationFeeRefundUpdated(event),
+          account: webhookHandlers.applicationFee.handleApplicationFeeRefundUpdated(
+            event,
+            this.sdk,
+          ),
         };
 
         await applicationFeeRefundUpdatedHandlers?.[webhookType];
@@ -711,7 +714,7 @@ class Stripe extends Abstract {
 
       case 'application_fee.refunded':
         const applicationFeeRefundedHandlers = {
-          account: this.handleApplicationFeeRefunded(event),
+          account: webhookHandlers.applicationFee.handleApplicationFeeRefunded(event),
         };
 
         await applicationFeeRefundedHandlers?.[webhookType];
@@ -722,7 +725,7 @@ class Stripe extends Abstract {
        */
       case 'charge.refund.updated':
         const chargeRefundUpdatedHandlers = {
-          account: this.handleRefundUpdated(event),
+          account: webhookHandlers.charge.handleRefundUpdated(event, this.manager),
         };
 
         await chargeRefundUpdatedHandlers?.[webhookType];
@@ -794,108 +797,6 @@ class Stripe extends Abstract {
     transactions.forEach((transaction) => {
       transaction.params.transferReversedAmount = reversedAmount;
     });
-
-    await this.transactionRepository.save(transactions);
-  }
-
-  /**
-   * Handles application fee refund updated
-   */
-  public async handleApplicationFeeRefundUpdated(event: StripeSdk.Event): Promise<void> {
-    const { fee } = event.data.object as StripeSdk.FeeRefund;
-
-    const applicationFeeId = this.extractId(fee);
-    const transactions = await this.transactionRepository.find({
-      applicationFeeId,
-    });
-
-    if (!transactions.length) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage(
-          'Failed to update refunded application fees. Debit or credit transaction',
-        ),
-        payload: { eventName: event.type, applicationFeeId },
-      });
-    }
-
-    const { amount, amount_refunded: refundedApplicationFeeAmount } =
-      await this.sdk.applicationFees.retrieve(applicationFeeId);
-
-    /**
-     * @TODO: create helper for updates check
-     */
-    let isUpdated = false;
-
-    transactions.forEach((transaction) => {
-      if (transaction.fee !== amount) {
-        throw new BaseException({
-          status: 500,
-          message: `Handle webhook event "${event.type}" occur. Transaction fee is not equal to Stripe application fee`,
-          payload: { eventName: event.type, transactionFee: transaction.fee, feeAmount: amount },
-        });
-      }
-
-      if (transaction.params.refundedApplicationFeeAmount !== refundedApplicationFeeAmount) {
-        transaction.params.refundedApplicationFeeAmount = refundedApplicationFeeAmount;
-        isUpdated = true;
-      }
-    });
-
-    if (!isUpdated) {
-      return;
-    }
-
-    await this.transactionRepository.save(transactions);
-  }
-
-  /**
-   * Handles application fee refunded
-   */
-  public async handleApplicationFeeRefunded(event: StripeSdk.Event): Promise<void> {
-    const {
-      id: applicationFeeId,
-      amount,
-      amount_refunded: refundedApplicationFeeAmount,
-    } = event.data.object as StripeSdk.ApplicationFee;
-
-    const transactions = await this.transactionRepository.find({
-      applicationFeeId,
-    });
-
-    if (!transactions.length) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage(
-          'Failed to update refunded application fees. Debit or credit transaction',
-        ),
-        payload: { eventName: event.type, applicationFeeId },
-      });
-    }
-
-    let isUpdated = false;
-
-    /**
-     * @TODO: move out to separate helper (e.g. class calculation)
-     */
-    transactions.forEach((transaction) => {
-      if (transaction.fee !== amount) {
-        throw new BaseException({
-          status: 500,
-          message: `Handle webhook event "${event.type}" occur. Transaction fee is not equal to Stripe application fee`,
-          payload: { eventName: event.type, transactionFee: transaction.fee, feeAmount: amount },
-        });
-      }
-
-      if (transaction.params.refundedApplicationFeeAmount !== refundedApplicationFeeAmount) {
-        transaction.params.refundedApplicationFeeAmount = refundedApplicationFeeAmount;
-        isUpdated = true;
-      }
-    });
-
-    if (!isUpdated) {
-      return;
-    }
 
     await this.transactionRepository.save(transactions);
   }
@@ -1000,56 +901,6 @@ class Stripe extends Abstract {
       lastDigits,
       cardId: card.id,
     });
-  }
-
-  /**
-   * Handles refund updated
-   */
-  public async handleRefundUpdated(event: StripeSdk.Event): Promise<void> {
-    const {
-      id,
-      status,
-      reason,
-      failure_reason: failedReason,
-      payment_intent: paymentIntent,
-    } = event.data.object as StripeSdk.Refund;
-
-    if (!paymentIntent || !status) {
-      throw new BaseException({
-        status: 500,
-        message: "Payment intent id or refund status wasn't provided.",
-      });
-    }
-
-    const refund = await this.refundRepository
-      .createQueryBuilder('r')
-      .where("r.params ->> 'refundId' = :refundId", { refundId: id })
-      .getOne();
-
-    if (!refund) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Failed to update refund. Refund'),
-      });
-    }
-
-    const refundStatus = Parser.parseStripeTransactionStatus(status as StripeTransactionStatus);
-
-    if (!refundStatus) {
-      throw new BaseException({
-        status: 500,
-        message: 'Failed to get transaction status for refund.',
-      });
-    }
-
-    refund.status = refundStatus;
-    refund.params.errorReason = failedReason;
-
-    if (reason && refund.params.reason !== reason) {
-      refund.params.reason = reason;
-    }
-
-    await this.refundRepository.save(refund);
   }
 
   /**
