@@ -652,7 +652,7 @@ class Stripe extends Abstract {
       case 'payment_method.updated':
       case 'payment_method.automatically_updated':
         const paymentMethodUpdatedAutomaticallyUpdatedHandlers = {
-          account: this.handlePaymentMethodUpdated(event),
+          account: webhookHandlers.paymentMethod.handlePaymentMethodUpdated(event),
         };
 
         await paymentMethodUpdatedAutomaticallyUpdatedHandlers?.[webhookType];
@@ -660,7 +660,7 @@ class Stripe extends Abstract {
 
       case 'payment_method.detached':
         const paymentMethodDetachedHandlers = {
-          account: this.handlePaymentMethodDetached(event),
+          account: webhookHandlers.paymentMethod.handlePaymentMethodDetached(event),
         };
 
         await paymentMethodDetachedHandlers?.[webhookType];
@@ -767,108 +767,6 @@ class Stripe extends Abstract {
         await webhookHandlers.customer.handleCustomerUpdated(event, this.manager);
         break;
     }
-  }
-
-  /**
-   * Handles payment method detach
-   * @description Card and other payment methods should be removed in according subscribers
-   * @TODO: Handle other payment methods if needed
-   */
-  public async handlePaymentMethodDetached(event: StripeSdk.Event): Promise<void> {
-    const { id: paymentMethodId, card: cardPaymentMethod } = event.data
-      .object as StripeSdk.PaymentMethod;
-
-    if (!cardPaymentMethod) {
-      throw new BaseException({
-        status: 500,
-        message: "Payment method card wasn't provided",
-      });
-    }
-
-    const card = await this.cardRepository
-      .createQueryBuilder('card')
-      .where(`card.params->>'paymentMethodId' = :value OR card."paymentMethodId" = :value`, {
-        value: paymentMethodId,
-      })
-      .getOne();
-
-    if (!card) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Payment method'),
-      });
-    }
-
-    await this.cardRepository.remove(card, { data: { isFromWebhook: true } });
-
-    void Microservice.eventPublish(Event.PaymentMethodRemoved, {
-      paymentMethodId,
-    });
-  }
-
-  /**
-   * Handles payment method update
-   * @description Expected card that can be setup via setupIntent
-   */
-  public async handlePaymentMethodUpdated(event: StripeSdk.Event): Promise<void> {
-    const {
-      id,
-      card: cardPaymentMethod,
-      billing_details: billing,
-    } = event.data.object as StripeSdk.PaymentMethod;
-
-    if (!cardPaymentMethod) {
-      throw new BaseException({
-        status: 500,
-        message: "Payment method card wasn't provided",
-      });
-    }
-
-    const card = await this.cardRepository
-      .createQueryBuilder('card')
-      .where(`card.params->>'paymentMethodId' = :value OR card."paymentMethodId" = :value`, {
-        value: id,
-      })
-      .getOne();
-
-    if (!card) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Payment method'),
-      });
-    }
-
-    const {
-      exp_month: expMonth,
-      exp_year: expYear,
-      last4: lastDigits,
-      brand,
-      funding,
-      issuer,
-      country,
-    } = cardPaymentMethod;
-
-    const expired = toExpirationDate(expMonth, expYear);
-
-    card.lastDigits = lastDigits;
-    card.expired = expired;
-    card.brand = brand;
-    card.funding = funding;
-    card.origin = country;
-    // If billing was updated to null - SHOULD set null
-    card.country = billing.address?.country || null;
-    card.postalCode = billing.address?.postal_code || null;
-    card.params.issuer = issuer;
-
-    await this.cardRepository.save(card);
-
-    void Microservice.eventPublish(Event.PaymentMethodUpdated, {
-      funding,
-      brand,
-      expired,
-      lastDigits,
-      cardId: card.id,
-    });
   }
 
   /**
