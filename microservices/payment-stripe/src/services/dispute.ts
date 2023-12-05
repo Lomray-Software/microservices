@@ -6,7 +6,6 @@ import { EntityManager } from 'typeorm';
 import DisputeStatus from '@constants/dispute-status';
 import StripeDisputeReason from '@constants/stripe-dispute-reason';
 import StripeDisputeStatus from '@constants/stripe-dispute-status';
-import TransactionStatus from '@constants/transaction-status';
 import DisputeEntity from '@entities/dispute';
 import TransactionEntity from '@entities/transaction';
 import Parser from '@services/parser';
@@ -127,11 +126,11 @@ class Dispute {
     let isUpdated = false;
 
     transactions.forEach((transaction) => {
-      if (transaction.status === TransactionStatus.DISPUTED) {
+      if (transaction.isDisputed) {
         return;
       }
 
-      transaction.status = TransactionStatus.DISPUTED;
+      transaction.isDisputed = true;
       isUpdated = true;
     });
 
