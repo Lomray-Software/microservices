@@ -58,11 +58,7 @@ class Dispute {
     disputeEntity.netWorth = netWorth;
 
     await manager.getRepository(DisputeEntity).save(disputeEntity);
-    await Dispute.updateTransactionsDisputeStatus(
-      manager,
-      disputeEntity.transactionId,
-      disputeStatus,
-    );
+    await Dispute.updateTransactionsDisputeStatus(manager, disputeEntity.transactionId);
   }
 
   /**
@@ -91,7 +87,7 @@ class Dispute {
     manager: EntityManager,
   ): Promise<void> {
     await Promise.all([
-      Dispute.updateTransactionsDisputeStatus(manager, entity.transactionId, entity.status),
+      Dispute.updateTransactionsDisputeStatus(manager, entity.transactionId),
       Microservice.eventPublish(Event.DisputeCreated, entity),
     ]);
   }
@@ -109,7 +105,6 @@ class Dispute {
   private static async updateTransactionsDisputeStatus(
     manager: EntityManager,
     transactionId?: string | null,
-    disputeStatus?: DisputeStatus | null,
   ): Promise<void> {
     if (!transactionId) {
       return;
@@ -130,18 +125,13 @@ class Dispute {
     }
 
     let isUpdated = false;
-    const transactionDisputeStatus =
-      Parser.parseStripeDisputeStatusToTransactionDisputeStatus(disputeStatus);
 
     transactions.forEach((transaction) => {
-      const isDisputeStatusNotChanged = transaction.disputeStatus === transactionDisputeStatus;
-
-      if (isDisputeStatusNotChanged && transaction.status === TransactionStatus.DISPUTED) {
+      if (transaction.status === TransactionStatus.DISPUTED) {
         return;
       }
 
       transaction.status = TransactionStatus.DISPUTED;
-      transaction.disputeStatus = transactionDisputeStatus;
       isUpdated = true;
     });
 
