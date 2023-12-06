@@ -10,9 +10,20 @@ class Factory {
    * Create gateway instance
    */
   public static async create(manager: EntityManager): Promise<Stripe> {
-    const { config, paymentMethods, apiKey } = await remoteConfig();
+    const { config, paymentMethods, apiKey, fees, taxes } = await remoteConfig();
 
-    if (!config || !apiKey || !paymentMethods) {
+    // All environments are required
+    const isFeesDefined = Boolean(
+      fees?.stablePaymentUnit &&
+        fees?.stableDisputeFeeUnit &&
+        fees?.paymentPercent &&
+        fees?.instantPayoutPercent,
+    );
+    const isTaxesDefined = Boolean(
+      taxes?.autoCalculateFeeUnit && taxes?.stableUnit && taxes?.defaultPercent,
+    );
+
+    if (!config || !apiKey || !paymentMethods || !isFeesDefined || !isTaxesDefined) {
       throw new Error('Payment options or api key or payment methods for stripe are not provided');
     }
 
