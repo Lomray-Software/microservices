@@ -22,10 +22,7 @@
       },
       "userId": {
         "in": {
-          "admin": "allow",
-          "user": {
-            "condition": "Fields: user owner"
-          }
+          "admin": "allow"
         },
         "out": {
           "user": "allow"
