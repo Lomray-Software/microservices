@@ -27,6 +27,8 @@ export interface IParams {
   isChargeRefundable: boolean;
   currency: TCurrency;
   issuedAt: Date;
+  // Dispute fee of Stripe at the moment of dispute creation
+  currentDisputeFee: number;
   balanceTransactionId?: string | null;
   networkReasonCode?: string | null; // 10.4
   paymentMethodType?: string | null; // card
