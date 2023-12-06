@@ -2,16 +2,17 @@ import { Log } from '@lomray/microservice-helpers';
 import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
 import { validate } from 'class-validator';
-import _ from 'lodash';
 import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
 import BalanceType from '@constants/balance-type';
 import BusinessType from '@constants/business-type';
 import CouponDuration from '@constants/coupon-duration';
 import RefundAmountType from '@constants/refund-amount-type';
+import RefundStatus from '@constants/refund-status';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
+import StripeRefundStatus from '@constants/stripe-refund-status';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionRole from '@constants/transaction-role';
 import TransactionStatus from '@constants/transaction-status';
@@ -31,11 +32,13 @@ import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
-import type { IPaymentIntentMetadata } from '@interfaces/payment-intent-metadata';
+import IFees from '@interfaces/fees';
 import type ITax from '@interfaces/tax';
-import type { ICardDataByFingerprintResult } from '@repositories/card';
 import CardRepository from '@repositories/card';
+import CustomerRepository from '@repositories/customer';
 import Calculation from '@services/calculation';
+import Parser from '@services/parser';
+import WebhookHandlers from '@services/webhook-handlers';
 import type {
   IBankAccountParams,
   ICardParams,
@@ -48,6 +51,7 @@ import Abstract from './abstract';
 export interface IStripeProductParams extends IProductParams {
   name: string;
   description?: string;
+  // @TODO: Expected: ImagesUrl?
   images?: string[];
 }
 
@@ -180,9 +184,9 @@ interface ICreateMultipleProductCheckoutParams {
 class Stripe extends Abstract {
   /**
    * Add new card
-   * @description NOTES:
+   * @description Definitions:
    * 1. Usage example - only in integration tests
-   * 2. Use setup intent for livemode
+   * 2. Use setup intent for live-mode
    * 3. For creating card manually with the sensitive data such as digits, cvc. Platform
    * account must be eligible for PCI (Payment Card Industry Data Security Standards)
    */
@@ -250,7 +254,7 @@ class Stripe extends Abstract {
 
   /**
    * Add bank account
-   * @description NOTE: Usage example - integration tests
+   * @description Usage example - integration tests
    * @TODO: Integrate with stripe
    */
   public async addBankAccount({
@@ -313,7 +317,7 @@ class Stripe extends Abstract {
 
   /**
    * Remove Customer from db and stripe
-   * NOTE: Usage example - integration tests
+   * @description Usage example - integration tests
    */
   public async removeCustomer(userId: string): Promise<boolean> {
     const customer = await this.customerRepository.findOne({ userId });
@@ -331,43 +335,6 @@ class Stripe extends Abstract {
     await this.customerRepository.remove(customer);
 
     return true;
-  }
-
-  /**
-   * Get unified transaction status
-   */
-  public getStatus(stripeStatus: StripeTransactionStatus): TransactionStatus {
-    switch (stripeStatus) {
-      case StripeTransactionStatus.SUCCEEDED:
-      case StripeTransactionStatus.PAID:
-        return TransactionStatus.SUCCESS;
-
-      case StripeTransactionStatus.UNPAID:
-      case StripeTransactionStatus.REQUIRES_CONFIRMATION:
-        return TransactionStatus.REQUIRED_PAYMENT;
-
-      case StripeTransactionStatus.ERROR:
-      case StripeTransactionStatus.PAYMENT_FAILED:
-      case StripeTransactionStatus.CANCELED:
-      case StripeTransactionStatus.REQUIRES_PAYMENT_METHOD:
-        return TransactionStatus.ERROR;
-
-      case StripeTransactionStatus.NO_PAYMENT_REQUIRED:
-      case StripeTransactionStatus.PROCESSING:
-        return TransactionStatus.IN_PROCESS;
-
-      case StripeTransactionStatus.REFUND_SUCCEEDED:
-        return TransactionStatus.REFUNDED;
-
-      case StripeTransactionStatus.REFUND_PENDING:
-        return TransactionStatus.REFUND_IN_PROCESS;
-
-      case StripeTransactionStatus.REFUND_CANCELED:
-        return TransactionStatus.REFUND_CANCELED;
-
-      case StripeTransactionStatus.REFUND_FAILED:
-        return TransactionStatus.REFUND_FAILED;
-    }
   }
 
   /**
@@ -514,7 +481,8 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Create ConnectAccount make redirect to account link and save stripeConnectAccount in customer
+   * Connect account
+   * @description Create ConnectAccount make redirect to account link and save stripeConnectAccount in customer
    */
   public async connectAccount(
     userId: string,
@@ -584,7 +552,7 @@ class Stripe extends Abstract {
 
   /**
    * Returns account link
-   * @description NOTE: Use when user needs to update connect account data
+   * @description Use when user needs to update connect account data
    */
   public async getConnectAccountLink(
     userId: string,
@@ -626,752 +594,198 @@ class Stripe extends Abstract {
     webhookType: string,
   ): Promise<void> {
     const event = this.sdk.webhooks.constructEvent(payload, signature, webhookKey);
+    const webhookHandlers = WebhookHandlers.init(this.manager);
 
     switch (event.type) {
       /**
        * Checkout session events
        */
-      case 'checkout.session.completed':
+      case 'checkout.session.completed': {
         await this.handleTransactionCompleted(event);
         break;
+      }
 
       /**
        * Account events
        */
-      case 'account.updated':
+      case 'account.updated': {
         const accountUpdatedHandlers = {
-          connect: this.handleAccountUpdated(event),
+          connect: webhookHandlers.account.handleAccountUpdated(event),
         };
 
         await accountUpdatedHandlers?.[webhookType];
         break;
+      }
 
-      case 'account.external_account.created':
+      case 'account.external_account.created': {
         const accountExternalAccountCreatedHandlers = {
           connect: this.handleExternalAccountCreated(event),
         };
 
         await accountExternalAccountCreatedHandlers?.[webhookType];
         break;
+      }
 
-      case 'account.external_account.updated':
+      case 'account.external_account.updated': {
         const accountExternalAccountUpdatedHandlers = {
           connect: this.handleExternalAccountUpdated(event),
         };
 
         await accountExternalAccountUpdatedHandlers?.[webhookType];
         break;
+      }
 
-      case 'account.external_account.deleted':
+      case 'account.external_account.deleted': {
         const accountExternalAccountDeletedHandlers = {
           connect: this.handleExternalAccountDeleted(event),
         };
 
         await accountExternalAccountDeletedHandlers?.[webhookType];
         break;
+      }
 
       /**
        * Payment method events
        */
-      case 'setup_intent.succeeded':
+      case 'setup_intent.succeeded': {
         const setupIntentSucceededHandlers = {
-          account: this.handleSetupIntentSucceed(event),
+          account: webhookHandlers.setupIntent.handleSetupIntentSucceed(event, this.sdk),
         };
 
         await setupIntentSucceededHandlers?.[webhookType];
         break;
+      }
 
       case 'payment_method.updated':
-      case 'payment_method.automatically_updated':
+      case 'payment_method.automatically_updated': {
         const paymentMethodUpdatedAutomaticallyUpdatedHandlers = {
-          account: this.handlePaymentMethodUpdated(event),
+          account: webhookHandlers.paymentMethod.handlePaymentMethodUpdated(event),
         };
 
         await paymentMethodUpdatedAutomaticallyUpdatedHandlers?.[webhookType];
         break;
+      }
 
-      case 'payment_method.detached':
+      case 'payment_method.detached': {
         const paymentMethodDetachedHandlers = {
-          account: this.handlePaymentMethodDetached(event),
+          account: webhookHandlers.paymentMethod.handlePaymentMethodDetached(event),
         };
 
         await paymentMethodDetachedHandlers?.[webhookType];
         break;
+      }
 
       /**
        * Transfer events
        */
-      case 'transfer.reversed':
+      case 'transfer.reversed': {
         const transferReversedHandlers = {
-          account: this.transferReversed(event),
+          account: webhookHandlers.transfer.transferReversed(event),
         };
 
         await transferReversedHandlers?.[webhookType];
         break;
+      }
 
       /**
        * Payment intent events
        */
       case 'payment_intent.processing':
       case 'payment_intent.succeeded':
-      case 'payment_intent.canceled':
+      case 'payment_intent.canceled': {
         const paymentIntentProcessingSucceededCanceledHandlers = {
-          account: this.handlePaymentIntent(event),
+          account: webhookHandlers.paymentIntent.handlePaymentIntent(event, this.sdk),
         };
 
         await paymentIntentProcessingSucceededCanceledHandlers?.[webhookType];
         break;
+      }
 
-      case 'payment_intent.payment_failed':
+      case 'payment_intent.payment_failed': {
         const paymentIntentPaymentFailedHandlers = {
-          account: this.handlePaymentIntentPaymentFailed(event),
+          account: webhookHandlers.paymentIntent.handlePaymentIntentPaymentFailed(event, this.sdk),
         };
 
         await paymentIntentPaymentFailedHandlers?.[webhookType];
         break;
+      }
 
       /**
        * Application fee events
        */
-      case 'application_fee.refund.updated':
+      case 'application_fee.refund.updated': {
         const applicationFeeRefundUpdatedHandlers = {
-          account: this.handleApplicationFeeRefundUpdated(event),
+          account: webhookHandlers.applicationFee.handleApplicationFeeRefundUpdated(
+            event,
+            this.sdk,
+          ),
         };
 
         await applicationFeeRefundUpdatedHandlers?.[webhookType];
         break;
+      }
 
-      case 'application_fee.refunded':
+      case 'application_fee.refunded': {
         const applicationFeeRefundedHandlers = {
-          account: this.handleApplicationFeeRefunded(event),
+          account: webhookHandlers.applicationFee.handleApplicationFeeRefunded(event),
         };
 
         await applicationFeeRefundedHandlers?.[webhookType];
         break;
+      }
 
       /**
        * Refund events
        */
-      case 'charge.refund.updated':
+      case 'charge.refund.updated': {
         const chargeRefundUpdatedHandlers = {
-          account: this.handleRefundUpdated(event),
+          account: webhookHandlers.charge.handleRefundUpdated(event, this.manager),
         };
 
         await chargeRefundUpdatedHandlers?.[webhookType];
         break;
+      }
 
       /**
        * Charge events
        */
-      case 'charge.refunded':
+      case 'charge.refunded': {
         const chargeRefundedHandlers = {
-          account: this.handleChargeRefunded(event),
+          account: webhookHandlers.charge.handleChargeRefunded(event, this.manager),
         };
 
         await chargeRefundedHandlers?.[webhookType];
         break;
+      }
+
+      case 'charge.dispute.created': {
+        const chargeDisputeCreatedHandlers = {
+          account: webhookHandlers.charge.handleChargeDisputeCreated(event, this.manager),
+        };
+
+        await chargeDisputeCreatedHandlers?.[webhookType];
+        break;
+      }
+
+      case 'charge.dispute.updated':
+      case 'charge.dispute.closed':
+      case 'charge.dispute.funds_reinstated': {
+        const chargeDisputeUpdatedClosedFundsReinstatedHandlers = {
+          account: webhookHandlers.charge.handleChargeDisputeUpdated(event, this.manager),
+        };
+
+        await chargeDisputeUpdatedClosedFundsReinstatedHandlers?.[webhookType];
+        break;
+      }
 
       /**
        * Customer events
        */
-      case 'customer.updated':
-        await this.handleCustomerUpdated(event);
+      case 'customer.updated': {
+        await webhookHandlers.customer.handleCustomerUpdated(event, this.manager);
         break;
-    }
-  }
-
-  /**
-   * Transfer reversed
-   */
-  public async transferReversed(event: StripeSdk.Event): Promise<void> {
-    const { amount_reversed: reversedAmount, source_transaction: chargeId } = event.data
-      .object as StripeSdk.Transfer;
-
-    const transactions = await this.transactionRepository
-      .createQueryBuilder('t')
-      .where('t.chargeId = :chargeId', { chargeId })
-      .getMany();
-
-    if (!transactions.length) {
-      const errorMessage = messages.getNotFoundMessage(
-        'Failed to hande transfer reversed. Debit or credit transaction',
-      );
-
-      Log.error(errorMessage);
-
-      throw new BaseException({
-        status: 500,
-        message: errorMessage,
-      });
-    }
-
-    transactions.forEach((transaction) => {
-      transaction.params.transferReversedAmount = reversedAmount;
-    });
-
-    await this.transactionRepository.save(transactions);
-  }
-
-  /**
-   * Handles application fee refund updated
-   */
-  public async handleApplicationFeeRefundUpdated(event: StripeSdk.Event): Promise<void> {
-    const { fee } = event.data.object as StripeSdk.FeeRefund;
-
-    const applicationFeeId = this.extractId(fee);
-    const transactions = await this.transactionRepository.find({
-      applicationFeeId,
-    });
-
-    if (!transactions.length) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage(
-          'Failed to update refunded application fees. Debit or credit transaction',
-        ),
-        payload: { eventName: event.type, applicationFeeId },
-      });
-    }
-
-    const { amount, amount_refunded: refundedApplicationFeeAmount } =
-      await this.sdk.applicationFees.retrieve(applicationFeeId);
-
-    /**
-     * @TODO: create helper for updates check
-     */
-    let isUpdated = false;
-
-    transactions.forEach((transaction) => {
-      if (transaction.fee !== amount) {
-        throw new BaseException({
-          status: 500,
-          message: `Handle webhook event "${event.type}" occur. Transaction fee is not equal to Stripe application fee`,
-          payload: { eventName: event.type, transactionFee: transaction.fee, feeAmount: amount },
-        });
       }
-
-      if (transaction.params.refundedApplicationFeeAmount !== refundedApplicationFeeAmount) {
-        transaction.params.refundedApplicationFeeAmount = refundedApplicationFeeAmount;
-        isUpdated = true;
-      }
-    });
-
-    if (!isUpdated) {
-      return;
     }
-
-    await this.transactionRepository.save(transactions);
-  }
-
-  /**
-   * Handles application fee refunded
-   */
-  public async handleApplicationFeeRefunded(event: StripeSdk.Event): Promise<void> {
-    const {
-      id: applicationFeeId,
-      amount,
-      amount_refunded: refundedApplicationFeeAmount,
-    } = event.data.object as StripeSdk.ApplicationFee;
-
-    const transactions = await this.transactionRepository.find({
-      applicationFeeId,
-    });
-
-    if (!transactions.length) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage(
-          'Failed to update refunded application fees. Debit or credit transaction',
-        ),
-        payload: { eventName: event.type, applicationFeeId },
-      });
-    }
-
-    let isUpdated = false;
-
-    /**
-     * @TODO: move out to separate helper (e.g. class calculation)
-     */
-    transactions.forEach((transaction) => {
-      if (transaction.fee !== amount) {
-        throw new BaseException({
-          status: 500,
-          message: `Handle webhook event "${event.type}" occur. Transaction fee is not equal to Stripe application fee`,
-          payload: { eventName: event.type, transactionFee: transaction.fee, feeAmount: amount },
-        });
-      }
-
-      if (transaction.params.refundedApplicationFeeAmount !== refundedApplicationFeeAmount) {
-        transaction.params.refundedApplicationFeeAmount = refundedApplicationFeeAmount;
-        isUpdated = true;
-      }
-    });
-
-    if (!isUpdated) {
-      return;
-    }
-
-    await this.transactionRepository.save(transactions);
-  }
-
-  /**
-   * Handles payment method detach
-   * @description Card and other payment methods should be removed in according subscribers
-   * @TODO: Handle other payment methods if needed
-   */
-  public async handlePaymentMethodDetached(event: StripeSdk.Event): Promise<void> {
-    const { id: paymentMethodId, card: cardPaymentMethod } = event.data
-      .object as StripeSdk.PaymentMethod;
-
-    if (!cardPaymentMethod) {
-      throw new BaseException({
-        status: 500,
-        message: "Payment method card wasn't provided",
-      });
-    }
-
-    const card = await this.cardRepository
-      .createQueryBuilder('card')
-      .where(`card.params->>'paymentMethodId' = :value OR card."paymentMethodId" = :value`, {
-        value: paymentMethodId,
-      })
-      .getOne();
-
-    if (!card) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Payment method'),
-      });
-    }
-
-    await this.cardRepository.remove(card, { data: { isFromWebhook: true } });
-
-    void Microservice.eventPublish(Event.PaymentMethodRemoved, {
-      paymentMethodId,
-    });
-  }
-
-  /**
-   * Handles customer update
-   */
-  public async handleCustomerUpdated(event: StripeSdk.Event): Promise<void> {
-    const { id, invoice_settings: invoiceSettings } = event.data.object as StripeSdk.Customer;
-
-    /**
-     * @TODO: Investigate why relations return empty array
-     */
-    const customer = await this.customerRepository.findOne({ customerId: id });
-
-    if (!customer) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Customer'),
-      });
-    }
-
-    const cards = await this.cardRepository.find({
-      userId: customer.userId,
-    });
-
-    /**
-     * Update cards default statuses on change default card for charge
-     */
-
-    await Promise.all(
-      cards.map((card) => {
-        card.isDefault =
-          CardRepository.extractPaymentMethodId(card) === invoiceSettings.default_payment_method;
-
-        return this.cardRepository.save(card);
-      }),
-    );
-
-    /**
-     * If customer has default payment method, and it's exist in stripe
-     */
-    if (customer.params.hasDefaultPaymentMethod && invoiceSettings.default_payment_method) {
-      return;
-    }
-
-    customer.params.hasDefaultPaymentMethod = Boolean(invoiceSettings.default_payment_method);
-
-    await this.customerRepository.save(customer);
-  }
-
-  /**
-   * Handles payment method update
-   * @description Expected card that can be setup via setupIntent
-   */
-  public async handlePaymentMethodUpdated(event: StripeSdk.Event): Promise<void> {
-    const {
-      id,
-      card: cardPaymentMethod,
-      billing_details: billing,
-    } = event.data.object as StripeSdk.PaymentMethod;
-
-    if (!cardPaymentMethod) {
-      throw new BaseException({
-        status: 500,
-        message: "Payment method card wasn't provided",
-      });
-    }
-
-    const card = await this.cardRepository
-      .createQueryBuilder('card')
-      .where(`card.params->>'paymentMethodId' = :value OR card."paymentMethodId" = :value`, {
-        value: id,
-      })
-      .getOne();
-
-    if (!card) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Payment method'),
-      });
-    }
-
-    const {
-      exp_month: expMonth,
-      exp_year: expYear,
-      last4: lastDigits,
-      brand,
-      funding,
-      issuer,
-      country,
-    } = cardPaymentMethod;
-
-    const expired = toExpirationDate(expMonth, expYear);
-
-    card.lastDigits = lastDigits;
-    card.expired = expired;
-    card.brand = brand;
-    card.funding = funding;
-    card.origin = country;
-    // If billing was updated to null - SHOULD set null
-    card.country = billing.address?.country || null;
-    card.postalCode = billing.address?.postal_code || null;
-    card.params.issuer = issuer;
-
-    await this.cardRepository.save(card);
-
-    void Microservice.eventPublish(Event.PaymentMethodUpdated, {
-      funding,
-      brand,
-      expired,
-      lastDigits,
-      cardId: card.id,
-    });
-  }
-
-  /**
-   * Handles refund updated
-   */
-  public async handleRefundUpdated(event: StripeSdk.Event): Promise<void> {
-    const {
-      id,
-      status,
-      reason,
-      failure_reason: failedReason,
-      payment_intent: paymentIntent,
-    } = event.data.object as StripeSdk.Refund;
-
-    if (!paymentIntent || !status) {
-      throw new BaseException({
-        status: 500,
-        message: "Payment intent id or refund status wasn't provided.",
-      });
-    }
-
-    const refund = await this.refundRepository
-      .createQueryBuilder('r')
-      .where("r.params ->> 'refundId' = :refundId", { refundId: id })
-      .getOne();
-
-    if (!refund) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Failed to update refund. Refund'),
-      });
-    }
-
-    const refundStatus = this.getStatus(status as unknown as StripeTransactionStatus);
-
-    if (!refundStatus) {
-      throw new BaseException({
-        status: 500,
-        message: 'Failed to get transaction status for refund.',
-      });
-    }
-
-    refund.status = refundStatus;
-    refund.params.errorReason = failedReason;
-
-    if (reason && refund.params.reason !== reason) {
-      refund.params.reason = reason;
-    }
-
-    await this.refundRepository.save(refund);
-  }
-
-  /**
-   * Handles charge refunded
-   */
-  public async handleChargeRefunded(event: StripeSdk.Event): Promise<void> {
-    const {
-      status,
-      payment_intent: paymentIntent,
-      amount_refunded: refundedTransactionAmount,
-      amount,
-    } = event.data.object as StripeSdk.Charge;
-
-    if (!paymentIntent || !status) {
-      throw new BaseException({
-        status: 500,
-        message: "Payment intent id or refund status wasn't provided.",
-      });
-    }
-
-    const transactions = await this.transactionRepository.find({
-      transactionId: this.extractId(paymentIntent),
-    });
-
-    if (!transactions.length) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage(
-          'Failed to handle charge refunded event. Debit or credit transaction',
-        ),
-      });
-    }
-
-    transactions.forEach((transaction) => {
-      transaction.status =
-        refundedTransactionAmount < amount
-          ? TransactionStatus.PARTIAL_REFUNDED
-          : TransactionStatus.REFUNDED;
-      transaction.params.refundedTransactionAmount = refundedTransactionAmount;
-    });
-
-    await this.transactionRepository.save(transactions);
-  }
-
-  /**
-   * Handles payment intent failure creation
-   * @description Payment intent will be created with the failed status: card was declined -
-   * high fraud risk but stripe will throw error on creation and send webhook event with the creation
-   */
-  public async handlePaymentIntentPaymentFailed(event: StripeSdk.Event): Promise<void> {
-    const {
-      id,
-      status,
-      metadata,
-      amount,
-      latest_charge: latestCharge,
-      last_payment_error: lastPaymentError,
-    } = event.data.object as StripeSdk.PaymentIntent;
-
-    await this.manager.transaction(async (entityManager) => {
-      const transactionRepository = entityManager.getRepository(Transaction);
-
-      const transactions = await transactionRepository.find({ transactionId: id });
-
-      /**
-       * If transactions weren't created cause payment intent failed on create
-       */
-      if (transactions.length) {
-        return;
-      }
-
-      const {
-        entityId,
-        title,
-        feesPayer,
-        cardId,
-        entityCost,
-        senderId,
-        receiverId,
-        taxExpiresAt,
-        taxCreatedAt,
-        taxBehaviour,
-        receiverRevenue,
-        taxAutoCalculateFee,
-        taxFee,
-        taxTransactionId,
-        taxCalculationId,
-      } = metadata as unknown as IPaymentIntentMetadata;
-
-      const card = await entityManager
-        .getRepository(Card)
-        .createQueryBuilder('card')
-        .where('card.userId = :userId AND card.id = :cardId', { userId: senderId, cardId })
-        .getOne();
-
-      if (!card) {
-        throw new BaseException({
-          status: 500,
-          message: messages.getNotFoundMessage('Failed to create transaction. Card'),
-        });
-      }
-
-      /* eslint-enable camelcase */
-      const transactionData = {
-        entityId,
-        title,
-        paymentMethodId: CardRepository.extractPaymentMethodId(card),
-        cardId,
-        transactionId: id,
-        status: this.getStatus(status as StripeTransactionStatus),
-        ...(latestCharge ? { chargeId: this.extractId(latestCharge) } : {}),
-        ...(taxTransactionId ? { taxTransactionId } : {}),
-        ...(taxCalculationId ? { taxCalculationId } : {}),
-        // eslint-disable-next-line camelcase
-        params: {
-          feesPayer,
-          entityCost: this.toSmallestCurrencyUnit(entityCost),
-          errorCode: lastPaymentError?.code,
-          errorMessage: lastPaymentError?.message,
-          declineCode: lastPaymentError?.decline_code,
-          taxExpiresAt,
-          taxCreatedAt,
-          taxBehaviour,
-          // Only if calculation was created provide tax calculation fee
-          ...(taxCalculationId && taxAutoCalculateFee
-            ? { taxAutoCalculateFee: this.toSmallestCurrencyUnit(taxAutoCalculateFee) }
-            : {}),
-          // Only if tax transaction was created provide tax fee
-          ...(taxTransactionId && taxFee ? { taxFee: this.toSmallestCurrencyUnit(taxFee) } : {}),
-        },
-      };
-
-      await Promise.all([
-        transactionRepository.save(
-          transactionRepository.create({
-            ...transactionData,
-            userId: senderId,
-            type: TransactionType.CREDIT,
-            amount,
-            params: transactionData.params,
-          }),
-        ),
-        transactionRepository.save(
-          transactionRepository.create({
-            ...transactionData,
-            userId: receiverId,
-            type: TransactionType.DEBIT,
-            amount: this.toSmallestCurrencyUnit(receiverRevenue),
-            params: transactionData.params,
-          }),
-        ),
-      ]);
-
-      // Do not support update payment intent, only recharge via creating new payment
-      if (status !== StripeTransactionStatus.REQUIRES_PAYMENT_METHOD) {
-        return;
-      }
-
-      await this.sdk.paymentIntents.cancel(id);
-    });
-  }
-
-  /**
-   * Handles payment intent statuses
-   */
-  public async handlePaymentIntent(event: StripeSdk.Event): Promise<void> {
-    const {
-      id,
-      status,
-      latest_charge: latestCharge,
-      last_payment_error: lastPaymentError,
-      transfer_data: transferData,
-    } = event.data.object as StripeSdk.PaymentIntent;
-
-    await this.manager.transaction(async (entityManager) => {
-      const transactionRepository = entityManager.getRepository(Transaction);
-
-      const transactions = await transactionRepository.find({ transactionId: id });
-
-      if (!transactions.length) {
-        const errorMessage = messages.getNotFoundMessage(
-          `Failed to handle payment intent "${event.type}". Debit or credit transaction`,
-        );
-
-        Log.error(errorMessage);
-
-        throw new BaseException({
-          status: 500,
-          message: errorMessage,
-          payload: { eventName: event.type },
-        });
-      }
-
-      const { transactionId, taxCalculationId } = transactions?.[0];
-
-      let stripeTaxTransaction: StripeSdk.Tax.Transaction | null = null;
-
-      /**
-       * If tax collecting and payment intent succeeded - create tax transaction
-       * @description Create tax transaction cost is $0.5. Create only if payment intent succeeded
-       */
-      if (taxCalculationId && status === StripeTransactionStatus.SUCCEEDED) {
-        // Create tax transaction (for Stripe Tax reports)
-        stripeTaxTransaction = await this.sdk.tax.transactions.createFromCalculation({
-          calculation: taxCalculationId,
-          // Stripe payment intent id
-          reference: transactionId,
-        });
-      }
-
-      transactions.forEach((transaction) => {
-        transaction.status = this.getStatus(status as unknown as StripeTransactionStatus);
-
-        /**
-         * Attach related charge
-         */
-        if (!transaction.chargeId && latestCharge) {
-          transaction.chargeId = this.extractId(latestCharge);
-        }
-
-        /**
-         * Attach destination funds transfer connect account
-         */
-        if (!transaction.params.transferDestinationConnectAccountId && transferData?.destination) {
-          transaction.params.transferDestinationConnectAccountId = this.extractId(
-            transferData.destination,
-          );
-        }
-
-        /**
-         * Attach tax transaction if reference
-         */
-        if (stripeTaxTransaction) {
-          transaction.taxTransactionId = stripeTaxTransaction.id;
-        }
-
-        if (!lastPaymentError) {
-          return;
-        }
-
-        /**
-         * Attach error data if it occurs
-         */
-        transaction.params.errorMessage = lastPaymentError.message;
-        transaction.params.errorCode = lastPaymentError.code;
-        transaction.params.declineCode = lastPaymentError.decline_code;
-      });
-
-      if (stripeTaxTransaction) {
-        /**
-         * Sync payment intent with the microservice transactions
-         */
-        await this.sdk.paymentIntents.update(transactionId, {
-          metadata: {
-            taxTransactionId: stripeTaxTransaction?.id,
-          },
-        });
-      }
-
-      await transactionRepository.save(transactions);
-    });
   }
 
   /**
@@ -1501,173 +915,6 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Handles setup intent succeed
-   * @description Support cards. Should be called when webhook triggers
-   */
-  public async handleSetupIntentSucceed(event: StripeSdk.Event): Promise<void> {
-    const { duplicatedCardsUsage } = await remoteConfig();
-
-    /* eslint-disable camelcase */
-    const { id, payment_method } = event.data.object as StripeSdk.SetupIntent;
-
-    if (!payment_method) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('The SetupIntent payment method'),
-      });
-    }
-
-    /**
-     * Get payment method data
-     */
-    const paymentMethod = await this.sdk.paymentMethods.retrieve(this.extractId(payment_method), {
-      expand: [StripePaymentMethods.CARD],
-    });
-
-    if (!paymentMethod?.card || !paymentMethod?.customer) {
-      throw new BaseException({
-        status: 500,
-        message: 'The payment method card or customer data is invalid.',
-      });
-    }
-
-    const customer = await this.customerRepository.findOne({
-      customerId: this.extractId(paymentMethod.customer),
-    });
-
-    if (!customer) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Customer'),
-      });
-    }
-
-    const {
-      id: paymentMethodId,
-      billing_details: billing,
-      card: {
-        brand,
-        last4: lastDigits,
-        exp_month: expMonth,
-        exp_year: expYear,
-        funding,
-        country,
-        issuer,
-        fingerprint,
-      },
-    } = paymentMethod;
-
-    const { userId } = customer;
-
-    const cardParams = {
-      lastDigits,
-      brand,
-      userId,
-      funding,
-      fingerprint,
-      paymentMethodId,
-      origin: country,
-      ...(billing.address?.country ? { country: billing.address.country } : {}),
-      ...(billing.address?.postal_code ? { postalCode: billing.address.postal_code } : {}),
-      expired: toExpirationDate(expMonth, expYear),
-    };
-
-    const cardEntity = this.cardRepository.create({
-      ...cardParams,
-      params: {
-        isApproved: true,
-        setupIntentId: id,
-        issuer,
-      },
-    });
-
-    /**
-     * If we should reject duplicated cards - check
-     */
-    if (duplicatedCardsUsage === 'reject') {
-      const cardData = await CardRepository.getCardDataByFingerprint({
-        userId,
-        fingerprint,
-        shouldExpandCard: true,
-      });
-
-      /**
-       * Cancel set up card if this card already exist as the payment method
-       */
-      if (cardData.isExist && cardData.type === 'paymentMethod') {
-        await this.detachOrRenewWithDetachDuplicatedCard(paymentMethodId, cardEntity, cardData);
-
-        return;
-      }
-    }
-
-    const savedCard = await this.cardRepository.save(cardEntity);
-
-    void Microservice.eventPublish(Event.SetupIntentSucceeded, savedCard);
-  }
-
-  /**
-   * Detach duplicated card
-   * @description Will detach duplicated card from Stripe customer
-   */
-  private async detachOrRenewWithDetachDuplicatedCard(
-    paymentMethodId: string,
-    cardEntity: Card,
-    { entity }: ICardDataByFingerprintResult,
-  ): Promise<void> {
-    if (!entity) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Failed to validate duplicated card. Card'),
-      });
-    }
-
-    /**
-     * Card properties for renewal card that must be identical
-     */
-    const cardProperties = ['lastDigits', 'brand', 'origin', 'fingerprint', 'funding', 'userId'];
-    const existingCardPaymentMethodId = CardRepository.extractPaymentMethodId(entity);
-
-    const { year: existingYear, month: existingMonth } = fromExpirationDate(entity.expired);
-    const { year: updatedYear, month: updatedMonth } = fromExpirationDate(cardEntity.expired);
-
-    /**
-     * Update renewal card details
-     * @description Stripe does not create new fingerprint if card was renewal with new expiration date
-     */
-    if (
-      entity.expired !== cardEntity.expired &&
-      // All other card details MUST be equal
-      _.isEqual(_.pick(entity, cardProperties), _.pick(cardEntity, cardProperties)) &&
-      // Check expiration dates
-      updatedYear >= existingYear &&
-      updatedMonth >= existingMonth
-    ) {
-      entity.expired = cardEntity.expired;
-
-      /**
-       * Update card details and next() detach new duplicated card
-       */
-      await this.sdk.paymentMethods.update(existingCardPaymentMethodId as string, {
-        card: {
-          exp_month: updatedMonth,
-          exp_year: updatedYear,
-        },
-      });
-
-      await this.cardRepository.save(entity);
-    }
-
-    /**
-     * If customer trying to add identical, not renewal card
-     * @description Detach duplicated card from Stripe customer
-     */
-    await this.sdk.paymentMethods.detach(paymentMethodId);
-
-    await Microservice.eventPublish(Event.CardNotCreatedDuplicated, cardEntity);
-  }
-
-  /**
    * Handles connect account update
    * @description Connect account event
    */
@@ -1761,8 +1008,9 @@ class Stripe extends Abstract {
       });
     }
 
-    const { userId, params } = await this.getCustomerByAccountId(
+    const { userId, params } = await CustomerRepository.getCustomerByAccountId(
       this.extractId(externalAccount.account),
+      this.manager,
     );
 
     if (!this.isExternalAccountIsBankAccount(externalAccount)) {
@@ -1844,7 +1092,7 @@ class Stripe extends Abstract {
 
   /**
    * Handles connect account deleted
-   * @description NOTE: Connect account event
+   * @description Connect account event
    */
   public async handleExternalAccountDeleted(event: StripeSdk.Event): Promise<void> {
     const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
@@ -1888,42 +1136,6 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Handles customer update
-   * @description Connect account event
-   */
-  public async handleAccountUpdated(event: StripeSdk.Event) {
-    /* eslint-disable camelcase */
-    const {
-      id,
-      payouts_enabled: isPayoutEnabled,
-      charges_enabled: isChargesEnabled,
-      capabilities,
-      business_profile,
-    } = event.data.object as StripeSdk.Account;
-
-    const customer = await this.getCustomerByAccountId(id);
-
-    if (!customer) {
-      throw new BaseException({
-        status: 404,
-        message: messages.getNotFoundMessage('Customer'),
-      });
-    }
-
-    /**
-     * Check if customer can accept payment
-     * @description Check if user correctly and verify setup connect account
-     */
-    customer.params.isPayoutEnabled = isPayoutEnabled;
-    customer.params.transferCapabilityStatus = capabilities?.transfers || 'inactive';
-    customer.params.isVerified = isChargesEnabled && capabilities?.transfers === 'active';
-    customer.params.accountSupportPhoneNumber = business_profile?.support_phone;
-
-    await this.customerRepository.save(customer);
-    /* eslint-enable camelcase */
-  }
-
-  /**
    * Handles completing of transaction inside stripe payment process
    */
   public async handleTransactionCompleted(event: StripeSdk.Event): Promise<Transaction | void> {
@@ -1943,7 +1155,7 @@ class Stripe extends Abstract {
     await this.transactionRepository.update(
       { transactionId: id },
       {
-        status: this.getStatus(paymentStatus as StripeTransactionStatus),
+        status: Parser.parseStripeTransactionStatus(paymentStatus as StripeTransactionStatus),
         amount: amountTotal,
         params: {
           checkoutStatus: status as StripeCheckoutStatus,
@@ -2150,7 +1362,7 @@ class Stripe extends Abstract {
     withTax,
   }: IPaymentIntentParams): Promise<[Transaction, Transaction]> {
     const { fees } = await remoteConfig();
-    const { instantPayoutPercent = 1 } = fees!;
+    const { instantPayoutPercent = 1 } = fees as IFees;
 
     const { sender: senderCustomer, receiver: receiverCustomer } =
       await this.getAndValidateTransactionContributors(userId, receiverId);
@@ -2463,8 +1675,8 @@ class Stripe extends Abstract {
       transactionId,
       amount: stripeRefund.amount,
       status: stripeRefund.status
-        ? this.getStatus(stripeRefund.status as StripeTransactionStatus)
-        : TransactionStatus.INITIAL,
+        ? Parser.parseStripeRefundStatus(stripeRefund.status as StripeRefundStatus)
+        : RefundStatus.INITIAL,
       ...(entityId ? { entityId } : {}),
       params: {
         refundId: stripeRefund.id,
@@ -2868,6 +2080,7 @@ class Stripe extends Abstract {
 
   /**
    * Returns id or extracted id from data
+   * @TODO: remove and use helper: extract id from stripe instance
    */
   private extractId<T extends { id: string }>(data: string | T): string {
     return typeof data === 'string' ? data : data.id;
@@ -2920,27 +2133,8 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Returns customer by account id
-   */
-  private async getCustomerByAccountId(accountId: string): Promise<Customer> {
-    const customer = await this.customerRepository
-      .createQueryBuilder('customer')
-      .where("customer.params ->> 'accountId' = :accountId", { accountId })
-      .getOne();
-
-    if (!customer) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Customer'),
-      });
-    }
-
-    return customer;
-  }
-
-  /**
    * Returns card by card id
-   * NOTE: Uses to search related connect account (external account) data
+   * @description Uses to search related connect account (external account) data
    */
   private getCardById(cardId: string): Promise<Card | undefined> {
     return this.cardRepository
@@ -2951,7 +2145,7 @@ class Stripe extends Abstract {
 
   /**
    * Returns bank account by bank account id
-   * NOTE: Uses to search related connect account (external account) data
+   * @description Uses to search related connect account (external account) data
    */
   private getBankAccountById(bankAccountId: string): Promise<BankAccount | undefined> {
     return this.bankAccountRepository

@@ -10,10 +10,13 @@ import Card from '@entities/card';
 import Cart from '@entities/cart';
 import Coupon from '@entities/coupon';
 import Customer from '@entities/customer';
+import Dispute from '@entities/dispute';
+import EvidenceDetails from '@entities/evidence-details';
 import Price from '@entities/price';
 import Product from '@entities/product';
 import Refund from '@entities/refund';
-import Transaction, { IParams as ITransactionEntityParams } from '@entities/transaction';
+import Transaction from '@entities/transaction';
+import type { IParams as ITransactionEntityParams } from '@entities/transaction';
 import messages from '@helpers/validators/messages';
 
 export interface ICardParams {
@@ -112,6 +115,16 @@ abstract class Abstract {
   /**
    * @protected
    */
+  protected readonly disputeRepository: Repository<Dispute>;
+
+  /**
+   * @protected
+   */
+  protected readonly evidenceDetailsRepository: Repository<EvidenceDetails>;
+
+  /**
+   * @protected
+   */
   protected readonly refundRepository: Repository<Refund>;
 
   /**
@@ -152,6 +165,8 @@ abstract class Abstract {
     this.cardRepository = manager.getRepository(Card);
     this.bankAccountRepository = manager.getRepository(BankAccount);
     this.couponRepository = manager.getRepository(Coupon);
+    this.disputeRepository = manager.getRepository(Dispute);
+    this.evidenceDetailsRepository = manager.getRepository(EvidenceDetails);
     this.methods = methods;
     this.sdk = new StripeSdk(apiKey, stripeConfig);
     this.manager = manager;

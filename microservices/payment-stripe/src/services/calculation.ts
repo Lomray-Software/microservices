@@ -5,6 +5,7 @@ import StripePaymentMethods from '@constants/stripe-payment-methods';
 import TaxBehaviour from '@constants/tax-behaviour';
 import TransactionRole from '@constants/transaction-role';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
+import type IFees from '@interfaces/fees';
 import type ITax from '@interfaces/tax';
 import type ITaxes from '@interfaces/taxes';
 
@@ -48,17 +49,17 @@ class Calculation {
     processingAmountUnit: number;
   }> {
     const { fees } = await remoteConfig();
-    const { paymentPercent, stableUnit } = fees!;
+    const { paymentPercent, stablePaymentUnit } = fees as IFees;
 
     if (feesPayer === TransactionRole.SENDER) {
       const processingAmountUnit = Math.round(
-        (amountUnit + stableUnit) / (1 - paymentPercent / 100),
+        (amountUnit + stablePaymentUnit) / (1 - paymentPercent / 100),
       );
 
       return { processingAmountUnit, stripeFeeUnit: processingAmountUnit - amountUnit };
     }
 
-    const stripeFeeUnit = getPercentFromAmount(amountUnit, paymentPercent) + stableUnit;
+    const stripeFeeUnit = getPercentFromAmount(amountUnit, paymentPercent) + stablePaymentUnit;
 
     return { processingAmountUnit: amountUnit - stripeFeeUnit, stripeFeeUnit };
   }
@@ -76,7 +77,7 @@ class Calculation {
     }: IGetPaymentIntentTaxParams,
   ): Promise<IPaymentIntentTax> {
     const { taxes } = await remoteConfig();
-    const { stableUnit, autoCalculateFeeUnit } = taxes!;
+    const { stableUnit, autoCalculateFeeUnit } = taxes as ITaxes;
 
     const tax = await this.computePaymentIntentTax(sdk, {
       entityId,
