@@ -2,6 +2,7 @@ import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import sinon from 'sinon';
+import { configMock } from '@__mocks__/config';
 import * as remoteConfig from '@config/remote';
 import Factory from '@services/payment-gateway/factory';
 import Stripe from '@services/payment-gateway/stripe';
@@ -13,6 +14,7 @@ describe('services/payment-gateway/factory', () => {
     },
     paymentMethods: ['bancontact', 'card'],
     apiKey: 'fake-api-key',
+    ...configMock,
   };
 
   afterEach(() => {
@@ -29,7 +31,7 @@ describe('services/payment-gateway/factory', () => {
     expect(stripeInstance).to.be.an.instanceOf(Stripe);
   });
 
-  it('should create a Stripe instance with the provided parameters', async () => {
+  it('should throw error: invalid payment options or api key or payment methods', async () => {
     const configs = [
       {},
       { apikey: remoteConfigMock.apiKey },

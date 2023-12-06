@@ -2,7 +2,8 @@ const configMock = {
   fees: {
     paymentPercent: 2.9,
     stablePaymentUnit: 30, // $0.3
-    stableDisputeFee: 1500, // $15
+    stableDisputeFeeUnit: 1500, // $15
+    instantPayoutPercent: 1,
   },
   taxes: {
     defaultPercent: 8,
