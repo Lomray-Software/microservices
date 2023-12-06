@@ -1,0 +1,19 @@
+### Update notice (view)
+POST http://127.0.0.1:8001/ms/notification
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "notice.update",
+  "params": {
+    "fields": {
+      "isViewed": true
+    },
+    "query": {
+      "where": {
+        "id": "4beace43-5231-400d-b0cf-40bc07cabe2a"
+      }
+    }
+  }
+}
