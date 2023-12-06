@@ -127,7 +127,7 @@ class Charge {
           chargedFees,
           netWorth,
           params: {
-            issuedAt: new Date(Number(issuedAt)),
+            issuedAt: new Date(Number(issuedAt) * 1000),
             currency: currency as TCurrency,
             isChargeRefundable,
           },
