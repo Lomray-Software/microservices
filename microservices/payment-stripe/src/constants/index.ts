@@ -14,7 +14,7 @@ const constants = {
   MS_PAYOUT_COEFF: Number(process.env.MS_PAYOUT_COEFF) ?? 0.3,
   MS_FEES:
     process.env.MS_FEES ??
-    '{ "stablePaymentUnit": 30, "paymentPercent": 2.9, "instantPayoutPercent": 1, "stableDisputeFee": 1500 }',
+    '{ "stablePaymentUnit": 30, "paymentPercent": 2.9, "instantPayoutPercent": 1, "stableDisputeFeeUnit": 1500 }',
   MS_TAXES:
     process.env.MS_TAXES ?? '{ "defaultPercent": 8, "stableUnit": 50, "autoCalculateFeeUnit": 5 }',
   SETUP_INTENT_USAGE: (process.env.SETUP_INTENT_USAGE || 'off_session') as TSetupIntentUsage,

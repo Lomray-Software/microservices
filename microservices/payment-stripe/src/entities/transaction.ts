@@ -200,6 +200,7 @@ class Transaction {
   @IsValidStripeId()
   @Length(1, 66)
   @IsUndefinable()
+  @IsNullable()
   bankAccountId: string | null;
 
   @Column({ type: 'varchar', length: 66, default: null })

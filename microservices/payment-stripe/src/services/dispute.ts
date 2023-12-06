@@ -3,6 +3,7 @@ import { Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
 import StripeSdk from 'stripe';
 import { EntityManager } from 'typeorm';
+import remoteConfig from '@config/remote';
 import DisputeStatus from '@constants/dispute-status';
 import StripeDisputeReason from '@constants/stripe-dispute-reason';
 import StripeDisputeStatus from '@constants/stripe-dispute-status';
@@ -55,6 +56,9 @@ class Dispute {
     disputeEntity.chargedFees = chargedFees;
     disputeEntity.chargedAmount = chargedAmount;
     disputeEntity.netWorth = netWorth;
+    disputeEntity.params.currentDisputeFee =
+      // If dispute is injury fees will not be charged
+      chargedFees || (await remoteConfig())?.fees?.stableDisputeFeeUnit || 0;
 
     await manager.getRepository(DisputeEntity).save(disputeEntity);
     await Dispute.updateTransactionsDisputeStatus(manager, disputeEntity.transactionId);

@@ -127,7 +127,7 @@
       },
       "fees": {
         "stablePaymentUnit": 30,
-        "stableDisputeFee": 1500,
+        "stableDisputeFeeUnit": 1500,
         "paymentPercent": 2.9,
         "instantPayoutPercent": 1
       },
