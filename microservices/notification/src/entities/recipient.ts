@@ -1,5 +1,5 @@
 import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsObject, Length } from 'class-validator';
+import { Allow, IsObject, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -8,7 +8,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
 import Message from '@entities/message';
@@ -25,7 +25,11 @@ import Task from '@entities/task';
 @Unique(['userId', 'taskId'])
 @Entity()
 class Recipient {
-  @PrimaryColumn('uuid')
+  @PrimaryGeneratedColumn('uuid')
+  @Allow()
+  id: string;
+
+  @Column({ type: 'uuid' })
   @Length(1, 36)
   userId: string;
 
