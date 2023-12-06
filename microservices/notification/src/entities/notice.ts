@@ -49,6 +49,7 @@ class Notice {
   @Column({ type: 'uuid', default: null })
   @Length(1, 36)
   @IsUndefinable()
+  @IsNullable()
   taskId: string | null;
 
   @Column({ type: 'varchar' })
