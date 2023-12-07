@@ -12,6 +12,8 @@ import CrudCoupon from '@methods/coupon/crud';
 import CustomerCreate from '@methods/customer/create';
 import CrudCustomer from '@methods/customer/crud';
 import CustomerRemove from '@methods/customer/remove';
+import CrudDispute from '@methods/dispute/crud';
+import CrudEvidenceDetails from '@methods/evidence-details/crud';
 import PriceCreate from '@methods/price/create';
 import CrudPrice from '@methods/price/crud';
 import ProductCreate from '@methods/product/create';
@@ -85,6 +87,8 @@ export default (ms: Microservice): void => {
     'promo-code': {
       ...CrudPromoCode,
     },
+    dispute: CrudDispute,
+    'evidence-details': CrudEvidenceDetails,
   };
 
   /**
