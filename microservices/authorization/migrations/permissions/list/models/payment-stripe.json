@@ -65,7 +65,7 @@
       },
       "product": "payment-stripe.Product"
     },
-    "createdAt": "2023-05-26T15:01:39.186Z"
+    "createdAt": "2023-05-26T11:01:39.186Z"
   },
   {
     "microservice": "payment-stripe",
@@ -139,6 +139,38 @@
         },
         "out": {
           "user": "allow"
+        }
+      },
+      "taxCalculationId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "taxTransactionId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "chargeId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "applicationFeeId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
         }
       },
       "title": {
@@ -230,6 +262,22 @@
         },
         "out": {
           "user": "allow"
+        }
+      },
+      "chargeRefundStatus": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "isDisputed": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
         }
       },
       "params": {
@@ -467,6 +515,30 @@
         }
       },
       "brand": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "origin": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "country": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "postalCode": {
         "in": {
           "admin": "allow"
         },
@@ -2278,10 +2350,430 @@
           "admin": "allow"
         },
         "out": {
-          "admin": "allow"
+          "user": "allow"
         }
       }
     },
     "createdAt": "2023-11-07T16:05:58.208Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.EvidenceDetails",
+    "title": "Evidence Details",
+    "schema": {
+      "disputeId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "hasEvidence": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "submissionCount": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "dueBy": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "isPastBy": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "dispute": "payment-stripe.Dispute"
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.Dispute",
+    "title": "Dispute",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "transactionId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "disputeId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "amount": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "chargedAmount": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "chargedFees": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "netWorth": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "reason": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "status": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "metadata": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "evidenceDetails": "payment-stripe.EvidenceDetails"
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ListOutputParams.778a551ef1b9ba15c6786969e4dc459f",
+    "title": "List Output Params",
+    "schema": {
+      "list": "payment-stripe.Dispute",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ViewOutputParams.fa4bcae3eb4fc9afc8c3cbed3aa1875a",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "payment-stripe.Dispute"
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateRequestParams.9b5f728757aedfc864ca5cfc43379254",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "payment-stripe.Dispute"
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateOutputParams.fa4bcae3eb4fc9afc8c3cbed3aa1875a",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "payment-stripe.Dispute"
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateRequestParams.9b5f728757aedfc864ca5cfc43379254",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "payment-stripe.Dispute",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateOutputParams.fa4bcae3eb4fc9afc8c3cbed3aa1875a",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "payment-stripe.Dispute"
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.RemoveOutputParams.f7990294279fb3fc213b15765dd18265",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "payment-stripe.Dispute",
+      "entities": "payment-stripe.Dispute"
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ListOutputParams.67428bb2c25e3481efbd870d29a1d881",
+    "title": "List Output Params",
+    "schema": {
+      "list": "payment-stripe.EvidenceDetails",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ViewOutputParams.f92fcb7a35a65777bfc99a5b4d799306",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "payment-stripe.EvidenceDetails"
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateRequestParams.d6a14ca9ecafe5319b8144294fe95b7a",
+    "title": "Create Request Params",
+    "schema": {
+      "fields": "payment-stripe.EvidenceDetails"
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.CreateOutputParams.f92fcb7a35a65777bfc99a5b4d799306",
+    "title": "Create Output Params",
+    "schema": {
+      "entity": "payment-stripe.EvidenceDetails"
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateRequestParams.d6a14ca9ecafe5319b8144294fe95b7a",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "payment-stripe.EvidenceDetails",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateOutputParams.f92fcb7a35a65777bfc99a5b4d799306",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "payment-stripe.EvidenceDetails"
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.RemoveOutputParams.f0ac9a22cb497d080de3dcdd23b50e82",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "payment-stripe.EvidenceDetails",
+      "entities": "payment-stripe.EvidenceDetails"
+    },
+    "createdAt": "2023-12-07T11:29:06.960Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.Refund",
+    "title": "Refund",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "transactionId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "amount": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "entityId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "status": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-08-21T19:01:40.516Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ListOutputParams.98098d6518d8c64a3b26c372e77d9eaf",
+    "title": "List Output Params",
+    "schema": {
+      "list": "payment-stripe.Refund",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2023-08-21T19:01:40.516Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ViewOutputParams.2547eb5419ade8cc4d4542f118bd0b66",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "payment-stripe.Refund"
+    },
+    "createdAt": "2023-08-21T19:01:40.516Z"
   }
 ]

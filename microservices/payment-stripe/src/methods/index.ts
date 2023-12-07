@@ -88,7 +88,7 @@ export default (ms: Microservice): void => {
       ...CrudPromoCode,
     },
     dispute: CrudDispute,
-    evidenceDetails: CrudEvidenceDetails,
+    'evidence-details': CrudEvidenceDetails,
   };
 
   /**
