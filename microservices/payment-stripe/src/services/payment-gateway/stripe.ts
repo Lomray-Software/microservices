@@ -580,12 +580,7 @@ class Stripe extends Abstract {
 
   /**
    * Get the webhook from stripe and handle deciding on type of event
-   * @description NOTE: If handlers can be used for connect and master account - wrap it in handlers callbacks
-   * Example (eventType could be 'connect', 'account' or other):
-   * const fullWebhookEventName = {
-   *  [firstEventType]: firstCallback,
-   *  [secondEventType]: secondCallback
-   * }
+   * @description If handlers can be used for connect and master account - wrap it in handlers callbacks
    */
   public async handleWebhookEvent(
     payload: string,
@@ -594,6 +589,25 @@ class Stripe extends Abstract {
     webhookType: string,
   ): Promise<void> {
     const event = this.sdk.webhooks.constructEvent(payload, signature, webhookKey);
+
+    try {
+      await this.processWebhookEvent(event, webhookType);
+    } catch (error) {
+      const errorMessage = `Failed to process webhook. Event type: "${
+        event.type
+      }", webhook type: "${webhookType}". ${error.message as string} `;
+
+      Log.error(errorMessage);
+
+      // Throw error for Stripe webhook retry
+      throw new Error(errorMessage);
+    }
+  }
+
+  /**
+   * Process webhook event
+   */
+  private async processWebhookEvent(event: StripeSdk.Event, webhookType: string): Promise<void> {
     const webhookHandlers = WebhookHandlers.init(this.manager);
 
     switch (event.type) {
@@ -609,38 +623,38 @@ class Stripe extends Abstract {
        * Account events
        */
       case 'account.updated': {
-        const accountUpdatedHandlers = {
-          connect: webhookHandlers.account.handleAccountUpdated(event),
+        const handlers = {
+          connect: () => webhookHandlers.account.handleAccountUpdated(event),
         };
 
-        await accountUpdatedHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
       case 'account.external_account.created': {
-        const accountExternalAccountCreatedHandlers = {
-          connect: this.handleExternalAccountCreated(event),
+        const handlers = {
+          connect: () => this.handleExternalAccountCreated(event),
         };
 
-        await accountExternalAccountCreatedHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
       case 'account.external_account.updated': {
-        const accountExternalAccountUpdatedHandlers = {
-          connect: this.handleExternalAccountUpdated(event),
+        const handlers = {
+          connect: () => this.handleExternalAccountUpdated(event),
         };
 
-        await accountExternalAccountUpdatedHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
       case 'account.external_account.deleted': {
-        const accountExternalAccountDeletedHandlers = {
-          connect: this.handleExternalAccountDeleted(event),
+        const handlers = {
+          connect: () => this.handleExternalAccountDeleted(event),
         };
 
-        await accountExternalAccountDeletedHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
@@ -648,30 +662,30 @@ class Stripe extends Abstract {
        * Payment method events
        */
       case 'setup_intent.succeeded': {
-        const setupIntentSucceededHandlers = {
-          account: webhookHandlers.setupIntent.handleSetupIntentSucceed(event, this.sdk),
+        const handlers = {
+          account: () => webhookHandlers.setupIntent.handleSetupIntentSucceed(event, this.sdk),
         };
 
-        await setupIntentSucceededHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
       case 'payment_method.updated':
       case 'payment_method.automatically_updated': {
-        const paymentMethodUpdatedAutomaticallyUpdatedHandlers = {
-          account: webhookHandlers.paymentMethod.handlePaymentMethodUpdated(event),
+        const handlers = {
+          account: () => webhookHandlers.paymentMethod.handlePaymentMethodUpdated(event),
         };
 
-        await paymentMethodUpdatedAutomaticallyUpdatedHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
       case 'payment_method.detached': {
-        const paymentMethodDetachedHandlers = {
-          account: webhookHandlers.paymentMethod.handlePaymentMethodDetached(event),
+        const handlers = {
+          account: () => webhookHandlers.paymentMethod.handlePaymentMethodDetached(event),
         };
 
-        await paymentMethodDetachedHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
@@ -679,11 +693,11 @@ class Stripe extends Abstract {
        * Transfer events
        */
       case 'transfer.reversed': {
-        const transferReversedHandlers = {
-          account: webhookHandlers.transfer.transferReversed(event),
+        const handlers = {
+          account: () => webhookHandlers.transfer.transferReversed(event),
         };
 
-        await transferReversedHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
@@ -693,20 +707,21 @@ class Stripe extends Abstract {
       case 'payment_intent.processing':
       case 'payment_intent.succeeded':
       case 'payment_intent.canceled': {
-        const paymentIntentProcessingSucceededCanceledHandlers = {
-          account: webhookHandlers.paymentIntent.handlePaymentIntent(event, this.sdk),
+        const handlers = {
+          account: () => webhookHandlers.paymentIntent.handlePaymentIntent(event, this.sdk),
         };
 
-        await paymentIntentProcessingSucceededCanceledHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
       case 'payment_intent.payment_failed': {
-        const paymentIntentPaymentFailedHandlers = {
-          account: webhookHandlers.paymentIntent.handlePaymentIntentPaymentFailed(event, this.sdk),
+        const handlers = {
+          account: () =>
+            webhookHandlers.paymentIntent.handlePaymentIntentPaymentFailed(event, this.sdk),
         };
 
-        await paymentIntentPaymentFailedHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
@@ -714,23 +729,21 @@ class Stripe extends Abstract {
        * Application fee events
        */
       case 'application_fee.refund.updated': {
-        const applicationFeeRefundUpdatedHandlers = {
-          account: webhookHandlers.applicationFee.handleApplicationFeeRefundUpdated(
-            event,
-            this.sdk,
-          ),
+        const handlers = {
+          account: () =>
+            webhookHandlers.applicationFee.handleApplicationFeeRefundUpdated(event, this.sdk),
         };
 
-        await applicationFeeRefundUpdatedHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
       case 'application_fee.refunded': {
-        const applicationFeeRefundedHandlers = {
-          account: webhookHandlers.applicationFee.handleApplicationFeeRefunded(event),
+        const handlers = {
+          account: () => webhookHandlers.applicationFee.handleApplicationFeeRefunded(event),
         };
 
-        await applicationFeeRefundedHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
@@ -738,11 +751,11 @@ class Stripe extends Abstract {
        * Refund events
        */
       case 'charge.refund.updated': {
-        const chargeRefundUpdatedHandlers = {
-          account: webhookHandlers.charge.handleRefundUpdated(event, this.manager),
+        const handlers = {
+          account: () => webhookHandlers.charge.handleRefundUpdated(event, this.manager),
         };
 
-        await chargeRefundUpdatedHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
@@ -750,31 +763,31 @@ class Stripe extends Abstract {
        * Charge events
        */
       case 'charge.refunded': {
-        const chargeRefundedHandlers = {
-          account: webhookHandlers.charge.handleChargeRefunded(event, this.manager),
+        const handlers = {
+          account: () => webhookHandlers.charge.handleChargeRefunded(event, this.manager),
         };
 
-        await chargeRefundedHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
       case 'charge.dispute.created': {
-        const chargeDisputeCreatedHandlers = {
-          account: webhookHandlers.charge.handleChargeDisputeCreated(event, this.manager),
+        const handlers = {
+          account: () => webhookHandlers.charge.handleChargeDisputeCreated(event, this.manager),
         };
 
-        await chargeDisputeCreatedHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
       case 'charge.dispute.updated':
       case 'charge.dispute.closed':
       case 'charge.dispute.funds_reinstated': {
-        const chargeDisputeUpdatedClosedFundsReinstatedHandlers = {
-          account: webhookHandlers.charge.handleChargeDisputeUpdated(event, this.manager),
+        const handlers = {
+          account: () => webhookHandlers.charge.handleChargeDisputeUpdated(event, this.manager),
         };
 
-        await chargeDisputeUpdatedClosedFundsReinstatedHandlers?.[webhookType];
+        await handlers?.[webhookType]();
         break;
       }
 
@@ -782,7 +795,11 @@ class Stripe extends Abstract {
        * Customer events
        */
       case 'customer.updated': {
-        await webhookHandlers.customer.handleCustomerUpdated(event, this.manager);
+        const handlers = {
+          account: () => webhookHandlers.customer.handleCustomerUpdated(event, this.manager),
+        };
+
+        await handlers?.[webhookType]();
         break;
       }
     }
