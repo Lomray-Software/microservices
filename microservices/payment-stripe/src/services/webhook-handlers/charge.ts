@@ -1,4 +1,3 @@
-import { BaseException } from '@lomray/microservice-nodejs-lib';
 import StripeSdk from 'stripe';
 import { EntityManager } from 'typeorm';
 import StripeDisputeReason from '@constants/stripe-dispute-reason';
@@ -44,10 +43,7 @@ class Charge {
     } = event.data.object as StripeSdk.Charge;
 
     if (!paymentIntent || !status) {
-      throw new BaseException({
-        status: 500,
-        message: "Payment intent id or refund status wasn't provided.",
-      });
+      throw new Error("Payment intent id or charge status wasn't provided.");
     }
 
     const transactions = await transactionRepository.find({
@@ -55,12 +51,7 @@ class Charge {
     });
 
     if (!transactions.length) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage(
-          'Failed to handle charge refunded event. Debit or credit transaction',
-        ),
-      });
+      throw new Error(messages.getNotFoundMessage('Debit or credit transaction'));
     }
 
     transactions.forEach((transaction) => {
@@ -97,10 +88,7 @@ class Charge {
     } = event.data.object as StripeSdk.Dispute;
 
     if (!paymentIntent || !status) {
-      throw new BaseException({
-        status: 500,
-        message: "Dispute was not handled. Payment intent or dispute status wasn't provided.",
-      });
+      throw new Error("Dispute was not handled. Payment intent or dispute status wasn't provided.");
     }
 
     await manager.transaction(async (entityManager) => {
@@ -156,11 +144,7 @@ class Charge {
     const dispute = event.data.object as StripeSdk.Dispute;
 
     if (!dispute?.payment_intent || !dispute.status) {
-      throw new BaseException({
-        status: 500,
-        message: "Dispute was not handled. Payment intent or dispute status wasn't provided.",
-        payload: { eventName: event.type },
-      });
+      throw new Error("Dispute was not handled. Payment intent or dispute status wasn't provided.");
     }
 
     await manager.transaction(async (entityManager) => {
@@ -177,14 +161,7 @@ class Charge {
       });
 
       if (!disputeEntity) {
-        throw new BaseException({
-          status: 500,
-          message: messages.getNotFoundMessage('Dispute was not updated. Dispute'),
-          payload: {
-            transactionId,
-            eventName: event.type,
-          },
-        });
+        throw new Error(messages.getNotFoundMessage(`Dispute transaction "${transactionId}"`));
       }
 
       await DisputeService.update(disputeEntity, dispute, entityManager);
@@ -205,10 +182,7 @@ class Charge {
     } = event.data.object as StripeSdk.Refund;
 
     if (!paymentIntent || !status) {
-      throw new BaseException({
-        status: 500,
-        message: "Payment intent id or refund status wasn't provided.",
-      });
+      throw new Error("Payment intent id or refund status wasn't provided.");
     }
 
     const refund = await refundRepository
@@ -217,19 +191,13 @@ class Charge {
       .getOne();
 
     if (!refund) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Failed to update refund. Refund'),
-      });
+      throw new Error(messages.getNotFoundMessage('Failed to update refund. Refund'));
     }
 
     const refundStatus = Parser.parseStripeRefundStatus(status as StripeRefundStatus);
 
     if (!refundStatus) {
-      throw new BaseException({
-        status: 500,
-        message: 'Failed to get transaction status for refund.',
-      });
+      throw new Error('Failed to get transaction status for refund.');
     }
 
     refund.status = refundStatus;
