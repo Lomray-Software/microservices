@@ -45,6 +45,7 @@ const webhook = Endpoint.custom(
 
     const service = await Factory.create(getManager());
 
+    // Should throw an error if webhook handle was failed
     await service.handleWebhookEvent(
       rawBody,
       payload.headers['stripe-signature'] as string,
@@ -52,7 +53,9 @@ const webhook = Endpoint.custom(
       query.id,
     );
 
-    return { isHandled: true };
+    return {
+      isHandled: true,
+    };
   },
 );
 

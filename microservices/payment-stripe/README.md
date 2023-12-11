@@ -30,7 +30,8 @@ This microservice provides payments mechanism for stipe.
 - `MS_PAYMENT_METHODS` - Payment methods allowed using in Stripe. Default: `'["bancontact", "card"]'`
 - `MS_WEBHOOK_KEYS` - Stripe webhook keys to connect ms and work with stripe webhook service. Example: `{"myId":"whsec_c6332a6b339173127d2e6c813112e2f2323b4b2b10eea5ac17c5649a60cf335e"}`
 - `MS_PAYOUT_COEFF` - Number for calculating amount of money for transferring to the product owners. Default: `0.3`
-- `MS_FEES` - Fees that takes while creating payment intent. Default: `'{ "stableUnit": 30, "paymentPercent": 2.9 }'`
+- `MS_FEES` - Fees that takes while creating payment intent. Default: `'{ "stablePaymentUnit": 30, "paymentPercent": 2.9, "stableDisputeFee": 1500, "instantPayoutPercent": 1 }'`
+- `MS_TAX` - Tax that takes while creating payment intent. Default: `'{ "defaultPercent": 8, "stableUnit": 50, "autoCalculateFeeUnit": 5 }'`
 - [See full list `COMMON ENVIRONMENTS`](https://github.com/Lomray-Software/microservice-helpers#common-environments)
 
 ### <a id="how-to-run"></a>HOW TO RUN:
@@ -79,9 +80,13 @@ __Run on JS__: ~110 MB PEAK / ~80 MB
 ### <a id="memory-usage"></a>STRIPE:
 
 Run stripe cli for test dev env:
-
+1. Account events
 ```bash
-stripe listen --forward-to 'http://localhost:3000/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=connect'
+stripe listen --forward-to 'http://localhost:3000/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=account'
+```
+2. Connect events
+```bash
+stripe listen --forward-connect-to 'http://localhost:3000/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=connect'
 ```
 
 ### <a id="webhooks"></a>WEBHOOKS:
@@ -89,8 +94,8 @@ stripe listen --forward-to 'http://localhost:3000/webhook/payment-stripe.stripe.
 into your hosted endpoint listeners in the Stripe dashboard.
 2. For local development: use stripe-cli
 
-### <a id="webhooks"></a>DEFINITIONS:
-#### <a id="webhooks"></a>Fees:
+### <a id="definitions"></a>DEFINITIONS:
+#### <a id="definitions-fees"></a>Fees:
 1. Application fees - collected amount by Platform from transaction.
 2. Tax - collected taxes (included in application fees).
 3. Fee - Platform fee, Stripe fee (included in application fees).
@@ -101,8 +106,27 @@ into your hosted endpoint listeners in the Stripe dashboard.
 7. Base fee - platform + stripe + create tax transaction fee
 8. Personal fee - base fee + personal (debit or credit extra fee)
 
-#### <a id="webhooks"></a>Tax:
+#### <a id="definitions-tax"></a>Tax:
 1. Tax calculation (Tax Calculation API) - calculated by Stripe tax for transaction (e.g. payment intent)
 2. Tax transaction (Tax Transaction API) - Stripe tax transaction presented in Stripe Tax reports
- 
+
+### <a id="testing"></a> TESTING:
+#### <a id="testing-stripe"></a> STRIPE:
+Original reference: https://stripe.com/docs/testing
+
+#### <a id="testing-stripe-cards"></a> CARDS:
+
+Use these test cards to simulate successful payments from North and South America.
+1. United States (US)	- 4242424242424242 - Visa
+
+To simulate a declined payment with a successfully attached card, use the next one.
+1. Decline after attaching	- 4000000000000341	- Attaching this card to a Customer object succeeds, but attempts to charge the customer fail.
+
+To simulate a disputed transaction, use the test cards in this section. Then, to simulate winning or losing the dispute, provide winning or losing evidence.
+1. Fraudulent	- 4000000000000259 - With default account settings, charge succeeds, only to be disputed as fraudulent. This type of dispute is protected after 3D Secure authentication.
+2. Not received	- 4000000000002685	- With default account settings, charge succeeds, only to be disputed as product not received. This type of dispute isn’t protected after 3D Secure authentication.
+3. Inquiry	- 4000000000001976	- With default account settings, charge succeeds, only to be disputed as an inquiry.
+4. Warning	- 4000000000005423	- With default account settings, charge succeeds, only to receive an early fraud warning.
+5. Multiple disputes	- 4000000404000079	- With default account settings, charge succeeds, only to be disputed multiple times.
+
 Rebuild: 1

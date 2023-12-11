@@ -902,5 +902,200 @@
     "modelIn": "payment-stripe.DashboardLoginLinkInput",
     "modelOut": "payment-stripe.DashboardLoginLinkOutput",
     "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "refund.view",
+    "description": "Returns Refund by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-22T04:31:37.656Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "payment-stripe.ViewOutputParams.2547eb5419ade8cc4d4542f118bd0b66",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "dispute.count",
+    "description": "Returns count of Dispute by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-12-07T11:29:06.960Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "dispute.list",
+    "description": "Returns list of Dispute by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-12-07T11:29:06.960Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "payment-stripe.ListOutputParams.778a551ef1b9ba15c6786969e4dc459f",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "dispute.view",
+    "description": "Returns Dispute by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-12-07T11:29:06.960Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "payment-stripe.ViewOutputParams.fa4bcae3eb4fc9afc8c3cbed3aa1875a",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "dispute.create",
+    "description": "Create a new Dispute",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-12-07T11:29:06.960Z",
+    "modelIn": "payment-stripe.CreateRequestParams.9b5f728757aedfc864ca5cfc43379254",
+    "modelOut": "payment-stripe.CreateOutputParams.fa4bcae3eb4fc9afc8c3cbed3aa1875a",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "dispute.update",
+    "description": "Update Dispute by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-12-07T11:29:06.960Z",
+    "modelIn": "payment-stripe.UpdateRequestParams.9b5f728757aedfc864ca5cfc43379254",
+    "modelOut": "payment-stripe.UpdateOutputParams.fa4bcae3eb4fc9afc8c3cbed3aa1875a",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "dispute.remove",
+    "description": "Remove Dispute by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-12-07T11:29:06.960Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "payment-stripe.RemoveOutputParams.f7990294279fb3fc213b15765dd18265",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "evidence-details.count",
+    "description": "Returns count of EvidenceDetails by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-12-07T11:29:06.960Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "evidence-details.list",
+    "description": "Returns list of EvidenceDetails by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-12-07T11:29:06.960Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "payment-stripe.ListOutputParams.67428bb2c25e3481efbd870d29a1d881",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "evidence-details.view",
+    "description": "Returns EvidenceDetails by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-12-07T11:29:06.960Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "payment-stripe.ViewOutputParams.f92fcb7a35a65777bfc99a5b4d799306",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "evidence-details.create",
+    "description": "Create a new EvidenceDetails",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-12-07T11:29:06.960Z",
+    "modelIn": "payment-stripe.CreateRequestParams.d6a14ca9ecafe5319b8144294fe95b7a",
+    "modelOut": "payment-stripe.CreateOutputParams.f92fcb7a35a65777bfc99a5b4d799306",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "evidence-details.update",
+    "description": "Update EvidenceDetails by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-12-07T11:29:06.960Z",
+    "modelIn": "payment-stripe.UpdateRequestParams.d6a14ca9ecafe5319b8144294fe95b7a",
+    "modelOut": "payment-stripe.UpdateOutputParams.f92fcb7a35a65777bfc99a5b4d799306",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "evidence-details.remove",
+    "description": "Remove EvidenceDetails by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-12-07T11:29:06.960Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "payment-stripe.RemoveOutputParams.f0ac9a22cb497d080de3dcdd23b50e82",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "refund.count",
+    "description": "Returns count of Refund by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-22T04:31:37.656Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "refund.list",
+    "description": "Returns list of Refund by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2023-08-22T04:31:37.656Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "payment-stripe.ListOutputParams.98098d6518d8c64a3b26c372e77d9eaf",
+    "methodFilters": []
   }
 ]

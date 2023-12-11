@@ -696,6 +696,14 @@
     "alias": "notification.Recipient",
     "title": "Recipient",
     "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "userId": {
         "in": {
           "admin": "allow"

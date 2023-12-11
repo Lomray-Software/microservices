@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import type RefundAmountType from '@constants/refund-amount-type';
+import RefundStatus from '@constants/refund-status';
 import TransactionStatus from '@constants/transaction-status';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -72,13 +73,10 @@ class Refund {
   @IsUndefinable()
   params: IParams;
 
-  @JSONSchema({
-    description: 'Status should be started with the refund prefix',
-  })
-  @Column({ type: 'enum', enum: TransactionStatus, default: TransactionStatus.INITIAL })
+  @Column({ type: 'enum', enum: RefundStatus, default: RefundStatus.INITIAL })
   @IsEnum(TransactionStatus)
   @IsUndefinable()
-  status: TransactionStatus;
+  status: RefundStatus;
 
   @IsTypeormDate()
   @CreateDateColumn()

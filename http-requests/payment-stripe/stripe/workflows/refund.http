@@ -9,11 +9,13 @@ Content-Type: application/json
   "params": {
     "userId": "68827b31-33e9-45b5-bf9f-8823b993d0ef",
     "receiverId": "0b0be2e8-1013-4be8-8e7f-a27c4b0a5e45",
-    "entityId": "entity08-ecd6-483a-9117-2af2e104b5f8",
+    "entityId": "9bea9620-b8fb-4675-a8cc-593a98b8ffe5",
+    "cardId": "6da843ff-01da-4363-872f-c415f2976d66",
     "entityCost": 100,
     "feesPayer": "sender",
-    "title": "Test 5: campaign ticket with tax",
-    "withTax": true
+    "title": "7 fraudulent dispute card",
+    "applicationPaymentPercent": 3,
+    "withTax": false
   }
 }
 
@@ -26,8 +28,8 @@ Content-Type: application/json
   "id": "1",
   "method": "stripe.refund",
   "params": {
-    "transactionId": "pi_3NkNQYAmQ4asS8PS13Dz4Z0x",
-    "amount": 100
+    "transactionId": "pi_3OCWa6FpQjUWTpHe1cPPDiCC",
+    "amount": 200
   }
 }
 
@@ -40,7 +42,7 @@ Content-Type: application/json
   "id": "1",
   "method": "stripe.refund",
   "params": {
-    "transactionId": "pi_3NiFSQAmQ4asS8PS0oUkim0t"
+    "transactionId": "pi_3OCT0JFpQjUWTpHe01ks0b1T"
   }
 }
 
@@ -53,8 +55,8 @@ Content-Type: application/json
   "id": "1",
   "method": "stripe.refund",
   "params": {
-    "transactionId": "pi_3NkNTgAmQ4asS8PS1b9pWug7",
-    "refundAmountType": "entityCost"
+    "transactionId": "pi_3OCTWzFpQjUWTpHe1Fon6ebZ",
+    "refundAmountType": "revenue"
   }
 }
 
