@@ -80,9 +80,13 @@ __Run on JS__: ~110 MB PEAK / ~80 MB
 ### <a id="memory-usage"></a>STRIPE:
 
 Run stripe cli for test dev env:
-
+1. Account events
 ```bash
-stripe listen --forward-to 'http://localhost:3000/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=connect'
+stripe listen --forward-to 'http://localhost:3000/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=account'
+```
+2. Connect events
+```bash
+stripe listen --forward-connect-to 'http://localhost:3000/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=connect'
 ```
 
 ### <a id="webhooks"></a>WEBHOOKS:
