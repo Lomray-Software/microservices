@@ -43,6 +43,7 @@ class ActiveUsers {
   public async compute(): Promise<number> {
     const { result, error } = await Api.get().authentication.token.count({
       query: {
+        distinct: 'userId',
         where: {
           createdAt: {
             [JQOperator.lessOrEqual]: new Date(
@@ -50,7 +51,6 @@ class ActiveUsers {
             ).toISOString(),
           },
         },
-        groupBy: ['userId'],
       },
     });
 
