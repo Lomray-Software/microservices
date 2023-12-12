@@ -1137,37 +1137,5 @@
       "entities": "users.ConfirmCode"
     },
     "createdAt": "2023-02-13T19:37:46.275Z"
-  },
-  {
-    "microservice": "users",
-    "alias": "users.ActiveUsersInput",
-    "title": "Active Users Input",
-    "schema": {
-      "dayInterval": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      }
-    },
-    "createdAt": "2023-12-12T07:16:33.313Z"
-  },
-  {
-    "microservice": "users",
-    "alias": "users.ActiveUsersOutput",
-    "title": "Active Users Output",
-    "schema": {
-      "count": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      }
-    },
-    "createdAt": "2023-12-12T07:16:33.313Z"
   }
 ]

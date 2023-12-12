@@ -473,18 +473,5 @@
     "modelIn": "RemoveRequestParams",
     "modelOut": "users.RemoveOutputParams.a28f429696a14c44bcc1d3f30506e901",
     "methodFilters": []
-  },
-  {
-    "microservice": "users",
-    "method": "user.active-users",
-    "description": "Returns unique active users",
-    "allowGroup": [
-      "admin"
-    ],
-    "denyGroup": [],
-    "createdAt": "2023-12-12T07:16:33.313Z",
-    "modelIn": "users.ActiveUsersInput",
-    "modelOut": "users.ActiveUsersOutput",
-    "methodFilters": []
   }
 ]
