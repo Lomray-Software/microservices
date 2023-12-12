@@ -1,0 +1,15 @@
+### Get unique active users
+POST http://127.0.0.1:3000
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer usertokenbloooooooooooooooooooom
+
+{
+  "id": "1",
+  "method": "authentication.token.count",
+  "params": {
+    "query": {
+      "distinct": "userId"
+    }
+  }
+}
