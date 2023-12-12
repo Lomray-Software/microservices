@@ -1,3 +1,4 @@
+### Get unique active users
 POST http://127.0.0.1:8001/ms/users
 Accept: application/json
 Content-Type: application/json
@@ -5,5 +6,7 @@ Content-Type: application/json
 {
   "id": "1",
   "method": "user.active-users",
-  "params": {}
+  "params": {
+    "dayInterval": 31
+  }
 }
