@@ -14,6 +14,14 @@
           "admin": "allow"
         }
       },
+      "payload": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "hasRemoved": {
         "in": {
           "admin": "allow"
