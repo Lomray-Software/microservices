@@ -5,9 +5,13 @@ import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
 import ChargeRefundStatus from '@constants/charge-refund-status';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
+import DisputeEntity from '@entities/dispute';
 import TransactionEntity from '@entities/transaction';
 import Factory from '@services/payment-gateway/factory';
 
+/**
+ * Transaction service
+ */
 class Transaction {
   /**
    * Not succeeded transaction statuses
@@ -35,7 +39,7 @@ class Transaction {
     manager: EntityManager,
     updateColumns: ColumnMetadata[],
   ): Promise<void> {
-    await this.updateChargeRefundStatus(entity, manager);
+    await this.syncStats(entity, manager);
 
     if (this.notSucceededTransactionStatuses.includes(entity.status)) {
       await Microservice.eventPublish(Event.TransactionUpdated, entity);
@@ -56,48 +60,83 @@ class Transaction {
   }
 
   /**
-   * Update charge refund status
+   * Update transaction stats
+   * @description Sync stats that can be missed due webhook events
    */
-  private static async updateChargeRefundStatus(
-    {
-      type,
-      amount,
-      transactionId,
-      chargeRefundStatus,
-      params: { refundedTransactionAmount },
-    }: TransactionEntity,
+  private static async syncStats(
+    { type, amount, transactionId, params: { refundedTransactionAmount } }: TransactionEntity,
     manager: EntityManager,
   ): Promise<void> {
-    if (type !== TransactionType.DEBIT) {
+    // Credit transaction contain total transaction amount
+    if (type !== TransactionType.CREDIT) {
       return;
     }
 
     const transactionRepository = manager.getRepository(TransactionEntity);
-    let status: ChargeRefundStatus | null = null;
+    const disputeRepository = manager.getRepository(DisputeEntity);
 
-    if (refundedTransactionAmount === amount) {
-      status = ChargeRefundStatus.FULL_REFUND;
-    } else if (refundedTransactionAmount > 0) {
-      status = ChargeRefundStatus.PARTIAL_REFUND;
-    } else {
-      status = ChargeRefundStatus.NO_REFUND;
-    }
+    /**
+     * Get transactions
+     */
+    const [transactions, disputeCount] = await Promise.all([
+      transactionRepository.find({
+        where: {
+          transactionId,
+        },
+      }),
+      disputeRepository.count({ where: { transactionId } }),
+    ]);
+    const isTransactionDisputed = Boolean(disputeCount);
 
-    if (!status || status === chargeRefundStatus) {
+    if (!transactions.length) {
       return;
     }
 
-    const transactions = await transactionRepository.find({
-      where: {
-        transactionId,
-      },
-    });
+    const updatedChargeRefundStatus = this.getChargeRefundStatus(amount, refundedTransactionAmount);
+
+    let isUpdated = false;
+    let isListeners = false;
 
     transactions.forEach((transaction) => {
-      transaction.chargeRefundStatus = status as ChargeRefundStatus;
+      // Sync charge refund status
+      if (transaction.chargeRefundStatus !== updatedChargeRefundStatus) {
+        transaction.chargeRefundStatus = updatedChargeRefundStatus;
+        isUpdated = true;
+      }
+
+      // Sync dispute status
+      if (!isTransactionDisputed || transaction.isDisputed === isTransactionDisputed) {
+        return;
+      }
+
+      transaction.isDisputed = true;
+      isUpdated = true;
+      isListeners = true;
     });
 
-    await transactionRepository.save(transactions);
+    if (!isUpdated) {
+      return;
+    }
+
+    await transactionRepository.save(transactions, { listeners: isListeners });
+  }
+
+  /**
+   * Returns charge refund status
+   */
+  private static getChargeRefundStatus(
+    amount: number,
+    refundedTransactionAmount: number,
+  ): ChargeRefundStatus {
+    if (refundedTransactionAmount === amount) {
+      return ChargeRefundStatus.FULL_REFUND;
+    }
+
+    if (refundedTransactionAmount > 0) {
+      return ChargeRefundStatus.PARTIAL_REFUND;
+    }
+
+    return ChargeRefundStatus.NO_REFUND;
   }
 }
 
