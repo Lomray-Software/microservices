@@ -67,7 +67,8 @@ class Transaction {
     { type, amount, transactionId, params: { refundedTransactionAmount } }: TransactionEntity,
     manager: EntityManager,
   ): Promise<void> {
-    if (type !== TransactionType.DEBIT) {
+    // Credit transaction contain total transaction amount
+    if (type !== TransactionType.CREDIT) {
       return;
     }
 
