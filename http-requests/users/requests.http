@@ -2,21 +2,15 @@
 POST http://127.0.0.1:3000
 Accept: application/json
 Content-Type: application/json
+## Admin token
 Authorization: Bearer admintokenooooooooooooooooooooon
+## User token
+#Authorization: Bearer usertokenooooooooooooooooooooooo
 
 {
   "id": "1",
   "method": "authentication.token.count",
   "params": {
-    "payload": {
-      "authorization": {
-        "filter": {
-          "methodOptions": {
-            "isAllowDistinct": true
-          }
-        }
-      }
-    },
     "query": {
       "attributes": [
         {

@@ -68,5 +68,14 @@
       "admin": "stop"
     },
     "createdAt": "2022-03-15T06:15:40.656Z"
+  },
+  {
+    "title": "Allow method options",
+    "condition": {
+      "methodOptions": {
+        "isAllowDistinct": "*"
+      }
+    },
+    "createdAt": "2022-03-15T06:15:14.739Z"
   }
 ]
