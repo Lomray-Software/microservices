@@ -159,7 +159,7 @@
     "modelOut": "CountOutputParams",
     "methodFilters": [
       {
-        "filterTitle": "Allow method options",
+        "filterTitle": "Allow distinct in query",
         "operator": "and",
         "roleAlias": "admin",
         "createdAt": "2022-03-15T06:18:07.204Z"

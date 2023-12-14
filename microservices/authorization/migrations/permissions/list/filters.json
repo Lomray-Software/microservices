@@ -70,7 +70,7 @@
     "createdAt": "2022-03-15T06:15:40.656Z"
   },
   {
-    "title": "Allow method options",
+    "title": "Allow distinct in query",
     "condition": {
       "methodOptions": {
         "isAllowDistinct": "*"
