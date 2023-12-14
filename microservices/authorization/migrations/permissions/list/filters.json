@@ -73,7 +73,7 @@
     "title": "Allow distinct in query",
     "condition": {
       "methodOptions": {
-        "isAllowDistinct": "*"
+        "isAllowDistinct": true
       },
       "options": {
         "isDisableAttributes": false
