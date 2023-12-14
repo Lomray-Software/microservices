@@ -1,5 +1,5 @@
 ### Get unique active users
-POST http://127.0.0.1:3000
+POST http://127.0.0.1:3005
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer admintokenooooooooooooooooooooon
@@ -8,11 +8,22 @@ Authorization: Bearer admintokenooooooooooooooooooooon
   "id": "1",
   "method": "authentication.token.count",
   "params": {
-    "query": {
-      "distinct": "userId",
-      "where": {
-        "type": "personal"
+    "payload": {
+      "authorization": {
+        "filter": {
+          "methodOptions": {
+            "isAllowDistinct": true
+          }
+        }
       }
+    },
+    "query": {
+      "attributes": [
+        {
+          "name": "userId",
+          "isDistinct": true
+        }
+      ]
     }
   }
 }
