@@ -40,7 +40,7 @@
   },
 	"dependencies": {
 		"@aws-sdk/client-ses": "^3.345.0",
-    "@lomray/microservice-helpers": "^2.13.0",
+    "@lomray/microservice-helpers": "^2.14.0",
 		"class-transformer": "^0.5.1",
 		"class-validator": "^0.14.0",
 		"class-validator-jsonschema": "^5.0.0",
