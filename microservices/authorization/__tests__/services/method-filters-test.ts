@@ -1,5 +1,6 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { expect } from 'chai';
+import { allUserRolesMock } from '@__mocks__/user-roles';
 import { FilterIgnoreType, FilterOperator } from '@constants/filter';
 import MethodFiltersEntity from '@entities/method-filter';
 import MethodFilters from '@services/method-filters';
@@ -80,10 +81,10 @@ describe('services/method-filters', () => {
   });
 
   it('should correctly collect filters for method: admins role', () => {
-    const userRoles = ['admins', 'users', 'guests']; // order matters
-    const filters = MethodFilters.init({ userRoles, templateOptions: { userId } }).getFilters(
-      methodFilters,
-    );
+    const filters = MethodFilters.init({
+      userRoles: allUserRolesMock,
+      templateOptions: { userId },
+    }).getFilters(methodFilters);
 
     expect(filters).to.deep.equal({
       options: guests.filter.condition.options,
@@ -97,12 +98,10 @@ describe('services/method-filters', () => {
 
   it('should correctly collect filters for method: collect for admins - except users filter', () => {
     const usersFilter = { ...users, operator: 'only' };
-    const userRoles = ['admins', 'users', 'guests']; // order matters
-    const filters = MethodFilters.init({ userRoles, templateOptions: { userId } }).getFilters([
-      methodFilters[0],
-      usersFilter,
-      methodFilters[2],
-    ]);
+    const filters = MethodFilters.init({
+      userRoles: allUserRolesMock,
+      templateOptions: { userId },
+    }).getFilters([methodFilters[0], usersFilter, methodFilters[2]]);
 
     expect(filters).to.deep.equal({
       options: guests.filter.condition.options,
@@ -119,12 +118,10 @@ describe('services/method-filters', () => {
       ...guests,
       filter: { ...guests.filter, ignore: { users: FilterIgnoreType.stop } },
     };
-    const userRoles = ['admins', 'users', 'guests']; // order matters
-    const filters = MethodFilters.init({ userRoles, templateOptions: { userId } }).getFilters([
-      guestFilter,
-      methodFilters[1],
-      methodFilters[2],
-    ]);
+    const filters = MethodFilters.init({
+      userRoles: allUserRolesMock,
+      templateOptions: { userId },
+    }).getFilters([guestFilter, methodFilters[1], methodFilters[2]]);
 
     expect(filters).to.deep.equal({
       query: {
@@ -140,12 +137,10 @@ describe('services/method-filters', () => {
       ...guests,
       filter: { ...guests.filter, ignore: { admins: FilterIgnoreType.stop } },
     };
-    const userRoles = ['admins', 'users', 'guests']; // order matters
-    const filters = MethodFilters.init({ userRoles, templateOptions: { userId } }).getFilters([
-      guestFilter,
-      methodFilters[1],
-      methodFilters[2],
-    ]);
+    const filters = MethodFilters.init({
+      userRoles: allUserRolesMock,
+      templateOptions: { userId },
+    }).getFilters([guestFilter, methodFilters[1], methodFilters[2]]);
 
     expect(filters).to.deep.equal({
       query: {
@@ -161,12 +156,10 @@ describe('services/method-filters', () => {
       ...guests,
       filter: { ...guests.filter, ignore: { users: FilterIgnoreType.only } },
     };
-    const userRoles = ['admins', 'users', 'guests']; // order matters
-    const filters = MethodFilters.init({ userRoles, templateOptions: { userId } }).getFilters([
-      guestFilter,
-      methodFilters[1],
-      methodFilters[2],
-    ]);
+    const filters = MethodFilters.init({
+      userRoles: allUserRolesMock,
+      templateOptions: { userId },
+    }).getFilters([guestFilter, methodFilters[1], methodFilters[2]]);
 
     expect(filters).to.deep.equal({
       options: guests.filter.condition.options,
@@ -254,9 +247,8 @@ describe('services/method-filters', () => {
       },
     });
 
-    const userRoles = ['admins', 'users', 'guests']; // order matters
     const filters = MethodFilters.init({
-      userRoles,
+      userRoles: allUserRolesMock,
       templateOptions: {
         userId: 99,
         fields: {
@@ -287,19 +279,17 @@ describe('services/method-filters', () => {
   });
 
   it('should correctly return condition init state: empty', () => {
-    const userRoles = ['admins', 'users', 'guests'];
-
     expect(
-      MethodFilters.init({ userRoles, templateOptions: {} })['getConditionInitState'](),
+      MethodFilters.init({ userRoles: allUserRolesMock, templateOptions: {} })[
+        'getConditionInitState'
+      ](),
     ).to.deep.equal({});
   });
 
   it('should correctly return condition init state: payload filters - method options', () => {
-    const userRoles = ['admins', 'users', 'guests'];
-
     expect(
       MethodFilters.init({
-        userRoles,
+        userRoles: allUserRolesMock,
         templateOptions: {
           fields: {
             payload: { authorization: { filter: { methodOptions: { isAllowDistinct: true } } } },
