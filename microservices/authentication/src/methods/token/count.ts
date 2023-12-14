@@ -7,9 +7,6 @@ import Token from '@entities/token';
  */
 const count = Endpoint.count(() => ({
   repository: getRepository(Token),
-  queryOptions: {
-    isDisableAttributes: false,
-  },
 }));
 
 export default count;

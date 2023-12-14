@@ -273,4 +273,32 @@ describe('services/method-filters', () => {
       },
     });
   });
+
+  it('should correctly collect allow distinct in query for method', () => {
+    const allowDistinctInQueryFilter = methodFiltersRepo.create({
+      roleAlias: 'admins',
+      operator: FilterOperator.and,
+      filter: {
+        condition: {
+          methodOptions: { isAllowDistinct: true },
+          options: { isDisableAttributes: false },
+        },
+      },
+    });
+
+    const filters = MethodFilters.init({
+      userRoles: allUserRolesMock,
+      templateOptions: {
+        userId: 99,
+      },
+    }).getFilters([allowDistinctInQueryFilter]);
+
+    expect(filters).to.deep.equal({
+      methodOptions: {
+        isAllowDistinct: true,
+      },
+      options: { isDisableAttributes: false },
+      query: {},
+    });
+  });
 });
