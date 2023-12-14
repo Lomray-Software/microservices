@@ -68,5 +68,17 @@
       "admin": "stop"
     },
     "createdAt": "2022-03-15T06:15:40.656Z"
+  },
+  {
+    "title": "Allow distinct in query",
+    "condition": {
+      "methodOptions": {
+        "isAllowDistinct": true
+      },
+      "options": {
+        "isDisableAttributes": false
+      }
+    },
+    "createdAt": "2022-03-15T06:15:14.739Z"
   }
 ]
