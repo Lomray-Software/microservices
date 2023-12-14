@@ -223,7 +223,7 @@ describe('services/method-filters', () => {
     });
   });
 
-  it('should correctly collect filters for method: merge relations & attributes & groupBy & options & methodOptions', () => {
+  it('should correctly collect filters for method: merge relations & attributes & groupBy & options & methodOptions & payloadMethodOptions', () => {
     const usersFilter = methodFiltersRepo.create({
       roleAlias: 'guests',
       operator: FilterOperator.and,
@@ -255,14 +255,20 @@ describe('services/method-filters', () => {
     });
 
     const userRoles = ['admins', 'users', 'guests']; // order matters
-    const filters = MethodFilters.init({ userRoles, templateOptions: { userId: 99 } }).getFilters([
-      usersFilter,
-      extendFilter,
-    ]);
+    const filters = MethodFilters.init({
+      userRoles,
+      templateOptions: {
+        userId: 99,
+        fields: {
+          payload: { authorization: { filter: { methodOptions: { isAllowDistinct: true } } } },
+        },
+      },
+    }).getFilters([usersFilter, extendFilter]);
 
     expect(filters).to.deep.equal({
       methodOptions: {
         isAllowMultiple: true,
+        isAllowDistinct: true,
       },
       options: {
         defaultPageSize: 50,
@@ -276,6 +282,33 @@ describe('services/method-filters', () => {
             name: 'test2',
           },
         ],
+      },
+    });
+  });
+
+  it('should correctly return condition init state: empty', () => {
+    const userRoles = ['admins', 'users', 'guests'];
+
+    expect(
+      MethodFilters.init({ userRoles, templateOptions: {} })['getConditionInitState'](),
+    ).to.deep.equal({});
+  });
+
+  it('should correctly return condition init state: payload filters - method options', () => {
+    const userRoles = ['admins', 'users', 'guests'];
+
+    expect(
+      MethodFilters.init({
+        userRoles,
+        templateOptions: {
+          fields: {
+            payload: { authorization: { filter: { methodOptions: { isAllowDistinct: true } } } },
+          },
+        },
+      })['getConditionInitState'](),
+    ).to.deep.equal({
+      methodOptions: {
+        isAllowDistinct: true,
       },
     });
   });

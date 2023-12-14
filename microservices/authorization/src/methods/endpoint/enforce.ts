@@ -97,27 +97,11 @@ const enforce = Endpoint.custom(
     const isAllow = await endpointService.isMethodAllowed(shouldThrowError);
     const { roles } = await endpointService.getEnforcer().findUserRoles();
 
-    const filters =
-      isAllow && hasFilters ? await endpointService.getMethodFilters(filterInput) : undefined;
-    const filterInputMethodOptions = filterInput?.payload?.authorization?.filter?.methodOptions;
-
     return {
       isAllow,
       roles,
-      // If filters exists
-      filters: filters && {
-        ...filters,
-        // Provide authorization filters if method filters doesn't exist
-        ...(filterInputMethodOptions
-          ? {
-              methodOptions: {
-                ...filters.methodOptions,
-                // Method options for microservices helpers: Is allow distinct
-                ...filterInputMethodOptions,
-              },
-            }
-          : {}),
-      },
+      filters:
+        isAllow && hasFilters ? await endpointService.getMethodFilters(filterInput) : undefined,
       filteredInput:
         isAllow && hasFilterInput
           ? await endpointService.filterFields(FilterType.IN, app, filterInput, { payload, method })
