@@ -216,7 +216,7 @@ describe('services/method-filters', () => {
     });
   });
 
-  it('should correctly collect filters for method: merge relations & attributes & groupBy & options & methodOptions & payloadMethodOptions', () => {
+  it('should correctly collect filters for method: merge relations & attributes & groupBy & options & methodOptions', () => {
     const usersFilter = methodFiltersRepo.create({
       roleAlias: 'guests',
       operator: FilterOperator.and,
@@ -251,16 +251,12 @@ describe('services/method-filters', () => {
       userRoles: allUserRolesMock,
       templateOptions: {
         userId: 99,
-        fields: {
-          payload: { authorization: { filter: { methodOptions: { isAllowDistinct: true } } } },
-        },
       },
     }).getFilters([usersFilter, extendFilter]);
 
     expect(filters).to.deep.equal({
       methodOptions: {
         isAllowMultiple: true,
-        isAllowDistinct: true,
       },
       options: {
         defaultPageSize: 50,
@@ -274,31 +270,6 @@ describe('services/method-filters', () => {
             name: 'test2',
           },
         ],
-      },
-    });
-  });
-
-  it('should correctly return condition init state: empty', () => {
-    expect(
-      MethodFilters.init({ userRoles: allUserRolesMock, templateOptions: {} })[
-        'getConditionInitState'
-      ](),
-    ).to.deep.equal({});
-  });
-
-  it('should correctly return condition init state: payload filters - method options', () => {
-    expect(
-      MethodFilters.init({
-        userRoles: allUserRolesMock,
-        templateOptions: {
-          fields: {
-            payload: { authorization: { filter: { methodOptions: { isAllowDistinct: true } } } },
-          },
-        },
-      })['getConditionInitState'](),
-    ).to.deep.equal({
-      methodOptions: {
-        isAllowDistinct: true,
       },
     });
   });

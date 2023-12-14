@@ -68,6 +68,7 @@ class Filter {
       isParallel?: boolean;
       shouldReturnEntity?: boolean;
       shouldResetCache?: boolean;
+      isAllowDistinct?: boolean;
     };
   };
 

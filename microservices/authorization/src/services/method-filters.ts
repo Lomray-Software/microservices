@@ -44,7 +44,7 @@ class MethodFilters {
    * Collect filters
    */
   public getFilters(filters: MethodFiltersEntity[]): Filter['condition'] {
-    const condition = this.getConditionInitState();
+    const condition: Filter['condition'] = {};
 
     if (filters.length === 0) {
       return condition;
@@ -102,20 +102,6 @@ class MethodFilters {
     }
 
     return condition;
-  }
-
-  /**
-   * Returns condition init state
-   * @description Compose payload filters with condition default state
-   */
-  private getConditionInitState(): Filter['condition'] {
-    const payloadMethodOptions =
-      this.templateOptions?.fields?.payload?.authorization?.filter?.methodOptions;
-
-    return {
-      // Set as default authorization filter method options
-      ...(payloadMethodOptions ? { methodOptions: payloadMethodOptions } : {}),
-    };
   }
 
   /**
