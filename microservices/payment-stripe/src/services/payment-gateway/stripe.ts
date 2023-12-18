@@ -118,6 +118,11 @@ interface IPayoutMethod {
   method: 'card' | 'bankAccount';
 }
 
+interface ICheckoutCart {
+  redirectUrl: string | null;
+  clientSecret: string | null;
+}
+
 interface IInstantPayoutParams {
   userId: string;
   amount: number;
@@ -176,6 +181,7 @@ interface ICreateMultipleProductCheckoutParams {
   successUrl: string;
   cancelUrl: string;
   userId: string;
+  isEmbeddedMode: boolean;
 }
 
 /**
@@ -433,8 +439,8 @@ class Stripe extends Abstract {
    */
   public async createCartCheckout(
     params: ICreateMultipleProductCheckoutParams,
-  ): Promise<string | null> {
-    const { cartId, userId, successUrl, cancelUrl } = params;
+  ): Promise<ICheckoutCart | null> {
+    const { cartId, userId, successUrl, cancelUrl, isEmbeddedMode } = params;
     const { customerId } = await super.getCustomer(userId);
 
     const cart = await this.cartRepository.findOne(
@@ -455,14 +461,21 @@ class Stripe extends Abstract {
       quantity,
     }));
 
+    // @TODO: update version of the stripe SDK to get new types in sheckout sessions create
     /* eslint-disable camelcase */
-    const { id, url } = await this.sdk.checkout.sessions.create({
+    const {
+      id,
+      url,
       // @ts-ignore
+      client_secret: clientSecret,
+    } = await this.sdk.checkout.sessions.create({
       line_items: lineItems,
       mode: 'payment',
       customer: customerId,
       success_url: successUrl,
       cancel_url: cancelUrl,
+      // @ts-ignore
+      ui_mode: isEmbeddedMode ? 'embedded' : 'hosted',
     });
     /* eslint-enable camelcase */
 
@@ -477,7 +490,7 @@ class Stripe extends Abstract {
       id,
     );
 
-    return url;
+    return { redirectUrl: url, clientSecret };
   }
 
   /**

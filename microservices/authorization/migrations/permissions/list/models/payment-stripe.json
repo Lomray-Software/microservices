@@ -2304,6 +2304,14 @@
         "out": {
           "admin": "allow"
         }
+      },
+      "isEmbeddedMode": {
+        "in": {
+          "user": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
       }
     },
     "createdAt": "2023-11-03T10:05:10.401Z"
@@ -2319,6 +2327,14 @@
         },
         "out": {
           "admin": "allow"
+        }
+      },
+      "clientSecret": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
         }
       }
     },
