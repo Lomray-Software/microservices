@@ -302,10 +302,10 @@ class Charge {
               status:
                 Parser.parseStripeRefundStatus(refundStatus as StripeRefundStatus) ||
                 RefundStatus.INITIAL,
+              ...(entityId ? { entityId } : {}),
               params: {
-                reason: reason as string,
                 refundId: id,
-                ...(entityId ? { entityId } : {}),
+                ...(reason ? { reason } : {}),
                 ...(type ? { type } : {}),
                 ...(refundAmountType ? { refundAmountType } : {}),
               },
