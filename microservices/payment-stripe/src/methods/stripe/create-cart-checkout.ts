@@ -1,5 +1,5 @@
-import { Endpoint, IsNullable } from '@lomray/microservice-helpers';
-import { IsString, Length } from 'class-validator';
+import { Endpoint, IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsBoolean, IsString, Length } from 'class-validator';
 import { getManager } from 'typeorm';
 import Factory from '@services/payment-gateway/factory';
 
@@ -16,12 +16,20 @@ class CreateCartCheckoutInput {
 
   @IsString()
   cancelUrl: string;
+
+  @IsBoolean()
+  @IsUndefinable()
+  isEmbeddedMode?: boolean;
 }
 
 class CreateCartCheckoutOutput {
   @IsNullable()
   @IsString()
   redirectUrl: string | null;
+
+  @IsNullable()
+  @IsString()
+  clientSecret: string | null;
 }
 
 /**
@@ -33,17 +41,16 @@ const createCartCheckout = Endpoint.custom(
     output: CreateCartCheckoutOutput,
     description: 'Setup intent and return client secret key',
   }),
-  async ({ cartId, successUrl, cancelUrl, userId }) => {
+  async ({ cartId, successUrl, cancelUrl, userId, isEmbeddedMode = false }) => {
     const service = await Factory.create(getManager());
 
-    return {
-      redirectUrl: await service.createCartCheckout({
-        cartId,
-        successUrl,
-        cancelUrl,
-        userId,
-      }),
-    };
+    return service.createCartCheckout({
+      cartId,
+      successUrl,
+      cancelUrl,
+      userId,
+      isEmbeddedMode,
+    });
   },
 );
 
