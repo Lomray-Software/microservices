@@ -34,7 +34,7 @@ class RefundInput {
 }
 
 class RefundOutput {
-  isRefundRecognized: boolean;
+  isRecognized: boolean;
 }
 
 /**
@@ -51,7 +51,7 @@ const refund = Endpoint.custom(
     const service = await Factory.create(getManager());
 
     return {
-      isRefundRecognized: await service.refund({
+      isRecognized: await service.refund({
         transactionId,
         amount,
         refundAmountType,
