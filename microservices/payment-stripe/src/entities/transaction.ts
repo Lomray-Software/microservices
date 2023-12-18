@@ -52,7 +52,7 @@ export interface IParams
     Pick<IPaymentIntentMetadata, 'taxAutoCalculateFee' | 'taxFee'> {
   // Refunded original transaction/payment intent/charge
   refundedTransactionAmount: number;
-  // Last success refunded amount from refunds with success status
+  // Success refunded amount from refunds with success status
   successRefundedAmount: number;
   // Refunded Stripe collected fee
   refundedApplicationFeeAmount: number;
