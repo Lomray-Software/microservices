@@ -1619,12 +1619,12 @@
     "alias": "payment-stripe.RefundOutput",
     "title": "Refund Output",
     "schema": {
-      "entity": {
+      "isRecognized": {
         "in": {
           "admin": "allow"
         },
         "out": {
-          "user": "allow"
+          "admin": "allow"
         }
       }
     },
