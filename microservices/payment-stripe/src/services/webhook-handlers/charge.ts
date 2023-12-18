@@ -12,6 +12,7 @@ import TransactionEntity from '@entities/transaction';
 import extractIdFromStripeInstance from '@helpers/extract-id-from-stripe-instance';
 import messages from '@helpers/validators/messages';
 import TCurrency from '@interfaces/currency';
+import TRefundErrorReason from '@interfaces/refund-error-reason';
 import IRefundMetadata from '@interfaces/refund-metadata';
 import RefundRepository from '@repositories/refund';
 import DisputeService from '@services/dispute';
@@ -225,7 +226,7 @@ class Charge {
         params: {
           refundId: id,
           reason: reason as string,
-          errorReason: failedReason,
+          errorReason: failedReason as TRefundErrorReason,
         },
       });
 
@@ -246,7 +247,7 @@ class Charge {
     }
 
     refund.status = refundStatus;
-    refund.params.errorReason = failedReason;
+    refund.params.errorReason = failedReason as TRefundErrorReason;
 
     if (reason && refund.params.reason !== reason) {
       refund.params.reason = reason;
