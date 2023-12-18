@@ -8,11 +8,9 @@ import BalanceType from '@constants/balance-type';
 import BusinessType from '@constants/business-type';
 import CouponDuration from '@constants/coupon-duration';
 import RefundAmountType from '@constants/refund-amount-type';
-import RefundStatus from '@constants/refund-status';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
-import StripeRefundStatus from '@constants/stripe-refund-status';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
 import TransactionRole from '@constants/transaction-role';
 import TransactionStatus from '@constants/transaction-status';
@@ -23,7 +21,6 @@ import Coupon from '@entities/coupon';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
-import Refund from '@entities/refund';
 import Transaction, { defaultParams as defaultTransactionParams } from '@entities/transaction';
 import composeBalance from '@helpers/compose-balance';
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
@@ -752,7 +749,7 @@ class Stripe extends Abstract {
        */
       case 'charge.refund.updated': {
         const handlers = {
-          account: () => webhookHandlers.charge.handleRefundUpdated(event, this.manager),
+          account: () => webhookHandlers.charge.handleRefundUpdated(event, this.manager, this.sdk),
         };
 
         await handlers?.[webhookType]();
@@ -764,7 +761,7 @@ class Stripe extends Abstract {
        */
       case 'charge.refunded': {
         const handlers = {
-          account: () => webhookHandlers.charge.handleChargeRefunded(event, this.manager),
+          account: () => webhookHandlers.charge.handleChargeRefunded(event, this.manager, this.sdk),
         };
 
         await handlers?.[webhookType]();
@@ -1354,8 +1351,8 @@ class Stripe extends Abstract {
 
       if (destinationTransaction) {
         transaction.params.destinationTransactionId = this.extractId(destinationTransaction);
-        transaction.params.transferAmount = transferExpanded?.amount || 0;
-        transaction.params.transferReversedAmount = transferExpanded?.amount_reversed || 0;
+        transaction.params.transferAmount = transferExpanded?.amount ?? 0;
+        transaction.params.transferReversedAmount = transferExpanded?.amount_reversed ?? 0;
       }
     });
 
@@ -1491,7 +1488,7 @@ class Stripe extends Abstract {
     const senderPersonalFeeUnit = baseFeeUnit + senderAdditionalFee;
     const receiverPersonalFeeUnit = baseFeeUnit + receiverAdditionalFee;
     const collectedFeeUnit =
-      baseFeeUnit + senderAdditionalFee + receiverAdditionalFee + (tax?.totalAmountUnit || 0);
+      baseFeeUnit + senderAdditionalFee + receiverAdditionalFee + (tax?.totalAmountUnit ?? 0);
 
     /* eslint-disable camelcase */
     const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
@@ -1630,7 +1627,7 @@ class Stripe extends Abstract {
     entityId,
     refundAmountType = RefundAmountType.REVENUE,
     type,
-  }: IRefundParams): Promise<Refund> {
+  }: IRefundParams): Promise<boolean> {
     const debitTransaction = await this.transactionRepository.findOne({
       transactionId,
       type: TransactionType.DEBIT,
@@ -1659,7 +1656,7 @@ class Stripe extends Abstract {
     } else {
       amountUnit =
         // Paid entity cost - already refunded amount
-        (debitTransaction.params.entityCost || 0) -
+        (debitTransaction.params.entityCost ?? 0) -
         (debitTransaction.params.refundedTransactionAmount || 0);
     }
 
@@ -1674,7 +1671,7 @@ class Stripe extends Abstract {
      * Returns refunds from platform (application) account to sender
      */
     /* eslint-disable camelcase */
-    const stripeRefund = await this.sdk.refunds.create({
+    await this.sdk.refunds.create({
       charge: debitTransaction.chargeId,
       // From receiver connected account funds will be transferred to Platform, then refund
       reverse_transfer: true,
@@ -1688,31 +1685,8 @@ class Stripe extends Abstract {
       },
     });
 
-    const refund = this.refundRepository.create({
-      transactionId,
-      amount: stripeRefund.amount,
-      status: stripeRefund.status
-        ? Parser.parseStripeRefundStatus(stripeRefund.status as StripeRefundStatus)
-        : RefundStatus.INITIAL,
-      ...(entityId ? { entityId } : {}),
-      params: {
-        refundId: stripeRefund.id,
-        reason: stripeRefund.reason as string,
-        errorReason: stripeRefund.failure_reason,
-        refundAmountType,
-        ...(type ? { type } : {}),
-      },
-    });
-
-    await this.refundRepository.save(refund);
-
-    /**
-     * Sync stripe refund with the microservice refund
-     */
-    void this.sdk.refunds.update(stripeRefund.id, { metadata: { refundId: refund.id } });
-
     /* eslint-enable camelcase */
-    return refund;
+    return true;
   }
 
   /**
@@ -1841,8 +1815,8 @@ class Stripe extends Abstract {
       let estimatedTaxUnit = 0;
 
       if (shouldEstimateTax) {
-        userTempUnitAmount += taxes?.stableUnit || 0;
-        estimatedTaxUnit = getPercentFromAmount(userTempUnitAmount, taxes?.defaultPercent || 0);
+        userTempUnitAmount += taxes?.stableUnit ?? 0;
+        estimatedTaxUnit = getPercentFromAmount(userTempUnitAmount, taxes?.defaultPercent ?? 0);
       }
 
       userTempUnitAmount += estimatedTaxUnit;
@@ -1888,8 +1862,8 @@ class Stripe extends Abstract {
     let estimatedTaxUnit = 0;
 
     if (shouldEstimateTax) {
-      userUnitAmount += taxes?.stableUnit || 0;
-      estimatedTaxUnit = getPercentFromAmount(userUnitAmount, taxes?.defaultPercent || 0);
+      userUnitAmount += taxes?.stableUnit ?? 0;
+      estimatedTaxUnit = getPercentFromAmount(userUnitAmount, taxes?.defaultPercent ?? 0);
     }
 
     userUnitAmount += estimatedTaxUnit;
@@ -2033,13 +2007,11 @@ class Stripe extends Abstract {
     StripeSdk.CouponCreateParams,
     'duration' | 'duration_in_months'
   > {
-    {
-      if (duration === CouponDuration.REPEATING && !durationInMonths) {
-        throw new BaseException({
-          status: 400,
-          message: 'If duration is repeating, the number of months the coupon applies.',
-        });
-      }
+    if (duration === CouponDuration.REPEATING && !durationInMonths) {
+      throw new BaseException({
+        status: 400,
+        message: 'If duration is repeating, the number of months the coupon applies.',
+      });
     }
 
     return {

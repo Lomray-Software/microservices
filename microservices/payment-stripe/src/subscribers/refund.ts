@@ -17,19 +17,19 @@ class Refund implements EntitySubscriberInterface<RefundEntity> {
   /**
    * Handle Refund event: after insert
    */
-  public async afterInsert({ entity }: InsertEvent<RefundEntity>): Promise<void> {
-    await RefundService.handleAfterCreate(entity);
+  public async afterInsert({ entity, manager }: InsertEvent<RefundEntity>): Promise<void> {
+    await RefundService.handleAfterCreate(entity, manager);
   }
 
   /**
    * Handle Refund event: after update
    */
-  public async afterUpdate({ entity }: UpdateEvent<RefundEntity>): Promise<void> {
+  public async afterUpdate({ entity, manager }: UpdateEvent<RefundEntity>): Promise<void> {
     if (!entity) {
       return;
     }
 
-    await RefundService.handleAfterUpdate(entity as RefundEntity);
+    await RefundService.handleAfterUpdate(entity as RefundEntity, manager);
   }
 }
 

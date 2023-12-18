@@ -1,10 +1,8 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
-import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsObject, IsString, Length, Min } from 'class-validator';
+import { IsEnum, IsNumber, IsString, Length, Min } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { getManager } from 'typeorm';
 import RefundAmountType from '@constants/refund-amount-type';
-import Refund from '@entities/refund';
 import Factory from '@services/payment-gateway/factory';
 
 class RefundInput {
@@ -36,9 +34,7 @@ class RefundInput {
 }
 
 class RefundOutput {
-  @IsObject()
-  @Type(() => Refund)
-  entity: Refund;
+  isRefundRecognized: boolean;
 }
 
 /**
@@ -55,7 +51,12 @@ const refund = Endpoint.custom(
     const service = await Factory.create(getManager());
 
     return {
-      entity: await service.refund({ transactionId, amount, refundAmountType, entityId }),
+      isRefundRecognized: await service.refund({
+        transactionId,
+        amount,
+        refundAmountType,
+        entityId,
+      }),
     };
   },
 );
