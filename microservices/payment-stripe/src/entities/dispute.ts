@@ -22,7 +22,7 @@ export interface IMetadata {
 export interface IParams {
   /**
    * If true, it’s still possible to refund the disputed payment. After the payment has been fully refunded,
-   * no further funds are withdrawn from your Stripe account as a result of this dispute
+   * no further funds are withdrawn from your Stripe accounts as a result of this dispute
    */
   isChargeRefundable: boolean;
   currency: TCurrency;
@@ -37,7 +37,7 @@ export interface IParams {
 }
 
 /**
- * Dispute
+ * Dispute entity
  * @description Dispute doesn't have pure relation to the transaction for preventing duplication
  * Transaction id is not unique (presented as debit and credit transactions)
  */

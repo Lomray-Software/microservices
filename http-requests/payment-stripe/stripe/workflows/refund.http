@@ -2,6 +2,8 @@
 POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
+## Success refund card: 58d82be8-80b0-4b7b-81ea-a1dc9af346c3
+## Failed refund card: 5e219e6c-ea6a-4081-a8f1-8ab00977cb97
 
 {
   "id": "1",
@@ -10,10 +12,10 @@ Content-Type: application/json
     "userId": "68827b31-33e9-45b5-bf9f-8823b993d0ef",
     "receiverId": "0b0be2e8-1013-4be8-8e7f-a27c4b0a5e45",
     "entityId": "9bea9620-b8fb-4675-a8cc-593a98b8ffe5",
-    "cardId": "6da843ff-01da-4363-872f-c415f2976d66",
+    "cardId": "5e219e6c-ea6a-4081-a8f1-8ab00977cb97",
     "entityCost": 100,
     "feesPayer": "sender",
-    "title": "7 fraudulent dispute card",
+    "title": "9 refund failed",
     "applicationPaymentPercent": 3,
     "withTax": false
   }

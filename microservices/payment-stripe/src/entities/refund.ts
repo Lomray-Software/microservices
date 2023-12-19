@@ -11,6 +11,7 @@ import {
 import type RefundAmountType from '@constants/refund-amount-type';
 import RefundStatus from '@constants/refund-status';
 import TransactionStatus from '@constants/transaction-status';
+import type TRefundErrorReason from '@interfaces/refund-error-reason';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface IParams {
@@ -19,7 +20,7 @@ interface IParams {
   // Reason for the refund, either user-provided
   reason?: string;
   // Error reason for failed refund
-  errorReason?: string;
+  errorReason?: TRefundErrorReason;
   refundAmountType?: RefundAmountType;
   // Abstract entity type
   type?: string;
