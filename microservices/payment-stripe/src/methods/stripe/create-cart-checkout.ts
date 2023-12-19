@@ -1,5 +1,5 @@
 import { Endpoint, IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsBoolean, IsString, Length } from 'class-validator';
+import { IsBoolean, IsString, Length, ValidateIf } from 'class-validator';
 import { getManager } from 'typeorm';
 import Factory from '@services/payment-gateway/factory';
 
@@ -12,10 +12,16 @@ class CreateCartCheckoutInput {
   userId: string;
 
   @IsString()
+  @ValidateIf((input) => !input.isEmbeddedMode)
   successUrl: string;
 
   @IsString()
+  @ValidateIf((input) => !input.isEmbeddedMode)
   cancelUrl: string;
+
+  @IsString()
+  @ValidateIf((input) => input.isEmbeddedMode)
+  returnUrl: string;
 
   @IsBoolean()
   @IsUndefinable()
@@ -41,16 +47,25 @@ const createCartCheckout = Endpoint.custom(
     output: CreateCartCheckoutOutput,
     description: 'Setup intent and return client secret key',
   }),
-  async ({ cartId, successUrl, cancelUrl, userId, isEmbeddedMode = false }) => {
+  async ({ cartId, successUrl, cancelUrl, userId, returnUrl, isEmbeddedMode = false }) => {
     const service = await Factory.create(getManager());
 
-    return service.createCartCheckout({
-      cartId,
-      successUrl,
-      cancelUrl,
-      userId,
-      isEmbeddedMode,
-    });
+    return service.createCartCheckout(
+      isEmbeddedMode
+        ? {
+            isEmbeddedMode,
+            cartId,
+            userId,
+            returnUrl,
+          }
+        : {
+            isEmbeddedMode,
+            cartId,
+            userId,
+            successUrl,
+            cancelUrl,
+          },
+    );
   },
 );
 

@@ -2305,6 +2305,14 @@
           "admin": "allow"
         }
       },
+      "returnUrl": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "isEmbeddedMode": {
         "in": {
           "user": "allow"

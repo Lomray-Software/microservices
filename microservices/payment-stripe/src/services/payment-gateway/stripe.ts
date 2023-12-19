@@ -173,13 +173,26 @@ interface IStripePromoCodeParams {
   maxRedemptions?: number;
 }
 
-interface ICreateMultipleProductCheckoutParams {
+interface ICreateMultipleProductCheckout {
+  isEmbeddedMode?: boolean;
   cartId: string;
+  userId: string;
+}
+
+interface ICreateMultipleProductCheckoutEmbedded extends ICreateMultipleProductCheckout {
+  isEmbeddedMode: true;
+  returnUrl: string;
+}
+
+interface ICreateMultipleProductCheckoutStripeHosted extends ICreateMultipleProductCheckout {
+  isEmbeddedMode: false;
   successUrl: string;
   cancelUrl: string;
-  userId: string;
-  isEmbeddedMode: boolean;
 }
+
+type TCreateMultipleProductCheckoutParams =
+  | ICreateMultipleProductCheckoutEmbedded
+  | ICreateMultipleProductCheckoutStripeHosted;
 
 /**
  * Stripe payment provider
@@ -435,9 +448,9 @@ class Stripe extends Abstract {
    * Create checkout session for existing cart and return url to redirect user for payment
    */
   public async createCartCheckout(
-    params: ICreateMultipleProductCheckoutParams,
+    params: TCreateMultipleProductCheckoutParams,
   ): Promise<ICheckoutCart | null> {
-    const { cartId, userId, successUrl, cancelUrl, isEmbeddedMode } = params;
+    const { cartId, userId, isEmbeddedMode } = params;
     const { customerId } = await super.getCustomer(userId);
 
     const cart = await this.cartRepository.findOne(
@@ -458,22 +471,45 @@ class Stripe extends Abstract {
       quantity,
     }));
 
-    // @TODO: update version of the stripe SDK to get new types in sheckout sessions create
     /* eslint-disable camelcase */
+    let checkoutParams: StripeSdk.Checkout.SessionCreateParams = {
+      line_items: lineItems,
+      mode: 'payment',
+      customer: customerId,
+      success_url: '',
+    };
+
+    /**
+     * Set redirect url for embedded mode or success/cancel urls for stripe hosted mode
+     */
+    if (isEmbeddedMode) {
+      const { returnUrl } = params;
+
+      checkoutParams = {
+        ...checkoutParams,
+        // @ts-ignore
+        return_url: returnUrl,
+        ui_mode: 'embedded',
+      };
+      // @ts-ignore
+    } else {
+      const { successUrl, cancelUrl } = params;
+
+      checkoutParams = {
+        ...checkoutParams,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+      };
+    }
+
+    // @TODO: update version of the stripe SDK to get new types in sheckout sessions create
+
     const {
       id,
       url,
       // @ts-ignore
       client_secret: clientSecret,
-    } = await this.sdk.checkout.sessions.create({
-      line_items: lineItems,
-      mode: 'payment',
-      customer: customerId,
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      // @ts-ignore
-      ui_mode: isEmbeddedMode ? 'embedded' : 'hosted',
-    });
+    } = await this.sdk.checkout.sessions.create(checkoutParams);
     /* eslint-enable camelcase */
 
     await this.createTransaction(
