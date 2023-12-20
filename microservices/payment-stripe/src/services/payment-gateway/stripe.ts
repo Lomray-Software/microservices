@@ -472,11 +472,12 @@ class Stripe extends Abstract {
     }));
 
     /* eslint-disable camelcase */
-    let checkoutParams: StripeSdk.Checkout.SessionCreateParams = {
+    let checkoutParams: Omit<StripeSdk.Checkout.SessionCreateParams, 'success_url'> & {
+      success_url?: string;
+    } = {
       line_items: lineItems,
       mode: 'payment',
       customer: customerId,
-      success_url: '',
     };
 
     /**
@@ -509,7 +510,9 @@ class Stripe extends Abstract {
       url,
       // @ts-ignore
       client_secret: clientSecret,
-    } = await this.sdk.checkout.sessions.create(checkoutParams);
+    } = await this.sdk.checkout.sessions.create(
+      checkoutParams as StripeSdk.Checkout.SessionCreateParams,
+    );
     /* eslint-enable camelcase */
 
     await this.createTransaction(
