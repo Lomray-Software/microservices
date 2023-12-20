@@ -478,6 +478,7 @@ class Stripe extends Abstract {
       line_items: lineItems,
       mode: 'payment',
       customer: customerId,
+      locale: 'en',
     };
 
     /**
