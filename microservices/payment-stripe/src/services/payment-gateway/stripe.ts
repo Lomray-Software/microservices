@@ -181,7 +181,7 @@ interface ICreateMultipleProductCheckout {
 
 interface ICreateMultipleProductCheckoutEmbedded extends ICreateMultipleProductCheckout {
   isEmbeddedMode: true;
-  returnUrl: string;
+  returnUrl: string | null;
 }
 
 interface ICreateMultipleProductCheckoutStripeHosted extends ICreateMultipleProductCheckout {
