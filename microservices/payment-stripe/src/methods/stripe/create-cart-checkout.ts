@@ -20,8 +20,10 @@ class CreateCartCheckoutInput {
   cancelUrl: string;
 
   @IsString()
+  @IsUndefinable()
+  @IsNullable()
   @ValidateIf((input) => input.isEmbeddedMode)
-  returnUrl: string;
+  returnUrl: string | null;
 
   @IsBoolean()
   @IsUndefinable()
