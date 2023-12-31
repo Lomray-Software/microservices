@@ -23,6 +23,7 @@ import Price from '@entities/price';
 import Product from '@entities/product';
 import Transaction, { defaultParams as defaultTransactionParams } from '@entities/transaction';
 import composeBalance from '@helpers/compose-balance';
+import extractIdFromStripeInstance from '@helpers/extract-id-from-stripe-instance';
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
@@ -213,7 +214,7 @@ class Stripe extends Abstract {
       throw new BaseException({ status: 500, message: messages.getNotFoundMessage('Customer') });
     }
 
-    const cardData = this.buildCardData(params);
+    const cardData = Stripe.buildCardData(params);
 
     if (!cardData) {
       throw new BaseException({ status: 400, message: 'Provided card data is invalid.' });
@@ -989,7 +990,7 @@ class Stripe extends Abstract {
     /* eslint-disable camelcase */
     const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
 
-    if (!this.isExternalAccountIsBankAccount(externalAccount)) {
+    if (!Stripe.isExternalAccountIsBankAccount(externalAccount)) {
       const card = await this.getCardById(externalAccount.id);
 
       if (!card) {
@@ -1022,7 +1023,7 @@ class Stripe extends Abstract {
       card.params.issuer = issuer;
       card.country = billingCountry;
       card.postalCode = billingPostalCode;
-      card.isInstantPayoutAllowed = this.isAllowedInstantPayout(availablePayoutMethods);
+      card.isInstantPayoutAllowed = Stripe.isAllowedInstantPayout(availablePayoutMethods);
 
       await this.cardRepository.save(card);
 
@@ -1052,7 +1053,7 @@ class Stripe extends Abstract {
     bankAccount.lastDigits = lastDigits;
     bankAccount.holderName = holderName;
     bankAccount.bankName = bankName;
-    bankAccount.isInstantPayoutAllowed = this.isAllowedInstantPayout(availablePayoutMethods);
+    bankAccount.isInstantPayoutAllowed = Stripe.isAllowedInstantPayout(availablePayoutMethods);
 
     await this.bankAccountRepository.save(bankAccount);
     /* eslint-enable camelcase */
@@ -1076,11 +1077,11 @@ class Stripe extends Abstract {
     }
 
     const { userId, params } = await CustomerRepository.getCustomerByAccountId(
-      this.extractId(externalAccount.account),
+      extractIdFromStripeInstance(externalAccount.account),
       this.manager,
     );
 
-    if (!this.isExternalAccountIsBankAccount(externalAccount)) {
+    if (!Stripe.isExternalAccountIsBankAccount(externalAccount)) {
       const {
         id: cardId,
         last4: lastDigits,
@@ -1124,7 +1125,7 @@ class Stripe extends Abstract {
         userId,
         origin: country,
         ...(fingerprint ? { fingerprint } : {}),
-        isInstantPayoutAllowed: this.isAllowedInstantPayout(availablePayoutMethods),
+        isInstantPayoutAllowed: Stripe.isAllowedInstantPayout(availablePayoutMethods),
         ...(billingCountry ? { country: billingCountry } : {}),
         ...(billingPostalCode ? { postalCode: billingPostalCode } : {}),
         isDefault: Boolean(isDefault),
@@ -1149,7 +1150,7 @@ class Stripe extends Abstract {
       bankAccountId,
       lastDigits,
       userId,
-      isInstantPayoutAllowed: this.isAllowedInstantPayout(availablePayoutMethods),
+      isInstantPayoutAllowed: Stripe.isAllowedInstantPayout(availablePayoutMethods),
       holderName,
       bankName,
       params: { bankAccountId },
@@ -1171,9 +1172,9 @@ class Stripe extends Abstract {
       });
     }
 
-    const externalAccountId = this.extractId(externalAccount.id);
+    const externalAccountId = extractIdFromStripeInstance(externalAccount.id);
 
-    if (!this.isExternalAccountIsBankAccount(externalAccount)) {
+    if (!Stripe.isExternalAccountIsBankAccount(externalAccount)) {
       const card = await this.getCardById(externalAccountId);
 
       if (!card) {
@@ -1320,7 +1321,7 @@ class Stripe extends Abstract {
       },
     );
 
-    const isApplicationFeeExpanded = this.checkIfApplicationFeeIsObject(applicationFee);
+    const isApplicationFeeExpanded = Stripe.checkIfApplicationFeeIsObject(applicationFee);
 
     if (!isApplicationFeeExpanded) {
       const errorMessage = 'Failed to expand charge application fee';
@@ -1356,7 +1357,7 @@ class Stripe extends Abstract {
       });
     }
 
-    const transferId: string | null = transfer ? this.extractId(transfer) : null;
+    const transferId: string | null = transfer ? extractIdFromStripeInstance(transfer) : null;
     const isDestinationTransaction = transactions.some(
       ({ params }) => params.transferDestinationConnectAccountId,
     );
@@ -1395,7 +1396,7 @@ class Stripe extends Abstract {
     }
 
     const destinationTransaction: string | null =
-      transferId && transferExpanded ? this.extractId(transferExpanded) : null;
+      transferId && transferExpanded ? extractIdFromStripeInstance(transferExpanded) : null;
 
     transactions.forEach((transaction) => {
       transaction.applicationFeeId = applicationFeeId;
@@ -1403,7 +1404,8 @@ class Stripe extends Abstract {
       transaction.params.refundedApplicationFeeAmount = applicationFeeRefundedAmount;
 
       if (destinationTransaction) {
-        transaction.params.destinationTransactionId = this.extractId(destinationTransaction);
+        transaction.params.destinationTransactionId =
+          extractIdFromStripeInstance(destinationTransaction);
         transaction.params.transferAmount = transferExpanded?.amount ?? 0;
         transaction.params.transferReversedAmount = transferExpanded?.amount_reversed ?? 0;
       }
@@ -2076,6 +2078,7 @@ class Stripe extends Abstract {
 
   /**
    * Get and calculate transfer information
+   * @protected
    */
   protected async getTransferInfo(
     entityId: string,
@@ -2112,24 +2115,8 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Check if external account is bank account
-   */
-  private isExternalAccountIsBankAccount(
-    externalAccount: StripeSdk.BankAccount | StripeSdk.Card,
-  ): externalAccount is StripeSdk.BankAccount {
-    return externalAccount.object.startsWith('ba');
-  }
-
-  /**
-   * Returns id or extracted id from data
-   * @TODO: remove and use helper: extract id from stripe instance
-   */
-  private extractId<T extends { id: string }>(data: string | T): string {
-    return typeof data === 'string' ? data : data.id;
-  }
-
-  /**
    * Returns card for charging payment
+   * @private
    */
   private async getChargingCard(userId: string, cardId?: string): Promise<Card> {
     let card: Card | undefined;
@@ -2177,6 +2164,7 @@ class Stripe extends Abstract {
   /**
    * Returns card by card id
    * @description Uses to search related connect account (external account) data
+   * @private
    */
   private getCardById(cardId: string): Promise<Card | undefined> {
     return this.cardRepository
@@ -2188,6 +2176,7 @@ class Stripe extends Abstract {
   /**
    * Returns bank account by bank account id
    * @description Uses to search related connect account (external account) data
+   * @private
    */
   private getBankAccountById(bankAccountId: string): Promise<BankAccount | undefined> {
     return this.bankAccountRepository
@@ -2198,6 +2187,7 @@ class Stripe extends Abstract {
 
   /**
    * Returns account link
+   * @private
    */
   private buildAccountLink(
     accountId: string,
@@ -2215,18 +2205,8 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Check is allowed instant payout
-   */
-  private isAllowedInstantPayout(availablePayoutMethods?: TAvailablePaymentMethods): boolean {
-    if (!availablePayoutMethods) {
-      return false;
-    }
-
-    return availablePayoutMethods.includes('instant');
-  }
-
-  /**
    * Returns payout method data
+   * @private
    */
   private async getPayoutMethodData(
     payoutMethod?: IPayoutMethod,
@@ -2258,31 +2238,8 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Build card data
-   */
-  private buildCardData({ cvc, expired, digits, token }: ICardParams): TCardData | undefined {
-    if (token) {
-      return { token };
-    }
-
-    if (!expired || !digits || !cvc) {
-      return;
-    }
-
-    const { year, month } = fromExpirationDate(expired);
-
-    return {
-      // eslint-disable-next-line camelcase
-      exp_month: month,
-      // eslint-disable-next-line camelcase
-      exp_year: year,
-      cvc,
-      number: digits,
-    };
-  }
-
-  /**
    * Get and validate receiver and sender
+   * @private
    */
   private async getAndValidateTransactionContributors(
     senderId: string,
@@ -2323,9 +2280,64 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Check if transfer is object
+   * Check is allowed instant payout
+   * @private
    */
-  private checkIfApplicationFeeIsObject(
+  private static isAllowedInstantPayout(
+    availablePayoutMethods?: TAvailablePaymentMethods,
+  ): boolean {
+    if (!availablePayoutMethods) {
+      return false;
+    }
+
+    return availablePayoutMethods.includes('instant');
+  }
+
+  /**
+   * Check if external account is bank account
+   * @private
+   */
+  private static isExternalAccountIsBankAccount(
+    externalAccount: StripeSdk.BankAccount | StripeSdk.Card,
+  ): externalAccount is StripeSdk.BankAccount {
+    return externalAccount.object.startsWith('ba');
+  }
+
+  /**
+   * Build card data
+   * @private
+   */
+  private static buildCardData({
+    cvc,
+    expired,
+    digits,
+    token,
+  }: ICardParams): TCardData | undefined {
+    if (token) {
+      return { token };
+    }
+
+    if (!expired || !digits || !cvc) {
+      return;
+    }
+
+    const { year, month } = fromExpirationDate(expired);
+
+    return {
+      // eslint-disable-next-line camelcase
+      exp_month: month,
+      // eslint-disable-next-line camelcase
+      exp_year: year,
+      cvc,
+      number: digits,
+    };
+  }
+
+  /**
+   * Check if transfer is object
+   * @private
+   */
+  private static checkIfApplicationFeeIsObject(
     applicationFee?: StripeSdk.ApplicationFee | string | null,
   ): applicationFee is StripeSdk.ApplicationFee {
     if (!applicationFee || typeof applicationFee === 'string') {
