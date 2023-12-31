@@ -27,11 +27,13 @@ import extractIdFromStripeInstance from '@helpers/extract-id-from-stripe-instanc
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
+import isExternalAccountIsBankAccount from '@helpers/is-external-account-is-bank-account';
 import messages from '@helpers/validators/messages';
 import TBalance from '@interfaces/balance';
 import TCurrency from '@interfaces/currency';
 import IFees from '@interfaces/fees';
 import type ITax from '@interfaces/tax';
+import BankAccountRepository from '@repositories/bank-account';
 import CardRepository from '@repositories/card';
 import CustomerRepository from '@repositories/customer';
 import Calculation from '@services/calculation';
@@ -447,6 +449,7 @@ class Stripe extends Abstract {
 
   /**
    * Create checkout session for existing cart and return url to redirect user for payment
+   * @TODO: get rid of the ts-ignores
    */
   public async createCartCheckout(
     params: TCreateMultipleProductCheckoutParams,
@@ -789,8 +792,8 @@ class Stripe extends Abstract {
     /* eslint-disable camelcase */
     const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
 
-    if (!Stripe.isExternalAccountIsBankAccount(externalAccount)) {
-      const card = await this.getCardById(externalAccount.id);
+    if (!isExternalAccountIsBankAccount(externalAccount)) {
+      const card = await CardRepository.getCardById(externalAccount.id, this.manager);
 
       if (!card) {
         throw new BaseException({
@@ -829,7 +832,10 @@ class Stripe extends Abstract {
       return;
     }
 
-    const bankAccount = await this.getBankAccountById(externalAccount.id);
+    const bankAccount = await BankAccountRepository.getBankAccountById(
+      externalAccount.id,
+      this.manager,
+    );
 
     if (!bankAccount) {
       throw new BaseException({
@@ -880,7 +886,7 @@ class Stripe extends Abstract {
       this.manager,
     );
 
-    if (!Stripe.isExternalAccountIsBankAccount(externalAccount)) {
+    if (!isExternalAccountIsBankAccount(externalAccount)) {
       const {
         id: cardId,
         last4: lastDigits,
@@ -955,51 +961,6 @@ class Stripe extends Abstract {
       params: { bankAccountId },
     });
     /* eslint-enable camelcase */
-  }
-
-  /**
-   * Handles connect account deleted
-   * @description Connect account event
-   */
-  public async handleExternalAccountDeleted(event: StripeSdk.Event): Promise<void> {
-    const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
-
-    if (!externalAccount?.account) {
-      throw new BaseException({
-        status: 500,
-        message: 'The connected account reference in external account data not found.',
-      });
-    }
-
-    const externalAccountId = extractIdFromStripeInstance(externalAccount.id);
-
-    if (!Stripe.isExternalAccountIsBankAccount(externalAccount)) {
-      const card = await this.getCardById(externalAccountId);
-
-      if (!card) {
-        throw new BaseException({
-          status: 500,
-          message: messages.getNotFoundMessage('Failed to handle external account deleted. Card'),
-        });
-      }
-
-      await this.cardRepository.remove(card);
-
-      return;
-    }
-
-    const bankAccount = await this.getBankAccountById(externalAccountId);
-
-    if (!bankAccount) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage(
-          'Failed to handle external account deleted. Bank account',
-        ),
-      });
-    }
-
-    await this.bankAccountRepository.remove(bankAccount);
   }
 
   /**
@@ -1908,7 +1869,7 @@ class Stripe extends Abstract {
 
       case 'account.external_account.deleted': {
         const handlers = {
-          connect: () => this.handleExternalAccountDeleted(event),
+          connect: () => webhookHandlers.externalAccount.handleExternalAccountDeleted(event),
         };
 
         await handlers?.[webhookType]();
@@ -2168,30 +2129,6 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Returns card by card id
-   * @description Uses to search related connect account (external account) data
-   * @private
-   */
-  private getCardById(cardId: string): Promise<Card | undefined> {
-    return this.cardRepository
-      .createQueryBuilder('card')
-      .where("card.params ->> 'cardId' = :cardId", { cardId })
-      .getOne();
-  }
-
-  /**
-   * Returns bank account by bank account id
-   * @description Uses to search related connect account (external account) data
-   * @private
-   */
-  private getBankAccountById(bankAccountId: string): Promise<BankAccount | undefined> {
-    return this.bankAccountRepository
-      .createQueryBuilder('bankAccount')
-      .where("bankAccount.params ->> 'bankAccountId' = :bankAccountId", { bankAccountId })
-      .getOne();
-  }
-
-  /**
    * Returns account link
    * @private
    */
@@ -2297,16 +2234,6 @@ class Stripe extends Abstract {
     }
 
     return availablePayoutMethods.includes('instant');
-  }
-
-  /**
-   * Check if external account is bank account
-   * @private
-   */
-  private static isExternalAccountIsBankAccount(
-    externalAccount: StripeSdk.BankAccount | StripeSdk.Card,
-  ): externalAccount is StripeSdk.BankAccount {
-    return externalAccount.object.startsWith('ba');
   }
 
   /**
