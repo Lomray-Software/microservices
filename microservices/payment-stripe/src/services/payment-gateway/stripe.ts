@@ -656,207 +656,6 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Process webhook event
-   */
-  private async processWebhookEvent(event: StripeSdk.Event, webhookType: string): Promise<void> {
-    const webhookHandlers = WebhookHandlers.init(this.manager);
-
-    switch (event.type) {
-      /**
-       * Checkout session events
-       */
-      case 'checkout.session.completed': {
-        await this.handleTransactionCompleted(event);
-        break;
-      }
-
-      /**
-       * Account events
-       */
-      case 'account.updated': {
-        const handlers = {
-          connect: () => webhookHandlers.account.handleAccountUpdated(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'account.external_account.created': {
-        const handlers = {
-          connect: () => this.handleExternalAccountCreated(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'account.external_account.updated': {
-        const handlers = {
-          connect: () => this.handleExternalAccountUpdated(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'account.external_account.deleted': {
-        const handlers = {
-          connect: () => this.handleExternalAccountDeleted(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      /**
-       * Payment method events
-       */
-      case 'setup_intent.succeeded': {
-        const handlers = {
-          account: () => webhookHandlers.setupIntent.handleSetupIntentSucceed(event, this.sdk),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'payment_method.updated':
-      case 'payment_method.automatically_updated': {
-        const handlers = {
-          account: () => webhookHandlers.paymentMethod.handlePaymentMethodUpdated(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'payment_method.detached': {
-        const handlers = {
-          account: () => webhookHandlers.paymentMethod.handlePaymentMethodDetached(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      /**
-       * Transfer events
-       */
-      case 'transfer.reversed': {
-        const handlers = {
-          account: () => webhookHandlers.transfer.transferReversed(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      /**
-       * Payment intent events
-       */
-      case 'payment_intent.processing':
-      case 'payment_intent.succeeded':
-      case 'payment_intent.canceled': {
-        const handlers = {
-          account: () => webhookHandlers.paymentIntent.handlePaymentIntent(event, this.sdk),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'payment_intent.payment_failed': {
-        const handlers = {
-          account: () =>
-            webhookHandlers.paymentIntent.handlePaymentIntentPaymentFailed(event, this.sdk),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      /**
-       * Application fee events
-       */
-      case 'application_fee.refund.updated': {
-        const handlers = {
-          account: () =>
-            webhookHandlers.applicationFee.handleApplicationFeeRefundUpdated(event, this.sdk),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'application_fee.refunded': {
-        const handlers = {
-          account: () => webhookHandlers.applicationFee.handleApplicationFeeRefunded(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      /**
-       * Refund events
-       */
-      case 'charge.refund.updated': {
-        const handlers = {
-          account: () => webhookHandlers.charge.handleRefundUpdated(event, this.manager, this.sdk),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      /**
-       * Charge events
-       */
-      case 'charge.refunded': {
-        const handlers = {
-          account: () => webhookHandlers.charge.handleChargeRefunded(event, this.manager, this.sdk),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'charge.dispute.created': {
-        const handlers = {
-          account: () => webhookHandlers.charge.handleChargeDisputeCreated(event, this.manager),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'charge.dispute.updated':
-      case 'charge.dispute.closed':
-      case 'charge.dispute.funds_reinstated': {
-        const handlers = {
-          account: () => webhookHandlers.charge.handleChargeDisputeUpdated(event, this.manager),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      /**
-       * Customer events
-       */
-      case 'customer.updated': {
-        const handlers = {
-          account: () => webhookHandlers.customer.handleCustomerUpdated(event, this.manager),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-    }
-  }
-
-  /**
    * Create instant payout
    * @description Should be called from the API
    */
@@ -1988,8 +1787,11 @@ class Stripe extends Abstract {
     duration,
     durationInMonths,
   }: IStripeCouponParams): Promise<Coupon> {
-    const couponDiscount = this.validateAndTransformCouponDiscountInput({ percentOff, amountOff });
-    const couponDuration = this.validateAndTransformCouponDurationInput({
+    const couponDiscount = Stripe.validateAndTransformCouponDiscountInput({
+      percentOff,
+      amountOff,
+    });
+    const couponDuration = Stripe.validateAndTransformCouponDurationInput({
       duration,
       durationInMonths,
     });
@@ -2018,62 +1820,6 @@ class Stripe extends Abstract {
       },
       id,
     );
-  }
-
-  /**
-   * Validate and transform coupon discount input
-   */
-  private validateAndTransformCouponDiscountInput({
-    percentOff,
-    amountOff,
-  }: Pick<IStripeCouponParams, 'percentOff' | 'amountOff'>): Pick<
-    StripeSdk.CouponCreateParams,
-    'amount_off' | 'percent_off'
-  > {
-    if (!amountOff && !percentOff) {
-      throw new BaseException({
-        status: 400,
-        message: 'Neither discount amount nor percent provided.',
-      });
-    }
-
-    if (amountOff && percentOff) {
-      throw new BaseException({
-        status: 400,
-        message: 'Cannot provide both amount and percent discount.',
-      });
-    }
-
-    return {
-      // eslint-disable-next-line camelcase
-      amount_off: amountOff,
-      // eslint-disable-next-line camelcase
-      percent_off: percentOff,
-    };
-  }
-
-  /**
-   * Validate and transform coupon duration input
-   */
-  private validateAndTransformCouponDurationInput({
-    duration,
-    durationInMonths,
-  }: Pick<IStripeCouponParams, 'duration' | 'durationInMonths'>): Pick<
-    StripeSdk.CouponCreateParams,
-    'duration' | 'duration_in_months'
-  > {
-    if (duration === CouponDuration.REPEATING && !durationInMonths) {
-      throw new BaseException({
-        status: 400,
-        message: 'If duration is repeating, the number of months the coupon applies.',
-      });
-    }
-
-    return {
-      duration: duration as StripeSdk.CouponCreateParams.Duration,
-      // eslint-disable-next-line camelcase
-      duration_in_months: durationInMonths,
-    };
   }
 
   /**
@@ -2112,6 +1858,266 @@ class Stripe extends Abstract {
         userId: transactions[0].userId,
       },
     );
+  }
+
+  /**
+   * Process webhook event
+   * @private
+   */
+  private async processWebhookEvent(event: StripeSdk.Event, webhookType: string): Promise<void> {
+    const webhookHandlers = WebhookHandlers.init(this.manager);
+
+    switch (event.type) {
+      /**
+       * Checkout session events
+       */
+      case 'checkout.session.completed': {
+        await this.handleTransactionCompleted(event);
+        break;
+      }
+
+      /**
+       * Account events
+       */
+      case 'account.updated': {
+        const handlers = {
+          connect: () => webhookHandlers.account.handleAccountUpdated(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'account.external_account.created': {
+        const handlers = {
+          connect: () => this.handleExternalAccountCreated(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'account.external_account.updated': {
+        const handlers = {
+          connect: () => this.handleExternalAccountUpdated(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'account.external_account.deleted': {
+        const handlers = {
+          connect: () => this.handleExternalAccountDeleted(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      /**
+       * Payment method events
+       */
+      case 'setup_intent.succeeded': {
+        const handlers = {
+          account: () => webhookHandlers.setupIntent.handleSetupIntentSucceed(event, this.sdk),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'payment_method.updated':
+      case 'payment_method.automatically_updated': {
+        const handlers = {
+          account: () => webhookHandlers.paymentMethod.handlePaymentMethodUpdated(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'payment_method.detached': {
+        const handlers = {
+          account: () => webhookHandlers.paymentMethod.handlePaymentMethodDetached(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      /**
+       * Transfer events
+       */
+      case 'transfer.reversed': {
+        const handlers = {
+          account: () => webhookHandlers.transfer.transferReversed(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      /**
+       * Payment intent events
+       */
+      case 'payment_intent.processing':
+      case 'payment_intent.succeeded':
+      case 'payment_intent.canceled': {
+        const handlers = {
+          account: () => webhookHandlers.paymentIntent.handlePaymentIntent(event, this.sdk),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'payment_intent.payment_failed': {
+        const handlers = {
+          account: () =>
+            webhookHandlers.paymentIntent.handlePaymentIntentPaymentFailed(event, this.sdk),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      /**
+       * Application fee events
+       */
+      case 'application_fee.refund.updated': {
+        const handlers = {
+          account: () =>
+            webhookHandlers.applicationFee.handleApplicationFeeRefundUpdated(event, this.sdk),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'application_fee.refunded': {
+        const handlers = {
+          account: () => webhookHandlers.applicationFee.handleApplicationFeeRefunded(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      /**
+       * Refund events
+       */
+      case 'charge.refund.updated': {
+        const handlers = {
+          account: () => webhookHandlers.charge.handleRefundUpdated(event, this.manager, this.sdk),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      /**
+       * Charge events
+       */
+      case 'charge.refunded': {
+        const handlers = {
+          account: () => webhookHandlers.charge.handleChargeRefunded(event, this.manager, this.sdk),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'charge.dispute.created': {
+        const handlers = {
+          account: () => webhookHandlers.charge.handleChargeDisputeCreated(event, this.manager),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'charge.dispute.updated':
+      case 'charge.dispute.closed':
+      case 'charge.dispute.funds_reinstated': {
+        const handlers = {
+          account: () => webhookHandlers.charge.handleChargeDisputeUpdated(event, this.manager),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      /**
+       * Customer events
+       */
+      case 'customer.updated': {
+        const handlers = {
+          account: () => webhookHandlers.customer.handleCustomerUpdated(event, this.manager),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+    }
+  }
+
+  /**
+   * Validate and transform coupon duration input
+   * @private
+   */
+  private static validateAndTransformCouponDurationInput({
+    duration,
+    durationInMonths,
+  }: Pick<IStripeCouponParams, 'duration' | 'durationInMonths'>): Pick<
+    StripeSdk.CouponCreateParams,
+    'duration' | 'duration_in_months'
+  > {
+    if (duration === CouponDuration.REPEATING && !durationInMonths) {
+      throw new BaseException({
+        status: 400,
+        message: 'If duration is repeating, the number of months the coupon applies.',
+      });
+    }
+
+    return {
+      duration: duration as StripeSdk.CouponCreateParams.Duration,
+      // eslint-disable-next-line camelcase
+      duration_in_months: durationInMonths,
+    };
+  }
+
+  /**
+   * Validate and transform coupon discount input
+   * @private
+   */
+  private static validateAndTransformCouponDiscountInput({
+    percentOff,
+    amountOff,
+  }: Pick<IStripeCouponParams, 'percentOff' | 'amountOff'>): Pick<
+    StripeSdk.CouponCreateParams,
+    'amount_off' | 'percent_off'
+  > {
+    if (!amountOff && !percentOff) {
+      throw new BaseException({
+        status: 400,
+        message: 'Neither discount amount nor percent provided.',
+      });
+    }
+
+    if (amountOff && percentOff) {
+      throw new BaseException({
+        status: 400,
+        message: 'Cannot provide both amount and percent discount.',
+      });
+    }
+
+    return {
+      // eslint-disable-next-line camelcase
+      amount_off: amountOff,
+      // eslint-disable-next-line camelcase
+      percent_off: percentOff,
+    };
   }
 
   /**
