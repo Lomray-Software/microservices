@@ -17,6 +17,21 @@ export interface ICardDataByFingerprintResult {
 @EntityRepository(CardEntity)
 class Card extends Repository<CardEntity> {
   /**
+   * Returns card by card id
+   * @description Uses to search related connect account (external account) data
+   */
+  public static getCardById(
+    cardId: string,
+    manager: EntityManager,
+  ): Promise<CardEntity | undefined> {
+    return manager
+      .getRepository(CardEntity)
+      .createQueryBuilder('card')
+      .where("card.params ->> 'cardId' = :cardId", { cardId })
+      .getOne();
+  }
+
+  /**
    * Returns extracted payment method from card
    * @description Support old payment method storage in params
    */
