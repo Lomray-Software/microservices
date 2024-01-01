@@ -23,6 +23,7 @@ import Price from '@entities/price';
 import Product from '@entities/product';
 import Transaction, { defaultParams as defaultTransactionParams } from '@entities/transaction';
 import composeBalance from '@helpers/compose-balance';
+import extractIdFromStripeInstance from '@helpers/extract-id-from-stripe-instance';
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import getPercentFromAmount from '@helpers/get-percent-from-amount';
@@ -32,7 +33,6 @@ import TCurrency from '@interfaces/currency';
 import IFees from '@interfaces/fees';
 import type ITax from '@interfaces/tax';
 import CardRepository from '@repositories/card';
-import CustomerRepository from '@repositories/customer';
 import Calculation from '@services/calculation';
 import Parser from '@services/parser';
 import WebhookHandlers from '@services/webhook-handlers';
@@ -51,6 +51,11 @@ export interface IStripeProductParams extends IProductParams {
   // @TODO: Expected: ImagesUrl?
   images?: string[];
 }
+
+export type TAvailablePaymentMethods =
+  | StripeSdk.Card.AvailablePayoutMethod[]
+  | StripeSdk.BankAccount.AvailablePayoutMethod[]
+  | null;
 
 interface IPaymentIntentParams {
   userId: string;
@@ -142,11 +147,6 @@ interface IGetPaymentIntentFeesParams
   withStripeFee?: boolean;
 }
 
-type TAvailablePaymentMethods =
-  | StripeSdk.Card.AvailablePayoutMethod[]
-  | StripeSdk.BankAccount.AvailablePayoutMethod[]
-  | null;
-
 interface IPaymentIntentFees {
   stripeUnitFee: number;
   platformUnitFee: number;
@@ -213,7 +213,7 @@ class Stripe extends Abstract {
       throw new BaseException({ status: 500, message: messages.getNotFoundMessage('Customer') });
     }
 
-    const cardData = this.buildCardData(params);
+    const cardData = Stripe.buildCardData(params);
 
     if (!cardData) {
       throw new BaseException({ status: 400, message: 'Provided card data is invalid.' });
@@ -446,6 +446,7 @@ class Stripe extends Abstract {
 
   /**
    * Create checkout session for existing cart and return url to redirect user for payment
+   * @TODO: get rid of the ts-ignores
    */
   public async createCartCheckout(
     params: TCreateMultipleProductCheckoutParams,
@@ -655,207 +656,6 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Process webhook event
-   */
-  private async processWebhookEvent(event: StripeSdk.Event, webhookType: string): Promise<void> {
-    const webhookHandlers = WebhookHandlers.init(this.manager);
-
-    switch (event.type) {
-      /**
-       * Checkout session events
-       */
-      case 'checkout.session.completed': {
-        await this.handleTransactionCompleted(event);
-        break;
-      }
-
-      /**
-       * Account events
-       */
-      case 'account.updated': {
-        const handlers = {
-          connect: () => webhookHandlers.account.handleAccountUpdated(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'account.external_account.created': {
-        const handlers = {
-          connect: () => this.handleExternalAccountCreated(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'account.external_account.updated': {
-        const handlers = {
-          connect: () => this.handleExternalAccountUpdated(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'account.external_account.deleted': {
-        const handlers = {
-          connect: () => this.handleExternalAccountDeleted(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      /**
-       * Payment method events
-       */
-      case 'setup_intent.succeeded': {
-        const handlers = {
-          account: () => webhookHandlers.setupIntent.handleSetupIntentSucceed(event, this.sdk),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'payment_method.updated':
-      case 'payment_method.automatically_updated': {
-        const handlers = {
-          account: () => webhookHandlers.paymentMethod.handlePaymentMethodUpdated(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'payment_method.detached': {
-        const handlers = {
-          account: () => webhookHandlers.paymentMethod.handlePaymentMethodDetached(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      /**
-       * Transfer events
-       */
-      case 'transfer.reversed': {
-        const handlers = {
-          account: () => webhookHandlers.transfer.transferReversed(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      /**
-       * Payment intent events
-       */
-      case 'payment_intent.processing':
-      case 'payment_intent.succeeded':
-      case 'payment_intent.canceled': {
-        const handlers = {
-          account: () => webhookHandlers.paymentIntent.handlePaymentIntent(event, this.sdk),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'payment_intent.payment_failed': {
-        const handlers = {
-          account: () =>
-            webhookHandlers.paymentIntent.handlePaymentIntentPaymentFailed(event, this.sdk),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      /**
-       * Application fee events
-       */
-      case 'application_fee.refund.updated': {
-        const handlers = {
-          account: () =>
-            webhookHandlers.applicationFee.handleApplicationFeeRefundUpdated(event, this.sdk),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'application_fee.refunded': {
-        const handlers = {
-          account: () => webhookHandlers.applicationFee.handleApplicationFeeRefunded(event),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      /**
-       * Refund events
-       */
-      case 'charge.refund.updated': {
-        const handlers = {
-          account: () => webhookHandlers.charge.handleRefundUpdated(event, this.manager, this.sdk),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      /**
-       * Charge events
-       */
-      case 'charge.refunded': {
-        const handlers = {
-          account: () => webhookHandlers.charge.handleChargeRefunded(event, this.manager, this.sdk),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'charge.dispute.created': {
-        const handlers = {
-          account: () => webhookHandlers.charge.handleChargeDisputeCreated(event, this.manager),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      case 'charge.dispute.updated':
-      case 'charge.dispute.closed':
-      case 'charge.dispute.funds_reinstated': {
-        const handlers = {
-          account: () => webhookHandlers.charge.handleChargeDisputeUpdated(event, this.manager),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-
-      /**
-       * Customer events
-       */
-      case 'customer.updated': {
-        const handlers = {
-          account: () => webhookHandlers.customer.handleCustomerUpdated(event, this.manager),
-        };
-
-        await handlers?.[webhookType]();
-        break;
-      }
-    }
-  }
-
-  /**
    * Create instant payout
    * @description Should be called from the API
    */
@@ -982,227 +782,6 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Handles connect account update
-   * @description Connect account event
-   */
-  public async handleExternalAccountUpdated(event: StripeSdk.Event): Promise<void> {
-    /* eslint-disable camelcase */
-    const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
-
-    if (!this.isExternalAccountIsBankAccount(externalAccount)) {
-      const card = await this.getCardById(externalAccount.id);
-
-      if (!card) {
-        throw new BaseException({
-          status: 500,
-          message: messages.getNotFoundMessage('Failed to handle external account updated. Card'),
-        });
-      }
-
-      const {
-        last4: lastDigits,
-        brand,
-        exp_year,
-        exp_month,
-        default_for_currency: isDefault,
-        available_payout_methods: availablePayoutMethods,
-        funding,
-        issuer,
-        country,
-        address_country: billingCountry,
-        address_zip: billingPostalCode,
-      } = externalAccount;
-
-      card.isDefault = Boolean(isDefault);
-      card.lastDigits = lastDigits;
-      card.expired = toExpirationDate(exp_month, exp_year);
-      card.brand = brand;
-      card.funding = funding;
-      card.origin = country;
-      card.params.issuer = issuer;
-      card.country = billingCountry;
-      card.postalCode = billingPostalCode;
-      card.isInstantPayoutAllowed = this.isAllowedInstantPayout(availablePayoutMethods);
-
-      await this.cardRepository.save(card);
-
-      return;
-    }
-
-    const bankAccount = await this.getBankAccountById(externalAccount.id);
-
-    if (!bankAccount) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage(
-          'Failed to handle external account updated. Bank account',
-        ),
-      });
-    }
-
-    const {
-      last4: lastDigits,
-      account_holder_name: holderName,
-      bank_name: bankName,
-      default_for_currency: isDefault,
-      available_payout_methods: availablePayoutMethods,
-    } = externalAccount as StripeSdk.BankAccount;
-
-    bankAccount.isDefault = Boolean(isDefault);
-    bankAccount.lastDigits = lastDigits;
-    bankAccount.holderName = holderName;
-    bankAccount.bankName = bankName;
-    bankAccount.isInstantPayoutAllowed = this.isAllowedInstantPayout(availablePayoutMethods);
-
-    await this.bankAccountRepository.save(bankAccount);
-    /* eslint-enable camelcase */
-  }
-
-  /**
-   * Handles connect account create
-   * @description NOTES: Connect account event
-   */
-  public async handleExternalAccountCreated(event: StripeSdk.Event): Promise<void> {
-    /* eslint-disable camelcase */
-    const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
-
-    if (!externalAccount?.account) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage(
-          'The connected account reference in external account data',
-        ),
-      });
-    }
-
-    const { userId, params } = await CustomerRepository.getCustomerByAccountId(
-      this.extractId(externalAccount.account),
-      this.manager,
-    );
-
-    if (!this.isExternalAccountIsBankAccount(externalAccount)) {
-      const {
-        id: cardId,
-        last4: lastDigits,
-        brand,
-        funding,
-        exp_year,
-        exp_month,
-        available_payout_methods: availablePayoutMethods,
-        default_for_currency: isDefault,
-        address_zip: billingPostalCode,
-        address_country: billingCountry,
-        fingerprint,
-        issuer,
-        country,
-      } = externalAccount;
-
-      /**
-       * Only connected custom account can attach few external account for payouts
-       */
-      if (params.accountType === 'custom') {
-        // User SHOULD NOT be eligible in any way to attach same card as payout method
-        const { isExist, type } = await CardRepository.getCardDataByFingerprint({
-          userId,
-          fingerprint,
-        });
-
-        if (isExist && type === 'externalAccount') {
-          /**
-           * @TODO: Handle for custom account duplicated card attach. Throw error and delete card from Stripe, etc..
-           */
-          const message = 'External account attached card is duplicated.';
-
-          Log.error(message);
-        }
-      }
-
-      await this.cardRepository.save({
-        lastDigits,
-        brand,
-        funding,
-        userId,
-        origin: country,
-        ...(fingerprint ? { fingerprint } : {}),
-        isInstantPayoutAllowed: this.isAllowedInstantPayout(availablePayoutMethods),
-        ...(billingCountry ? { country: billingCountry } : {}),
-        ...(billingPostalCode ? { postalCode: billingPostalCode } : {}),
-        isDefault: Boolean(isDefault),
-        expired: toExpirationDate(exp_month, exp_year),
-        params: { cardId, issuer },
-      });
-
-      return;
-    }
-
-    const {
-      id: bankAccountId,
-      last4: lastDigits,
-      account_holder_name: holderName,
-      bank_name: bankName,
-      default_for_currency: isDefault,
-      available_payout_methods: availablePayoutMethods,
-    } = externalAccount as StripeSdk.BankAccount;
-
-    await this.bankAccountRepository.save({
-      isDefault: Boolean(isDefault),
-      bankAccountId,
-      lastDigits,
-      userId,
-      isInstantPayoutAllowed: this.isAllowedInstantPayout(availablePayoutMethods),
-      holderName,
-      bankName,
-      params: { bankAccountId },
-    });
-    /* eslint-enable camelcase */
-  }
-
-  /**
-   * Handles connect account deleted
-   * @description Connect account event
-   */
-  public async handleExternalAccountDeleted(event: StripeSdk.Event): Promise<void> {
-    const externalAccount = event.data.object as StripeSdk.Card | StripeSdk.BankAccount;
-
-    if (!externalAccount?.account) {
-      throw new BaseException({
-        status: 500,
-        message: 'The connected account reference in external account data not found.',
-      });
-    }
-
-    const externalAccountId = this.extractId(externalAccount.id);
-
-    if (!this.isExternalAccountIsBankAccount(externalAccount)) {
-      const card = await this.getCardById(externalAccountId);
-
-      if (!card) {
-        throw new BaseException({
-          status: 500,
-          message: messages.getNotFoundMessage('Failed to handle external account deleted. Card'),
-        });
-      }
-
-      await this.cardRepository.remove(card);
-
-      return;
-    }
-
-    const bankAccount = await this.getBankAccountById(externalAccountId);
-
-    if (!bankAccount) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage(
-          'Failed to handle external account deleted. Bank account',
-        ),
-      });
-    }
-
-    await this.bankAccountRepository.remove(bankAccount);
-  }
-
-  /**
    * Handles completing of transaction inside stripe payment process
    */
   public async handleTransactionCompleted(event: StripeSdk.Event): Promise<Transaction | void> {
@@ -1320,7 +899,7 @@ class Stripe extends Abstract {
       },
     );
 
-    const isApplicationFeeExpanded = this.checkIfApplicationFeeIsObject(applicationFee);
+    const isApplicationFeeExpanded = Stripe.checkIfApplicationFeeIsObject(applicationFee);
 
     if (!isApplicationFeeExpanded) {
       const errorMessage = 'Failed to expand charge application fee';
@@ -1356,7 +935,7 @@ class Stripe extends Abstract {
       });
     }
 
-    const transferId: string | null = transfer ? this.extractId(transfer) : null;
+    const transferId: string | null = transfer ? extractIdFromStripeInstance(transfer) : null;
     const isDestinationTransaction = transactions.some(
       ({ params }) => params.transferDestinationConnectAccountId,
     );
@@ -1395,7 +974,7 @@ class Stripe extends Abstract {
     }
 
     const destinationTransaction: string | null =
-      transferId && transferExpanded ? this.extractId(transferExpanded) : null;
+      transferId && transferExpanded ? extractIdFromStripeInstance(transferExpanded) : null;
 
     transactions.forEach((transaction) => {
       transaction.applicationFeeId = applicationFeeId;
@@ -1403,7 +982,8 @@ class Stripe extends Abstract {
       transaction.params.refundedApplicationFeeAmount = applicationFeeRefundedAmount;
 
       if (destinationTransaction) {
-        transaction.params.destinationTransactionId = this.extractId(destinationTransaction);
+        transaction.params.destinationTransactionId =
+          extractIdFromStripeInstance(destinationTransaction);
         transaction.params.transferAmount = transferExpanded?.amount ?? 0;
         transaction.params.transferReversedAmount = transferExpanded?.amount_reversed ?? 0;
       }
@@ -1986,8 +1566,11 @@ class Stripe extends Abstract {
     duration,
     durationInMonths,
   }: IStripeCouponParams): Promise<Coupon> {
-    const couponDiscount = this.validateAndTransformCouponDiscountInput({ percentOff, amountOff });
-    const couponDuration = this.validateAndTransformCouponDurationInput({
+    const couponDiscount = Stripe.validateAndTransformCouponDiscountInput({
+      percentOff,
+      amountOff,
+    });
+    const couponDuration = Stripe.validateAndTransformCouponDurationInput({
       duration,
       durationInMonths,
     });
@@ -2019,63 +1602,8 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Validate and transform coupon discount input
-   */
-  private validateAndTransformCouponDiscountInput({
-    percentOff,
-    amountOff,
-  }: Pick<IStripeCouponParams, 'percentOff' | 'amountOff'>): Pick<
-    StripeSdk.CouponCreateParams,
-    'amount_off' | 'percent_off'
-  > {
-    if (!amountOff && !percentOff) {
-      throw new BaseException({
-        status: 400,
-        message: 'Neither discount amount nor percent provided.',
-      });
-    }
-
-    if (amountOff && percentOff) {
-      throw new BaseException({
-        status: 400,
-        message: 'Cannot provide both amount and percent discount.',
-      });
-    }
-
-    return {
-      // eslint-disable-next-line camelcase
-      amount_off: amountOff,
-      // eslint-disable-next-line camelcase
-      percent_off: percentOff,
-    };
-  }
-
-  /**
-   * Validate and transform coupon duration input
-   */
-  private validateAndTransformCouponDurationInput({
-    duration,
-    durationInMonths,
-  }: Pick<IStripeCouponParams, 'duration' | 'durationInMonths'>): Pick<
-    StripeSdk.CouponCreateParams,
-    'duration' | 'duration_in_months'
-  > {
-    if (duration === CouponDuration.REPEATING && !durationInMonths) {
-      throw new BaseException({
-        status: 400,
-        message: 'If duration is repeating, the number of months the coupon applies.',
-      });
-    }
-
-    return {
-      duration: duration as StripeSdk.CouponCreateParams.Duration,
-      // eslint-disable-next-line camelcase
-      duration_in_months: durationInMonths,
-    };
-  }
-
-  /**
    * Get and calculate transfer information
+   * @protected
    */
   protected async getTransferInfo(
     entityId: string,
@@ -2112,24 +1640,268 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Check if external account is bank account
+   * Process webhook event
+   * @private
    */
-  private isExternalAccountIsBankAccount(
-    externalAccount: StripeSdk.BankAccount | StripeSdk.Card,
-  ): externalAccount is StripeSdk.BankAccount {
-    return externalAccount.object.startsWith('ba');
+  private async processWebhookEvent(event: StripeSdk.Event, webhookType: string): Promise<void> {
+    const webhookHandlers = WebhookHandlers.init(this.manager);
+
+    switch (event.type) {
+      /**
+       * Checkout session events
+       */
+      case 'checkout.session.completed': {
+        await this.handleTransactionCompleted(event);
+        break;
+      }
+
+      /**
+       * Account events
+       */
+      case 'account.updated': {
+        const handlers = {
+          connect: () => webhookHandlers.account.handleAccountUpdated(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'account.external_account.created': {
+        const handlers = {
+          connect: () => webhookHandlers.externalAccount.handleExternalAccountCreated(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'account.external_account.updated': {
+        const handlers = {
+          connect: () => webhookHandlers.externalAccount.handleExternalAccountUpdated(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'account.external_account.deleted': {
+        const handlers = {
+          connect: () => webhookHandlers.externalAccount.handleExternalAccountDeleted(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      /**
+       * Payment method events
+       */
+      case 'setup_intent.succeeded': {
+        const handlers = {
+          account: () => webhookHandlers.setupIntent.handleSetupIntentSucceed(event, this.sdk),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'payment_method.updated':
+      case 'payment_method.automatically_updated': {
+        const handlers = {
+          account: () => webhookHandlers.paymentMethod.handlePaymentMethodUpdated(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'payment_method.detached': {
+        const handlers = {
+          account: () => webhookHandlers.paymentMethod.handlePaymentMethodDetached(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      /**
+       * Transfer events
+       */
+      case 'transfer.reversed': {
+        const handlers = {
+          account: () => webhookHandlers.transfer.transferReversed(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      /**
+       * Payment intent events
+       */
+      case 'payment_intent.processing':
+      case 'payment_intent.succeeded':
+      case 'payment_intent.canceled': {
+        const handlers = {
+          account: () => webhookHandlers.paymentIntent.handlePaymentIntent(event, this.sdk),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'payment_intent.payment_failed': {
+        const handlers = {
+          account: () =>
+            webhookHandlers.paymentIntent.handlePaymentIntentPaymentFailed(event, this.sdk),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      /**
+       * Application fee events
+       */
+      case 'application_fee.refund.updated': {
+        const handlers = {
+          account: () =>
+            webhookHandlers.applicationFee.handleApplicationFeeRefundUpdated(event, this.sdk),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'application_fee.refunded': {
+        const handlers = {
+          account: () => webhookHandlers.applicationFee.handleApplicationFeeRefunded(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      /**
+       * Refund events
+       */
+      case 'charge.refund.updated': {
+        const handlers = {
+          account: () => webhookHandlers.charge.handleRefundUpdated(event, this.manager, this.sdk),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      /**
+       * Charge events
+       */
+      case 'charge.refunded': {
+        const handlers = {
+          account: () => webhookHandlers.charge.handleChargeRefunded(event, this.manager, this.sdk),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'charge.dispute.created': {
+        const handlers = {
+          account: () => webhookHandlers.charge.handleChargeDisputeCreated(event, this.manager),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      case 'charge.dispute.updated':
+      case 'charge.dispute.closed':
+      case 'charge.dispute.funds_reinstated': {
+        const handlers = {
+          account: () => webhookHandlers.charge.handleChargeDisputeUpdated(event, this.manager),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+
+      /**
+       * Customer events
+       */
+      case 'customer.updated': {
+        const handlers = {
+          account: () => webhookHandlers.customer.handleCustomerUpdated(event, this.manager),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
+    }
   }
 
   /**
-   * Returns id or extracted id from data
-   * @TODO: remove and use helper: extract id from stripe instance
+   * Validate and transform coupon duration input
+   * @private
    */
-  private extractId<T extends { id: string }>(data: string | T): string {
-    return typeof data === 'string' ? data : data.id;
+  private static validateAndTransformCouponDurationInput({
+    duration,
+    durationInMonths,
+  }: Pick<IStripeCouponParams, 'duration' | 'durationInMonths'>): Pick<
+    StripeSdk.CouponCreateParams,
+    'duration' | 'duration_in_months'
+  > {
+    if (duration === CouponDuration.REPEATING && !durationInMonths) {
+      throw new BaseException({
+        status: 400,
+        message: 'If duration is repeating, the number of months the coupon applies.',
+      });
+    }
+
+    return {
+      duration: duration as StripeSdk.CouponCreateParams.Duration,
+      // eslint-disable-next-line camelcase
+      duration_in_months: durationInMonths,
+    };
+  }
+
+  /**
+   * Validate and transform coupon discount input
+   * @private
+   */
+  private static validateAndTransformCouponDiscountInput({
+    percentOff,
+    amountOff,
+  }: Pick<IStripeCouponParams, 'percentOff' | 'amountOff'>): Pick<
+    StripeSdk.CouponCreateParams,
+    'amount_off' | 'percent_off'
+  > {
+    if (!amountOff && !percentOff) {
+      throw new BaseException({
+        status: 400,
+        message: 'Neither discount amount nor percent provided.',
+      });
+    }
+
+    if (amountOff && percentOff) {
+      throw new BaseException({
+        status: 400,
+        message: 'Cannot provide both amount and percent discount.',
+      });
+    }
+
+    return {
+      // eslint-disable-next-line camelcase
+      amount_off: amountOff,
+      // eslint-disable-next-line camelcase
+      percent_off: percentOff,
+    };
   }
 
   /**
    * Returns card for charging payment
+   * @private
    */
   private async getChargingCard(userId: string, cardId?: string): Promise<Card> {
     let card: Card | undefined;
@@ -2175,29 +1947,8 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Returns card by card id
-   * @description Uses to search related connect account (external account) data
-   */
-  private getCardById(cardId: string): Promise<Card | undefined> {
-    return this.cardRepository
-      .createQueryBuilder('card')
-      .where("card.params ->> 'cardId' = :cardId", { cardId })
-      .getOne();
-  }
-
-  /**
-   * Returns bank account by bank account id
-   * @description Uses to search related connect account (external account) data
-   */
-  private getBankAccountById(bankAccountId: string): Promise<BankAccount | undefined> {
-    return this.bankAccountRepository
-      .createQueryBuilder('bankAccount')
-      .where("bankAccount.params ->> 'bankAccountId' = :bankAccountId", { bankAccountId })
-      .getOne();
-  }
-
-  /**
    * Returns account link
+   * @private
    */
   private buildAccountLink(
     accountId: string,
@@ -2215,18 +1966,8 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Check is allowed instant payout
-   */
-  private isAllowedInstantPayout(availablePayoutMethods?: TAvailablePaymentMethods): boolean {
-    if (!availablePayoutMethods) {
-      return false;
-    }
-
-    return availablePayoutMethods.includes('instant');
-  }
-
-  /**
    * Returns payout method data
+   * @private
    */
   private async getPayoutMethodData(
     payoutMethod?: IPayoutMethod,
@@ -2258,31 +1999,8 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Build card data
-   */
-  private buildCardData({ cvc, expired, digits, token }: ICardParams): TCardData | undefined {
-    if (token) {
-      return { token };
-    }
-
-    if (!expired || !digits || !cvc) {
-      return;
-    }
-
-    const { year, month } = fromExpirationDate(expired);
-
-    return {
-      // eslint-disable-next-line camelcase
-      exp_month: month,
-      // eslint-disable-next-line camelcase
-      exp_year: year,
-      cvc,
-      number: digits,
-    };
-  }
-
-  /**
    * Get and validate receiver and sender
+   * @private
    */
   private async getAndValidateTransactionContributors(
     senderId: string,
@@ -2323,9 +2041,40 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Check if transfer is object
+   * Build card data
+   * @private
    */
-  private checkIfApplicationFeeIsObject(
+  private static buildCardData({
+    cvc,
+    expired,
+    digits,
+    token,
+  }: ICardParams): TCardData | undefined {
+    if (token) {
+      return { token };
+    }
+
+    if (!expired || !digits || !cvc) {
+      return;
+    }
+
+    const { year, month } = fromExpirationDate(expired);
+
+    return {
+      // eslint-disable-next-line camelcase
+      exp_month: month,
+      // eslint-disable-next-line camelcase
+      exp_year: year,
+      cvc,
+      number: digits,
+    };
+  }
+
+  /**
+   * Check if transfer is object
+   * @private
+   */
+  private static checkIfApplicationFeeIsObject(
     applicationFee?: StripeSdk.ApplicationFee | string | null,
   ): applicationFee is StripeSdk.ApplicationFee {
     if (!applicationFee || typeof applicationFee === 'string') {

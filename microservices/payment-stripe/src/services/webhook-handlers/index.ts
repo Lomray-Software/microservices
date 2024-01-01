@@ -3,6 +3,7 @@ import Account from './account';
 import ApplicationFee from './application-fee';
 import Charge from './charge';
 import Customer from './customer';
+import ExternalAccount from './external-account';
 import PaymentIntent from './payment-intent';
 import PaymentMethod from './payment-method';
 import SetupIntent from './setup-intent';
@@ -55,7 +56,13 @@ class WebhookHandlers {
   public readonly account: Account;
 
   /**
+   * @public
+   */
+  public readonly externalAccount: ExternalAccount;
+
+  /**
    * @constructor
+   * @private
    */
   private constructor(manager: EntityManager) {
     this.customer = new Customer(manager);
@@ -66,6 +73,7 @@ class WebhookHandlers {
     this.paymentMethod = new PaymentMethod(manager);
     this.setupIntent = new SetupIntent(manager);
     this.account = new Account(manager);
+    this.externalAccount = new ExternalAccount(manager);
   }
 
   /**

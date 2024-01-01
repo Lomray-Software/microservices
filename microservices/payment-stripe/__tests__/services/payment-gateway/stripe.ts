@@ -3,8 +3,6 @@ import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import StripeSdk, { Stripe as StripeTypes } from 'stripe';
-import buildWebhookEvent from '@__helpers__/build-webhook-event';
-import { bankAccountMock } from '@__mocks__/bank-account';
 import { cardMock } from '@__mocks__/card';
 import messages from '@__mocks__/messages';
 import {
@@ -15,7 +13,6 @@ import {
   customerMock,
   paymentMethodId,
 } from '@__mocks__/stripe';
-import { bankAccountEventMock } from '@__mocks__/webhook-events/external-account/bank-account';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import TransactionRole from '@constants/transaction-role';
 import OriginalStripe from '@services/payment-gateway/stripe';
@@ -391,42 +388,6 @@ describe('services/payment-gateway/stripe', () => {
       );
 
       expect(isSet).to.false;
-    });
-  });
-
-  describe('webhooks handlers', () => {
-    describe('Event: account.external_account.deleted', () => {
-      it('should correctly remove bank account', async () => {
-        const event = buildWebhookEvent<StripeSdk.BankAccount>(bankAccountEventMock);
-
-        const extractIdStub = sinon.stub().returns(event.data.object.id);
-        const isExternalAccountIsBankAccountStub = sinon.stub().resolves(true);
-        const getBankAccountByIdStub = sinon.stub().resolves(bankAccountMock);
-
-        await service.handleExternalAccountDeleted.call(
-          {
-            extractId: extractIdStub,
-            isExternalAccountIsBankAccount: isExternalAccountIsBankAccountStub,
-            getBankAccountById: getBankAccountByIdStub,
-            bankAccountRepository: TypeormMock.entityManager,
-          },
-          event,
-        );
-
-        expect(TypeormMock.entityManager.remove).calledOnce;
-      });
-
-      it('should throw error: invalid bank connected account', async () => {
-        const event = buildWebhookEvent<StripeSdk.BankAccount>(bankAccountEventMock);
-
-        delete event.data.object.account;
-
-        expect(
-          await waitResult(
-            service.handleExternalAccountDeleted(event as unknown as StripeSdk.Event),
-          ),
-        ).to.throw('The connected account reference in external account data not found.');
-      });
     });
   });
 });

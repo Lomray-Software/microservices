@@ -19,7 +19,7 @@ const buildWebhookEvent = <TEventData>(data: TEventData): IStripeEvent<TEventDat
   object: 'event',
   account: 'account',
   data: {
-    object: data,
+    object: Object.assign({}, data),
   },
 });
 
