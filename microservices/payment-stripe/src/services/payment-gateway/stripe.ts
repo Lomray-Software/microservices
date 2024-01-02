@@ -491,8 +491,8 @@ class Stripe extends Abstract {
       checkoutParams = {
         ...checkoutParams,
         // @ts-ignore
-        return_url: returnUrl,
         ui_mode: 'embedded',
+        ...(returnUrl ? { return_url: returnUrl } : { redirect_on_completion: 'never' }),
       };
       // @ts-ignore
     } else {
