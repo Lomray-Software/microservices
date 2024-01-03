@@ -1,3 +1,4 @@
+import { Api, Log } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { EntityManager } from 'typeorm';
 import User from '@entities/user';
@@ -76,11 +77,42 @@ class Freeze {
       return user;
     }
 
+    // Update freeze status
     user.isFrozen = isFrozen;
 
     await userRepository.save(user);
 
+    // If freeze status is frozen - clear all user tokens
+    if (isFrozen) {
+      await this.clearAllUserTokens();
+    }
+
     return user;
+  }
+
+  /**
+   * Clear all user tokens
+   * @private
+   */
+  private async clearAllUserTokens(): Promise<void> {
+    const { error } = await Api.get().authentication.token.remove({
+      query: {
+        where: {
+          userId: this.userId,
+        },
+      },
+    });
+
+    if (!error) {
+      return;
+    }
+
+    Log.error(error.message);
+
+    throw new BaseException({
+      status: 500,
+      message: 'Failed to remove user tokens.',
+    });
   }
 }
 
