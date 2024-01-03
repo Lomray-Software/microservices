@@ -473,5 +473,18 @@
     "modelIn": "RemoveRequestParams",
     "modelOut": "users.RemoveOutputParams.a28f429696a14c44bcc1d3f30506e901",
     "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "identity-provider.get-user-by-token",
+    "description": "Returns user by identity token",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2024-01-03T15:10:16.346Z",
+    "modelIn": "users.GetUserByTokenIdentityProviderInput",
+    "modelOut": "users.GetUserByTokenIdentityProviderOutput",
+    "methodFilters": []
   }
 ]

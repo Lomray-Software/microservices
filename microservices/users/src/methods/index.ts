@@ -5,6 +5,7 @@ import CrudConfirmCode from '@methods/confirm-code/crud';
 import { send as ConfirmCodeSend } from '@methods/confirm-code/send';
 import { attach as IdentityProviderAttach } from '@methods/identity-provider/attach';
 import CrudIdentityProvider from '@methods/identity-provider/crud';
+import { getUserByToken as IdentityProviderGetUserByToken } from '@methods/identity-provider/get-user-by-token';
 import { signIn as IdentityProviderSignIn } from '@methods/identity-provider/sign-in';
 import CrudProfile from '@methods/profile/crud';
 import { changeLogin as UserChangeLogin } from '@methods/user/change-login';
@@ -57,6 +58,7 @@ export default (ms: Microservice): void => {
    */
   ms.addEndpoint('identity-provider.sign-in', IdentityProviderSignIn);
   ms.addEndpoint('identity-provider.attach', IdentityProviderAttach);
+  ms.addEndpoint('identity-provider.get-user-by-token', IdentityProviderGetUserByToken);
 
   /**
    * Microservice metadata endpoint

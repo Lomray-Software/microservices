@@ -30,7 +30,7 @@ describe('services/sign-up', () => {
 
   /**
    * Firebase mock
-   * NOTE: user update user stub for handle approve provider flow
+   * @description NOTE: user update user stub for handle approve provider flow
    */
   const firebaseMock = ({ user = {}, token = {}, updateUser = sinon.stub() } = {}) => ({
     auth: () => ({
@@ -81,6 +81,26 @@ describe('services/sign-up', () => {
     FirebaseSdkStub.resolves(firebaseMock({ user: { disabled: true } }));
 
     expect(await waitResult(service.signIn())).to.throw('Bad firebase token');
+  });
+
+  it('should throw error: get token by id user not found', async () => {
+    FirebaseSdkStub.resolves(firebaseMock());
+    TypeormMock.queryBuilder.getOne.resolves(undefined);
+
+    expect(await waitResult(service.getUserByToken())).to.throw('User was not found.');
+  });
+
+  it('should correctly return for get token by id user', async () => {
+    // @ts-ignore
+    const getFirebaseUserStub = sandbox.stub(service, 'getFirebaseUser').resolves([{}]);
+
+    FirebaseSdkStub.resolves(firebaseMock());
+    TypeormMock.queryBuilder.getOne.resolves(mockUser);
+
+    const user = await service.getUserByToken();
+
+    expect(user).to.deep.equal(mockUser);
+    expect(getFirebaseUserStub).to.calledOnce;
   });
 
   it('should successful sign in existing user', async () => {

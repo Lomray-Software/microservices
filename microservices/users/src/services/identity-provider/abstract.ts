@@ -90,6 +90,11 @@ abstract class Abstract {
   public abstract attachProvider(userId: string, params?: Record<string, any>): Promise<User>;
 
   /**
+   * Returns user from db by identity token
+   */
+  public abstract getUserByToken(): Promise<User>;
+
+  /**
    * Validate entities
    * @private
    */

@@ -15,6 +15,26 @@ type UserRecord = auth.UserRecord;
  */
 class Firebase extends Abstract {
   /**
+   * Return user by identity token
+   */
+  public async getUserByToken(): Promise<User> {
+    // Get firebase user
+    const [firebaseUser] = await this.getFirebaseUser();
+
+    // Get related user from db
+    const user = await this.userRepository.findUserByIdentifier(this.provider, firebaseUser.uid);
+
+    if (!user) {
+      throw new BaseException({
+        status: 404,
+        message: 'User was not found.',
+      });
+    }
+
+    return user;
+  }
+
+  /**
    * @inheritDoc
    */
   public async signIn({
