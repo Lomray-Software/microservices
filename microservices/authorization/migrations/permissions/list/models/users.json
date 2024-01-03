@@ -1140,39 +1140,6 @@
   },
   {
     "microservice": "users",
-    "alias": "users.ParseIdentityProviderInput",
-    "title": "Parse Identity Provider Input",
-    "schema": {
-      "provider": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      },
-      "token": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      }
-    },
-    "createdAt": "2024-01-03T14:53:36.167Z"
-  },
-  {
-    "microservice": "users",
-    "alias": "users.ParseIdentityProviderOutput",
-    "title": "Parse Identity Provider Output",
-    "schema": {
-      "user": "users.User"
-    },
-    "createdAt": "2024-01-03T14:53:36.167Z"
-  },
-  {
-    "microservice": "users",
     "alias": "users.GetUserByTokenIdentityProviderInput",
     "title": "Get User By Token Identity Provider Input",
     "schema": {
