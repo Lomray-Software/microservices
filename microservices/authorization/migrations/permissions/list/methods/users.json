@@ -476,15 +476,15 @@
   },
   {
     "microservice": "users",
-    "method": "identity-provider.parse",
-    "description": "Parse identity and returns users",
+    "method": "identity-provider.get-user-by-token",
+    "description": "Returns user by identity token",
     "allowGroup": [
       "admin"
     ],
     "denyGroup": [],
-    "createdAt": "2024-01-03T14:53:36.167Z",
-    "modelIn": "users.ParseIdentityProviderInput",
-    "modelOut": "users.ParseIdentityProviderOutput",
+    "createdAt": "2024-01-03T15:10:16.346Z",
+    "modelIn": "users.GetUserByTokenIdentityProviderInput",
+    "modelOut": "users.GetUserByTokenIdentityProviderOutput",
     "methodFilters": []
   }
 ]
