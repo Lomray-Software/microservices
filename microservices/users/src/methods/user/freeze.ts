@@ -1,11 +1,10 @@
 import { Endpoint, IsMeta } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
-import { IsBoolean, Length } from 'class-validator';
+import { IsEnum, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { getManager } from 'typeorm';
 import User from '@entities/user';
-import Freeze from '@services/freeze';
-import type { FreezeStatusType } from '@services/freeze';
+import Freeze, { FreezeStatusType } from '@services/freeze';
 
 class FreezeInput {
   @JSONSchema({
@@ -14,7 +13,7 @@ class FreezeInput {
   @Length(1, 36)
   userId: string;
 
-  @IsBoolean()
+  @IsEnum(FreezeStatusType)
   status: FreezeStatusType;
 }
 

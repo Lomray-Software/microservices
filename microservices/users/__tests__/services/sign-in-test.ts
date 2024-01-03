@@ -90,6 +90,25 @@ describe('services/sign-out', () => {
     expect(await waitResult(service.auth())).to.throw(BaseException);
   });
 
+  it('should throw error: account was frozen', async () => {
+    const user = repository.create({
+      id: 'user-id',
+      password: correctPassword,
+      isFrozen: true,
+    });
+
+    await repository.encryptPassword(user);
+
+    const service = SignIn.init({ login: mockEmail, password: correctPassword, repository });
+
+    TypeormMock.entityManager.findOne.resolves(user);
+
+    expect(await waitResult(service.auth().catch(({ message }) => message))).to.equal(
+      'Account was frozen.',
+    );
+    expect(await waitResult(service.auth())).to.throw(BaseException);
+  });
+
   it("should return user: account was removed but restore time isn't exceeded", async () => {
     const user = repository.create({
       id: 'user-id',
