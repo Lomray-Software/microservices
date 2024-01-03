@@ -7,7 +7,7 @@ import IdProvider from '@constants/id-provider';
 import User from '@entities/user';
 import Factory from '@services/identity-provider/factory';
 
-class ParseIdentityProviderInput {
+class GetUserByTokenIdentityProviderInput {
   @IsEnum(IdProvider)
   provider: IdProvider;
 
@@ -19,7 +19,7 @@ class ParseIdentityProviderInput {
   token: string;
 }
 
-class ParseIdentityProviderOutput {
+class GetUserByTokenIdentityProviderOutput {
   @IsMeta()
   @Type(() => User)
   @IsUndefinable()
@@ -27,13 +27,13 @@ class ParseIdentityProviderOutput {
 }
 
 /**
- * Parse identity and returns users
+ * Returns user by identity token
  */
-const parse = Endpoint.custom(
+const getUserByToken = Endpoint.custom(
   () => ({
-    input: ParseIdentityProviderInput,
-    output: ParseIdentityProviderOutput,
-    description: 'Parse identity and returns users',
+    input: GetUserByTokenIdentityProviderInput,
+    output: GetUserByTokenIdentityProviderOutput,
+    description: 'Returns user by identity token',
   }),
   async ({ provider, token }) => {
     const service = Factory.create(provider, token, getManager());
@@ -42,4 +42,8 @@ const parse = Endpoint.custom(
   },
 );
 
-export { ParseIdentityProviderInput, ParseIdentityProviderOutput, parse };
+export {
+  GetUserByTokenIdentityProviderInput,
+  GetUserByTokenIdentityProviderOutput,
+  getUserByToken,
+};
