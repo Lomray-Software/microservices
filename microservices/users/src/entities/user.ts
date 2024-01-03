@@ -1,5 +1,13 @@
 import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, Length, IsEmail, IsMobilePhone, IsString, Matches } from 'class-validator';
+import {
+  Allow,
+  Length,
+  IsEmail,
+  IsMobilePhone,
+  IsString,
+  Matches,
+  IsBoolean,
+} from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -76,6 +84,14 @@ class User {
   @IsNullable()
   @IsString()
   password: null | string;
+
+  @JSONSchema({
+    description: 'If a user account is frozen he will not be able to sign in.',
+  })
+  @Column({ type: 'boolean', default: false })
+  @IsBoolean()
+  @IsUndefinable()
+  isFrozen: boolean;
 
   @IsTypeormDate()
   @CreateDateColumn()

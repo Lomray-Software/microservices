@@ -31,6 +31,7 @@ class SignIn {
 
   /**
    * @constructor
+   * @protected
    */
   protected constructor({ login, password, repository }: ISignInParams) {
     this.login = login;
@@ -41,7 +42,7 @@ class SignIn {
   /**
    * Init service
    */
-  static init(params: ISignInParams): SignIn {
+  public static init(params: ISignInParams): SignIn {
     return new SignIn(params);
   }
 
@@ -66,6 +67,17 @@ class SignIn {
         code: ExceptionCode.LOGIN_PASSWORD_INCORRECT,
         message: 'Login or password incorrect.',
         status: 422,
+      });
+    }
+
+    /**
+     * Verify if user was frozen
+     */
+    if (user.isFrozen) {
+      throw new BaseException({
+        code: ExceptionCode.ACCOUNT_FROZEN,
+        message: 'Account was frozen.',
+        status: 500,
       });
     }
 
