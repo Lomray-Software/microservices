@@ -473,5 +473,18 @@
     "modelIn": "RemoveRequestParams",
     "modelOut": "users.RemoveOutputParams.a28f429696a14c44bcc1d3f30506e901",
     "methodFilters": []
+  },
+  {
+    "microservice": "users",
+    "method": "identity-provider.parse",
+    "description": "Parse identity and returns users",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2024-01-03T14:53:36.167Z",
+    "modelIn": "users.ParseIdentityProviderInput",
+    "modelOut": "users.ParseIdentityProviderOutput",
+    "methodFilters": []
   }
 ]
