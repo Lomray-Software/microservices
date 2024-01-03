@@ -1170,5 +1170,38 @@
       "user": "users.User"
     },
     "createdAt": "2024-01-03T14:53:36.167Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.GetUserByTokenIdentityProviderInput",
+    "title": "Get User By Token Identity Provider Input",
+    "schema": {
+      "provider": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "token": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2024-01-03T15:10:16.346Z"
+  },
+  {
+    "microservice": "users",
+    "alias": "users.GetUserByTokenIdentityProviderOutput",
+    "title": "Get User By Token Identity Provider Output",
+    "schema": {
+      "user": "users.User"
+    },
+    "createdAt": "2024-01-03T15:10:16.346Z"
   }
 ]
