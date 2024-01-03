@@ -17,10 +17,21 @@ class Firebase extends Abstract {
   /**
    * Return user by identity token
    */
-  public async getUserByToken(): Promise<User | undefined> {
+  public async getUserByToken(): Promise<User> {
+    // Get firebase user
     const [firebaseUser] = await this.getFirebaseUser();
 
-    return this.userRepository.findUserByIdentifier(this.provider, firebaseUser.uid);
+    // Get related user from db
+    const user = await this.userRepository.findUserByIdentifier(this.provider, firebaseUser.uid);
+
+    if (!user) {
+      throw new BaseException({
+        status: 404,
+        message: 'User was not found.',
+      });
+    }
+
+    return user;
   }
 
   /**

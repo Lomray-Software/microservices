@@ -30,7 +30,7 @@ describe('services/sign-up', () => {
 
   /**
    * Firebase mock
-   * NOTE: user update user stub for handle approve provider flow
+   * @description NOTE: user update user stub for handle approve provider flow
    */
   const firebaseMock = ({ user = {}, token = {}, updateUser = sinon.stub() } = {}) => ({
     auth: () => ({

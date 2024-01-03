@@ -92,7 +92,7 @@ abstract class Abstract {
   /**
    * Returns user from db by identity token
    */
-  public abstract getUserByToken(): Promise<User | undefined>;
+  public abstract getUserByToken(): Promise<User>;
 
   /**
    * Validate entities
