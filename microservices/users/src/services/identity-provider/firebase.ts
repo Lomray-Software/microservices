@@ -1,6 +1,7 @@
 import { Log } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import type { auth } from 'firebase-admin';
+import ExceptionCode from '@constants/exception-code';
 import IdentityProvider from '@entities/identity-provider';
 import Profile from '@entities/profile';
 import User from '@entities/user';
@@ -45,6 +46,17 @@ class Firebase extends Abstract {
       const userResult = await this.register(firebaseUser, providerType);
 
       return { user: userResult, isNew: true };
+    }
+
+    /**
+     * Verify if user was frozen
+     */
+    if (user.isFrozen) {
+      throw new BaseException({
+        code: ExceptionCode.ACCOUNT_FROZEN,
+        message: 'Account was frozen.',
+        status: 500,
+      });
     }
 
     if (isDenyAuthViaRegister) {

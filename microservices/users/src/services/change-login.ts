@@ -1,5 +1,6 @@
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { validate } from 'class-validator';
+import ExceptionCode from '@constants/exception-code';
 import User from '@entities/user';
 import UserRepository from '@repositories/user';
 import { ConfirmBy } from '@services/confirm/factory';
@@ -76,6 +77,17 @@ class ChangeLogin {
       throw new BaseException({
         status: 404,
         message: 'User not found.',
+      });
+    }
+
+    /**
+     * Verify if user was frozen
+     */
+    if (user.isFrozen) {
+      throw new BaseException({
+        code: ExceptionCode.ACCOUNT_FROZEN,
+        message: 'Account was frozen.',
+        status: 500,
       });
     }
 
