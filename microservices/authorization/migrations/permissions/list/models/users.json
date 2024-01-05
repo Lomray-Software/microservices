@@ -556,6 +556,14 @@
         "out": {
           "admin": "allow"
         }
+      },
+      "context": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
       }
     },
     "createdAt": "2022-04-14T05:34:31.363Z"
@@ -755,6 +763,14 @@
         "out": {
           "admin": "allow"
         }
+      },
+      "context": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
       }
     },
     "createdAt": "2022-04-14T05:34:31.363Z"
@@ -818,6 +834,14 @@
         "out": {
           "admin": "allow"
         }
+      },
+      "context": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
       }
     },
     "createdAt": "2022-04-14T05:34:31.363Z"
@@ -858,6 +882,14 @@
         "in": {
           "guest": "allow",
           "user": "allow",
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "context": {
+        "in": {
           "admin": "allow"
         },
         "out": {
