@@ -12,10 +12,16 @@ abstract class Abstract {
   protected readonly repository: Repository<ConfirmCode>;
 
   /**
+   * @protected
+   */
+  protected readonly context?: Record<string, any>;
+
+  /**
    * @constructor
    */
-  public constructor(repository: Abstract['repository']) {
+  public constructor(repository: Abstract['repository'], context?: Abstract['context']) {
     this.repository = repository;
+    this.context = context;
   }
 
   /**

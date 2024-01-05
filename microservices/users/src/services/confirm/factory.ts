@@ -16,13 +16,17 @@ class Factory {
   /**
    * Create confirmation service
    */
-  static create(type: ConfirmBy, repository: Repository<ConfirmCode>): Abstract {
+  static create(
+    type: ConfirmBy,
+    repository: Repository<ConfirmCode>,
+    context?: Record<string, any>,
+  ): Abstract {
     switch (type) {
       case ConfirmBy.email:
-        return new EmailConfirm(repository);
+        return new EmailConfirm(repository, context);
 
       case ConfirmBy.phone:
-        return new PhoneConfirm(repository);
+        return new PhoneConfirm(repository, context);
     }
   }
 }

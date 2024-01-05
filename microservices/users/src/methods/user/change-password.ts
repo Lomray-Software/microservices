@@ -1,5 +1,5 @@
 import { Endpoint, IsType, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsBoolean, IsEnum, IsNotEmpty, IsString, ValidateIf } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsObject, IsString, ValidateIf } from 'class-validator';
 import { getCustomRepository, getRepository } from 'typeorm';
 import ConfirmCode from '@entities/confirm-code';
 import User from '@entities/user';
@@ -39,6 +39,10 @@ class ChangePasswordInput {
   @IsBoolean()
   @IsUndefinable()
   allowByAdmin?: boolean;
+
+  @IsObject()
+  @IsUndefinable()
+  context?: Record<string, any>;
 }
 
 class ChangePasswordOutput {
@@ -55,14 +59,23 @@ const changePassword = Endpoint.custom(
     output: ChangePasswordOutput,
     description: 'Change user password',
   }),
-  async ({ userId, login, newPassword, oldPassword, confirmBy, confirmCode, allowByAdmin }) => {
+  async ({
+    userId,
+    login,
+    newPassword,
+    oldPassword,
+    confirmBy,
+    confirmCode,
+    allowByAdmin,
+    context,
+  }) => {
     const service = ChangePassword.init({
       userId,
       confirmBy,
       login,
       isConfirmed: (user: User) =>
         (confirmBy &&
-          Factory.create(confirmBy, getRepository(ConfirmCode)).verifyCode(
+          Factory.create(confirmBy, getRepository(ConfirmCode), context).verifyCode(
             user[confirmBy],
             confirmCode,
           )) ||
