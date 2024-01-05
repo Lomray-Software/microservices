@@ -1,5 +1,6 @@
 import { EventSubscriber, EntitySubscriberInterface, UpdateEvent, InsertEvent } from 'typeorm';
 import DisputeEntity from '@entities/dispute';
+import DisputeRepository from '@repositories/dispute';
 import DisputeService from '@services/dispute';
 
 /**
@@ -25,11 +26,11 @@ class Dispute implements EntitySubscriberInterface<DisputeEntity> {
    * Handle Refund event: after update
    */
   public async afterUpdate({ entity }: UpdateEvent<DisputeEntity>): Promise<void> {
-    if (!entity) {
+    if (!DisputeRepository.getIsEntityDispute(entity)) {
       return;
     }
 
-    await DisputeService.handleAfterUpdate(entity as DisputeEntity);
+    await DisputeService.handleAfterUpdate(entity);
   }
 }
 
