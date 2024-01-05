@@ -1,5 +1,6 @@
 import { EventSubscriber, EntitySubscriberInterface, UpdateEvent, InsertEvent } from 'typeorm';
 import RefundEntity from '@entities/refund';
+import RefundRepostory from '@repositories/refund';
 import RefundService from '@services/refund';
 
 /**
@@ -25,11 +26,11 @@ class Refund implements EntitySubscriberInterface<RefundEntity> {
    * Handle Refund event: after update
    */
   public async afterUpdate({ entity, manager }: UpdateEvent<RefundEntity>): Promise<void> {
-    if (!entity) {
+    if (!RefundRepostory.getIsEntityRefund(entity)) {
       return;
     }
 
-    await RefundService.handleAfterUpdate(entity as RefundEntity, manager);
+    await RefundService.handleAfterUpdate(entity, manager);
   }
 }
 

@@ -13,6 +13,16 @@ import messages from '@helpers/validators/messages';
 @EntityRepository(RefundEntity)
 class Refund extends Repository<RefundEntity> {
   /**
+   * Get is entity refund
+   * @example Cast types avoid from ObjectLiteral or undefined in after update
+   */
+  public static getIsEntityRefund<TEntity>(
+    entity?: RefundEntity | TEntity,
+  ): entity is RefundEntity {
+    return entity instanceof RefundEntity;
+  }
+
+  /**
    * Update transactions refund status
    * @description Will cause transaction update
    */
