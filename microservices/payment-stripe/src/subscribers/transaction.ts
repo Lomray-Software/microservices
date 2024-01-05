@@ -1,5 +1,6 @@
 import { EventSubscriber, EntitySubscriberInterface, UpdateEvent, InsertEvent } from 'typeorm';
 import TransactionEntity from '@entities/transaction';
+import TransactionRepository from '@repositories/transaction';
 import TransactionService from '@services/transaction';
 
 /**
@@ -30,16 +31,11 @@ class Transaction implements EntitySubscriberInterface<TransactionEntity> {
     manager,
     updatedColumns,
   }: UpdateEvent<TransactionEntity>): Promise<void> {
-    if (!entity) {
+    if (!TransactionRepository.getIsEntityTransaction(entity)) {
       return;
     }
 
-    await TransactionService.handleAfterUpdate(
-      entity as TransactionEntity,
-      databaseEntity,
-      manager,
-      updatedColumns,
-    );
+    await TransactionService.handleAfterUpdate(entity, databaseEntity, manager, updatedColumns);
   }
 }
 

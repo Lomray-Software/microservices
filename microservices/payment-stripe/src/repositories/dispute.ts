@@ -13,9 +13,7 @@ class Dispute extends Repository<DisputeEntity> {
   public static getIsEntityDispute<TEntity>(
     entity?: DisputeEntity | TEntity,
   ): entity is DisputeEntity {
-    return Boolean(
-      entity && 'disputeId' in entity && 'chargedAmount' in entity && 'chargedFees' in entity,
-    );
+    return entity instanceof DisputeEntity;
   }
 }
 
