@@ -12,6 +12,7 @@ const defaultConfig: IRemoteConfig = {
   fees: JSON.parse(CONST.MS_FEES),
   taxes: JSON.parse(CONST.MS_TAXES),
   duplicatedCardsUsage: CONST.DUPLICATED_CARDS_USAGE,
+  payout: JSON.parse(CONST.MS_PAYOUT),
 };
 
 /**
