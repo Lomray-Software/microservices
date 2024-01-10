@@ -1,0 +1,12 @@
+### Get connected account balance
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.balance",
+  "params": {
+    "userId": "68827b31-33e9-45b5-bf9f-8823b993d0ef"
+  }
+}

@@ -1,0 +1,14 @@
+### Process instant payout
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.instant-payout",
+  "params": {
+    "userId": "68827b31-33e9-45b5-bf9f-8823b993d0ef",
+    "amount": 10,
+    "payoutMethod": "444373ef-6f68-4055-a04c-2b0cada56333"
+  }
+}

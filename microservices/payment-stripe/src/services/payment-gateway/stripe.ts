@@ -57,6 +57,11 @@ export type TAvailablePaymentMethods =
   | StripeSdk.BankAccount.AvailablePayoutMethod[]
   | null;
 
+export enum PayoutMethodType {
+  CARD = 'card',
+  BANK_ACCOUNT = 'bankAccount',
+}
+
 interface IPaymentIntentParams {
   userId: string;
   receiverId: string;
@@ -117,7 +122,7 @@ interface ITransferInfo {
 
 interface IPayoutMethod {
   id: string;
-  method: 'card' | 'bankAccount';
+  method: PayoutMethodType;
 }
 
 interface ICheckoutCart {
@@ -128,7 +133,7 @@ interface ICheckoutCart {
 interface IInstantPayoutParams {
   userId: string;
   amount: number;
-  payoutMethod?: IPayoutMethod;
+  payoutMethod: IPayoutMethod;
   currency?: TCurrency;
 }
 
@@ -665,6 +670,15 @@ class Stripe extends Abstract {
     payoutMethod,
     currency = 'usd',
   }: IInstantPayoutParams): Promise<boolean> {
+    const payoutMethodAllowances = await this.getPayoutMethodAllowances(payoutMethod);
+
+    if (!payoutMethodAllowances?.isInstantPayoutAllowed) {
+      throw new BaseException({
+        status: 400,
+        message: "Provided payout method isn't support instant payout.",
+      });
+    }
+
     const unitAmount = this.toSmallestCurrencyUnit(amount);
 
     /**
@@ -722,21 +736,12 @@ class Stripe extends Abstract {
       });
     }
 
-    const payoutMethodData = await this.getPayoutMethodData(payoutMethod);
-
-    if (!payoutMethodData?.isInstantPayoutAllow) {
-      throw new BaseException({
-        status: 400,
-        message: "Provided payout method isn't support instant payout.",
-      });
-    }
-
     await this.sdk.payouts.create(
       {
         currency,
         amount: unitAmount,
         method: 'instant',
-        ...(payoutMethodData ? { destination: payoutMethodData.id } : {}),
+        ...(payoutMethodAllowances ? { destination: payoutMethodAllowances.id } : {}),
       },
       { stripeAccount: customer.params.accountId },
     );
@@ -1969,24 +1974,21 @@ class Stripe extends Abstract {
    * Returns payout method data
    * @private
    */
-  private async getPayoutMethodData(
+  private async getPayoutMethodAllowances(
     payoutMethod?: IPayoutMethod,
-  ): Promise<{ id?: string; isInstantPayoutAllow: boolean } | undefined> {
+  ): Promise<{ id?: string; isInstantPayoutAllowed: boolean } | undefined> {
     if (!payoutMethod) {
       return;
     }
 
     const { method, id } = payoutMethod;
 
-    /**
-     * @TODO: Simplify this
-     */
-    if (method === 'card') {
+    if (method === PayoutMethodType.CARD) {
       const card = await this.cardRepository.findOne(id);
 
       return {
         id: card?.params?.cardId,
-        isInstantPayoutAllow: Boolean(card?.isInstantPayoutAllowed),
+        isInstantPayoutAllowed: Boolean(card?.isInstantPayoutAllowed),
       };
     }
 
@@ -1994,7 +1996,7 @@ class Stripe extends Abstract {
 
     return {
       id: bankAccount?.params?.bankAccountId,
-      isInstantPayoutAllow: Boolean(bankAccount?.isInstantPayoutAllowed),
+      isInstantPayoutAllowed: Boolean(bankAccount?.isInstantPayoutAllowed),
     };
   }
 
