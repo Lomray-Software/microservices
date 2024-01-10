@@ -748,8 +748,9 @@ class Stripe extends Abstract {
           currency,
           amount: amountUnit,
           method: 'instant',
-          ...(payoutMethodAllowances ? { destination: payoutMethodAllowances.id } : {}),
+          destination: payoutMethodAllowances.externalAccountId,
         },
+        // Payout user connected account funds
         { stripeAccount: customer.params.accountId },
       );
     } catch (error) {
@@ -1992,7 +1993,11 @@ class Stripe extends Abstract {
   private async getPayoutMethodAllowances(
     userId: string,
     payoutMethod?: IPayoutMethod,
-  ): Promise<{ id?: string; isInstantPayoutAllowed: boolean } | undefined> {
+  ): Promise<{ externalAccountId: string; isInstantPayoutAllowed: boolean } | undefined> {
+    const externalAccountNotFoundError = messages.getNotFoundMessage(
+      'External account for instant payout',
+    );
+
     if (!payoutMethod) {
       const queries = [
         this.bankAccountRepository.createQueryBuilder('pm'),
@@ -2014,10 +2019,19 @@ class Stripe extends Abstract {
         });
       }
 
-      const [bankAccount, card] = results;
+      const [bankAccount, card] = results as [BankAccount | undefined, Card | undefined];
+
+      const externalAccountId = bankAccount?.params?.bankAccountId || card?.params?.cardId;
+
+      if (!externalAccountId) {
+        throw new BaseException({
+          status: 500,
+          message: externalAccountNotFoundError,
+        });
+      }
 
       return {
-        id: bankAccount?.id || card?.id,
+        externalAccountId,
         isInstantPayoutAllowed:
           Boolean(bankAccount?.isInstantPayoutAllowed) || Boolean(card?.isInstantPayoutAllowed),
       };
@@ -2026,18 +2040,36 @@ class Stripe extends Abstract {
     const { method, id } = payoutMethod;
 
     if (method === PayoutMethodType.CARD) {
-      const card = await this.cardRepository.findOne(id);
+      const card = await this.cardRepository.findOne(id, {
+        select: ['id', 'params'],
+      });
+
+      if (!card?.params?.cardId) {
+        throw new BaseException({
+          status: 500,
+          message: externalAccountNotFoundError,
+        });
+      }
 
       return {
-        id: card?.params?.cardId,
+        externalAccountId: card.params.cardId,
         isInstantPayoutAllowed: Boolean(card?.isInstantPayoutAllowed),
       };
     }
 
-    const bankAccount = await this.bankAccountRepository.findOne(id);
+    const bankAccount = await this.bankAccountRepository.findOne(id, {
+      select: ['id', 'params'],
+    });
+
+    if (!bankAccount?.params?.bankAccountId) {
+      throw new BaseException({
+        status: 500,
+        message: externalAccountNotFoundError,
+      });
+    }
 
     return {
-      id: bankAccount?.params?.bankAccountId,
+      externalAccountId: bankAccount?.params?.bankAccountId,
       isInstantPayoutAllowed: Boolean(bankAccount?.isInstantPayoutAllowed),
     };
   }
