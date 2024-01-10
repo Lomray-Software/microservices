@@ -13,7 +13,7 @@ export type TDuplicatedCarsUsage = 'support' | 'reject';
 export interface IRemoteConfig {
   duplicatedCardsUsage: TDuplicatedCarsUsage;
   setupIntentUsage: TSetupIntentUsage;
-  payout: IPayout;
+  payout?: IPayout;
   webhookKeys?: {
     [id: string]: string; // id (unique key) - secret (webhook Signing secret)
   };
