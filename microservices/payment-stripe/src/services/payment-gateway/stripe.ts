@@ -1,6 +1,7 @@
 import { Log } from '@lomray/microservice-helpers';
 import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
+import toSmallestUnit from '@lomray/microservices-client-api/helpers/parsers/to-smallest-unit';
 import { validate } from 'class-validator';
 import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
@@ -679,11 +680,16 @@ class Stripe extends Abstract {
       });
     }
 
-    const unitAmount = this.toSmallestCurrencyUnit(amount);
+    const amountUnit = toSmallestUnit(amount);
 
-    /**
-     * Get related customer
-     */
+    if (!amountUnit) {
+      throw new BaseException({
+        status: 500,
+        message: 'Failed to validate requested instant payout amount.',
+      });
+    }
+
+    // Get related customer
     const customer = await this.customerRepository.findOne({
       userId,
     });
@@ -729,22 +735,31 @@ class Stripe extends Abstract {
       });
     }
 
-    if (balance?.[currency] < unitAmount) {
+    if (balance?.[currency] < amountUnit) {
       throw new BaseException({
         status: 400,
         message: `Insufficient funds. Instant balance is ${balance?.[currency]} in ${currency}.`,
       });
     }
 
-    await this.sdk.payouts.create(
-      {
-        currency,
-        amount: unitAmount,
-        method: 'instant',
-        ...(payoutMethodAllowances ? { destination: payoutMethodAllowances.id } : {}),
-      },
-      { stripeAccount: customer.params.accountId },
-    );
+    try {
+      await this.sdk.payouts.create(
+        {
+          currency,
+          amount: amountUnit,
+          method: 'instant',
+          ...(payoutMethodAllowances ? { destination: payoutMethodAllowances.id } : {}),
+        },
+        { stripeAccount: customer.params.accountId },
+      );
+    } catch (error) {
+      Log.error(error.message);
+
+      throw new BaseException({
+        status: 500,
+        message: 'Stripe instant payout was failed.',
+      });
+    }
 
     return true;
   }
