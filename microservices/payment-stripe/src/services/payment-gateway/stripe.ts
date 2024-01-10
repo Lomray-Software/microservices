@@ -684,14 +684,14 @@ class Stripe extends Abstract {
     if (!customer.params.accountId) {
       throw new BaseException({
         status: 400,
-        message: "Customer don't have related connect account",
+        message: "Customer don't have related connect account.",
       });
     }
 
     if (!customer.params.isPayoutEnabled) {
       throw new BaseException({
         status: 400,
-        message: "Payout isn't available",
+        message: "Payout isn't available.",
       });
     }
 
@@ -711,14 +711,14 @@ class Stripe extends Abstract {
     if (!balance?.[currency]) {
       throw new BaseException({
         status: 400,
-        message: `Balance with the ${currency} isn't available`,
+        message: `Balance with the ${currency} isn't available.`,
       });
     }
 
     if (balance?.[currency] < unitAmount) {
       throw new BaseException({
         status: 400,
-        message: `Insufficient funds. Instant balance is ${balance?.[currency]} in ${currency}`,
+        message: `Insufficient funds. Instant balance is ${balance?.[currency]} in ${currency}.`,
       });
     }
 
@@ -727,7 +727,7 @@ class Stripe extends Abstract {
     if (!payoutMethodData?.isInstantPayoutAllow) {
       throw new BaseException({
         status: 400,
-        message: "Provided payout method isn't support instant payout",
+        message: "Provided payout method isn't support instant payout.",
       });
     }
 
