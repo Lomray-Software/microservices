@@ -133,7 +133,7 @@ interface ICheckoutCart {
 interface IInstantPayoutParams {
   userId: string;
   amount: number;
-  payoutMethod: IPayoutMethod;
+  payoutMethod?: IPayoutMethod;
   currency?: TCurrency;
 }
 
@@ -670,7 +670,7 @@ class Stripe extends Abstract {
     payoutMethod,
     currency = 'usd',
   }: IInstantPayoutParams): Promise<boolean> {
-    const payoutMethodAllowances = await this.getPayoutMethodAllowances(payoutMethod);
+    const payoutMethodAllowances = await this.getPayoutMethodAllowances(userId, payoutMethod);
 
     if (!payoutMethodAllowances?.isInstantPayoutAllowed) {
       throw new BaseException({
@@ -1975,10 +1975,37 @@ class Stripe extends Abstract {
    * @private
    */
   private async getPayoutMethodAllowances(
+    userId: string,
     payoutMethod?: IPayoutMethod,
   ): Promise<{ id?: string; isInstantPayoutAllowed: boolean } | undefined> {
     if (!payoutMethod) {
-      return;
+      const queries = [
+        this.bankAccountRepository.createQueryBuilder('pm'),
+        this.cardRepository.createQueryBuilder('pm'),
+      ];
+
+      const selectQueries = queries.map((query) =>
+        query
+          .where('pm.userId = :userId AND pm."isInstantPayoutAllowed" = true', { userId })
+          .getOne(),
+      );
+
+      const results = await Promise.all(selectQueries);
+
+      if (!results.length) {
+        throw new BaseException({
+          status: 500,
+          message: 'User does not have any available instant payout method.',
+        });
+      }
+
+      const [bankAccount, card] = results;
+
+      return {
+        id: bankAccount?.id || card?.id,
+        isInstantPayoutAllowed:
+          Boolean(bankAccount?.isInstantPayoutAllowed) || Boolean(card?.isInstantPayoutAllowed),
+      };
     }
 
     const { method, id } = payoutMethod;

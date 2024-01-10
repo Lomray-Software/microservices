@@ -8,7 +8,6 @@ Content-Type: application/json
   "method": "stripe.instant-payout",
   "params": {
     "userId": "68827b31-33e9-45b5-bf9f-8823b993d0ef",
-    "amount": 10,
-    "payoutMethod": "444373ef-6f68-4055-a04c-2b0cada56333"
+    "amount": 10
   }
 }
