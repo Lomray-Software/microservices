@@ -12,6 +12,15 @@ import PayoutMethod from '@constants/payout-method';
 import PayoutStatus from '@constants/payout-status';
 import PayoutType from '@constants/payout-type';
 
+/**
+ * Payout entity
+ */
+@JSONSchema({
+  title: 'Payout',
+  description: `A Payout object is created when you receive funds from Stripe, or when you initiate a payout
+    to either a bank account or debit card of a connected Stripe account. You can retrieve individual payouts,
+    and list all payouts. Payouts are made on varying schedules, depending on your country and industry.`,
+})
 @Entity()
 class Payout {
   @PrimaryGeneratedColumn()
