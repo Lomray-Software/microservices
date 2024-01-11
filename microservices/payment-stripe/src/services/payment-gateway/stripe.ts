@@ -1888,6 +1888,7 @@ class Stripe extends Abstract {
       case 'payout.reconciliation_completed':
       case 'payout.paid': {
         const handlers = {
+          // Handle payout of connected account
           connect: () => webhookHandlers.payout.handlePayoutOccur(event),
         };
 
