@@ -1,12 +1,14 @@
 import { Log } from '@lomray/microservice-helpers';
 import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
+import toSmallestUnit from '@lomray/microservices-client-api/helpers/parsers/to-smallest-unit';
 import { validate } from 'class-validator';
 import StripeSdk from 'stripe';
 import remoteConfig from '@config/remote';
 import BalanceType from '@constants/balance-type';
 import BusinessType from '@constants/business-type';
 import CouponDuration from '@constants/coupon-duration';
+import PayoutMethod from '@constants/payout-method';
 import RefundAmountType from '@constants/refund-amount-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
@@ -56,6 +58,11 @@ export type TAvailablePaymentMethods =
   | StripeSdk.Card.AvailablePayoutMethod[]
   | StripeSdk.BankAccount.AvailablePayoutMethod[]
   | null;
+
+export enum PayoutMethodType {
+  CARD = 'card',
+  BANK_ACCOUNT = 'bankAccount',
+}
 
 interface IPaymentIntentParams {
   userId: string;
@@ -117,7 +124,7 @@ interface ITransferInfo {
 
 interface IPayoutMethod {
   id: string;
-  method: 'card' | 'bankAccount';
+  method: PayoutMethodType;
 }
 
 interface ICheckoutCart {
@@ -665,11 +672,42 @@ class Stripe extends Abstract {
     payoutMethod,
     currency = 'usd',
   }: IInstantPayoutParams): Promise<boolean> {
-    const unitAmount = this.toSmallestCurrencyUnit(amount);
+    const { payout } = await remoteConfig();
+    const { instantMaxAmountPerTransaction, instantMinAmountPerTransaction } = payout!;
 
-    /**
-     * Get related customer
-     */
+    const payoutMethodAllowances = await this.getPayoutMethodAllowances(userId, payoutMethod);
+
+    if (!payoutMethodAllowances?.isInstantPayoutAllowed) {
+      throw new BaseException({
+        status: 400,
+        message: "Provided payout method isn't support instant payout.",
+      });
+    }
+
+    const amountUnit = toSmallestUnit(amount);
+
+    if (!amountUnit) {
+      throw new BaseException({
+        status: 500,
+        message: 'Failed to validate requested instant payout amount.',
+      });
+    }
+
+    if (amountUnit > instantMaxAmountPerTransaction) {
+      throw new BaseException({
+        status: 500,
+        message: 'Requested amount is more than payout transaction limit.',
+      });
+    }
+
+    if (amountUnit < instantMinAmountPerTransaction) {
+      throw new BaseException({
+        status: 500,
+        message: 'Requested amount is less than payout transaction limit.',
+      });
+    }
+
+    // Get related customer
     const customer = await this.customerRepository.findOne({
       userId,
     });
@@ -684,14 +722,14 @@ class Stripe extends Abstract {
     if (!customer.params.accountId) {
       throw new BaseException({
         status: 400,
-        message: "Customer don't have related connect account",
+        message: "Customer don't have related connect account.",
       });
     }
 
     if (!customer.params.isPayoutEnabled) {
       throw new BaseException({
         status: 400,
-        message: "Payout isn't available",
+        message: "Payout isn't available.",
       });
     }
 
@@ -711,35 +749,36 @@ class Stripe extends Abstract {
     if (!balance?.[currency]) {
       throw new BaseException({
         status: 400,
-        message: `Balance with the ${currency} isn't available`,
+        message: `Balance with the ${currency} isn't available.`,
       });
     }
 
-    if (balance?.[currency] < unitAmount) {
+    if (balance?.[currency] < amountUnit) {
       throw new BaseException({
         status: 400,
-        message: `Insufficient funds. Instant balance is ${balance?.[currency]} in ${currency}`,
+        message: `Insufficient funds. Instant balance is ${balance?.[currency]} in ${currency}.`,
       });
     }
 
-    const payoutMethodData = await this.getPayoutMethodData(payoutMethod);
+    try {
+      await this.sdk.payouts.create(
+        {
+          currency,
+          amount: amountUnit,
+          method: PayoutMethod.INSTANT,
+          destination: payoutMethodAllowances.externalAccountId,
+        },
+        // Payout user connected account funds
+        { stripeAccount: customer.params.accountId },
+      );
+    } catch (error) {
+      Log.error(error.message);
 
-    if (!payoutMethodData?.isInstantPayoutAllow) {
       throw new BaseException({
-        status: 400,
-        message: "Provided payout method isn't support instant payout",
+        status: 500,
+        message: 'Stripe instant payout was failed.',
       });
     }
-
-    await this.sdk.payouts.create(
-      {
-        currency,
-        amount: unitAmount,
-        method: 'instant',
-        ...(payoutMethodData ? { destination: payoutMethodData.id } : {}),
-      },
-      { stripeAccount: customer.params.accountId },
-    );
 
     return true;
   }
@@ -1838,6 +1877,24 @@ class Stripe extends Abstract {
         await handlers?.[webhookType]();
         break;
       }
+
+      /**
+       * Payout events
+       */
+      case 'payout.created':
+      case 'payout.updated':
+      case 'payout.failed':
+      case 'payout.canceled':
+      case 'payout.reconciliation_completed':
+      case 'payout.paid': {
+        const handlers = {
+          // Handle payout of connected account
+          connect: () => webhookHandlers.payout.handlePayoutOccur(event),
+        };
+
+        await handlers?.[webhookType]();
+        break;
+      }
     }
   }
 
@@ -1969,32 +2026,87 @@ class Stripe extends Abstract {
    * Returns payout method data
    * @private
    */
-  private async getPayoutMethodData(
+  private async getPayoutMethodAllowances(
+    userId: string,
     payoutMethod?: IPayoutMethod,
-  ): Promise<{ id?: string; isInstantPayoutAllow: boolean } | undefined> {
+  ): Promise<{ externalAccountId: string; isInstantPayoutAllowed: boolean } | undefined> {
+    const externalAccountNotFoundError = messages.getNotFoundMessage(
+      'External account for instant payout',
+    );
+
     if (!payoutMethod) {
-      return;
+      const queries = [
+        this.bankAccountRepository.createQueryBuilder('pm'),
+        this.cardRepository.createQueryBuilder('pm'),
+      ];
+
+      const selectQueries = queries.map((query) =>
+        query
+          .where('pm.userId = :userId AND pm."isInstantPayoutAllowed" = true', { userId })
+          .getOne(),
+      );
+
+      const results = await Promise.all(selectQueries);
+
+      if (!results.length) {
+        throw new BaseException({
+          status: 500,
+          message: 'User does not have any available instant payout method.',
+        });
+      }
+
+      const [bankAccount, card] = results as [BankAccount | undefined, Card | undefined];
+
+      const externalAccountId = bankAccount?.params?.bankAccountId || card?.params?.cardId;
+
+      if (!externalAccountId) {
+        throw new BaseException({
+          status: 500,
+          message: externalAccountNotFoundError,
+        });
+      }
+
+      return {
+        externalAccountId,
+        isInstantPayoutAllowed:
+          Boolean(bankAccount?.isInstantPayoutAllowed) || Boolean(card?.isInstantPayoutAllowed),
+      };
     }
 
     const { method, id } = payoutMethod;
 
-    /**
-     * @TODO: Simplify this
-     */
-    if (method === 'card') {
-      const card = await this.cardRepository.findOne(id);
+    if (method === PayoutMethodType.CARD) {
+      const card = await this.cardRepository.findOne(id, {
+        select: ['id', 'params'],
+      });
+
+      if (!card?.params?.cardId) {
+        throw new BaseException({
+          status: 500,
+          message: externalAccountNotFoundError,
+        });
+      }
 
       return {
-        id: card?.params?.cardId,
-        isInstantPayoutAllow: Boolean(card?.isInstantPayoutAllowed),
+        externalAccountId: card.params.cardId,
+        isInstantPayoutAllowed: Boolean(card?.isInstantPayoutAllowed),
       };
     }
 
-    const bankAccount = await this.bankAccountRepository.findOne(id);
+    const bankAccount = await this.bankAccountRepository.findOne(id, {
+      select: ['id', 'params'],
+    });
+
+    if (!bankAccount?.params?.bankAccountId) {
+      throw new BaseException({
+        status: 500,
+        message: externalAccountNotFoundError,
+      });
+    }
 
     return {
-      id: bankAccount?.params?.bankAccountId,
-      isInstantPayoutAllow: Boolean(bankAccount?.isInstantPayoutAllowed),
+      externalAccountId: bankAccount?.params?.bankAccountId,
+      isInstantPayoutAllowed: Boolean(bankAccount?.isInstantPayoutAllowed),
     };
   }
 
