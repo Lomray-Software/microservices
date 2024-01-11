@@ -1,5 +1,5 @@
 import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, IsDate, IsEnum, IsString, Length } from 'class-validator';
+import { Allow, IsDate, IsEnum, IsObject, IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -11,6 +11,10 @@ import {
 import PayoutMethod from '@constants/payout-method';
 import PayoutStatus from '@constants/payout-status';
 import PayoutType from '@constants/payout-type';
+
+interface IParams {
+  [k: string]: any;
+}
 
 /**
  * Payout entity
@@ -93,6 +97,11 @@ class Payout {
   @Column({ type: 'timestamptz' })
   @IsDate()
   arrivalDate: Date;
+
+  @Column({ type: 'json', default: {} })
+  @IsObject()
+  @IsUndefinable()
+  params: IParams;
 
   @IsTypeormDate()
   @CreateDateColumn()
