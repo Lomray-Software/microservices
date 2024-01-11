@@ -27,7 +27,7 @@ interface IParams {
 })
 @Entity()
 class Payout {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   @Allow()
   id: string;
 
