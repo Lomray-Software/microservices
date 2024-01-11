@@ -1,0 +1,97 @@
+import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
+import { Allow, IsDate, IsEnum, IsString, Length } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import PayoutMethod from '@constants/payout-method';
+import PayoutStatus from '@constants/payout-status';
+import PayoutType from '@constants/payout-type';
+
+@Entity()
+class Payout {
+  @PrimaryGeneratedColumn()
+  @Allow()
+  id: string;
+
+  @JSONSchema({
+    description: 'Stripe payout id',
+  })
+  @Column({ type: 'varchar', length: 66 })
+  @Length(1, 66)
+  payoutId: string;
+
+  @JSONSchema({
+    description: 'Id of the bank account or card the payout is sent to.',
+  })
+  @Column({ type: 'varchar', length: 66 })
+  @Length(1, 66)
+  destination: string;
+
+  @JSONSchema({
+    description: 'The method used to send this payout',
+  })
+  @Column({ type: 'enum', enum: PayoutMethod })
+  @IsEnum(PayoutMethod)
+  method: PayoutMethod;
+
+  @Column({ type: 'enum', enum: PayoutType })
+  @IsEnum(PayoutType)
+  type: PayoutType;
+
+  @JSONSchema({
+    description: `A payout is pending until it’s submitted to the bank, when it becomes in_transit.
+      The status changes to paid if the transaction succeeds, or to failed or canceled (within 5 business days).
+      Some payouts that fail might initially show as paid, then change to failed.`,
+  })
+  @Column({ type: 'enum', enum: PayoutStatus })
+  @IsEnum(PayoutStatus)
+  status: PayoutStatus;
+
+  @Column({ type: 'varchar', length: 10 })
+  @Length(1, 10)
+  currency: string;
+
+  @Column({ type: 'varchar', length: 20, default: null })
+  @Length(1, 20)
+  @IsUndefinable()
+  @IsNullable()
+  failureCode: string | null;
+
+  @Column({ type: 'text', default: null })
+  @IsString()
+  @IsUndefinable()
+  @IsNullable()
+  failureMessage: string | null;
+
+  @JSONSchema({
+    description: 'An arbitrary meta information attached to stripe payout instance',
+  })
+  @Column({ type: 'text', default: null })
+  @IsString()
+  @IsUndefinable()
+  @IsNullable()
+  description: string | null;
+
+  @JSONSchema({
+    description:
+      'Date that you can expect the payout to arrive in the bank. This factors in delays to account for weekends or bank holidays',
+  })
+  @Column({ type: 'timestamptz' })
+  @IsDate()
+  arrivalDate: Date;
+
+  @IsTypeormDate()
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @IsTypeormDate()
+  @UpdateDateColumn()
+  updatedAt: Date;
+}
+
+export default Payout;
