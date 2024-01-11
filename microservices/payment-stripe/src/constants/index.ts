@@ -19,7 +19,7 @@ const constants = {
     process.env.MS_TAXES ?? '{ "defaultPercent": 8, "stableUnit": 50, "autoCalculateFeeUnit": 5 }',
   MS_PAYOUT:
     process.env.MS_PAYOUT ??
-    '{ "instantMinAmountPerDay": 50, "instantMaxAmountPerDay": 999900, "instantPayoutLimitPerDay": 10 }',
+    '{ "instantMinAmountPerTransaction": 50, "instantMaxAmountPerTransaction": 999900, "instantPayoutLimitPerDay": 10 }',
   SETUP_INTENT_USAGE: (process.env.SETUP_INTENT_USAGE || 'off_session') as TSetupIntentUsage,
   DUPLICATED_CARDS_USAGE: (process.env.DUPLICATED_CARDS_USAGE || 'reject') as TDuplicatedCarsUsage,
 };

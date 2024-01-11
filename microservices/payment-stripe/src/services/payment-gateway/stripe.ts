@@ -8,6 +8,7 @@ import remoteConfig from '@config/remote';
 import BalanceType from '@constants/balance-type';
 import BusinessType from '@constants/business-type';
 import CouponDuration from '@constants/coupon-duration';
+import PayoutMethod from '@constants/payout-method';
 import RefundAmountType from '@constants/refund-amount-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
@@ -671,6 +672,9 @@ class Stripe extends Abstract {
     payoutMethod,
     currency = 'usd',
   }: IInstantPayoutParams): Promise<boolean> {
+    const { payout } = await remoteConfig();
+    const { instantMaxAmountPerTransaction, instantMinAmountPerTransaction } = payout!;
+
     const payoutMethodAllowances = await this.getPayoutMethodAllowances(userId, payoutMethod);
 
     if (!payoutMethodAllowances?.isInstantPayoutAllowed) {
@@ -686,6 +690,20 @@ class Stripe extends Abstract {
       throw new BaseException({
         status: 500,
         message: 'Failed to validate requested instant payout amount.',
+      });
+    }
+
+    if (amountUnit > instantMaxAmountPerTransaction) {
+      throw new BaseException({
+        status: 500,
+        message: 'Requested amount is more than payout transaction limit.',
+      });
+    }
+
+    if (amountUnit < instantMinAmountPerTransaction) {
+      throw new BaseException({
+        status: 500,
+        message: 'Requested amount is less than payout transaction limit.',
       });
     }
 
@@ -747,7 +765,7 @@ class Stripe extends Abstract {
         {
           currency,
           amount: amountUnit,
-          method: 'instant',
+          method: PayoutMethod.INSTANT,
           destination: payoutMethodAllowances.externalAccountId,
         },
         // Payout user connected account funds
