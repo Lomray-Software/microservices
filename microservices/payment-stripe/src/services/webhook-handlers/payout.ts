@@ -25,7 +25,8 @@ class Payout {
   }
 
   /**
-   * Handle payout create
+   * Handle payout occur
+   * @description Payout can be created or updated
    */
   public async handlePayoutCreate(event: StripeSdk.Event): Promise<void> {
     const {
@@ -53,21 +54,52 @@ class Payout {
     await this.manager.transaction(async (entityManager) => {
       const payoutRepository = entityManager.getRepository(PayoutEntity);
 
-      const payoutEntity = payoutRepository.create({
-        amount,
-        arrivalDate: new Date(Number(arrivalDate) * 1000),
-        method: method as PayoutMethod,
-        payoutId,
-        description,
-        destination: extractIdFromStripeInstance(destination),
-        failureCode,
-        failureMessage,
-        currency,
-        type: Parser.parseStripePayoutType(type as StripePayoutType),
-        status: Parser.parseStripePayoutStatus(status as StripePayoutStatus),
+      const payout = await payoutRepository.findOne({
+        where: {
+          payoutId,
+        },
       });
 
-      await payoutRepository.save(payoutEntity);
+      const data = {
+        type: Parser.parseStripePayoutType(type as StripePayoutType),
+        arrivalDate: new Date(Number(arrivalDate) * 1000),
+        status: Parser.parseStripePayoutStatus(status as StripePayoutStatus),
+        destination: extractIdFromStripeInstance(destination),
+        method: method as PayoutMethod,
+      };
+
+      if (!payout) {
+        const payoutEntity = payoutRepository.create({
+          amount,
+          arrivalDate: data.arrivalDate,
+          method: data.method,
+          payoutId,
+          description,
+          destination: data.destination,
+          failureCode,
+          failureMessage,
+          currency,
+          type: data.type,
+          status: data.status,
+        });
+
+        await payoutRepository.save(payoutEntity);
+
+        return;
+      }
+
+      payout.amount = amount;
+      payout.arrivalDate = data.arrivalDate;
+      payout.method = data.method;
+      payout.description = description;
+      payout.destination = data.destination;
+      payout.failureMessage = failureMessage;
+      payout.failureCode = failureCode;
+      payout.currency = currency;
+      payout.type = data.type;
+      payout.status = data.status;
+
+      await payoutRepository.save(payout);
     });
   }
 }
