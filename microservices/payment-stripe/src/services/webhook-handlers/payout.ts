@@ -28,7 +28,7 @@ class Payout {
    * Handle payout occur
    * @description Payout can be created or updated
    */
-  public async handlePayoutCreate(event: StripeSdk.Event): Promise<void> {
+  public async handlePayoutOccur(event: StripeSdk.Event): Promise<void> {
     const {
       id: payoutId,
       amount,
@@ -85,6 +85,10 @@ class Payout {
 
         await payoutRepository.save(payoutEntity);
 
+        return;
+      }
+
+      if (event.type === 'payout.created') {
         return;
       }
 

@@ -1865,9 +1865,12 @@ class Stripe extends Abstract {
        */
       case 'payout.created':
       case 'payout.updated':
+      case 'payout.failed':
+      case 'payout.canceled':
+      case 'payout.reconciliation_completed':
       case 'payout.paid': {
         const handlers = {
-          connect: () => webhookHandlers.payout.handlePayoutCreate(event),
+          connect: () => webhookHandlers.payout.handlePayoutOccur(event),
         };
 
         await handlers?.[webhookType]();
