@@ -1,5 +1,5 @@
 import { IsNullable, IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
-import { Allow, IsDate, IsEnum, IsObject, IsString, Length } from 'class-validator';
+import { Allow, IsDate, IsEnum, IsNumber, IsObject, IsString, Length, Min } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import {
   Column,
@@ -37,6 +37,14 @@ class Payout {
   @Column({ type: 'varchar', length: 66 })
   @Length(1, 66)
   payoutId: string;
+
+  @JSONSchema({
+    description: 'Min ±10 cents',
+  })
+  @Column({ type: 'int' })
+  @IsNumber()
+  @Min(10)
+  amount: number;
 
   @JSONSchema({
     description: 'Id of the bank account or card the payout is sent to.',

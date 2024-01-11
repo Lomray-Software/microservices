@@ -6,6 +6,7 @@ import Customer from './customer';
 import ExternalAccount from './external-account';
 import PaymentIntent from './payment-intent';
 import PaymentMethod from './payment-method';
+import Payout from './payout';
 import SetupIntent from './setup-intent';
 import Transfer from './transfer';
 
@@ -61,6 +62,11 @@ class WebhookHandlers {
   public readonly externalAccount: ExternalAccount;
 
   /**
+   * @public
+   */
+  public readonly payout: Payout;
+
+  /**
    * @constructor
    * @private
    */
@@ -74,6 +80,7 @@ class WebhookHandlers {
     this.setupIntent = new SetupIntent(manager);
     this.account = new Account(manager);
     this.externalAccount = new ExternalAccount(manager);
+    this.payout = new Payout(manager);
   }
 
   /**
