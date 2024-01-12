@@ -41,6 +41,7 @@ class Payout {
       failure_code: failureCode,
       failure_message: failureMessage,
       currency,
+      created,
     } = event.data.object as StripeSdk.Payout;
 
     if (!destination) {
@@ -63,6 +64,7 @@ class Payout {
       const data = {
         type: Parser.parseStripePayoutType(type as StripePayoutType),
         arrivalDate: new Date(Number(arrivalDate) * 1000),
+        registeredAt: new Date(Number(created) * 1000),
         status: Parser.parseStripePayoutStatus(status as StripePayoutStatus),
         destination: extractIdFromStripeInstance(destination),
         method: method as PayoutMethod,
@@ -81,6 +83,7 @@ class Payout {
           currency,
           type: data.type,
           status: data.status,
+          registeredAt: data.registeredAt,
         });
 
         await payoutRepository.save(payoutEntity);
@@ -102,6 +105,7 @@ class Payout {
       payout.currency = currency;
       payout.type = data.type;
       payout.status = data.status;
+      payout.registeredAt = data.registeredAt;
 
       await payoutRepository.save(payout);
     });

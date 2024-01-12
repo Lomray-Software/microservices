@@ -108,6 +108,10 @@ class Payout {
   @IsDate()
   arrivalDate: Date;
 
+  @Column({ type: 'timestamptz' })
+  @IsDate()
+  registeredAt: Date;
+
   @Column({ type: 'json', default: {} })
   @IsObject()
   @IsUndefinable()
