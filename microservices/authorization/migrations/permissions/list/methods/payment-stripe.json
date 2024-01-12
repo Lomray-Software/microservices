@@ -1097,5 +1097,70 @@
     "modelIn": "ListRequestParams",
     "modelOut": "payment-stripe.ListOutputParams.98098d6518d8c64a3b26c372e77d9eaf",
     "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "payout.count",
+    "description": "Returns count of Payout by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2024-01-12T13:16:19.144Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "payout.list",
+    "description": "Returns list of Payout by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2024-01-12T13:16:19.144Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "payment-stripe.ListOutputParams.2a138e32e29c0d18b5d2d97a69f3ec17",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "payout.view",
+    "description": "Returns Payout by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2024-01-12T13:16:19.144Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "payment-stripe.ViewOutputParams.ab22f76f4992fed35b6fe719de226ec1",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "payout.update",
+    "description": "Update Payout by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2024-01-12T13:16:19.144Z",
+    "modelIn": "payment-stripe.UpdateRequestParams.4087d1c2c4100238f4bfbbc882d025d9",
+    "modelOut": "payment-stripe.UpdateOutputParams.ab22f76f4992fed35b6fe719de226ec1",
+    "methodFilters": []
+  },
+  {
+    "microservice": "payment-stripe",
+    "method": "payout.remove",
+    "description": "Remove Payout by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2024-01-12T13:16:19.144Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "payment-stripe.RemoveOutputParams.8d1ba8b0dfb0e4c2902a7f8a8df1df34",
+    "methodFilters": []
   }
 ]
