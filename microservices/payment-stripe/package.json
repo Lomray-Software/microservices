@@ -40,7 +40,7 @@
   },
   "dependencies": {
     "@lomray/microservice-helpers": "^2.16.0",
-    "@lomray/microservices-client-api": "^2.87.0",
+    "@lomray/microservices-client-api": "^2.88.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "class-validator-jsonschema": "^5.0.0",

@@ -3175,5 +3175,195 @@
       "entities": "payment-stripe.PromoCode"
     },
     "createdAt": "2023-08-21T21:01:40.516Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.Payout",
+    "title": "Payout",
+    "schema": {
+      "id": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "payoutId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "amount": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "destination": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "method": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "type": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "status": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "currency": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "failureCode": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "failureMessage": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "description": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "arrivalDate": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "params": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2024-01-12T13:16:19.144Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ListOutputParams.2a138e32e29c0d18b5d2d97a69f3ec17",
+    "title": "List Output Params",
+    "schema": {
+      "list": "payment-stripe.Payout",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2024-01-12T13:16:19.144Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.ViewOutputParams.ab22f76f4992fed35b6fe719de226ec1",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "payment-stripe.Payout"
+    },
+    "createdAt": "2024-01-12T13:16:19.144Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateRequestParams.4087d1c2c4100238f4bfbbc882d025d9",
+    "title": "Update Request Params",
+    "schema": {
+      "fields": "payment-stripe.Payout",
+      "query": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2024-01-12T13:16:19.144Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.UpdateOutputParams.ab22f76f4992fed35b6fe719de226ec1",
+    "title": "Update Output Params",
+    "schema": {
+      "entity": "payment-stripe.Payout"
+    },
+    "createdAt": "2024-01-12T13:16:19.144Z"
+  },
+  {
+    "microservice": "payment-stripe",
+    "alias": "payment-stripe.RemoveOutputParams.8d1ba8b0dfb0e4c2902a7f8a8df1df34",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "payment-stripe.Payout",
+      "entities": "payment-stripe.Payout"
+    },
+    "createdAt": "2024-01-12T13:16:19.144Z"
   }
 ]

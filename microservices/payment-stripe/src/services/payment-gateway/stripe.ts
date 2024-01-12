@@ -1892,7 +1892,7 @@ class Stripe extends Abstract {
           connect: () => webhookHandlers.payout.handlePayoutOccur(event),
         };
 
-        await handlers?.[webhookType]();
+        await handlers?.[webhookType]?.();
         break;
       }
     }

@@ -7,6 +7,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  Unique,
 } from 'typeorm';
 import PayoutMethod from '@constants/payout-method';
 import PayoutStatus from '@constants/payout-status';
@@ -34,6 +35,7 @@ class Payout {
   @JSONSchema({
     description: 'Stripe payout id',
   })
+  @Unique('payout(uq):payoutId', ['payoutId'])
   @Column({ type: 'varchar', length: 66 })
   @Length(1, 66)
   payoutId: string;

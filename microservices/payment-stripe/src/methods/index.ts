@@ -14,6 +14,7 @@ import CrudCustomer from '@methods/customer/crud';
 import CustomerRemove from '@methods/customer/remove';
 import CrudDispute from '@methods/dispute/crud';
 import CrudEvidenceDetails from '@methods/evidence-details/crud';
+import CrudPayout from '@methods/payout/crud';
 import PriceCreate from '@methods/price/create';
 import CrudPrice from '@methods/price/crud';
 import ProductCreate from '@methods/product/create';
@@ -48,6 +49,7 @@ export default (ms: Microservice): void => {
       ...CrudBankAccount,
       add: BankAccountAdd,
     },
+    payout: CrudPayout,
     cart: CrudCart,
     'cart-product-price': CrudCartProductPrice,
     transaction: CrudTransaction,
