@@ -49,6 +49,15 @@ class Payout {
   amount: number;
 
   @JSONSchema({
+    description: 'Microservice entity',
+  })
+  @Column({ type: 'varchar', length: 36, default: null })
+  @Length(1, 36)
+  @IsUndefinable()
+  @IsNullable()
+  entityId: string | null;
+
+  @JSONSchema({
     description: 'Id of the bank account or card the payout is sent to.',
   })
   @Column({ type: 'varchar', length: 66 })
