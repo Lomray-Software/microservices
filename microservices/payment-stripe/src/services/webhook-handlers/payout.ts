@@ -43,6 +43,7 @@ class Payout {
       created,
     } = event.data.object as StripeSdk.Payout;
 
+    // Common data
     const data = {
       type: Parser.parseStripePayoutType(type as StripePayoutType),
       arrivalDate: new Date(Number(arrivalDate) * 1000),

@@ -1,5 +1,4 @@
 import { EntitySubscriberInterface, EventSubscriber, InsertEvent, UpdateEvent } from 'typeorm';
-import DisputeEntity from '@entities/dispute';
 import PayoutEntity from '@entities/payout';
 import PayoutRepository from '@repositories/payout';
 import PayoutService from '@services/payout';
@@ -12,8 +11,8 @@ class Payout implements EntitySubscriberInterface<PayoutEntity> {
   /**
    * This subscriber only for Payout entity
    */
-  public listenTo(): typeof DisputeEntity {
-    return DisputeEntity;
+  public listenTo(): typeof PayoutEntity {
+    return PayoutEntity;
   }
 
   /**
