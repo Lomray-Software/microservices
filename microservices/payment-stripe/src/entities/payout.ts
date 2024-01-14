@@ -58,11 +58,12 @@ class Payout {
   entityId: string | null;
 
   @JSONSchema({
-    description: 'Id of the bank account or card the payout is sent to.',
+    description:
+      'Id of the bank account or card the payout is sent to. Stripe destination is nullable',
   })
-  @Column({ type: 'varchar', length: 66 })
+  @Column({ type: 'varchar', length: 66, default: null })
   @Length(1, 66)
-  destination: string;
+  destination: string | null;
 
   @JSONSchema({
     description: 'The method used to send this payout',

@@ -1893,6 +1893,14 @@
           "admin": "allow"
         }
       },
+      "entityId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "payoutMethodId": {
         "in": {
           "admin": "allow"

@@ -10,6 +10,8 @@ import BusinessType from '@constants/business-type';
 import CouponDuration from '@constants/coupon-duration';
 import PayoutMethod from '@constants/payout-method';
 import RefundAmountType from '@constants/refund-amount-type';
+import StripePayoutStatus from '@constants/stripe/payout-status';
+import StripePayoutType from '@constants/stripe/payout-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
@@ -62,6 +64,14 @@ export type TAvailablePaymentMethods =
 export enum PayoutMethodType {
   CARD = 'card',
   BANK_ACCOUNT = 'bankAccount',
+}
+
+export interface IInstantPayoutParams {
+  userId: string;
+  amount: number;
+  entityId?: string;
+  payoutMethod?: IPayoutMethod;
+  currency?: TCurrency;
 }
 
 interface IPaymentIntentParams {
@@ -130,13 +140,6 @@ interface IPayoutMethod {
 interface ICheckoutCart {
   redirectUrl: string | null;
   clientSecret: string | null;
-}
-
-interface IInstantPayoutParams {
-  userId: string;
-  amount: number;
-  payoutMethod?: IPayoutMethod;
-  currency?: TCurrency;
 }
 
 type TCustomerBalance = Record<BalanceType, TBalance>;
@@ -669,6 +672,7 @@ class Stripe extends Abstract {
   public async instantPayout({
     userId,
     amount,
+    entityId,
     payoutMethod,
     currency = 'usd',
   }: IInstantPayoutParams): Promise<boolean> {
@@ -760,8 +764,10 @@ class Stripe extends Abstract {
       });
     }
 
+    let stripePayout: StripeSdk.Payout;
+
     try {
-      await this.sdk.payouts.create(
+      stripePayout = await this.sdk.payouts.create(
         {
           currency,
           amount: amountUnit,
@@ -779,6 +785,37 @@ class Stripe extends Abstract {
         message: 'Stripe instant payout was failed.',
       });
     }
+
+    const {
+      id: payoutId,
+      method,
+      arrival_date: arrivalDate,
+      description,
+      destination,
+      created,
+      status,
+      type,
+      failure_code: failureCode,
+      failure_message: failureMessage,
+    } = stripePayout;
+
+    const payoutEntity = this.payoutRepository.create({
+      amount,
+      arrivalDate: new Date(Number(arrivalDate) * 1000),
+      method: method as PayoutMethod,
+      payoutId,
+      description,
+      failureCode,
+      failureMessage,
+      currency,
+      type: Parser.parseStripePayoutType(type as StripePayoutType),
+      status: Parser.parseStripePayoutStatus(status as StripePayoutStatus),
+      registeredAt: new Date(Number(created) * 1000),
+      ...(entityId ? { entityId } : {}),
+      ...(destination ? { destination: extractIdFromStripeInstance(destination) } : {}),
+    });
+
+    await this.payoutRepository.save(payoutEntity);
 
     return true;
   }

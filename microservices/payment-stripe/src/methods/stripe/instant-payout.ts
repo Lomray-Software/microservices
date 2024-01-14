@@ -1,10 +1,11 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsBoolean, IsEnum, IsNumber, IsString, Length, Min } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
 import { getManager } from 'typeorm';
 import Factory from '@services/payment-gateway/factory';
-import { PayoutMethodType } from '@services/payment-gateway/stripe';
+import { PayoutMethodType, IInstantPayoutParams } from '@services/payment-gateway/stripe';
 
-class CreateInstantPayoutInput {
+class CreateInstantPayoutInput implements IInstantPayoutParams {
   @Length(1, 36)
   @IsString()
   userId: string;
@@ -12,6 +13,14 @@ class CreateInstantPayoutInput {
   @Min(1)
   @IsNumber()
   amount: number;
+
+  @JSONSchema({
+    description: 'Microservice entity',
+  })
+  @Length(1, 36)
+  @IsString()
+  @IsUndefinable()
+  entityId?: string;
 
   @Length(1, 36)
   @IsString()
@@ -37,13 +46,14 @@ const instantPayout = Endpoint.custom(
     output: CreateInstantPayoutOutput,
     description: 'Create instant payout',
   }),
-  async ({ userId, amount, payoutMethodId, payoutMethodType }) => {
+  async ({ userId, amount, entityId, payoutMethodId, payoutMethodType }) => {
     const service = await Factory.create(getManager());
 
     return {
       isInstantiated: await service.instantPayout({
         userId,
         amount,
+        entityId,
         ...(payoutMethodId && payoutMethodType
           ? { payoutMethod: { id: payoutMethodId, method: payoutMethodType } }
           : {}),
