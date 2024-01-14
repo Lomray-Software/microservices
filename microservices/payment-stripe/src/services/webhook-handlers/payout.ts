@@ -1,4 +1,3 @@
-import { BaseException } from '@lomray/microservice-nodejs-lib';
 import type StripeSdk from 'stripe';
 import { EntityManager } from 'typeorm';
 import PayoutMethod from '@constants/payout-method';
@@ -44,12 +43,14 @@ class Payout {
       created,
     } = event.data.object as StripeSdk.Payout;
 
-    if (!destination) {
-      throw new BaseException({
-        status: 500,
-        message: 'Failed to register payout, expected destination.',
-      });
-    }
+    const data = {
+      type: Parser.parseStripePayoutType(type as StripePayoutType),
+      arrivalDate: new Date(Number(arrivalDate) * 1000),
+      registeredAt: new Date(Number(created) * 1000),
+      status: Parser.parseStripePayoutStatus(status as StripePayoutStatus),
+      method: method as PayoutMethod,
+      ...(destination ? { destination: extractIdFromStripeInstance(destination) } : {}),
+    };
 
     // Add deps in transaction
     await this.manager.transaction(async (entityManager) => {
@@ -61,15 +62,6 @@ class Payout {
         },
       });
 
-      const data = {
-        type: Parser.parseStripePayoutType(type as StripePayoutType),
-        arrivalDate: new Date(Number(arrivalDate) * 1000),
-        registeredAt: new Date(Number(created) * 1000),
-        status: Parser.parseStripePayoutStatus(status as StripePayoutStatus),
-        destination: extractIdFromStripeInstance(destination),
-        method: method as PayoutMethod,
-      };
-
       if (!payout) {
         const payoutEntity = payoutRepository.create({
           amount,
@@ -77,13 +69,13 @@ class Payout {
           method: data.method,
           payoutId,
           description,
-          destination: data.destination,
           failureCode,
           failureMessage,
           currency,
           type: data.type,
           status: data.status,
           registeredAt: data.registeredAt,
+          ...(data.destination ? { destination: data.destination } : {}),
         });
 
         await payoutRepository.save(payoutEntity);
@@ -91,15 +83,19 @@ class Payout {
         return;
       }
 
+      // Do not update payout if event: created
       if (event.type === 'payout.created') {
         return;
+      }
+
+      if (data.destination) {
+        payout.destination = data.destination;
       }
 
       payout.amount = amount;
       payout.arrivalDate = data.arrivalDate;
       payout.method = data.method;
       payout.description = description;
-      payout.destination = data.destination;
       payout.failureMessage = failureMessage;
       payout.failureCode = failureCode;
       payout.currency = currency;
