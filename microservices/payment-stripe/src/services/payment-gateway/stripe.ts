@@ -677,7 +677,7 @@ class Stripe extends Abstract {
     currency = 'usd',
   }: IInstantPayoutParams): Promise<boolean> {
     const { payout } = await remoteConfig();
-    const { instantMaxAmountPerTransaction, instantMinAmountPerTransaction } = payout!;
+    const { instantMaxAmountPerTransactionUnit, instantMinAmountPerTransactionUnit } = payout!;
 
     const payoutMethodAllowances = await this.getPayoutMethodAllowances(userId, payoutMethod);
 
@@ -697,14 +697,14 @@ class Stripe extends Abstract {
       });
     }
 
-    if (amountUnit > instantMaxAmountPerTransaction) {
+    if (amountUnit > instantMaxAmountPerTransactionUnit) {
       throw new BaseException({
         status: 500,
         message: 'Requested amount is more than payout transaction limit.',
       });
     }
 
-    if (amountUnit < instantMinAmountPerTransaction) {
+    if (amountUnit < instantMinAmountPerTransactionUnit) {
       throw new BaseException({
         status: 500,
         message: 'Requested amount is less than payout transaction limit.',

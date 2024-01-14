@@ -20,7 +20,7 @@ const convertBalanceFromUnit = (balance: TCustomerBalance): TCustomerBalance => 
     }
 
     Object.keys(balance[type]).forEach((currency: TCurrency) => {
-      convertedInput[type][currency] = <number>fromSmallestUnit(balance[type][currency]);
+      convertedInput[type][currency] = fromSmallestUnit(balance[type][currency]) ?? 0;
     });
   });
 
