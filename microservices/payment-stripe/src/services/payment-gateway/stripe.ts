@@ -66,6 +66,8 @@ export enum PayoutMethodType {
   BANK_ACCOUNT = 'bankAccount',
 }
 
+export type TCustomerBalance = Record<BalanceType, TBalance>;
+
 export interface IInstantPayoutParams {
   userId: string;
   amount: number;
@@ -141,8 +143,6 @@ interface ICheckoutCart {
   redirectUrl: string | null;
   clientSecret: string | null;
 }
-
-type TCustomerBalance = Record<BalanceType, TBalance>;
 
 interface IGetPaymentIntentFeesParams
   extends Pick<
