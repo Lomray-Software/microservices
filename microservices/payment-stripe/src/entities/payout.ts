@@ -49,7 +49,8 @@ class Payout {
   amount: number;
 
   @JSONSchema({
-    description: 'Microservice entity',
+    description:
+      'Microservice entity. Your internal microservice payout (withdraw) or any else entity, that implements custom functionality',
   })
   @Column({ type: 'varchar', length: 36, default: null })
   @Length(1, 36)

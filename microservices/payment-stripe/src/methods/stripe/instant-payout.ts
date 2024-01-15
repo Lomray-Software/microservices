@@ -3,7 +3,8 @@ import { IsBoolean, IsEnum, IsNumber, IsString, Length, Min } from 'class-valida
 import { JSONSchema } from 'class-validator-jsonschema';
 import { getManager } from 'typeorm';
 import Factory from '@services/payment-gateway/factory';
-import { PayoutMethodType, IInstantPayoutParams } from '@services/payment-gateway/stripe';
+import { PayoutMethodType } from '@services/payment-gateway/stripe';
+import type { IInstantPayoutParams } from '@services/payment-gateway/stripe';
 
 class CreateInstantPayoutInput implements IInstantPayoutParams {
   @Length(1, 36)
@@ -15,7 +16,8 @@ class CreateInstantPayoutInput implements IInstantPayoutParams {
   amount: number;
 
   @JSONSchema({
-    description: 'Microservice entity',
+    description:
+      'Microservice entity. Your internal microservice payout (withdraw) or any else entity, that implements custom functionality',
   })
   @Length(1, 36)
   @IsString()
