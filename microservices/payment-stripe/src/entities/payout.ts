@@ -49,11 +49,22 @@ class Payout {
   amount: number;
 
   @JSONSchema({
-    description: 'Id of the bank account or card the payout is sent to.',
+    description:
+      'Microservice entity. Your internal microservice payout (withdraw) or any else entity, that implements custom functionality',
   })
-  @Column({ type: 'varchar', length: 66 })
+  @Column({ type: 'varchar', length: 36, default: null })
+  @Length(1, 36)
+  @IsUndefinable()
+  @IsNullable()
+  entityId: string | null;
+
+  @JSONSchema({
+    description:
+      'Id of the bank account or card the payout is sent to. Stripe destination is nullable',
+  })
+  @Column({ type: 'varchar', length: 66, default: null })
   @Length(1, 66)
-  destination: string;
+  destination: string | null;
 
   @JSONSchema({
     description: 'The method used to send this payout',
@@ -107,6 +118,10 @@ class Payout {
   @Column({ type: 'timestamptz' })
   @IsDate()
   arrivalDate: Date;
+
+  @Column({ type: 'timestamptz' })
+  @IsDate()
+  registeredAt: Date;
 
   @Column({ type: 'json', default: {} })
   @IsObject()

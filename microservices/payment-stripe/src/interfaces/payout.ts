@@ -1,8 +1,8 @@
 interface IPayout {
   // Instant payout minimum amount
-  instantMinAmountPerTransaction: number;
+  instantMinAmountPerTransactionUnit: number;
   // Instant payout maximum amount
-  instantMaxAmountPerTransaction: number;
+  instantMaxAmountPerTransactionUnit: number;
   // Limit for performing instant payout
   instantPayoutLimitPerDay: number;
 }

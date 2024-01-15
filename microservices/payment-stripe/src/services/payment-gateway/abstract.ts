@@ -12,6 +12,7 @@ import Coupon from '@entities/coupon';
 import Customer from '@entities/customer';
 import Dispute from '@entities/dispute';
 import EvidenceDetails from '@entities/evidence-details';
+import Payout from '@entities/payout';
 import Price from '@entities/price';
 import Product from '@entities/product';
 import Refund from '@entities/refund';
@@ -135,6 +136,11 @@ abstract class Abstract {
   /**
    * @protected
    */
+  protected readonly payoutRepository: Repository<Payout>;
+
+  /**
+   * @protected
+   */
   protected readonly manager: EntityManager;
 
   /**
@@ -167,6 +173,7 @@ abstract class Abstract {
     this.couponRepository = manager.getRepository(Coupon);
     this.disputeRepository = manager.getRepository(Dispute);
     this.evidenceDetailsRepository = manager.getRepository(EvidenceDetails);
+    this.payoutRepository = manager.getRepository(Payout);
     this.methods = methods;
     this.sdk = new StripeSdk(apiKey, stripeConfig);
     this.manager = manager;

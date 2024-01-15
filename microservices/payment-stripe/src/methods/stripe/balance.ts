@@ -2,6 +2,7 @@ import { Endpoint } from '@lomray/microservice-helpers';
 import { IsObject, IsString, Length } from 'class-validator';
 import { getManager } from 'typeorm';
 import BalanceType from '@constants/balance-type';
+import convertBalanceFromUnit from '@helpers/convert-balance-from-unit';
 import TBalance from '@interfaces/balance';
 import Factory from '@services/payment-gateway/factory';
 
@@ -29,7 +30,7 @@ const balance = Endpoint.custom(
     const service = await Factory.create(getManager());
 
     return {
-      balance: await service.getBalance(userId),
+      balance: convertBalanceFromUnit(await service.getBalance(userId)),
     };
   },
 );
