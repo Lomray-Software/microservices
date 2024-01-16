@@ -800,7 +800,7 @@ class Stripe extends Abstract {
     } = stripePayout;
 
     const payoutEntity = this.payoutRepository.create({
-      amount,
+      amount: amountUnit,
       arrivalDate: new Date(Number(arrivalDate) * 1000),
       method: method as PayoutMethod,
       payoutId,
