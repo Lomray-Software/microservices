@@ -49,7 +49,7 @@ class Card {
       .getCount();
 
     // Card count will contain current card, because after update event
-    if (cardsCount > 1) {
+    if (cardsCount <= 1) {
       void Microservice.eventPublish(Event.CardCreated, entity);
 
       return;
