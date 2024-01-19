@@ -162,6 +162,7 @@ abstract class Abstract {
     stripeConfig: StripeTypes.StripeConfig,
     methods: string[],
   ) {
+    this.sdk = new StripeSdk(apiKey, stripeConfig);
     this.customerRepository = manager.getRepository(Customer);
     this.productRepository = manager.getRepository(Product);
     this.priceRepository = manager.getRepository(Price);
@@ -175,7 +176,6 @@ abstract class Abstract {
     this.evidenceDetailsRepository = manager.getRepository(EvidenceDetails);
     this.payoutRepository = manager.getRepository(Payout);
     this.methods = methods;
-    this.sdk = new StripeSdk(apiKey, stripeConfig);
     this.manager = manager;
   }
 
@@ -260,6 +260,7 @@ abstract class Abstract {
 
   /**
    * Get transaction by transactionId
+   * @TODO: add usage
    */
   public async getTransactionById(transactionId: string): Promise<Transaction> {
     const transaction = await this.transactionRepository.findOne({ id: transactionId });
@@ -276,6 +277,7 @@ abstract class Abstract {
 
   /**
    * Get the customer
+   * @protected
    */
   protected async getCustomer(userId: string): Promise<Customer> {
     const customer = await this.customerRepository.findOne({ userId });
@@ -289,6 +291,7 @@ abstract class Abstract {
 
   /**
    * Create coupon
+   * @protected
    */
   protected async createCoupon(params: ICouponParams, couponId: string): Promise<Coupon> {
     const products = await this.productRepository.find({
