@@ -11,8 +11,15 @@ import isCardExpirationDateValid from '@helpers/is-card-expiration-date-valid';
  */
 @ValidatorConstraint({ name: 'isCardExpirationValid', async: false })
 class IsCardExpirationValidConstraint implements ValidatorConstraintInterface {
-  validate(value: string) {
+  /**
+   * Validate card expiration
+   */
+  public validate(value: string) {
     return isCardExpirationDateValid(value);
+  }
+
+  public defaultMessage(): string {
+    return 'Card was expired.';
   }
 }
 
