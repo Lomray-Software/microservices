@@ -24,7 +24,7 @@ class IsCardExpirationValidConstraint implements ValidatorConstraintInterface {
    * Returns default error message
    */
   public defaultMessage(): string {
-    return 'Card was expired.';
+    return 'Card has expired.';
   }
 }
 
