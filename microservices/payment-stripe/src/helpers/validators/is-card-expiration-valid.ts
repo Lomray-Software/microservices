@@ -18,6 +18,9 @@ class IsCardExpirationValidConstraint implements ValidatorConstraintInterface {
     return isCardExpirationDateValid(value);
   }
 
+  /**
+   * Returns default error message
+   */
   public defaultMessage(): string {
     return 'Card was expired.';
   }
