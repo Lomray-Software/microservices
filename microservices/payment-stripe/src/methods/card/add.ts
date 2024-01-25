@@ -4,7 +4,7 @@ import { IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import Card from '@entities/card';
 import type { ICardParams } from '@services/payment-gateway/abstract';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 class CardAddInput implements ICardParams {
   @IsString()
@@ -41,7 +41,7 @@ class CardAddOutput {
 const add = Endpoint.custom(
   () => ({ input: CardAddInput, output: CardAddOutput, description: 'Add new card' }),
   async ({ userId, digits, cvc, token, expired }) => {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init(getManager());
 
     return {
       entity: await service.addCard({ userId, token, expired, digits, cvc }),

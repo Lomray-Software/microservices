@@ -5,7 +5,7 @@ import { getManager } from 'typeorm';
 import CouponDuration from '@constants/coupon-duration';
 import Coupon from '@entities/coupon';
 import TCurrency from '@interfaces/currency';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 class CreateCouponInput {
   @IsEnum(CouponDuration)
@@ -76,7 +76,7 @@ const create = Endpoint.custom(
     maxRedemptions,
     products,
   }) => {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init(getManager());
 
     return {
       entity: await service.createCoupon({

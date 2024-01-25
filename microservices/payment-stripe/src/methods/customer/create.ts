@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import Customer from '@entities/customer';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 class CustomerCreateInput {
   @IsString()
@@ -32,7 +32,7 @@ const create = Endpoint.custom(
     description: 'Create new customer',
   }),
   async ({ userId, email, name }) => {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init(getManager());
 
     return {
       entity: await service.createCustomer(userId, email, name),

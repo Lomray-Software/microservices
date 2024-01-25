@@ -1,7 +1,7 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { IsBoolean, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 class CustomerRemoveInput {
   @IsString()
@@ -23,7 +23,7 @@ const remove = Endpoint.custom(
     description: 'Remove customer',
   }),
   async ({ userId }) => {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init(getManager());
 
     return {
       isRemoved: await service.removeCustomer(userId),
