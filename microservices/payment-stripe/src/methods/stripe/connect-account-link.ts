@@ -1,6 +1,5 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { IsString, Length } from 'class-validator';
-import { getManager } from 'typeorm';
 import Stripe from '@services/payment-gateway/stripe';
 
 class ConnectAccountLinkInput {
@@ -30,7 +29,7 @@ const connectAccountLink = Endpoint.custom(
     description: 'Create new link for access to the connect account',
   }),
   async ({ userId, refreshUrl, returnUrl }) => {
-    const service = await Stripe.init(getManager());
+    const service = await Stripe.init();
 
     return {
       accountLink: await service.getConnectAccountLink(userId, refreshUrl, returnUrl),

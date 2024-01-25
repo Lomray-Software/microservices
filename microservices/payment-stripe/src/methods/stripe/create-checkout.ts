@@ -1,6 +1,5 @@
 import { Endpoint, IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsBoolean, IsString, Length } from 'class-validator';
-import { getManager } from 'typeorm';
 import Stripe from '@services/payment-gateway/stripe';
 
 class CreateCheckoutInput {
@@ -38,7 +37,7 @@ const createCheckout = Endpoint.custom(
     description: 'Setup intent and return client secret key',
   }),
   async ({ priceId, successUrl, cancelUrl, userId, isAllowPromoCode }) => {
-    const service = await Stripe.init(getManager());
+    const service = await Stripe.init();
 
     return {
       redirectUrl: await service.createCheckout({

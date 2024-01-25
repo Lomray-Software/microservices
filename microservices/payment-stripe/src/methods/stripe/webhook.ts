@@ -1,7 +1,6 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { IsObject, IsString } from 'class-validator';
 import type StripeSDK from 'stripe';
-import { getManager } from 'typeorm';
 import remoteConfig from '@config/remote';
 import Stripe from '@services/payment-gateway/stripe';
 
@@ -43,7 +42,7 @@ const webhook = Endpoint.custom(
       throw new Error('Stripe signature is mot provided.');
     }
 
-    const service = await Stripe.init(getManager());
+    const service = await Stripe.init();
 
     // Should throw an error if webhook handle was failed
     await service.handleWebhookEvent(

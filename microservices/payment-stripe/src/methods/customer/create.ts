@@ -1,7 +1,6 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
 import { IsObject, IsString } from 'class-validator';
-import { getManager } from 'typeorm';
 import Customer from '@entities/customer';
 import Stripe from '@services/payment-gateway/stripe';
 
@@ -32,7 +31,7 @@ const create = Endpoint.custom(
     description: 'Create new customer',
   }),
   async ({ userId, email, name }) => {
-    const service = await Stripe.init(getManager());
+    const service = await Stripe.init();
 
     return {
       entity: await service.createCustomer(userId, email, name),

@@ -1,7 +1,6 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsEnum, IsNumber, IsString, Length, Min } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { getManager } from 'typeorm';
 import RefundAmountType from '@constants/refund-amount-type';
 import Stripe from '@services/payment-gateway/stripe';
 
@@ -48,7 +47,7 @@ const refund = Endpoint.custom(
     description: 'Create transaction refund',
   }),
   async ({ transactionId, amount, refundAmountType, entityId }) => {
-    const service = await Stripe.init(getManager());
+    const service = await Stripe.init();
 
     return {
       isRecognized: await service.refund({

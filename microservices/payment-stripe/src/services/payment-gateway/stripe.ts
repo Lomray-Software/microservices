@@ -4,7 +4,7 @@ import Event from '@lomray/microservices-client-api/constants/events/payment-str
 import toSmallestUnit from '@lomray/microservices-client-api/helpers/parsers/to-smallest-unit';
 import { validate } from 'class-validator';
 import StripeSdk from 'stripe';
-import { EntityManager } from 'typeorm';
+import { EntityManager, getManager } from 'typeorm';
 import remoteConfig from '@config/remote';
 import BalanceType from '@constants/balance-type';
 import BusinessType from '@constants/business-type';
@@ -212,7 +212,7 @@ class Stripe extends Abstract {
   /**
    * Init service
    */
-  public static async init(manager: EntityManager): Promise<Stripe> {
+  public static async init(manager: EntityManager = getManager()): Promise<Stripe> {
     const { config, paymentMethods, apiKey, fees, taxes } = await remoteConfig();
 
     // All environments are required

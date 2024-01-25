@@ -1,6 +1,6 @@
 import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
-import { EntityManager, getManager, QueryRunner } from 'typeorm';
+import { EntityManager, QueryRunner } from 'typeorm';
 import CardEntity from '@entities/card';
 import CustomerEntity from '@entities/customer';
 import messages from '@helpers/validators/messages';
@@ -110,7 +110,7 @@ class Card {
 
     const cardRepository = manager.getRepository(CardEntity);
     const customerRepository = manager.getRepository(CustomerEntity);
-    const service = await Stripe.init(getManager());
+    const service = await Stripe.init();
 
     const { userId } = entity;
 
@@ -176,7 +176,7 @@ class Card {
     manager: EntityManager,
     { data: { isFromWebhook } }: QueryRunner,
   ): Promise<void> {
-    const service = await Stripe.init(getManager());
+    const service = await Stripe.init();
 
     if (isFromWebhook) {
       void Microservice.eventPublish(Event.CardRemoved, databaseEntity);

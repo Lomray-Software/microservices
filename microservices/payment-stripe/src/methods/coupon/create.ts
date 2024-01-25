@@ -1,7 +1,6 @@
 import { Endpoint, IsUndefinable, IsValidate } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNumber, IsObject, IsString, Length } from 'class-validator';
-import { getManager } from 'typeorm';
 import CouponDuration from '@constants/coupon-duration';
 import Coupon from '@entities/coupon';
 import TCurrency from '@interfaces/currency';
@@ -76,7 +75,7 @@ const create = Endpoint.custom(
     maxRedemptions,
     products,
   }) => {
-    const service = await Stripe.init(getManager());
+    const service = await Stripe.init();
 
     return {
       entity: await service.createCoupon({
