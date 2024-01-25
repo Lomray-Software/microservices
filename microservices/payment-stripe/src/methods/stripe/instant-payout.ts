@@ -2,8 +2,7 @@ import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsBoolean, IsEnum, IsNumber, IsString, Length, Min } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { getManager } from 'typeorm';
-import Factory from '@services/payment-gateway/factory';
-import { PayoutMethodType } from '@services/payment-gateway/stripe';
+import Stripe, { PayoutMethodType } from '@services/payment-gateway/stripe';
 import type { IInstantPayoutParams } from '@services/payment-gateway/stripe';
 
 class CreateInstantPayoutInput implements IInstantPayoutParams {
@@ -49,7 +48,7 @@ const instantPayout = Endpoint.custom(
     description: 'Create instant payout',
   }),
   async ({ userId, amount, entityId, payoutMethodId, payoutMethodType }) => {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init(getManager());
 
     return {
       isInstantiated: await service.instantPayout({

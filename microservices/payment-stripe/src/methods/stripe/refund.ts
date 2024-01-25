@@ -3,7 +3,7 @@ import { IsEnum, IsNumber, IsString, Length, Min } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { getManager } from 'typeorm';
 import RefundAmountType from '@constants/refund-amount-type';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 class RefundInput {
   @IsString()
@@ -48,7 +48,7 @@ const refund = Endpoint.custom(
     description: 'Create transaction refund',
   }),
   async ({ transactionId, amount, refundAmountType, entityId }) => {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init(getManager());
 
     return {
       isRecognized: await service.refund({

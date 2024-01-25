@@ -1,7 +1,7 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { IsString, Length } from 'class-validator';
 import { getManager } from 'typeorm';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 class DashboardLoginLinkInput {
   @Length(1, 36)
@@ -25,7 +25,7 @@ const dashboardLoginLink = Endpoint.custom(
     description: 'Create new link for access to the express account dashboard',
   }),
   async ({ userId }) => {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init(getManager());
 
     return {
       url: await service.getDashboardLoginLink(userId),

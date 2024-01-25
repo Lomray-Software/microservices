@@ -1,7 +1,7 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { IsArray, IsBoolean } from 'class-validator';
 import { getManager } from 'typeorm';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 class PayoutInput {
   @IsArray()
@@ -23,7 +23,7 @@ const payout = Endpoint.custom(
     description: 'Create payout for product owners',
   }),
   async ({ entities }) => {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init(getManager());
 
     return {
       isComplete: await service.payout(entities),

@@ -4,7 +4,7 @@ import { IsObject, IsString } from 'class-validator';
 import { getManager } from 'typeorm';
 import BankAccount from '@entities/bank-account';
 import type { IBankAccountParams } from '@services/payment-gateway/abstract';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 class BankAccountAddInput implements IBankAccountParams {
   @IsString()
@@ -44,7 +44,7 @@ const add = Endpoint.custom(
     description: 'Add new bank account',
   }),
   async ({ userId, bankName, holderName, bankAccountId, lastDigits }) => {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init(getManager());
 
     return {
       entity: await service.addBankAccount({
