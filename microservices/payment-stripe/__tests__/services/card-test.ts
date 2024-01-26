@@ -1,4 +1,5 @@
 import { TypeormMock } from '@lomray/microservice-helpers/mocks';
+import { Microservice } from '@lomray/microservice-nodejs-lib';
 import { expect } from 'chai';
 import sinon from 'sinon';
 import { cardMock } from '@__mocks__/card';
@@ -9,9 +10,11 @@ import Stripe from '@services/payment-gateway/stripe';
 describe('services/card', () => {
   const sandbox = sinon.createSandbox();
   let cardHandleAfterInsert: sinon.SinonSpy;
+  let microserviceEventPublish: sinon.SinonSpy;
 
   beforeEach(() => {
     cardHandleAfterInsert = sandbox.spy(Card, 'handleAfterInsert');
+    microserviceEventPublish = sandbox.spy(Microservice, 'eventPublish');
     TypeormMock.entityManager.restore();
   });
 
@@ -30,6 +33,7 @@ describe('services/card', () => {
 
       expect(extractPaymentMethodIdStub).to.calledOnce;
       expect(TypeormMock.entityManager.getCustomRepository).to.not.called;
+      expect(microserviceEventPublish).to.called;
     });
 
     it('should just send event publish: default card already exist', async () => {
@@ -43,6 +47,7 @@ describe('services/card', () => {
       expect(extractPaymentMethodIdStub).to.calledOnce;
       expect(TypeormMock.queryBuilder.getCount).to.called;
       expect(TypeormMock.entityManager.findOne).to.not.called;
+      expect(microserviceEventPublish).to.called;
     });
 
     it('should set new card as default: default card not exist', async () => {
@@ -64,6 +69,7 @@ describe('services/card', () => {
       expect(TypeormMock.queryBuilder.getCount).to.called;
       expect(TypeormMock.entityManager.findOne).to.calledOnce;
       expect(TypeormMock.entityManager.save).to.calledOnce;
+      expect(microserviceEventPublish).to.called;
     });
   });
 });
