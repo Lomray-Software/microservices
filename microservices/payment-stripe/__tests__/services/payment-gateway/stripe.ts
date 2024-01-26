@@ -92,6 +92,7 @@ describe('services/payment-gateway/stripe', () => {
   });
 
   afterEach(() => {
+    sinon.restore();
     sandbox.restore();
   });
 
@@ -103,7 +104,6 @@ describe('services/payment-gateway/stripe', () => {
 
       const stripeInstance = await OriginalStripe.init(TypeormMock.entityManager);
 
-      sinon.restore();
       expect(stripeInstance).to.be.an.instanceOf(OriginalStripe);
     });
 

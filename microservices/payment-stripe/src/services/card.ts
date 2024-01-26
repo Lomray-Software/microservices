@@ -33,7 +33,6 @@ class Card {
 
     const cardRepository = manager.getRepository(CardEntity);
     const customerRepository = manager.getRepository(CustomerEntity);
-    const service = await Stripe.init(manager);
 
     /**
      * Get attached cards count as the payment method
@@ -67,6 +66,8 @@ class Card {
         },
       });
     }
+
+    const service = await Stripe.init(manager);
 
     const isSet = await service.setDefaultCustomerPaymentMethod(
       customer.customerId,
