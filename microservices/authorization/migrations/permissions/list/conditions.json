@@ -1,7 +1,7 @@
 [
   {
     "title": "Get list with query condition",
-    "description": "",
+    "description": "Query where should not be empty. Check at least request where id existence",
     "conditions": {
       "or": [
         {
@@ -16,7 +16,7 @@
   },
   {
     "title": "Get list with not empty query.where",
-    "description": "",
+    "description": "Query where should not be empty",
     "conditions": {
       "or": [
         {
