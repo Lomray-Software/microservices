@@ -48,8 +48,8 @@ class Card {
       .andWhere('card.isDefault = :isDefault', { isDefault: true })
       .getCount();
 
-    // Card count will contain current card, because after update event
-    if (cardsCount <= 1) {
+    // If default card already exist - publish event
+    if (cardsCount >= 1) {
       void Microservice.eventPublish(Event.CardCreated, entity);
 
       return;
