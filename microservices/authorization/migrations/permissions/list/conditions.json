@@ -31,7 +31,7 @@
   },
   {
     "title": "Check if file and related entity belong to a user",
-    "description": "",
+    "description": "Verify whether the file and its associated entity pertain to a specific user",
     "conditions": {
       "or": [
         {
@@ -87,7 +87,7 @@
   },
   {
     "title": "Remove or update only user-owned entity",
-    "description": "",
+    "description": "Delete or modify exclusively the entities owned by the user",
     "conditions": {
       "or": [
         {
@@ -115,7 +115,7 @@
   },
   {
     "title": "Fields: user owner",
-    "description": "",
+    "description": "Check if requested data related to the user",
     "conditions": {
       "or": [
         {
@@ -130,7 +130,7 @@
   },
   {
     "title": "Fields: user entity owner",
-    "description": "",
+    "description": "Check if requested data is the user",
     "conditions": {
       "or": [
         {
@@ -148,7 +148,7 @@
   },
   {
     "title": "Payment-stripe: if exist in customers and myself",
-    "description": "",
+    "description": "Check is user exist in customers and this user requesting data about himself",
     "conditions": {
       "or": [
         {
