@@ -30,6 +30,14 @@ class Condition {
   title: string;
 
   @JSONSchema({
+    description: 'Condition workflow description',
+  })
+  @Column({ type: 'varchar', length: 255, default: '' })
+  @Length(3, 255)
+  @IsUndefinable()
+  description: string;
+
+  @JSONSchema({
     description: 'JSON condition for check access to methods',
   })
   @Column({ type: 'json', default: {} })
