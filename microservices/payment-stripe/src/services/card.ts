@@ -42,7 +42,7 @@ class Card {
       .where('card.userId = :userId', { userId: entity.userId })
       // Select cards that attached to connect account (have payment method id)
       .andWhere(
-        `card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL`,
+        `(card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL)`,
       )
       .andWhere('card.isDefault = :isDefault', { isDefault: true })
       .getCount();
