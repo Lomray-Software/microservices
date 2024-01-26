@@ -1,6 +1,6 @@
 import { EntitySubscriberInterface, EventSubscriber, InsertEvent } from 'typeorm';
 import PromoCodeEntity from '@entities/promo-code';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 /**
  * Promo code subscriber
@@ -18,7 +18,7 @@ class PromoCode implements EntitySubscriberInterface<PromoCodeEntity> {
    * Create stripe promo code and attach stripe id to entity
    */
   public async beforeInsert({ entity, manager }: InsertEvent<PromoCodeEntity>): Promise<void> {
-    const service = await Factory.create(manager);
+    const service = await Stripe.init(manager);
 
     const { id, code } = await service.createPromoCode({
       couponId: entity.couponId,

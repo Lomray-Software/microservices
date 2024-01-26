@@ -1,9 +1,8 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
 import { IsNumber, IsObject, IsString } from 'class-validator';
-import { getManager } from 'typeorm';
 import Price from '@entities/price';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 class PriceCreateInput {
   @IsString()
@@ -35,7 +34,7 @@ const create = Endpoint.custom(
     description: 'Create new price',
   }),
   async (params) => {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init();
 
     return {
       entity: await service.createPrice(params),

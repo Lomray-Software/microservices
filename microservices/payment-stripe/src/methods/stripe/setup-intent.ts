@@ -1,7 +1,6 @@
 import { Endpoint, IsNullable } from '@lomray/microservice-helpers';
 import { IsString, Length } from 'class-validator';
-import { getManager } from 'typeorm';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 class SetupIntentInput {
   @Length(1, 36)
@@ -25,7 +24,7 @@ const setupIntent = Endpoint.custom(
     description: 'Setup intent and return client secret key',
   }),
   async ({ userId }) => {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init();
 
     return {
       clientSecretToken: await service.setupIntent(userId),

@@ -1,9 +1,8 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsEnum, IsString, Length } from 'class-validator';
-import { getManager } from 'typeorm';
 import BusinessType from '@constants/business-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 class ConnectAccountInput {
   @Length(1, 36)
@@ -42,7 +41,7 @@ const connectAccount = Endpoint.custom(
     description: 'Create new connected account with link',
   }),
   async ({ userId, email, accountType, refreshUrl, returnUrl, businessType }) => {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init();
 
     return {
       accountLink: await service.connectAccount(

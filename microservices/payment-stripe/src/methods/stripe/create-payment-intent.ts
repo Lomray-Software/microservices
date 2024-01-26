@@ -1,9 +1,8 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsBoolean, IsEnum, IsNumber, IsObject, IsString, Length } from 'class-validator';
-import { getManager } from 'typeorm';
 import TransactionRole from '@constants/transaction-role';
 import type Transaction from '@entities/transaction';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 class PaymentIntentInput {
   @Length(1, 36)
@@ -78,7 +77,7 @@ const connectAccount = Endpoint.custom(
     extraReceiverRevenuePercent,
     withTax,
   }) => {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init();
 
     return {
       transaction: await service.createPaymentIntent({

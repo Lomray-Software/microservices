@@ -7,7 +7,7 @@ import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
 import DisputeEntity from '@entities/dispute';
 import TransactionEntity from '@entities/transaction';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 /**
  * Transaction service
@@ -53,7 +53,7 @@ class Transaction {
      * Attach required to transactions Stripe references and amount
      */
     if (isChargeUpdated && entity.chargeId && !databaseEntity.chargeId) {
-      await (await Factory.create(manager)).attachToTransactionsChargeRefs(entity.chargeId);
+      await (await Stripe.init(manager)).attachToTransactionsChargeRefs(entity.chargeId);
     }
 
     await Microservice.eventPublish(Event.TransactionUpdated, entity);

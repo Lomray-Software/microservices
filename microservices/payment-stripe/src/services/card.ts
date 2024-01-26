@@ -1,11 +1,11 @@
 import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
-import { EntityManager, getManager, QueryRunner } from 'typeorm';
+import { EntityManager, QueryRunner } from 'typeorm';
 import CardEntity from '@entities/card';
 import CustomerEntity from '@entities/customer';
 import messages from '@helpers/validators/messages';
 import CardRepository from '@repositories/card';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 /**
  * Card service
@@ -33,7 +33,7 @@ class Card {
 
     const cardRepository = manager.getRepository(CardEntity);
     const customerRepository = manager.getRepository(CustomerEntity);
-    const service = await Factory.create(manager);
+    const service = await Stripe.init(manager);
 
     /**
      * Get attached cards count as the payment method
@@ -110,7 +110,7 @@ class Card {
 
     const cardRepository = manager.getRepository(CardEntity);
     const customerRepository = manager.getRepository(CustomerEntity);
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init();
 
     const { userId } = entity;
 
@@ -176,7 +176,7 @@ class Card {
     manager: EntityManager,
     { data: { isFromWebhook } }: QueryRunner,
   ): Promise<void> {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init();
 
     if (isFromWebhook) {
       void Microservice.eventPublish(Event.CardRemoved, databaseEntity);
