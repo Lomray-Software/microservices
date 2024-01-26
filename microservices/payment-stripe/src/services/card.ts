@@ -115,15 +115,13 @@ class Card {
 
     const { userId } = entity;
 
-    /**
-     * Get all customer related card
-     */
+    // Get all customer related card
     const cards = await cardRepository.find({
       userId,
     });
 
     if (!cards.length) {
-      throw new BaseException({ status: 500, message: "Cards aren't found" });
+      throw new BaseException({ status: 500, message: "Cards aren't found." });
     }
 
     const customer = await customerRepository.findOne({ userId });
@@ -179,6 +177,7 @@ class Card {
   ): Promise<void> {
     const service = await Stripe.init();
 
+    // If card was removed from Stripe event(e.g. dashboard)
     if (isFromWebhook) {
       void Microservice.eventPublish(Event.CardRemoved, databaseEntity);
 
