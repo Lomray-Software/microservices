@@ -33,7 +33,6 @@ class Card {
 
     const cardRepository = manager.getRepository(CardEntity);
     const customerRepository = manager.getRepository(CustomerEntity);
-    const service = await Stripe.init(manager);
 
     /**
      * Get attached cards count as the payment method
@@ -43,13 +42,13 @@ class Card {
       .where('card.userId = :userId', { userId: entity.userId })
       // Select cards that attached to connect account (have payment method id)
       .andWhere(
-        `card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL`,
+        `(card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL)`,
       )
       .andWhere('card.isDefault = :isDefault', { isDefault: true })
       .getCount();
 
-    // Card count will contain current card, because after update event
-    if (cardsCount <= 1) {
+    // If default card already exist - publish event
+    if (cardsCount >= 1) {
       void Microservice.eventPublish(Event.CardCreated, entity);
 
       return;
@@ -67,6 +66,8 @@ class Card {
         },
       });
     }
+
+    const service = await Stripe.init(manager);
 
     const isSet = await service.setDefaultCustomerPaymentMethod(
       customer.customerId,
@@ -114,15 +115,13 @@ class Card {
 
     const { userId } = entity;
 
-    /**
-     * Get all customer related card
-     */
+    // Get all customer related card
     const cards = await cardRepository.find({
       userId,
     });
 
     if (!cards.length) {
-      throw new BaseException({ status: 500, message: "Cards aren't found" });
+      throw new BaseException({ status: 500, message: "Cards aren't found." });
     }
 
     const customer = await customerRepository.findOne({ userId });
@@ -178,6 +177,7 @@ class Card {
   ): Promise<void> {
     const service = await Stripe.init();
 
+    // If card was removed from Stripe event(e.g. dashboard)
     if (isFromWebhook) {
       void Microservice.eventPublish(Event.CardRemoved, databaseEntity);
 
