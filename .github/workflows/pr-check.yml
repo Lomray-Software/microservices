@@ -39,7 +39,7 @@ jobs:
 
       - name: Commit lint
         run: |
-          npm install commitlint@18.6.0 @commitlint/config-conventional@18.5.1
+          npm install commitlint@18.6.0 @commitlint/config-conventional@18.5.0
           echo "${{ github.event.pull_request.title }}" | npx --no-install commitlint -g commitlint.config.js
 
   checks:
