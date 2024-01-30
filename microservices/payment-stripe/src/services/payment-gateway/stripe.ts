@@ -214,7 +214,7 @@ class Stripe extends Abstract {
       throw new Error('Payment options or api key or payment methods for stripe are not provided');
     }
 
-    // Used for correct init override in child
+    // Refers to the constructor. Used for correct init override in child.
     return new this(manager, apiKey, config, paymentMethods);
   }
 
