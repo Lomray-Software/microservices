@@ -169,10 +169,10 @@ interface IStripePromoCodeParams {
 }
 
 interface ICreateMultipleProductCheckout {
-  isEmbeddedMode?: boolean;
   cartId: string;
   userId: string;
   customerEmail: string;
+  isEmbeddedMode?: boolean;
 }
 
 interface ICreateMultipleProductCheckoutEmbedded extends ICreateMultipleProductCheckout {
