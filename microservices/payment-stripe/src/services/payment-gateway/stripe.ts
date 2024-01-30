@@ -590,6 +590,8 @@ class Stripe extends Abstract {
         settings: {
           payouts: {
             // eslint-disable-next-line camelcase
+            debit_negative_balances: true,
+            // eslint-disable-next-line camelcase
             schedule: { interval: 'manual' },
           },
         },
