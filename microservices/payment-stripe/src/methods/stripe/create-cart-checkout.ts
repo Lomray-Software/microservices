@@ -10,6 +10,10 @@ class CreateCartCheckoutInput {
   @IsString()
   userId: string;
 
+  @Length(1, 40)
+  @IsString()
+  customerEmail: string;
+
   @IsString()
   @ValidateIf((input) => !input.isEmbeddedMode)
   successUrl: string;
@@ -48,7 +52,15 @@ const createCartCheckout = Endpoint.custom(
     output: CreateCartCheckoutOutput,
     description: 'Setup intent and return client secret key',
   }),
-  async ({ cartId, successUrl, cancelUrl, userId, returnUrl, isEmbeddedMode = false }) => {
+  async ({
+    cartId,
+    successUrl,
+    cancelUrl,
+    userId,
+    customerEmail,
+    returnUrl,
+    isEmbeddedMode = false,
+  }) => {
     const service = await Stripe.init();
 
     return service.createCartCheckout(
@@ -58,6 +70,7 @@ const createCartCheckout = Endpoint.custom(
             cartId,
             userId,
             returnUrl,
+            customerEmail,
           }
         : {
             isEmbeddedMode,
@@ -65,6 +78,7 @@ const createCartCheckout = Endpoint.custom(
             userId,
             successUrl,
             cancelUrl,
+            customerEmail,
           },
     );
   },

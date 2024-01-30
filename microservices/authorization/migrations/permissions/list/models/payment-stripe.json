@@ -2238,6 +2238,14 @@
           "admin": "allow"
         }
       },
+      "customerEmail": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "successUrl": {
         "in": {
           "admin": "allow"
