@@ -10,7 +10,6 @@ import BalanceType from '@constants/balance-type';
 import BusinessType from '@constants/business-type';
 import CouponDuration from '@constants/coupon-duration';
 import PayoutMethod from '@constants/payout-method';
-import RefundAmountType from '@constants/refund-amount-type';
 import StripePayoutStatus from '@constants/stripe/payout-status';
 import StripePayoutType from '@constants/stripe/payout-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
@@ -94,21 +93,6 @@ interface IPaymentIntentParams {
   // Extra receiver revenue percent from application payment percent
   extraReceiverRevenuePercent?: number;
   withTax?: boolean;
-}
-
-interface IRefundParams {
-  transactionId: string;
-  refundAmountType?: RefundAmountType;
-  amount?: number;
-  /**
-   * If user don't have required amount in connect account, he must provide
-   * bank account or card id that will be used for refund charge
-   */
-  bankAccountId?: string;
-  cardId?: string;
-  entityId?: string;
-  // Abstract entity type
-  type?: string;
 }
 
 interface ICheckoutParams {
@@ -589,6 +573,8 @@ class Stripe extends Abstract {
         ...(businessType ? { business_type: businessType } : {}),
         settings: {
           payouts: {
+            // eslint-disable-next-line camelcase
+            debit_negative_balances: true,
             // eslint-disable-next-line camelcase
             schedule: { interval: 'manual' },
           },
@@ -1347,80 +1333,6 @@ class Stripe extends Abstract {
     });
 
     return transactions;
-  }
-
-  /**
-   * Refund transaction (payment intent)
-   * @description Workflow:
-   * Sender payed 106.39$: 100$ - entity cost, 3.39$ - stripe fees, 3$ - platform application fee.
-   * In the end of refund sender will receive 100$ and platform revenue will be 3$.
-   */
-  public async refund({
-    transactionId,
-    amount,
-    entityId,
-    refundAmountType = RefundAmountType.REVENUE,
-    type,
-  }: IRefundParams): Promise<boolean> {
-    const debitTransaction = await this.transactionRepository.findOne({
-      transactionId,
-      type: TransactionType.DEBIT,
-    });
-
-    if (!debitTransaction) {
-      throw new BaseException({
-        status: 400,
-        message: messages.getNotFoundMessage('Transaction'),
-      });
-    }
-
-    if (!debitTransaction.chargeId) {
-      throw new BaseException({
-        status: 400,
-        message: "Transaction don't have related transfer id and can't be refunded.",
-      });
-    }
-
-    let amountUnit: number | undefined;
-
-    if (amount) {
-      amountUnit = this.toSmallestCurrencyUnit(amount);
-    } else if (refundAmountType === RefundAmountType.REVENUE) {
-      amountUnit = debitTransaction.amount;
-    } else {
-      amountUnit =
-        // Paid entity cost - already refunded amount
-        (debitTransaction.params.entityCost ?? 0) -
-        (debitTransaction.params.refundedTransactionAmount || 0);
-    }
-
-    if (!amountUnit) {
-      throw new BaseException({
-        status: 500,
-        message: 'Failed to refund transaction. Invalid refund amount.',
-      });
-    }
-
-    /**
-     * Returns refunds from platform (application) account to sender
-     */
-    /* eslint-disable camelcase */
-    await this.sdk.refunds.create({
-      charge: debitTransaction.chargeId,
-      // From receiver connected account funds will be transferred to Platform, then refund
-      reverse_transfer: true,
-      // Refund collected application fee, if - not: rest refund amount will be charged from receiver connected account
-      refund_application_fee: false,
-      amount: amountUnit,
-      metadata: {
-        ...(entityId ? { entityId } : {}),
-        ...(refundAmountType ? { refundAmountType } : {}),
-        ...(type ? { type } : {}),
-      },
-    });
-
-    /* eslint-enable camelcase */
-    return true;
   }
 
   /**

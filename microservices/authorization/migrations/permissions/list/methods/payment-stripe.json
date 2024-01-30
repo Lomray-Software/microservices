@@ -537,20 +537,6 @@
   },
   {
     "microservice": "payment-stripe",
-    "method": "stripe.refund",
-    "description": "Create transaction refund",
-    "allowGroup": [
-      "admin"
-    ],
-    "denyGroup": [],
-    "createdAt": "2023-05-26T15:12:57.976Z",
-    "modelIn": "payment-stripe.RefundInput",
-    "modelOut": "payment-stripe.RefundOutput",
-    "condition": "Payment-stripe: refund",
-    "methodFilters": []
-  },
-  {
-    "microservice": "payment-stripe",
     "method": "card.view",
     "description": "Returns Card by given condition",
     "allowGroup": [
