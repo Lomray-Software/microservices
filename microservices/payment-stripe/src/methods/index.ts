@@ -31,7 +31,6 @@ import DashboardLoginLink from '@methods/stripe/dashboard-login-link';
 import InstantPayout from '@methods/stripe/instant-payout';
 import PaymentIntentFees from '@methods/stripe/payment-intent-fees';
 import Payout from '@methods/stripe/payout';
-import Refund from '@methods/stripe/refund';
 import SetupIntent from '@methods/stripe/setup-intent';
 import WebhookHandler from '@methods/stripe/webhook';
 import CrudTransaction from '@methods/transaction/crud';
@@ -71,7 +70,6 @@ export default (ms: Microservice): void => {
       'dashboard-login-link': DashboardLoginLink,
       webhook: WebhookHandler,
       payout: Payout,
-      refund: Refund,
       balance: Balance,
     },
     product: {
