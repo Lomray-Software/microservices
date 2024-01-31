@@ -10,10 +10,6 @@ class CreateCartCheckoutInput {
   @IsString()
   userId: string;
 
-  @Length(1, 40)
-  @IsString()
-  customerEmail: string;
-
   @IsString()
   @ValidateIf((input) => !input.isEmbeddedMode)
   successUrl: string;
@@ -27,6 +23,11 @@ class CreateCartCheckoutInput {
   @IsNullable()
   @ValidateIf((input) => input.isEmbeddedMode)
   returnUrl: string | null;
+
+  @Length(1, 40)
+  @IsString()
+  @IsUndefinable()
+  customerEmail?: string;
 
   @IsBoolean()
   @IsUndefinable()

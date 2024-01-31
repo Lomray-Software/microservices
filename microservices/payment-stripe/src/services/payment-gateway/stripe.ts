@@ -171,7 +171,7 @@ interface IStripePromoCodeParams {
 interface ICreateMultipleProductCheckout {
   cartId: string;
   userId: string;
-  customerEmail: string;
+  customerEmail?: string;
   isEmbeddedMode?: boolean;
 }
 
