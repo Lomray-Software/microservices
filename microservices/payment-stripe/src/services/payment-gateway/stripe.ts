@@ -10,6 +10,7 @@ import BalanceType from '@constants/balance-type';
 import BusinessType from '@constants/business-type';
 import CouponDuration from '@constants/coupon-duration';
 import PayoutMethod from '@constants/payout-method';
+import PayoutMethodType from '@constants/payout-method-type';
 import StripePayoutStatus from '@constants/stripe/payout-status';
 import StripePayoutType from '@constants/stripe/payout-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
@@ -60,11 +61,6 @@ export type TAvailablePaymentMethods =
   | StripeSdk.Card.AvailablePayoutMethod[]
   | StripeSdk.BankAccount.AvailablePayoutMethod[]
   | null;
-
-export enum PayoutMethodType {
-  CARD = 'card',
-  BANK_ACCOUNT = 'bankAccount',
-}
 
 export type TCustomerBalance = Record<BalanceType, TBalance>;
 
@@ -611,7 +607,7 @@ class Stripe extends Abstract {
     if (!customer.params.accountId) {
       throw new BaseException({
         status: 400,
-        message: "Customer don't have setup connect account",
+        message: "Customer don't have setup connect account.",
       });
     }
 
@@ -646,7 +642,7 @@ class Stripe extends Abstract {
     if (!customer.params.accountId) {
       throw new BaseException({
         status: 400,
-        message: "Customer don't have setup connect account",
+        message: "Customer don't have setup connect account.",
       });
     }
 
