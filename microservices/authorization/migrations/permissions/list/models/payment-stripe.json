@@ -2224,7 +2224,7 @@
     "schema": {
       "cartId": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
           "admin": "allow"
@@ -2232,7 +2232,15 @@
       },
       "userId": {
         "in": {
+          "user": "allow"
+        },
+        "out": {
           "admin": "allow"
+        }
+      },
+      "customerEmail": {
+        "in": {
+          "user": "allow"
         },
         "out": {
           "admin": "allow"
@@ -2240,7 +2248,7 @@
       },
       "successUrl": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
           "admin": "allow"
@@ -2248,7 +2256,7 @@
       },
       "cancelUrl": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
           "admin": "allow"
@@ -2256,7 +2264,7 @@
       },
       "returnUrl": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
           "admin": "allow"
@@ -2264,7 +2272,7 @@
       },
       "isEmbeddedMode": {
         "in": {
-          "admin": "allow"
+          "user": "allow"
         },
         "out": {
           "admin": "allow"

@@ -169,9 +169,10 @@ interface IStripePromoCodeParams {
 }
 
 interface ICreateMultipleProductCheckout {
-  isEmbeddedMode?: boolean;
   cartId: string;
   userId: string;
+  customerEmail?: string;
+  isEmbeddedMode?: boolean;
 }
 
 interface ICreateMultipleProductCheckoutEmbedded extends ICreateMultipleProductCheckout {
@@ -471,7 +472,7 @@ class Stripe extends Abstract {
   public async createCartCheckout(
     params: TCreateMultipleProductCheckoutParams,
   ): Promise<ICheckoutCart | null> {
-    const { cartId, userId, isEmbeddedMode } = params;
+    const { cartId, userId, isEmbeddedMode, customerEmail } = params;
     const { customerId } = await super.getCustomer(userId);
 
     const cart = await this.cartRepository.findOne(
@@ -496,6 +497,7 @@ class Stripe extends Abstract {
     let checkoutParams: Omit<StripeSdk.Checkout.SessionCreateParams, 'success_url'> & {
       success_url?: string;
     } = {
+      customer_email: customerEmail,
       line_items: lineItems,
       mode: 'payment',
       customer: customerId,
