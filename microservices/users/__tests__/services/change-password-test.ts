@@ -2,7 +2,9 @@ import { TypeormMock } from '@lomray/microservice-helpers/mocks';
 import { waitResult } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import sinon from 'sinon';
+import * as remoteConfig from '@config/remote';
 import User from '@entities/user';
+import TClearUserTokens from '@interfaces/clear-user-tokens';
 import UserRepository from '@repositories/user';
 import ChangePassword from '@services/change-password';
 
@@ -83,6 +85,7 @@ describe('services/change-password', () => {
         userId,
         repository,
       });
+
       // Private method
       // @ts-ignore
       const handleClearUserTokensStub = sandbox.stub(service, 'handleClearUserTokens');
@@ -97,6 +100,40 @@ describe('services/change-password', () => {
       expect(repository.isValidPassword(user as User, newPassword)).to.true;
       expect(handleClearUserTokensStub).to.calledOnce;
       expect(argUserId).to.equal(userId);
+    });
+  });
+
+  describe('handleClearUserTokens', () => {
+    it('should stop validation: type is undefined or none', async () => {
+      for (const type of [undefined, 'none']) {
+        const service = ChangePassword.init({
+          userId,
+          repository,
+          clearTokensType: type as TClearUserTokens,
+        });
+
+        await service['handleClearUserTokens'](userId);
+      }
+    });
+
+    it('should stop validation: type is undefined or none', async () => {
+      for (const type of [undefined, 'none']) {
+        const service = ChangePassword.init({
+          userId,
+          repository,
+        });
+
+        const remoteConfigStub = sinon.stub().resolves({
+          changePasswordClearTokensType: type,
+        });
+
+        // @ts-ignore
+        sinon.replace(remoteConfig, 'default', remoteConfigStub);
+
+        await service['handleClearUserTokens'](userId);
+
+        sinon.restore();
+      }
     });
   });
 });
