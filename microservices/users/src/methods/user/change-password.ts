@@ -3,9 +3,9 @@ import { IsBoolean, IsEnum, IsNotEmpty, IsString, ValidateIf } from 'class-valid
 import { getCustomRepository, getRepository } from 'typeorm';
 import ConfirmCode from '@entities/confirm-code';
 import User from '@entities/user';
+import type TClearUserTokens from '@interfaces/clear-user-tokens';
 import UserRepository from '@repositories/user';
 import ChangePassword from '@services/change-password';
-import type { TClearUserTokens } from '@services/change-password';
 import { Factory, ConfirmBy } from '@services/confirm/factory';
 
 class ChangePasswordInput {

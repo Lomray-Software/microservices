@@ -15,6 +15,8 @@ const constants = {
   }),
   MS_USER_PASSWORD_SALT_ROUNDS: Number(process.env.MS_USER_PASSWORD_SALT_ROUNDS) || 10,
   MS_USER_REMOVE_ACCOUNT_RESTORE_TIME: Number(process.env.MS_USER_REMOVE_ACCOUNT_RESTORE_TIME) || 0,
+  MS_USER_CHANGE_PASSWORD_CLEAR_TOKENS_TYPE:
+    process.env.MS_USER_CHANGE_PASSWORD_CLEAR_TOKENS_TYPE || 'none',
 };
 
 export default constants;

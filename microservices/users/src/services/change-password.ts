@@ -1,10 +1,10 @@
 import { EntityColumns } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
+import remoteConfig from '@config/remote';
 import User from '@entities/user';
+import type TClearUserTokens from '@interfaces/clear-user-tokens';
 import UserRepository from '@repositories/user';
 import { ConfirmBy } from '@services/confirm/factory';
-
-export type TClearUserTokens = 'all' | 'rest';
 
 export type ChangePasswordParams = {
   userId?: string;
@@ -131,11 +131,16 @@ class ChangePassword {
    * Handle clear user tokens
    */
   private async handleClearUserTokens(userId: string): Promise<void> {
-    if (!this.clearTokensType) {
+    // Check default clear tokens type
+    const { changePasswordClearTokensType } = await remoteConfig();
+
+    const type = this.clearTokensType || changePasswordClearTokensType;
+
+    if (!type || type === 'none') {
       return;
     }
 
-    if (this.clearTokensType === 'all') {
+    if (type === 'all') {
       await this.repository.clearUserTokens(userId);
 
       return;
