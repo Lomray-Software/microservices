@@ -118,16 +118,20 @@ class User extends Repository<UserEntity> {
       query,
     });
 
-    if (countError || !countResult) {
-      Log.error(countError?.message);
+    if (countError) {
+      Log.error(countError.message);
 
       throw new BaseException({
         status: 500,
         message: 'Failed to clear rest user tokens.',
+        payload: {
+          userId,
+          currentToken: tokenId,
+        },
       });
     }
 
-    const { count: tokensCount } = countResult;
+    const { count: tokensCount } = countResult || {};
 
     if (!tokensCount) {
       return;
@@ -155,6 +159,10 @@ class User extends Repository<UserEntity> {
     throw new BaseException({
       status: 500,
       message: 'Failed to remove user tokens.',
+      payload: {
+        userId,
+        currentToken: tokenId,
+      },
     });
   }
 }
