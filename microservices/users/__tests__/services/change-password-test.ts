@@ -176,16 +176,16 @@ describe('services/change-password', () => {
       expect(argToken).to.equal(token);
     });
 
-    it('should throw error: rest clear without token', async () => {
+    it('should skip rest tokens clean up: current token not passed', async () => {
       const service = ChangePassword.init({
         userId,
         repository,
         clearTokensType: 'rest',
       });
 
-      expect(await waitResult(service['handleClearUserTokens'](userId))).to.throw(
-        'Failed to clear rest user tokens. Current user token was not found.',
-      );
+      await service['handleClearUserTokens'](userId);
+
+      expect(clearUserTokensStub).to.not.called;
     });
   });
 });

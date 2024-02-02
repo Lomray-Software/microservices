@@ -148,10 +148,7 @@ class ChangePassword {
 
     // Clear tokens type - REST. Keep only current
     if (!this.currentToken) {
-      throw new BaseException({
-        status: 500,
-        message: 'Failed to clear rest user tokens. Current user token was not found.',
-      });
+      return;
     }
 
     await this.repository.clearUserTokens(userId, this.currentToken);
