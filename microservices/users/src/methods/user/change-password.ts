@@ -5,6 +5,7 @@ import ConfirmCode from '@entities/confirm-code';
 import User from '@entities/user';
 import UserRepository from '@repositories/user';
 import ChangePassword from '@services/change-password';
+import type { TClearUserTokens } from '@services/change-password';
 import { Factory, ConfirmBy } from '@services/confirm/factory';
 
 class ChangePasswordInput {
@@ -39,6 +40,10 @@ class ChangePasswordInput {
   @IsBoolean()
   @IsUndefinable()
   allowByAdmin?: boolean;
+
+  @IsString()
+  @IsUndefinable()
+  clearTokensType?: TClearUserTokens;
 }
 
 class ChangePasswordOutput {
@@ -55,7 +60,17 @@ const changePassword = Endpoint.custom(
     output: ChangePasswordOutput,
     description: 'Change user password',
   }),
-  async ({ userId, login, newPassword, oldPassword, confirmBy, confirmCode, allowByAdmin }) => {
+  async ({
+    userId,
+    login,
+    newPassword,
+    oldPassword,
+    confirmBy,
+    confirmCode,
+    allowByAdmin,
+    clearTokensType,
+    payload,
+  }) => {
     const service = ChangePassword.init({
       userId,
       confirmBy,
@@ -68,6 +83,8 @@ const changePassword = Endpoint.custom(
           )) ||
         allowByAdmin,
       repository: getCustomRepository(UserRepository),
+      clearTokensType,
+      currentToken: payload?.authentication?.tokenId,
     });
 
     return {

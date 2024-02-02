@@ -4,12 +4,16 @@ import User from '@entities/user';
 import UserRepository from '@repositories/user';
 import { ConfirmBy } from '@services/confirm/factory';
 
+export type TClearUserTokens = 'all' | 'rest';
+
 export type ChangePasswordParams = {
   userId?: string;
   login?: string;
   confirmBy?: ConfirmBy;
   repository: UserRepository;
   isConfirmed?: (user: User) => Promise<boolean> | boolean | undefined;
+  currentToken?: string;
+  clearTokensType?: TClearUserTokens;
 };
 
 /**
@@ -25,6 +29,16 @@ class ChangePassword {
    * @protected
    */
   protected readonly login?: string;
+
+  /**
+   * @protected
+   */
+  protected readonly currentToken?: string;
+
+  /**
+   * @protected
+   */
+  protected readonly clearTokensType?: TClearUserTokens;
 
   /**
    * @protected
@@ -50,18 +64,22 @@ class ChangePassword {
     confirmBy,
     repository,
     isConfirmed,
+    currentToken,
+    clearTokensType,
   }: ChangePasswordParams) {
     this.userId = userId;
     this.login = login;
     this.confirmBy = confirmBy;
     this.isConfirmed = isConfirmed;
     this.repository = repository;
+    this.currentToken = currentToken;
+    this.clearTokensType = clearTokensType;
   }
 
   /**
    * Init service
    */
-  static init(params: ChangePasswordParams): ChangePassword {
+  public static init(params: ChangePasswordParams): ChangePassword {
     return new ChangePassword(params);
   }
 
@@ -104,9 +122,34 @@ class ChangePassword {
 
     user.password = newPassword;
 
-    await this.repository.encryptPassword(user);
+    await Promise.all([this.repository.encryptPassword(user), this.handleClearUserTokens(user.id)]);
 
     return this.repository.save(user);
+  }
+
+  /**
+   * Handle clear user tokens
+   */
+  private async handleClearUserTokens(userId: string): Promise<void> {
+    if (!this.clearTokensType) {
+      return;
+    }
+
+    if (this.clearTokensType === 'all') {
+      await this.repository.clearUserTokens(userId);
+
+      return;
+    }
+
+    // Clear tokens type - REST. Keep only current
+    if (!this.currentToken) {
+      throw new BaseException({
+        status: 500,
+        message: 'Failed to clear rest user tokens. Current user token was not found.',
+      });
+    }
+
+    await this.repository.clearUserTokens(userId, this.currentToken);
   }
 }
 

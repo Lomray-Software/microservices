@@ -1,3 +1,4 @@
+import { Api, Log } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import bcrypt from 'bcrypt';
 import { EntityRepository, Repository } from 'typeorm';
@@ -97,6 +98,63 @@ class User extends Repository<UserEntity> {
       code: ExceptionCode.ACCOUNT_REMOVED,
       message: 'Account was removed.',
       status: 403,
+    });
+  }
+
+  /**
+   * Clear  user tokens
+   * @description If token passed - clear rest user tokens
+   * If token not passed - clear all user tokens
+   */
+  public async clearUserTokens(userId: string, tokenId?: string): Promise<void> {
+    const query = {
+      where: {
+        userId,
+        ...(tokenId ? { id: tokenId } : {}),
+      },
+    };
+
+    const { error: countError, result: countResult } = await Api.get().authentication.token.count({
+      query,
+    });
+
+    if (countError || !countResult) {
+      Log.error(countError?.message);
+
+      throw new BaseException({
+        status: 500,
+        message: 'Failed to clear rest user tokens.',
+      });
+    }
+
+    const { count: tokensCount } = countResult;
+
+    if (!tokensCount) {
+      return;
+    }
+
+    const { error } = await Api.get().authentication.token.remove({
+      query,
+      payload: {
+        authorization: {
+          filter: {
+            methodOptions: {
+              isAllowMultiple: true,
+            },
+          },
+        },
+      },
+    });
+
+    if (!error) {
+      return;
+    }
+
+    Log.error(error.message);
+
+    throw new BaseException({
+      status: 500,
+      message: 'Failed to remove user tokens.',
     });
   }
 }
