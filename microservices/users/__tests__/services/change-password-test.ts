@@ -11,6 +11,7 @@ import ChangePassword from '@services/change-password';
 describe('services/change-password', () => {
   const sandbox = sinon.createSandbox();
   const repository = TypeormMock.entityManager.getCustomRepository(UserRepository);
+  let clearUserTokensStub: sinon.SinonStub;
   const userId = 'user-id';
   const newPassword = 'new-password';
   const oldPassword = 'old-password';
@@ -25,11 +26,12 @@ describe('services/change-password', () => {
   });
 
   beforeEach(() => {
+    clearUserTokensStub = sandbox.stub(repository, 'clearUserTokens');
     TypeormMock.sandbox.reset();
   });
 
   afterEach(() => {
-    sandbox.reset();
+    sandbox.restore();
   });
 
   describe('change', () => {
@@ -113,6 +115,8 @@ describe('services/change-password', () => {
         });
 
         await service['handleClearUserTokens'](userId);
+
+        expect(clearUserTokensStub).to.not.called;
       }
     });
 
@@ -132,8 +136,56 @@ describe('services/change-password', () => {
 
         await service['handleClearUserTokens'](userId);
 
+        expect(clearUserTokensStub).to.not.called;
+
         sinon.restore();
       }
+    });
+
+    it('should call clear all user tokens: with user id', async () => {
+      const service = ChangePassword.init({
+        userId,
+        repository,
+        clearTokensType: 'all',
+      });
+
+      await service['handleClearUserTokens'](userId);
+
+      const [argUserId] = clearUserTokensStub.firstCall.args;
+
+      expect(clearUserTokensStub).to.calledOnce;
+      expect(argUserId).to.equal(userId);
+    });
+
+    it('should call clear rest user tokens: with user id', async () => {
+      const token = 'token-id';
+
+      const service = ChangePassword.init({
+        userId,
+        repository,
+        clearTokensType: 'rest',
+        currentToken: token,
+      });
+
+      await service['handleClearUserTokens'](userId);
+
+      const [argUserId, argToken] = clearUserTokensStub.firstCall.args;
+
+      expect(clearUserTokensStub).to.calledOnce;
+      expect(argUserId).to.equal(userId);
+      expect(argToken).to.equal(token);
+    });
+
+    it('should throw error: rest clear without token', async () => {
+      const service = ChangePassword.init({
+        userId,
+        repository,
+        clearTokensType: 'rest',
+      });
+
+      expect(await waitResult(service['handleClearUserTokens'](userId))).to.throw(
+        'Failed to clear rest user tokens. Current user token was not found.',
+      );
     });
   });
 });
