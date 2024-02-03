@@ -125,8 +125,7 @@ class User extends Repository<UserEntity> {
         status: 500,
         message: 'Failed to clear rest user tokens.',
         payload: {
-          userId,
-          currentToken: tokenId,
+          message: countError.message,
         },
       });
     }
@@ -160,8 +159,7 @@ class User extends Repository<UserEntity> {
       status: 500,
       message: 'Failed to remove user tokens.',
       payload: {
-        userId,
-        currentToken: tokenId,
+        message: error.message,
       },
     });
   }
