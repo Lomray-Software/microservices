@@ -103,8 +103,9 @@ class User extends Repository<UserEntity> {
 
   /**
    * Clear  user tokens
-   * @description If token passed - clear rest user tokens
-   * If token not passed - clear all user tokens
+   * @description Use cases:
+   * 1. If token passed - clear rest user tokens
+   * 2. If token not passed - clear all user tokens
    */
   public async clearUserTokens(userId: string, tokenId?: string): Promise<void> {
     const query = {
@@ -130,13 +131,12 @@ class User extends Repository<UserEntity> {
       });
     }
 
-    const { count: tokensCount } = countResult || {};
-
-    if (!tokensCount) {
+    // If tokens do not exist
+    if (!countResult?.count) {
       return;
     }
 
-    const { error } = await Api.get().authentication.token.remove({
+    const { error: tokenRemoveError } = await Api.get().authentication.token.remove({
       query,
       payload: {
         authorization: {
@@ -149,17 +149,17 @@ class User extends Repository<UserEntity> {
       },
     });
 
-    if (!error) {
+    if (!tokenRemoveError) {
       return;
     }
 
-    Log.error(error.message);
+    Log.error(tokenRemoveError.message);
 
     throw new BaseException({
       status: 500,
       message: 'Failed to remove user tokens.',
       payload: {
-        message: error.message,
+        message: tokenRemoveError.message,
       },
     });
   }
