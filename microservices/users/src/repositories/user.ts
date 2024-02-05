@@ -115,6 +115,7 @@ class User extends Repository<UserEntity> {
       },
     };
 
+    // Check if user have any else tokens
     const { error: countError, result: countResult } = await Api.get().authentication.token.count({
       query,
     });
