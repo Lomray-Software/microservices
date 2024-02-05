@@ -59,6 +59,7 @@ describe('repositories/user', () => {
       sandbox.stub(Api.get().authentication.token, 'count').resolves({
         error: apiErrorMock,
       });
+
       expect(await waitResult(repository.clearUserTokens('user-id'))).to.throw(
         'Failed to clear rest user tokens.',
       );
@@ -68,6 +69,7 @@ describe('repositories/user', () => {
       sandbox.stub(Api.get().authentication.token, 'count').resolves({
         error: apiErrorMock,
       });
+
       expect(await waitResult(repository.clearUserTokens('user-id', 'token-id'))).to.throw(
         'Failed to clear rest user tokens.',
       );
