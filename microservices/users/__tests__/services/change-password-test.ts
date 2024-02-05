@@ -34,6 +34,17 @@ describe('services/change-password', () => {
     sandbox.restore();
   });
 
+  describe('init', () => {
+    it('should correctly build service', () => {
+      expect(
+        ChangePassword.init({
+          userId,
+          repository,
+        }),
+      ).to.instanceof(ChangePassword);
+    });
+  });
+
   describe('change', () => {
     it('should throw error: user not found', async () => {
       const service = ChangePassword.init({
