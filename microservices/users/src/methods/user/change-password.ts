@@ -1,5 +1,6 @@
 import { Endpoint, IsType, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsBoolean, IsEnum, IsNotEmpty, IsString, ValidateIf } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
 import { getCustomRepository, getRepository } from 'typeorm';
 import ConfirmCode from '@entities/confirm-code';
 import User from '@entities/user';
@@ -23,18 +24,28 @@ class ChangePasswordInput {
   @IsNotEmpty()
   newPassword: string;
 
+  @JSONSchema({
+    description: 'Skip if change password has allowed by admin',
+  })
   @IsString()
   @IsNotEmpty()
-  @ValidateIf(({ confirmCode, oldPassword }) => !confirmCode || oldPassword)
+  @ValidateIf(
+    ({ confirmCode, oldPassword, allowByAdmin }) => !allowByAdmin && (!confirmCode || oldPassword),
+  )
   oldPassword?: string;
 
   @IsEnum(ConfirmBy)
   @ValidateIf(({ confirmCode }) => confirmCode)
   confirmBy?: ConfirmBy;
 
+  @JSONSchema({
+    description: 'Skip if change password has allowed by admin',
+  })
   @IsType(['string', 'number'])
   @IsNotEmpty()
-  @ValidateIf(({ confirmCode, oldPassword }) => !oldPassword || confirmCode)
+  @ValidateIf(
+    ({ confirmCode, oldPassword, allowByAdmin }) => !allowByAdmin && (!oldPassword || confirmCode),
+  )
   confirmCode?: string | number;
 
   @IsBoolean()
