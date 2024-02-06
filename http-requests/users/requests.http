@@ -39,3 +39,21 @@ Authorization: Bearer admintokenooooooooooooooooooooon
   }
 }
 
+### Change user password as an user
+POST http://127.0.0.1:3000
+Accept: application/json
+Content-Type: application/json
+## Admin token
+Authorization: Bearer usertokenooooooooooooooooooooooo
+
+{
+  "id": "1",
+  "method": "users.user.change-password",
+  "params": {
+    "userId": "d7275b35-5f67-4f7c-bb58-731cddbcb93f",
+    "newPassword": "123456789!A",
+    "oldPassword": "Dasha.123",
+    "confirmCode": "405799",
+    "confirmBy": "email"
+  }
+}
