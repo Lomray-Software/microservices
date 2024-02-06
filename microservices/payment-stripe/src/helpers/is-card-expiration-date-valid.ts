@@ -1,7 +1,7 @@
 /**
  * Check if card expiration date valid
  */
-const isCardExpirationDateValid = (date: string) => {
+const isCardExpirationDateValid = (date: string): boolean => {
   const currentDate = new Date();
   const [expirationMonth, expirationYear] = date.split('/');
 
@@ -11,7 +11,7 @@ const isCardExpirationDateValid = (date: string) => {
 
   const expirationDate = new Date(
     getExpirationYear(expirationYear, currentDate),
-    Number(expirationMonth) - 1,
+    Number(expirationMonth),
     1,
   );
 
