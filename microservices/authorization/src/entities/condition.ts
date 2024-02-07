@@ -30,10 +30,11 @@ class Condition {
   title: string;
 
   @JSONSchema({
-    description: 'Condition workflow description',
+    description: 'Condition validation description',
+    example: 'Validate if entity related to the user',
   })
-  @Column({ type: 'varchar', length: 255, default: '' })
-  @Length(3, 255)
+  @Column({ type: 'varchar', length: 1000, default: '' })
+  @Length(3, 1000)
   @IsUndefinable()
   description: string;
 
