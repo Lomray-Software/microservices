@@ -727,6 +727,14 @@
           "admin": "allow"
         }
       },
+      "clearTokensType": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "oldPassword": {
         "in": {
           "user": "allow",

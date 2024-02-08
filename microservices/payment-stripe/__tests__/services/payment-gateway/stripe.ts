@@ -4,6 +4,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import StripeSdk, { Stripe as StripeTypes } from 'stripe';
 import { cardMock } from '@__mocks__/card';
+import { configMock } from '@__mocks__/config';
 import messages from '@__mocks__/messages';
 import {
   accountLinkMock,
@@ -13,6 +14,7 @@ import {
   customerMock,
   paymentMethodId,
 } from '@__mocks__/stripe';
+import * as remoteConfig from '@config/remote';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import TransactionRole from '@constants/transaction-role';
 import OriginalStripe from '@services/payment-gateway/stripe';
@@ -26,6 +28,14 @@ describe('services/payment-gateway/stripe', () => {
   const sandbox = sinon.createSandbox();
   const config: StripeTypes.StripeConfig = {
     apiVersion: '2022-11-15',
+  };
+  const remoteConfigMock = {
+    config: {
+      apiVersion: '2022-11-15',
+    },
+    paymentMethods: ['bancontact', 'card'],
+    apiKey: 'fake-api-key',
+    ...configMock,
   };
   const accountUrlMock = 'https://mike.com/account';
   const userMock = {
@@ -83,6 +93,39 @@ describe('services/payment-gateway/stripe', () => {
 
   afterEach(() => {
     sandbox.restore();
+  });
+
+  describe('init', () => {
+    it('should create a Stripe instance with the provided parameters', async () => {
+      const remoteConfigStub = sandbox.stub().resolves(remoteConfigMock);
+
+      sinon.replace(remoteConfig, 'default', remoteConfigStub);
+
+      const stripeInstance = await OriginalStripe.init(TypeormMock.entityManager);
+
+      sinon.restore();
+      expect(stripeInstance).to.be.an.instanceOf(OriginalStripe);
+    });
+
+    it('should throw error: invalid payment options or api key or payment methods', async () => {
+      const configs = [
+        {},
+        { apikey: remoteConfigMock.apiKey },
+        { config: remoteConfigMock.config },
+        { paymentMethods: remoteConfigMock.paymentMethods },
+      ];
+
+      for (const conf of configs) {
+        const remoteConfigStub = sandbox.stub().resolves(conf);
+
+        sinon.replace(remoteConfig, 'default', remoteConfigStub);
+        sinon.restore();
+
+        expect(await waitResult(OriginalStripe.init(TypeormMock.entityManager))).to.throw(
+          'Payment options or api key or payment methods for stripe are not provided',
+        );
+      }
+    });
   });
 
   describe('core', () => {

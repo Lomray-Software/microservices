@@ -30,6 +30,15 @@ class Condition {
   title: string;
 
   @JSONSchema({
+    description: 'Condition validation description',
+    example: 'Validate if entity related to the user',
+  })
+  @Column({ type: 'varchar', length: 1000, default: '' })
+  @Length(3, 1000)
+  @IsUndefinable()
+  description: string;
+
+  @JSONSchema({
     description: 'JSON condition for check access to methods',
   })
   @Column({ type: 'json', default: {} })

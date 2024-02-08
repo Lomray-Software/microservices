@@ -1,7 +1,7 @@
 import { BaseException } from '@lomray/microservice-nodejs-lib';
 import { EntitySubscriberInterface, EventSubscriber, RemoveEvent } from 'typeorm';
 import CouponEntity from '@entities/coupon';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 /**
  * Coupon subscriber
@@ -23,7 +23,7 @@ class Coupon implements EntitySubscriberInterface<CouponEntity> {
       return;
     }
 
-    const service = await Factory.create(manager);
+    const service = await Stripe.init(manager);
     const isDeleted = await service.removeCoupon(entity.couponId);
 
     if (!isDeleted) {

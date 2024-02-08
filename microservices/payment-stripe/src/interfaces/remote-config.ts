@@ -1,5 +1,6 @@
 import type { Stripe } from 'stripe';
 import type IFees from '@interfaces/fees';
+import type IPayout from '@interfaces/payout';
 import type ITaxes from '@interfaces/taxes';
 
 export type TSetupIntentUsage = 'off_session' | 'on_session';
@@ -12,6 +13,7 @@ export type TDuplicatedCarsUsage = 'support' | 'reject';
 export interface IRemoteConfig {
   duplicatedCardsUsage: TDuplicatedCarsUsage;
   setupIntentUsage: TSetupIntentUsage;
+  payout?: IPayout;
   webhookKeys?: {
     [id: string]: string; // id (unique key) - secret (webhook Signing secret)
   };

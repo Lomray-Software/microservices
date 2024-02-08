@@ -1,6 +1,7 @@
 [
   {
     "title": "Get list with query condition",
+    "description": "Query where should not be empty. Check at least request where id existence",
     "conditions": {
       "or": [
         {
@@ -15,6 +16,7 @@
   },
   {
     "title": "Get list with not empty query.where",
+    "description": "Query where should not be empty",
     "conditions": {
       "or": [
         {
@@ -29,6 +31,7 @@
   },
   {
     "title": "Check if file and related entity belong to a user",
+    "description": "Verify whether the file and its associated entity pertain to a specific user",
     "conditions": {
       "or": [
         {
@@ -84,6 +87,7 @@
   },
   {
     "title": "Remove or update only user-owned entity",
+    "description": "Delete or modify exclusively the entities owned by the user",
     "conditions": {
       "or": [
         {
@@ -111,6 +115,7 @@
   },
   {
     "title": "Fields: user owner",
+    "description": "Check if requested data related to the user",
     "conditions": {
       "or": [
         {
@@ -125,6 +130,7 @@
   },
   {
     "title": "Fields: user entity owner",
+    "description": "Check if requested data is the user",
     "conditions": {
       "or": [
         {
@@ -142,6 +148,7 @@
   },
   {
     "title": "Payment-stripe: if exist in customers and myself",
+    "description": "Check is user exist in customers and this user requesting data about himself",
     "conditions": {
       "or": [
         {
@@ -161,33 +168,6 @@
             }
           },
           "template": "<%= !_.isEmpty(_.get(customer, 'entity')) && _.get(reqParams, 'userId') === _.get(payload, 'authentication.userId') %>"
-        }
-      ]
-    },
-    "createdAt": "2022-06-20T09:41:44.183Z"
-  },
-  {
-    "title": "Payment-stripe: refund",
-    "conditions": {
-      "or": [
-        {
-          "template": "<%= _.includes(roles, 'admin') %>"
-        },
-        {
-          "requests": {
-            "transaction": {
-              "method": "payment-stripe.transaction.view",
-              "params": {
-                "query": {
-                  "where": {
-                    "transactionId": "<%= _.get(reqParams, 'transactionId') %>",
-                    "type": "debit"
-                  }
-                }
-              }
-            }
-          },
-          "template": "<%= _.get(transaction, 'entity.userId') === _.get(payload, 'authentication.userId') && _.get(transaction, 'entity.status') === 'success' %>"
         }
       ]
     },

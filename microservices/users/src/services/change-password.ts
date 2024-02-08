@@ -1,6 +1,8 @@
 import { EntityColumns } from '@lomray/microservice-helpers';
 import { BaseException } from '@lomray/microservice-nodejs-lib';
+import remoteConfig from '@config/remote';
 import User from '@entities/user';
+import type TClearUserTokens from '@interfaces/clear-user-tokens';
 import UserRepository from '@repositories/user';
 import { ConfirmBy } from '@services/confirm/factory';
 
@@ -10,6 +12,8 @@ export type ChangePasswordParams = {
   confirmBy?: ConfirmBy;
   repository: UserRepository;
   isConfirmed?: (user: User) => Promise<boolean> | boolean | undefined;
+  currentToken?: string;
+  clearTokensType?: TClearUserTokens;
 };
 
 /**
@@ -25,6 +29,16 @@ class ChangePassword {
    * @protected
    */
   protected readonly login?: string;
+
+  /**
+   * @protected
+   */
+  protected readonly currentToken?: string;
+
+  /**
+   * @protected
+   */
+  protected readonly clearTokensType?: TClearUserTokens;
 
   /**
    * @protected
@@ -50,18 +64,22 @@ class ChangePassword {
     confirmBy,
     repository,
     isConfirmed,
+    currentToken,
+    clearTokensType,
   }: ChangePasswordParams) {
     this.userId = userId;
     this.login = login;
     this.confirmBy = confirmBy;
     this.isConfirmed = isConfirmed;
     this.repository = repository;
+    this.currentToken = currentToken;
+    this.clearTokensType = clearTokensType;
   }
 
   /**
    * Init service
    */
-  static init(params: ChangePasswordParams): ChangePassword {
+  public static init(params: ChangePasswordParams): ChangePassword {
     return new ChangePassword(params);
   }
 
@@ -104,9 +122,36 @@ class ChangePassword {
 
     user.password = newPassword;
 
-    await this.repository.encryptPassword(user);
+    await Promise.all([this.repository.encryptPassword(user), this.handleClearUserTokens(user.id)]);
 
     return this.repository.save(user);
+  }
+
+  /**
+   * Handle clear user tokens
+   */
+  private async handleClearUserTokens(userId: string): Promise<void> {
+    // Check default clear tokens type
+    const { changePasswordClearTokensType } = await remoteConfig();
+
+    const type = this.clearTokensType || changePasswordClearTokensType;
+
+    if (!type || type === 'none') {
+      return;
+    }
+
+    if (type === 'all') {
+      await this.repository.clearUserTokens(userId);
+
+      return;
+    }
+
+    // Clear tokens type - REST. Keep only current
+    if (!this.currentToken) {
+      return;
+    }
+
+    await this.repository.clearUserTokens(userId, this.currentToken);
   }
 }
 

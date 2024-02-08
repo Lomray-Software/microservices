@@ -1,13 +1,18 @@
 import { Log } from '@lomray/microservice-helpers';
 import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
+import toSmallestUnit from '@lomray/microservices-client-api/helpers/parsers/to-smallest-unit';
 import { validate } from 'class-validator';
 import StripeSdk from 'stripe';
+import { EntityManager, getManager } from 'typeorm';
 import remoteConfig from '@config/remote';
 import BalanceType from '@constants/balance-type';
 import BusinessType from '@constants/business-type';
 import CouponDuration from '@constants/coupon-duration';
-import RefundAmountType from '@constants/refund-amount-type';
+import PayoutMethod from '@constants/payout-method';
+import PayoutMethodType from '@constants/payout-method-type';
+import StripePayoutStatus from '@constants/stripe/payout-status';
+import StripePayoutType from '@constants/stripe/payout-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
@@ -57,6 +62,16 @@ export type TAvailablePaymentMethods =
   | StripeSdk.BankAccount.AvailablePayoutMethod[]
   | null;
 
+export type TCustomerBalance = Record<BalanceType, TBalance>;
+
+export interface IInstantPayoutParams {
+  userId: string;
+  amount: number;
+  entityId?: string;
+  payoutMethod?: IPayoutMethod;
+  currency?: TCurrency;
+}
+
 interface IPaymentIntentParams {
   userId: string;
   receiverId: string;
@@ -74,21 +89,6 @@ interface IPaymentIntentParams {
   // Extra receiver revenue percent from application payment percent
   extraReceiverRevenuePercent?: number;
   withTax?: boolean;
-}
-
-interface IRefundParams {
-  transactionId: string;
-  refundAmountType?: RefundAmountType;
-  amount?: number;
-  /**
-   * If user don't have required amount in connect account, he must provide
-   * bank account or card id that will be used for refund charge
-   */
-  bankAccountId?: string;
-  cardId?: string;
-  entityId?: string;
-  // Abstract entity type
-  type?: string;
 }
 
 interface ICheckoutParams {
@@ -117,22 +117,13 @@ interface ITransferInfo {
 
 interface IPayoutMethod {
   id: string;
-  method: 'card' | 'bankAccount';
+  method: PayoutMethodType;
 }
 
 interface ICheckoutCart {
   redirectUrl: string | null;
   clientSecret: string | null;
 }
-
-interface IInstantPayoutParams {
-  userId: string;
-  amount: number;
-  payoutMethod?: IPayoutMethod;
-  currency?: TCurrency;
-}
-
-type TCustomerBalance = Record<BalanceType, TBalance>;
 
 interface IGetPaymentIntentFeesParams
   extends Pick<
@@ -174,9 +165,10 @@ interface IStripePromoCodeParams {
 }
 
 interface ICreateMultipleProductCheckout {
-  isEmbeddedMode?: boolean;
   cartId: string;
   userId: string;
+  customerEmail?: string;
+  isEmbeddedMode?: boolean;
 }
 
 interface ICreateMultipleProductCheckoutEmbedded extends ICreateMultipleProductCheckout {
@@ -198,6 +190,31 @@ type TCreateMultipleProductCheckoutParams =
  * Stripe payment provider
  */
 class Stripe extends Abstract {
+  /**
+   * Init service
+   */
+  public static async init(manager: EntityManager = getManager()): Promise<Stripe> {
+    const { config, paymentMethods, apiKey, fees, taxes } = await remoteConfig();
+
+    // All environments are required
+    const isFeesDefined = Boolean(
+      fees?.stablePaymentUnit &&
+        fees?.stableDisputeFeeUnit &&
+        fees?.paymentPercent &&
+        fees?.instantPayoutPercent,
+    );
+    const isTaxesDefined = Boolean(
+      taxes?.autoCalculateFeeUnit && taxes?.stableUnit && taxes?.defaultPercent,
+    );
+
+    if (!config || !apiKey || !paymentMethods || !isFeesDefined || !isTaxesDefined) {
+      throw new Error('Payment options or api key or payment methods for stripe are not provided');
+    }
+
+    // Refers to the constructor. Used for correct init override in child.
+    return new this(manager, apiKey, config, paymentMethods);
+  }
+
   /**
    * Add new card
    * @description Definitions:
@@ -451,7 +468,7 @@ class Stripe extends Abstract {
   public async createCartCheckout(
     params: TCreateMultipleProductCheckoutParams,
   ): Promise<ICheckoutCart | null> {
-    const { cartId, userId, isEmbeddedMode } = params;
+    const { cartId, userId, isEmbeddedMode, customerEmail } = params;
     const { customerId } = await super.getCustomer(userId);
 
     const cart = await this.cartRepository.findOne(
@@ -476,6 +493,7 @@ class Stripe extends Abstract {
     let checkoutParams: Omit<StripeSdk.Checkout.SessionCreateParams, 'success_url'> & {
       success_url?: string;
     } = {
+      customer_email: customerEmail,
       line_items: lineItems,
       mode: 'payment',
       customer: customerId,
@@ -555,6 +573,8 @@ class Stripe extends Abstract {
         settings: {
           payouts: {
             // eslint-disable-next-line camelcase
+            debit_negative_balances: true,
+            // eslint-disable-next-line camelcase
             schedule: { interval: 'manual' },
           },
         },
@@ -587,7 +607,7 @@ class Stripe extends Abstract {
     if (!customer.params.accountId) {
       throw new BaseException({
         status: 400,
-        message: "Customer don't have setup connect account",
+        message: "Customer don't have setup connect account.",
       });
     }
 
@@ -622,7 +642,7 @@ class Stripe extends Abstract {
     if (!customer.params.accountId) {
       throw new BaseException({
         status: 400,
-        message: "Customer don't have setup connect account",
+        message: "Customer don't have setup connect account.",
       });
     }
 
@@ -662,14 +682,46 @@ class Stripe extends Abstract {
   public async instantPayout({
     userId,
     amount,
+    entityId,
     payoutMethod,
     currency = 'usd',
   }: IInstantPayoutParams): Promise<boolean> {
-    const unitAmount = this.toSmallestCurrencyUnit(amount);
+    const { payout } = await remoteConfig();
+    const { instantMaxAmountPerTransactionUnit, instantMinAmountPerTransactionUnit } = payout!;
 
-    /**
-     * Get related customer
-     */
+    const payoutMethodAllowances = await this.getPayoutMethodAllowances(userId, payoutMethod);
+
+    if (!payoutMethodAllowances?.isInstantPayoutAllowed) {
+      throw new BaseException({
+        status: 400,
+        message: "Provided payout method isn't support instant payout.",
+      });
+    }
+
+    const amountUnit = toSmallestUnit(amount);
+
+    if (!amountUnit) {
+      throw new BaseException({
+        status: 500,
+        message: 'Failed to validate requested instant payout amount.',
+      });
+    }
+
+    if (amountUnit > instantMaxAmountPerTransactionUnit) {
+      throw new BaseException({
+        status: 500,
+        message: 'Requested amount is more than payout transaction limit.',
+      });
+    }
+
+    if (amountUnit < instantMinAmountPerTransactionUnit) {
+      throw new BaseException({
+        status: 500,
+        message: 'Requested amount is less than payout transaction limit.',
+      });
+    }
+
+    // Get related customer
     const customer = await this.customerRepository.findOne({
       userId,
     });
@@ -684,14 +736,14 @@ class Stripe extends Abstract {
     if (!customer.params.accountId) {
       throw new BaseException({
         status: 400,
-        message: "Customer don't have related connect account",
+        message: "Customer don't have related connect account.",
       });
     }
 
     if (!customer.params.isPayoutEnabled) {
       throw new BaseException({
         status: 400,
-        message: "Payout isn't available",
+        message: "Payout isn't available.",
       });
     }
 
@@ -711,35 +763,69 @@ class Stripe extends Abstract {
     if (!balance?.[currency]) {
       throw new BaseException({
         status: 400,
-        message: `Balance with the ${currency} isn't available`,
+        message: `Balance with the ${currency} isn't available.`,
       });
     }
 
-    if (balance?.[currency] < unitAmount) {
+    if (balance?.[currency] < amountUnit) {
       throw new BaseException({
         status: 400,
-        message: `Insufficient funds. Instant balance is ${balance?.[currency]} in ${currency}`,
+        message: `Insufficient funds. Instant balance is ${balance?.[currency]} in ${currency}.`,
       });
     }
 
-    const payoutMethodData = await this.getPayoutMethodData(payoutMethod);
+    let stripePayout: StripeSdk.Payout;
 
-    if (!payoutMethodData?.isInstantPayoutAllow) {
+    try {
+      stripePayout = await this.sdk.payouts.create(
+        {
+          currency,
+          amount: amountUnit,
+          method: PayoutMethod.INSTANT,
+          destination: payoutMethodAllowances.externalAccountId,
+        },
+        // Payout user connected account funds
+        { stripeAccount: customer.params.accountId },
+      );
+    } catch (error) {
+      Log.error(error.message);
+
       throw new BaseException({
-        status: 400,
-        message: "Provided payout method isn't support instant payout",
+        status: 500,
+        message: 'Stripe instant payout was failed.',
       });
     }
 
-    await this.sdk.payouts.create(
-      {
-        currency,
-        amount: unitAmount,
-        method: 'instant',
-        ...(payoutMethodData ? { destination: payoutMethodData.id } : {}),
-      },
-      { stripeAccount: customer.params.accountId },
-    );
+    const {
+      id: payoutId,
+      method,
+      arrival_date: arrivalDate,
+      description,
+      destination,
+      created,
+      status,
+      type,
+      failure_code: failureCode,
+      failure_message: failureMessage,
+    } = stripePayout;
+
+    const payoutEntity = this.payoutRepository.create({
+      amount: amountUnit,
+      arrivalDate: new Date(Number(arrivalDate) * 1000),
+      method: method as PayoutMethod,
+      payoutId,
+      description,
+      failureCode,
+      failureMessage,
+      currency,
+      type: Parser.parseStripePayoutType(type as StripePayoutType),
+      status: Parser.parseStripePayoutStatus(status as StripePayoutStatus),
+      registeredAt: new Date(Number(created) * 1000),
+      ...(entityId ? { entityId } : {}),
+      ...(destination ? { destination: extractIdFromStripeInstance(destination) } : {}),
+    });
+
+    await this.payoutRepository.save(payoutEntity);
 
     return true;
   }
@@ -1246,80 +1332,6 @@ class Stripe extends Abstract {
     });
 
     return transactions;
-  }
-
-  /**
-   * Refund transaction (payment intent)
-   * @description Workflow:
-   * Sender payed 106.39$: 100$ - entity cost, 3.39$ - stripe fees, 3$ - platform application fee.
-   * In the end of refund sender will receive 100$ and platform revenue will be 3$.
-   */
-  public async refund({
-    transactionId,
-    amount,
-    entityId,
-    refundAmountType = RefundAmountType.REVENUE,
-    type,
-  }: IRefundParams): Promise<boolean> {
-    const debitTransaction = await this.transactionRepository.findOne({
-      transactionId,
-      type: TransactionType.DEBIT,
-    });
-
-    if (!debitTransaction) {
-      throw new BaseException({
-        status: 400,
-        message: messages.getNotFoundMessage('Transaction'),
-      });
-    }
-
-    if (!debitTransaction.chargeId) {
-      throw new BaseException({
-        status: 400,
-        message: "Transaction don't have related transfer id and can't be refunded.",
-      });
-    }
-
-    let amountUnit: number | undefined;
-
-    if (amount) {
-      amountUnit = this.toSmallestCurrencyUnit(amount);
-    } else if (refundAmountType === RefundAmountType.REVENUE) {
-      amountUnit = debitTransaction.amount;
-    } else {
-      amountUnit =
-        // Paid entity cost - already refunded amount
-        (debitTransaction.params.entityCost ?? 0) -
-        (debitTransaction.params.refundedTransactionAmount || 0);
-    }
-
-    if (!amountUnit) {
-      throw new BaseException({
-        status: 500,
-        message: 'Failed to refund transaction. Invalid refund amount.',
-      });
-    }
-
-    /**
-     * Returns refunds from platform (application) account to sender
-     */
-    /* eslint-disable camelcase */
-    await this.sdk.refunds.create({
-      charge: debitTransaction.chargeId,
-      // From receiver connected account funds will be transferred to Platform, then refund
-      reverse_transfer: true,
-      // Refund collected application fee, if - not: rest refund amount will be charged from receiver connected account
-      refund_application_fee: false,
-      amount: amountUnit,
-      metadata: {
-        ...(entityId ? { entityId } : {}),
-        ...(refundAmountType ? { refundAmountType } : {}),
-        ...(type ? { type } : {}),
-      },
-    });
-
-    /* eslint-enable camelcase */
-    return true;
   }
 
   /**
@@ -1838,6 +1850,24 @@ class Stripe extends Abstract {
         await handlers?.[webhookType]();
         break;
       }
+
+      /**
+       * Payout events
+       */
+      case 'payout.created':
+      case 'payout.updated':
+      case 'payout.failed':
+      case 'payout.canceled':
+      case 'payout.reconciliation_completed':
+      case 'payout.paid': {
+        const handlers = {
+          // Handle payout of connected account
+          connect: () => webhookHandlers.payout.handlePayoutOccur(event),
+        };
+
+        await handlers?.[webhookType]?.();
+        break;
+      }
     }
   }
 
@@ -1969,32 +1999,87 @@ class Stripe extends Abstract {
    * Returns payout method data
    * @private
    */
-  private async getPayoutMethodData(
+  private async getPayoutMethodAllowances(
+    userId: string,
     payoutMethod?: IPayoutMethod,
-  ): Promise<{ id?: string; isInstantPayoutAllow: boolean } | undefined> {
+  ): Promise<{ externalAccountId: string; isInstantPayoutAllowed: boolean } | undefined> {
+    const externalAccountNotFoundError = messages.getNotFoundMessage(
+      'External account for instant payout',
+    );
+
     if (!payoutMethod) {
-      return;
+      const queries = [
+        this.bankAccountRepository.createQueryBuilder('pm'),
+        this.cardRepository.createQueryBuilder('pm'),
+      ];
+
+      const selectQueries = queries.map((query) =>
+        query
+          .where('pm.userId = :userId AND pm."isInstantPayoutAllowed" = true', { userId })
+          .getOne(),
+      );
+
+      const results = await Promise.all(selectQueries);
+
+      if (!results.length) {
+        throw new BaseException({
+          status: 500,
+          message: 'User does not have any available instant payout method.',
+        });
+      }
+
+      const [bankAccount, card] = results as [BankAccount | undefined, Card | undefined];
+
+      const externalAccountId = bankAccount?.params?.bankAccountId || card?.params?.cardId;
+
+      if (!externalAccountId) {
+        throw new BaseException({
+          status: 500,
+          message: externalAccountNotFoundError,
+        });
+      }
+
+      return {
+        externalAccountId,
+        isInstantPayoutAllowed:
+          Boolean(bankAccount?.isInstantPayoutAllowed) || Boolean(card?.isInstantPayoutAllowed),
+      };
     }
 
     const { method, id } = payoutMethod;
 
-    /**
-     * @TODO: Simplify this
-     */
-    if (method === 'card') {
-      const card = await this.cardRepository.findOne(id);
+    if (method === PayoutMethodType.CARD) {
+      const card = await this.cardRepository.findOne(id, {
+        select: ['id', 'params'],
+      });
+
+      if (!card?.params?.cardId) {
+        throw new BaseException({
+          status: 500,
+          message: externalAccountNotFoundError,
+        });
+      }
 
       return {
-        id: card?.params?.cardId,
-        isInstantPayoutAllow: Boolean(card?.isInstantPayoutAllowed),
+        externalAccountId: card.params.cardId,
+        isInstantPayoutAllowed: Boolean(card?.isInstantPayoutAllowed),
       };
     }
 
-    const bankAccount = await this.bankAccountRepository.findOne(id);
+    const bankAccount = await this.bankAccountRepository.findOne(id, {
+      select: ['id', 'params'],
+    });
+
+    if (!bankAccount?.params?.bankAccountId) {
+      throw new BaseException({
+        status: 500,
+        message: externalAccountNotFoundError,
+      });
+    }
 
     return {
-      id: bankAccount?.params?.bankAccountId,
-      isInstantPayoutAllow: Boolean(bankAccount?.isInstantPayoutAllowed),
+      externalAccountId: bankAccount?.params?.bankAccountId,
+      isInstantPayoutAllowed: Boolean(bankAccount?.isInstantPayoutAllowed),
     };
   }
 

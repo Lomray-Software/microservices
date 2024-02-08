@@ -24,7 +24,7 @@ class Card implements EntitySubscriberInterface<CardEntity> {
    * Handle card create
    */
   public async afterInsert({ entity, manager }: InsertEvent<CardEntity>): Promise<void> {
-    await CardService.handleCreate(entity, manager);
+    await CardService.handleAfterInsert(entity, manager);
   }
 
   /**

@@ -1,8 +1,10 @@
 import { Endpoint, IsType, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsBoolean, IsEnum, IsNotEmpty, IsObject, IsString, ValidateIf } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
 import { getCustomRepository, getRepository } from 'typeorm';
 import ConfirmCode from '@entities/confirm-code';
 import User from '@entities/user';
+import type TClearUserTokens from '@interfaces/clear-user-tokens';
 import UserRepository from '@repositories/user';
 import ChangePassword from '@services/change-password';
 import { Factory, ConfirmBy } from '@services/confirm/factory';
@@ -22,23 +24,37 @@ class ChangePasswordInput {
   @IsNotEmpty()
   newPassword: string;
 
+  @JSONSchema({
+    description: 'Skip if change password has allowed by admin',
+  })
   @IsString()
   @IsNotEmpty()
-  @ValidateIf(({ confirmCode, oldPassword }) => !confirmCode || oldPassword)
+  @ValidateIf(
+    ({ confirmCode, oldPassword, allowByAdmin }) => !allowByAdmin && (!confirmCode || oldPassword),
+  )
   oldPassword?: string;
 
   @IsEnum(ConfirmBy)
   @ValidateIf(({ confirmCode }) => confirmCode)
   confirmBy?: ConfirmBy;
 
+  @JSONSchema({
+    description: 'Skip if change password has allowed by admin',
+  })
   @IsType(['string', 'number'])
   @IsNotEmpty()
-  @ValidateIf(({ confirmCode, oldPassword }) => !oldPassword || confirmCode)
+  @ValidateIf(
+    ({ confirmCode, oldPassword, allowByAdmin }) => !allowByAdmin && (!oldPassword || confirmCode),
+  )
   confirmCode?: string | number;
 
   @IsBoolean()
   @IsUndefinable()
   allowByAdmin?: boolean;
+
+  @IsString()
+  @IsUndefinable()
+  clearTokensType?: TClearUserTokens;
 
   @IsObject()
   @IsUndefinable()
@@ -68,6 +84,8 @@ const changePassword = Endpoint.custom(
     confirmCode,
     allowByAdmin,
     context,
+    clearTokensType,
+    payload,
   }) => {
     const service = ChangePassword.init({
       userId,
@@ -81,6 +99,8 @@ const changePassword = Endpoint.custom(
           )) ||
         allowByAdmin,
       repository: getCustomRepository(UserRepository),
+      clearTokensType,
+      currentToken: payload?.authentication?.tokenId,
     });
 
     return {

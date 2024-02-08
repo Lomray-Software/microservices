@@ -1,7 +1,6 @@
 import { Endpoint, IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsBoolean, IsString, Length, ValidateIf } from 'class-validator';
-import { getManager } from 'typeorm';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 class CreateCartCheckoutInput {
   @IsString()
@@ -24,6 +23,11 @@ class CreateCartCheckoutInput {
   @IsNullable()
   @ValidateIf((input) => input.isEmbeddedMode)
   returnUrl: string | null;
+
+  @Length(1, 40)
+  @IsString()
+  @IsUndefinable()
+  customerEmail?: string;
 
   @IsBoolean()
   @IsUndefinable()
@@ -49,8 +53,16 @@ const createCartCheckout = Endpoint.custom(
     output: CreateCartCheckoutOutput,
     description: 'Setup intent and return client secret key',
   }),
-  async ({ cartId, successUrl, cancelUrl, userId, returnUrl, isEmbeddedMode = false }) => {
-    const service = await Factory.create(getManager());
+  async ({
+    cartId,
+    successUrl,
+    cancelUrl,
+    userId,
+    customerEmail,
+    returnUrl,
+    isEmbeddedMode = false,
+  }) => {
+    const service = await Stripe.init();
 
     return service.createCartCheckout(
       isEmbeddedMode
@@ -59,6 +71,7 @@ const createCartCheckout = Endpoint.custom(
             cartId,
             userId,
             returnUrl,
+            customerEmail,
           }
         : {
             isEmbeddedMode,
@@ -66,6 +79,7 @@ const createCartCheckout = Endpoint.custom(
             userId,
             successUrl,
             cancelUrl,
+            customerEmail,
           },
     );
   },

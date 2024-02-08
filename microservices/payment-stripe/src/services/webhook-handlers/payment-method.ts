@@ -1,6 +1,6 @@
 import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
-import StripeSdk from 'stripe';
+import type StripeSdk from 'stripe';
 import { EntityManager } from 'typeorm';
 import toExpirationDate from '@helpers/formatters/to-expiration-date';
 import messages from '@helpers/validators/messages';
@@ -84,7 +84,7 @@ class PaymentMethod {
 
     await this.cardRepository.save(card);
 
-    void Microservice.eventPublish(Event.PaymentMethodUpdated, {
+    await Microservice.eventPublish(Event.PaymentMethodUpdated, {
       funding,
       brand,
       expired,
@@ -125,7 +125,7 @@ class PaymentMethod {
 
     await this.cardRepository.remove(card, { data: { isFromWebhook: true } });
 
-    void Microservice.eventPublish(Event.PaymentMethodRemoved, {
+    await Microservice.eventPublish(Event.PaymentMethodRemoved, {
       paymentMethodId,
     });
   }

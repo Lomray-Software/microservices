@@ -14,6 +14,7 @@ import CrudCustomer from '@methods/customer/crud';
 import CustomerRemove from '@methods/customer/remove';
 import CrudDispute from '@methods/dispute/crud';
 import CrudEvidenceDetails from '@methods/evidence-details/crud';
+import CrudPayout from '@methods/payout/crud';
 import PriceCreate from '@methods/price/create';
 import CrudPrice from '@methods/price/crud';
 import ProductCreate from '@methods/product/create';
@@ -30,7 +31,6 @@ import DashboardLoginLink from '@methods/stripe/dashboard-login-link';
 import InstantPayout from '@methods/stripe/instant-payout';
 import PaymentIntentFees from '@methods/stripe/payment-intent-fees';
 import Payout from '@methods/stripe/payout';
-import Refund from '@methods/stripe/refund';
 import SetupIntent from '@methods/stripe/setup-intent';
 import WebhookHandler from '@methods/stripe/webhook';
 import CrudTransaction from '@methods/transaction/crud';
@@ -48,6 +48,7 @@ export default (ms: Microservice): void => {
       ...CrudBankAccount,
       add: BankAccountAdd,
     },
+    payout: CrudPayout,
     cart: CrudCart,
     'cart-product-price': CrudCartProductPrice,
     transaction: CrudTransaction,
@@ -69,7 +70,6 @@ export default (ms: Microservice): void => {
       'dashboard-login-link': DashboardLoginLink,
       webhook: WebhookHandler,
       payout: Payout,
-      refund: Refund,
       balance: Balance,
     },
     product: {

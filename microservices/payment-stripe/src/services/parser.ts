@@ -1,7 +1,11 @@
 import { Log } from '@lomray/microservice-helpers';
 import DisputeReason from '@constants/dispute-reason';
 import DisputeStatus from '@constants/dispute-status';
+import PayoutStatus from '@constants/payout-status';
+import PayoutType from '@constants/payout-type';
 import RefundStatus from '@constants/refund-status';
+import StripePayoutStatus from '@constants/stripe/payout-status';
+import StripePayoutType from '@constants/stripe/payout-type';
 import StripeDisputeReason from '@constants/stripe-dispute-reason';
 import StripeDisputeStatus from '@constants/stripe-dispute-status';
 import StripeRefundStatus from '@constants/stripe-refund-status';
@@ -16,6 +20,51 @@ declare function assert(status: never): never;
  * Decomposed payment stripe logic
  */
 class Parser {
+  /**
+   * Parse Stripe payout status
+   */
+  public static parseStripePayoutStatus(stripeStatus: StripePayoutStatus): PayoutStatus {
+    switch (stripeStatus) {
+      case StripePayoutStatus.PAID:
+        return PayoutStatus.PAID;
+
+      case StripePayoutStatus.CANCELED:
+        return PayoutStatus.CANCELED;
+
+      case StripePayoutStatus.FAILED:
+        return PayoutStatus.FAILED;
+
+      case StripePayoutStatus.IN_TRANSIT:
+        return PayoutStatus.IN_TRANSIT;
+
+      case StripePayoutStatus.PENDING:
+        return PayoutStatus.PENDING;
+
+      default:
+        Log.error(`Unknown Stripe payout status: ${stripeStatus as string}`);
+
+        assert(stripeStatus);
+    }
+  }
+
+  /**
+   * Parse Stripe payout type
+   */
+  public static parseStripePayoutType(stripeStatus: StripePayoutType): PayoutType {
+    switch (stripeStatus) {
+      case StripePayoutType.CARD:
+        return PayoutType.CARD;
+
+      case StripePayoutType.BANK_ACCOUNT:
+        return PayoutType.BANK_ACCOUNT;
+
+      default:
+        Log.error(`Unknown Stripe payout type: ${stripeStatus as string}`);
+
+        assert(stripeStatus);
+    }
+  }
+
   /**
    * Parse Stripe refund status
    */

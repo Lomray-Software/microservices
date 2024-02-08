@@ -1,9 +1,9 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { IsObject, IsString, Length } from 'class-validator';
-import { getManager } from 'typeorm';
 import BalanceType from '@constants/balance-type';
+import convertBalanceFromUnit from '@helpers/convert-balance-from-unit';
 import TBalance from '@interfaces/balance';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 class BalanceInput {
   @Length(1, 36)
@@ -26,10 +26,10 @@ const balance = Endpoint.custom(
     description: 'Returns balance',
   }),
   async ({ userId }) => {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init();
 
     return {
-      balance: await service.getBalance(userId),
+      balance: convertBalanceFromUnit(await service.getBalance(userId)),
     };
   },
 );

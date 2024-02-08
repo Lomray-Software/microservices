@@ -1,9 +1,11 @@
-import { Endpoint } from '@lomray/microservice-helpers';
-import { IsBoolean, IsNumber, IsString, Length, Min } from 'class-validator';
-import { getManager } from 'typeorm';
-import Factory from '@services/payment-gateway/factory';
+import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsBoolean, IsEnum, IsNumber, IsString, Length, Min } from 'class-validator';
+import { JSONSchema } from 'class-validator-jsonschema';
+import PayoutMethodType from '@constants/payout-method-type';
+import Stripe from '@services/payment-gateway/stripe';
+import type { IInstantPayoutParams } from '@services/payment-gateway/stripe';
 
-class CreateInstantPayoutInput {
+class CreateInstantPayoutInput implements IInstantPayoutParams {
   @Length(1, 36)
   @IsString()
   userId: string;
@@ -11,6 +13,24 @@ class CreateInstantPayoutInput {
   @Min(1)
   @IsNumber()
   amount: number;
+
+  @JSONSchema({
+    description:
+      'Microservice entity. Your internal microservice payout (withdraw) or any else entity, that implements custom functionality',
+  })
+  @Length(1, 36)
+  @IsString()
+  @IsUndefinable()
+  entityId?: string;
+
+  @Length(1, 36)
+  @IsString()
+  @IsUndefinable()
+  payoutMethodId?: string;
+
+  @IsEnum(PayoutMethodType)
+  @IsUndefinable()
+  payoutMethodType?: PayoutMethodType;
 }
 
 class CreateInstantPayoutOutput {
@@ -27,11 +47,18 @@ const instantPayout = Endpoint.custom(
     output: CreateInstantPayoutOutput,
     description: 'Create instant payout',
   }),
-  async ({ userId, amount }) => {
-    const service = await Factory.create(getManager());
+  async ({ userId, amount, entityId, payoutMethodId, payoutMethodType }) => {
+    const service = await Stripe.init();
 
     return {
-      isInstantiated: await service.instantPayout({ userId, amount }),
+      isInstantiated: await service.instantPayout({
+        userId,
+        amount,
+        entityId,
+        ...(payoutMethodId && payoutMethodType
+          ? { payoutMethod: { id: payoutMethodId, method: payoutMethodType } }
+          : {}),
+      }),
     };
   },
 );

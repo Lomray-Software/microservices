@@ -1,11 +1,11 @@
 import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
-import { EntityManager, getManager, QueryRunner } from 'typeorm';
+import { EntityManager, QueryRunner } from 'typeorm';
 import CardEntity from '@entities/card';
 import CustomerEntity from '@entities/customer';
 import messages from '@helpers/validators/messages';
 import CardRepository from '@repositories/card';
-import Factory from '@services/payment-gateway/factory';
+import Stripe from '@services/payment-gateway/stripe';
 
 /**
  * Card service
@@ -19,7 +19,7 @@ class Card {
    * 1. Card should be created from setup intent succeed
    * 2. Should be called after insert
    */
-  public static async handleCreate(entity: CardEntity, manager: EntityManager): Promise<void> {
+  public static async handleAfterInsert(entity: CardEntity, manager: EntityManager): Promise<void> {
     const paymentMethodId = CardRepository.extractPaymentMethodId(entity);
 
     if (!paymentMethodId) {
@@ -33,7 +33,6 @@ class Card {
 
     const cardRepository = manager.getRepository(CardEntity);
     const customerRepository = manager.getRepository(CustomerEntity);
-    const service = await Factory.create(getManager());
 
     /**
      * Get attached cards count as the payment method
@@ -41,29 +40,34 @@ class Card {
     const cardsCount = await cardRepository
       .createQueryBuilder('card')
       .where('card.userId = :userId', { userId: entity.userId })
+      // Select cards that attached to connect account (have payment method id)
       .andWhere(
-        `card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL`,
+        `(card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL)`,
       )
       .andWhere('card.isDefault = :isDefault', { isDefault: true })
       .getCount();
 
-    /**
-     * Card count will contain current card
-     */
-    if (cardsCount) {
+    // If default card already exist - publish event
+    if (cardsCount >= 1) {
       void Microservice.eventPublish(Event.CardCreated, entity);
 
       return;
     }
 
-    /**
-     * If 0 cards with the required params for payment method
-     */
+    // If 1 (current card) with the required params for payment method
     const customer = await customerRepository.findOne({ userId: entity.userId });
 
     if (!customer) {
-      throw new BaseException({ status: 500, message: messages.getNotFoundMessage('Customer') });
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Customer'),
+        payload: {
+          userId: entity.userId,
+        },
+      });
     }
+
+    const service = await Stripe.init(manager);
 
     const isSet = await service.setDefaultCustomerPaymentMethod(
       customer.customerId,
@@ -73,7 +77,7 @@ class Card {
     if (!isSet) {
       throw new BaseException({
         status: 500,
-        message: 'Failed to set card as the default payment method for customer',
+        message: 'Failed to set card as the default payment method for customer.',
       });
     }
 
@@ -107,19 +111,17 @@ class Card {
 
     const cardRepository = manager.getRepository(CardEntity);
     const customerRepository = manager.getRepository(CustomerEntity);
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init();
 
     const { userId } = entity;
 
-    /**
-     * Get all customer related card
-     */
+    // Get all customer related card
     const cards = await cardRepository.find({
       userId,
     });
 
     if (!cards.length) {
-      throw new BaseException({ status: 500, message: "Cards aren't found" });
+      throw new BaseException({ status: 500, message: "Cards aren't found." });
     }
 
     const customer = await customerRepository.findOne({ userId });
@@ -173,8 +175,9 @@ class Card {
     manager: EntityManager,
     { data: { isFromWebhook } }: QueryRunner,
   ): Promise<void> {
-    const service = await Factory.create(getManager());
+    const service = await Stripe.init();
 
+    // If card was removed from Stripe event(e.g. dashboard)
     if (isFromWebhook) {
       void Microservice.eventPublish(Event.CardRemoved, databaseEntity);
 
