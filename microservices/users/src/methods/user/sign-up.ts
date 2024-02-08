@@ -1,4 +1,4 @@
-import { Endpoint, IsMeta, IsType } from '@lomray/microservice-helpers';
+import { Endpoint, IsMeta, IsType, IsUndefinable } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsObject } from 'class-validator';
 import { getCustomRepository, getRepository } from 'typeorm';
@@ -19,6 +19,10 @@ class SignUpInput {
   @IsType(['string', 'number'])
   @IsNotEmpty()
   confirmCode: string | number;
+
+  @IsObject()
+  @IsUndefinable()
+  context?: Record<string, any>;
 }
 
 class SignUpOutput {
@@ -33,8 +37,8 @@ class SignUpOutput {
  */
 const signUp = Endpoint.custom(
   () => ({ input: SignUpInput, output: SignUpOutput, description: 'Sign up user' }),
-  async ({ fields, confirmBy, confirmCode }) => {
-    const confirmService = Factory.create(confirmBy, getRepository(ConfirmCode));
+  async ({ fields, confirmBy, confirmCode, context }) => {
+    const confirmService = Factory.create(confirmBy, getRepository(ConfirmCode), context);
     const service = SignUp.init({
       fields,
       isConfirmed: () => confirmService.verifyCode(fields[confirmBy], confirmCode),

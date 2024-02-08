@@ -1,5 +1,5 @@
 import { Endpoint, IsType, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsBoolean, IsEnum, IsNotEmpty, IsString, ValidateIf } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsObject, IsString, ValidateIf } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import { getCustomRepository, getRepository } from 'typeorm';
 import ConfirmCode from '@entities/confirm-code';
@@ -55,6 +55,10 @@ class ChangePasswordInput {
   @IsString()
   @IsUndefinable()
   clearTokensType?: TClearUserTokens;
+
+  @IsObject()
+  @IsUndefinable()
+  context?: Record<string, any>;
 }
 
 class ChangePasswordOutput {
@@ -79,6 +83,7 @@ const changePassword = Endpoint.custom(
     confirmBy,
     confirmCode,
     allowByAdmin,
+    context,
     clearTokensType,
     payload,
   }) => {
@@ -88,7 +93,7 @@ const changePassword = Endpoint.custom(
       login,
       isConfirmed: (user: User) =>
         (confirmBy &&
-          Factory.create(confirmBy, getRepository(ConfirmCode)).verifyCode(
+          Factory.create(confirmBy, getRepository(ConfirmCode), context).verifyCode(
             user[confirmBy],
             confirmCode,
           )) ||

@@ -1,5 +1,5 @@
-import { Endpoint, IsType } from '@lomray/microservice-helpers';
-import { IsBoolean, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { Endpoint, IsType, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsBoolean, IsEnum, IsNotEmpty, IsObject, IsString } from 'class-validator';
 import { getCustomRepository, getRepository } from 'typeorm';
 import ConfirmCode from '@entities/confirm-code';
 import UserRepository from '@repositories/user';
@@ -21,6 +21,10 @@ class ChangeLoginInput {
   @IsType(['string', 'number'])
   @IsNotEmpty()
   confirmCode: string | number;
+
+  @IsObject()
+  @IsUndefinable()
+  context?: Record<string, any>;
 }
 
 class ChangeLoginOutput {
@@ -33,8 +37,8 @@ class ChangeLoginOutput {
  */
 const changeLogin = Endpoint.custom(
   () => ({ input: ChangeLoginInput, output: ChangeLoginOutput, description: 'Change user login' }),
-  async ({ userId, login, confirmBy, confirmCode }) => {
-    const confirmService = Factory.create(confirmBy, getRepository(ConfirmCode));
+  async ({ userId, login, confirmBy, confirmCode, context }) => {
+    const confirmService = Factory.create(confirmBy, getRepository(ConfirmCode), context);
     const service = ChangeLogin.init({
       userId,
       login,
