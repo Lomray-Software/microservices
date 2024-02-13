@@ -111,7 +111,8 @@ class User extends Repository<UserEntity> {
     const query = {
       where: {
         userId,
-        ...(tokenId ? { id: tokenId } : {}),
+        // Select all tokens that are not equal to provided
+        ...(tokenId ? { id: { '!=': tokenId } } : {}),
       },
     };
 
