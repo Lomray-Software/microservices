@@ -2,6 +2,7 @@ import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsBoolean, IsEnum, IsNumber } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import TransactionRole from '@constants/transaction-role';
+import Calculation from '@services/calculation';
 import Stripe from '@services/payment-gateway/stripe';
 
 class PaymentIntentFeesInput {
@@ -88,7 +89,7 @@ const paymentIntentFees = Endpoint.custom(
 
     const entityUnitCost = service.toSmallestCurrencyUnit(entityCost);
 
-    const unitFees = await service.getPaymentIntentFees({
+    const unitFees = await Calculation.getPaymentIntentFees({
       entityUnitCost,
       extraReceiverRevenuePercent,
       feesPayer,
