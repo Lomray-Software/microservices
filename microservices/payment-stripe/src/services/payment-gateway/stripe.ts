@@ -17,6 +17,7 @@ import StripeAccountTypes from '@constants/stripe-account-types';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripePaymentMethods from '@constants/stripe-payment-methods';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
+import transactionDefaultParams from '@constants/transaction-default-params';
 import TransactionRole from '@constants/transaction-role';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
@@ -26,7 +27,7 @@ import Coupon from '@entities/coupon';
 import Customer from '@entities/customer';
 import Price from '@entities/price';
 import Product from '@entities/product';
-import Transaction, { defaultParams as defaultTransactionParams } from '@entities/transaction';
+import Transaction from '@entities/transaction';
 import composeBalance from '@helpers/compose-balance';
 import extractIdFromStripeInstance from '@helpers/extract-id-from-stripe-instance';
 import fromExpirationDate from '@helpers/formatters/from-expiration-date';
@@ -1241,7 +1242,7 @@ class Stripe extends Abstract {
       ...(tax ? { tax: tax.totalAmountUnit, taxCalculationId: tax.id } : {}),
       params: {
         // Handle override initial params from repository create
-        ...defaultTransactionParams,
+        ...transactionDefaultParams,
         feesPayer,
         platformFee: platformUnitFee,
         stripeFee: stripeFeeUnit,
