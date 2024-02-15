@@ -202,6 +202,8 @@ class Charge {
       .where("r.params ->> 'refundId' = :refundId", { refundId: id })
       .getOne();
 
+    const refundStatus = Parser.parseStripeRefundStatus(status as StripeRefundStatus);
+
     if (!refund) {
       const transaction = await transactionRepository.findOne({
         where: {
@@ -219,9 +221,7 @@ class Charge {
       const refundEntity = refundRepository.create({
         transactionId: transaction.transactionId,
         amount,
-        status: status
-          ? Parser.parseStripeRefundStatus(status as StripeRefundStatus)
-          : RefundStatus.INITIAL,
+        ...(refundStatus ? { status: refundStatus } : {}),
         ...(metadata?.entityId ? { entityId: metadata.entityId } : {}),
         params: {
           refundId: id,
@@ -232,15 +232,13 @@ class Charge {
 
       const savedRefund = await refundRepository.save(refundEntity);
 
-      /**
-       * Sync stripe refund with the microservice refund
-       */
-      await sdk.refunds.update(id, { metadata: { refundId: savedRefund.id } });
+      // Sync stripe refund with the microservice refund
+      if (!metadata?.hasOwnProperty('refundId')) {
+        await sdk.refunds.update(id, { metadata: { refundId: savedRefund.id } });
+      }
 
       return;
     }
-
-    const refundStatus = Parser.parseStripeRefundStatus(status as StripeRefundStatus);
 
     if (!refundStatus) {
       throw new Error('Failed to get transaction status for refund.');
@@ -248,6 +246,8 @@ class Charge {
 
     refund.status = refundStatus;
     refund.params.errorReason = failedReason as TRefundErrorReason;
+    refund.params.refundId = id;
+    refund.amount = amount;
 
     if (reason && refund.params.reason !== reason) {
       refund.params.reason = reason;

@@ -16,7 +16,6 @@ import {
 } from '@__mocks__/stripe';
 import * as remoteConfig from '@config/remote';
 import StripeAccountTypes from '@constants/stripe-account-types';
-import TransactionRole from '@constants/transaction-role';
 import OriginalStripe from '@services/payment-gateway/stripe';
 
 interface IStripeMockParams {
@@ -325,69 +324,6 @@ describe('services/payment-gateway/stripe', () => {
       expect(await waitResult(service.removeCustomer(userMock.userId))).to.throw(
         messages.customerIsNotFound,
       );
-    });
-
-    it('should correctly compute payment intent fees', async () => {
-      const expectedResult = {
-        platformUnitFee: 0,
-        extraReceiverUnitRevenue: 0,
-        stripeUnitFee: 61,
-        receiverAdditionalFee: 0,
-        receiverUnitRevenue: 1000,
-        senderAdditionalFee: 0,
-        userUnitAmount: 1061,
-      };
-
-      expect(
-        await service.getPaymentIntentFees({
-          feesPayer: TransactionRole.SENDER,
-          entityUnitCost: 1000,
-        }),
-      ).to.deep.equal(expectedResult);
-    });
-
-    it('should correctly compute payment intent fees with application fees', async () => {
-      const expectedResult = {
-        platformUnitFee: 30,
-        extraReceiverUnitRevenue: 0,
-        stripeUnitFee: 62,
-        receiverAdditionalFee: 0,
-        receiverUnitRevenue: 1000,
-        senderAdditionalFee: 0,
-        userUnitAmount: 1092,
-      };
-
-      expect(
-        await service.getPaymentIntentFees({
-          feesPayer: TransactionRole.SENDER,
-          entityUnitCost: 1000,
-          applicationPaymentPercent: 3,
-        }),
-      ).to.deep.equal(expectedResult);
-    });
-
-    it('should correctly compute payment intent fees with application  and receiver additional fees', async () => {
-      const expectedResult = {
-        platformUnitFee: 30,
-        extraReceiverUnitRevenue: 0,
-        stripeUnitFee: 62,
-        receiverAdditionalFee: 60,
-        receiverUnitRevenue: 940,
-        senderAdditionalFee: 0,
-        userUnitAmount: 1092,
-      };
-
-      expect(
-        await service.getPaymentIntentFees({
-          feesPayer: TransactionRole.SENDER,
-          entityUnitCost: 1000,
-          applicationPaymentPercent: 3,
-          additionalFeesPercent: {
-            receiver: 6,
-            sender: 0,
-          },
-        }),
-      ).to.deep.equal(expectedResult);
     });
 
     it('should correctly set payment method', async () => {

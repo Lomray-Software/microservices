@@ -26,6 +26,71 @@ describe('services/calculation', () => {
     sandbox.restore();
   });
 
+  describe('getPaymentIntentFees', () => {
+    it('should correctly compute payment intent fees', async () => {
+      const expectedResult = {
+        platformUnitFee: 0,
+        extraReceiverUnitRevenue: 0,
+        stripeUnitFee: 61,
+        receiverAdditionalFee: 0,
+        receiverUnitRevenue: 1000,
+        senderAdditionalFee: 0,
+        userUnitAmount: 1061,
+      };
+
+      expect(
+        await Calculation.getPaymentIntentFees({
+          feesPayer: TransactionRole.SENDER,
+          entityUnitCost: 1000,
+        }),
+      ).to.deep.equal(expectedResult);
+    });
+
+    it('should correctly compute payment intent fees with application fees', async () => {
+      const expectedResult = {
+        platformUnitFee: 30,
+        extraReceiverUnitRevenue: 0,
+        stripeUnitFee: 62,
+        receiverAdditionalFee: 0,
+        receiverUnitRevenue: 1000,
+        senderAdditionalFee: 0,
+        userUnitAmount: 1092,
+      };
+
+      expect(
+        await Calculation.getPaymentIntentFees({
+          feesPayer: TransactionRole.SENDER,
+          entityUnitCost: 1000,
+          applicationPaymentPercent: 3,
+        }),
+      ).to.deep.equal(expectedResult);
+    });
+
+    it('should correctly compute payment intent fees with application  and receiver additional fees', async () => {
+      const expectedResult = {
+        platformUnitFee: 30,
+        extraReceiverUnitRevenue: 0,
+        stripeUnitFee: 62,
+        receiverAdditionalFee: 60,
+        receiverUnitRevenue: 940,
+        senderAdditionalFee: 0,
+        userUnitAmount: 1092,
+      };
+
+      expect(
+        await Calculation.getPaymentIntentFees({
+          feesPayer: TransactionRole.SENDER,
+          entityUnitCost: 1000,
+          applicationPaymentPercent: 3,
+          additionalFeesPercent: {
+            receiver: 6,
+            sender: 0,
+          },
+        }),
+      ).to.deep.equal(expectedResult);
+    });
+  });
+
   describe('getStripeFeeAndProcessingAmount', () => {
     it('should correctly calculate stripe fee and processing amount for sender', async () => {
       expect(

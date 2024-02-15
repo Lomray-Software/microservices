@@ -87,25 +87,19 @@ class PaymentIntent {
       transactions.forEach((transaction) => {
         transaction.status = Parser.parseStripeTransactionStatus(status as StripeTransactionStatus);
 
-        /**
-         * Attach related charge
-         */
+        // Attach related charge
         if (!transaction.chargeId && latestCharge) {
           transaction.chargeId = extractIdFromStripeInstance(latestCharge);
         }
 
-        /**
-         * Attach destination funds transfer connect account
-         */
+        // Attach destination funds transfer connect account
         if (!transaction.params.transferDestinationConnectAccountId && transferData?.destination) {
           transaction.params.transferDestinationConnectAccountId = extractIdFromStripeInstance(
             transferData.destination,
           );
         }
 
-        /**
-         * Attach tax transaction if reference
-         */
+        // Attach tax transaction if reference
         if (stripeTaxTransaction) {
           transaction.taxTransactionId = stripeTaxTransaction.id;
         }
@@ -114,18 +108,14 @@ class PaymentIntent {
           return;
         }
 
-        /**
-         * Attach error data if it occurs
-         */
+        // Attach error data if it occurs
         transaction.params.errorMessage = lastPaymentError.message;
         transaction.params.errorCode = lastPaymentError.code;
         transaction.params.declineCode = lastPaymentError.decline_code;
       });
 
       if (stripeTaxTransaction) {
-        /**
-         * Sync payment intent with the microservice transactions
-         */
+        // Sync payment intent with the microservice transactions
         await sdk.paymentIntents.update(transactionId, {
           metadata: {
             taxTransactionId: stripeTaxTransaction?.id,
