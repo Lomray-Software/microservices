@@ -13,6 +13,7 @@ import {
 import ChargeRefundStatus from '@constants/charge-refund-status';
 import StripeCheckoutStatus from '@constants/stripe-checkout-status';
 import StripeTransactionStatus from '@constants/stripe-transaction-status';
+import transactionDefaultParams from '@constants/transaction-default-params';
 import TransactionRole from '@constants/transaction-role';
 import TransactionStatus from '@constants/transaction-status';
 import TransactionType from '@constants/transaction-type';
@@ -86,32 +87,6 @@ export interface IParams
   entityCost?: number;
   taxAutoCalculateFee?: number;
 }
-
-/**
- * In whole cases this data is required and usable
- */
-export const defaultParams: Pick<
-  IParams,
-  | 'refundedTransactionAmount'
-  | 'refundedApplicationFeeAmount'
-  | 'platformFee'
-  | 'stripeFee'
-  | 'extraFee'
-  | 'baseFee'
-  | 'personalFee'
-  | 'transferAmount'
-  | 'transferReversedAmount'
-> = {
-  refundedTransactionAmount: 0,
-  refundedApplicationFeeAmount: 0,
-  transferReversedAmount: 0,
-  platformFee: 0,
-  stripeFee: 0,
-  extraFee: 0,
-  baseFee: 0,
-  personalFee: 0,
-  transferAmount: 0,
-};
 
 @JSONSchema({
   // Check payment stripe docs fo detailed description
@@ -289,7 +264,7 @@ class Transaction {
   @JSONSchema({
     description: 'Store data about payment connected account and etc.',
   })
-  @Column({ type: 'json', default: defaultParams })
+  @Column({ type: 'json', default: transactionDefaultParams })
   @IsObject()
   @IsUndefinable()
   params: IParams;
