@@ -8,6 +8,7 @@ import getPercentFromAmount from '@helpers/get-percent-from-amount';
 import type IFees from '@interfaces/fees';
 import type ITax from '@interfaces/tax';
 import type ITaxes from '@interfaces/taxes';
+import type { IPaymentIntentParams } from '@services/payment-gateway/stripe';
 
 interface IGetPaymentIntentTaxParams {
   processingTransactionAmountUnit: number;
@@ -34,10 +35,155 @@ interface IPaymentIntentTax extends Pick<ITaxes, 'autoCalculateFeeUnit'> {
   createTaxTransactionFeeUnit: number;
 }
 
+export interface IGetPaymentIntentFeesParams
+  extends Pick<
+    IPaymentIntentParams,
+    | 'applicationPaymentPercent'
+    | 'feesPayer'
+    | 'additionalFeesPercent'
+    | 'extraReceiverRevenuePercent'
+  > {
+  entityUnitCost: number;
+  shouldEstimateTax?: boolean;
+  withStripeFee?: boolean;
+}
+
+export interface IPaymentIntentFees {
+  stripeUnitFee: number;
+  platformUnitFee: number;
+  userUnitAmount: number;
+  receiverUnitRevenue: number;
+  receiverAdditionalFee: number;
+  senderAdditionalFee: number;
+  extraReceiverUnitRevenue: number;
+  estimatedTaxUnit?: number;
+  estimatedTaxPercent?: number;
+}
+
 /**
  * Stripe calculation service
  */
 class Calculation {
+  /**
+   * Returns receiver payment amount
+   * @description NOTES: How much end user will get after fees from transaction
+   * 1. Stable unit - stable amount that payment provider charges
+   * 2. Payment percent - payment provider fee percent for single transaction
+   * Fees calculation:
+   * 1. User pays fee
+   * totalAmount = 106$, receiverReceiver = 100, taxFee = 3, platformFee = 3
+   * 2. Receiver pays fees
+   * totalAmount = 100$, receiverReceiver = 94, taxFee = 3, platformFee = 3
+   */
+  public static async getPaymentIntentFees({
+    entityUnitCost,
+    additionalFeesPercent,
+    feesPayer = TransactionRole.SENDER,
+    applicationPaymentPercent = 0,
+    extraReceiverRevenuePercent = 0,
+    shouldEstimateTax = false,
+    withStripeFee = true,
+  }: IGetPaymentIntentFeesParams): Promise<IPaymentIntentFees> {
+    const { taxes } = await remoteConfig();
+
+    // Calculate additional fees
+    const receiverAdditionalFee = getPercentFromAmount(
+      entityUnitCost,
+      additionalFeesPercent?.receiver,
+    );
+    const senderAdditionalFee = getPercentFromAmount(entityUnitCost, additionalFeesPercent?.sender);
+
+    // Additional receiver revenue from application percent
+    const extraReceiverUnitRevenue = getPercentFromAmount(
+      entityUnitCost,
+      extraReceiverRevenuePercent,
+    );
+
+    const sharedFees = {
+      extraReceiverUnitRevenue,
+      senderAdditionalFee,
+      receiverAdditionalFee,
+      ...(shouldEstimateTax ? { estimatedTaxPercent: taxes?.defaultPercent } : {}),
+    };
+
+    // How much percent from total amount will receive end user
+    const platformUnitFee = getPercentFromAmount(entityUnitCost, applicationPaymentPercent);
+
+    if (feesPayer === TransactionRole.SENDER) {
+      let userTempUnitAmount = entityUnitCost + platformUnitFee + senderAdditionalFee;
+      let userUnitAmount: number;
+      let estimatedTaxUnit = 0;
+
+      if (shouldEstimateTax) {
+        userTempUnitAmount += taxes?.stableUnit ?? 0;
+        estimatedTaxUnit = getPercentFromAmount(userTempUnitAmount, taxes?.defaultPercent ?? 0);
+      }
+
+      userTempUnitAmount += estimatedTaxUnit;
+
+      if (withStripeFee) {
+        // If tax will be calculated on top set of transaction - do not include Stripe fee
+        userUnitAmount = (
+          await Calculation.getStripeFeeAndProcessingAmount({
+            amountUnit: userTempUnitAmount,
+            feesPayer: TransactionRole.SENDER,
+          })
+        )?.processingAmountUnit;
+      } else {
+        userUnitAmount = userTempUnitAmount;
+      }
+
+      return {
+        ...sharedFees,
+        ...(shouldEstimateTax ? { estimatedTaxUnit, taxFeeUnit: taxes?.stableUnit } : {}),
+        platformUnitFee,
+        userUnitAmount,
+        stripeUnitFee: Math.round(userUnitAmount - userTempUnitAmount),
+        receiverUnitRevenue: Math.round(
+          entityUnitCost - receiverAdditionalFee + extraReceiverUnitRevenue,
+        ),
+      };
+    }
+
+    let stripeUnitFee = 0;
+
+    if (withStripeFee) {
+      stripeUnitFee = (
+        await Calculation.getStripeFeeAndProcessingAmount({
+          amountUnit: entityUnitCost,
+          feesPayer: TransactionRole.RECEIVER,
+        })
+      )?.stripeFeeUnit;
+    }
+
+    let userUnitAmount = Math.round(entityUnitCost + senderAdditionalFee);
+    let estimatedTaxUnit = 0;
+
+    if (shouldEstimateTax) {
+      userUnitAmount += taxes?.stableUnit ?? 0;
+      estimatedTaxUnit = getPercentFromAmount(userUnitAmount, taxes?.defaultPercent ?? 0);
+    }
+
+    userUnitAmount += estimatedTaxUnit;
+
+    const receiverUnitRevenue = Math.round(
+      entityUnitCost -
+        stripeUnitFee -
+        platformUnitFee -
+        receiverAdditionalFee +
+        extraReceiverUnitRevenue,
+    );
+
+    return {
+      ...sharedFees,
+      ...(shouldEstimateTax ? { estimatedTaxUnit, taxFeeUnit: taxes?.stableUnit } : {}),
+      platformUnitFee,
+      stripeUnitFee,
+      userUnitAmount,
+      receiverUnitRevenue,
+    };
+  }
+
   /**
    * Returns Stripe fee
    */
@@ -107,9 +253,7 @@ class Calculation {
       shouldIgnoreNotCollecting = false,
     }: IComputePaymentIntentTaxParams,
   ): Promise<ITax> {
-    /**
-     * Get payment method data
-     */
+    // Get payment method data
     const paymentMethod = await sdk.paymentMethods.retrieve(paymentMethodId, {
       expand: [StripePaymentMethods.CARD],
     });
