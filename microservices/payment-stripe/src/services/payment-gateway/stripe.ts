@@ -1498,6 +1498,7 @@ class Stripe extends Abstract {
     switch (event.type) {
       /**
        * Checkout session events
+       * @TODO: move out to webhook handlers
        */
       case 'checkout.session.completed': {
         await this.handleTransactionCompleted(event);
@@ -1710,7 +1711,6 @@ class Stripe extends Abstract {
 
   /**
    * Validate and transform coupon duration input
-   * @private
    */
   private static validateAndTransformCouponDurationInput({
     duration,
@@ -1735,7 +1735,6 @@ class Stripe extends Abstract {
 
   /**
    * Validate and transform coupon discount input
-   * @private
    */
   private static validateAndTransformCouponDiscountInput({
     percentOff,
@@ -1768,7 +1767,6 @@ class Stripe extends Abstract {
 
   /**
    * Returns card for charging payment
-   * @private
    */
   private async getChargingCard(userId: string, cardId?: string): Promise<Card> {
     let card: Card | undefined;
@@ -1815,7 +1813,6 @@ class Stripe extends Abstract {
 
   /**
    * Returns account link
-   * @private
    */
   private buildAccountLink(
     accountId: string,
@@ -1834,7 +1831,6 @@ class Stripe extends Abstract {
 
   /**
    * Returns payout method data
-   * @private
    */
   private async getPayoutMethodAllowances(
     userId: string,
@@ -1922,7 +1918,6 @@ class Stripe extends Abstract {
 
   /**
    * Get and validate receiver and sender
-   * @private
    */
   private async getAndValidateTransactionContributors(
     senderId: string,
@@ -1964,7 +1959,6 @@ class Stripe extends Abstract {
 
   /**
    * Build card data
-   * @private
    */
   private static buildCardData({
     cvc,
@@ -1994,7 +1988,6 @@ class Stripe extends Abstract {
 
   /**
    * Check if transfer is object
-   * @private
    */
   private static checkIfApplicationFeeIsObject(
     applicationFee?: StripeSdk.ApplicationFee | string | null,
