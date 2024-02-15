@@ -9,9 +9,9 @@ import type { TCustomerBalance } from '@services/payment-gateway/stripe';
 const convertBalanceFromUnit = (balance: TCustomerBalance): TCustomerBalance => {
   const currencies = { usd: 0, eur: 0 };
   const convertedInput: TCustomerBalance = {
-    [BalanceType.INSTANT]: currencies,
-    [BalanceType.PENDING]: currencies,
-    [BalanceType.AVAILABLE]: currencies,
+    [BalanceType.INSTANT]: { ...currencies },
+    [BalanceType.PENDING]: { ...currencies },
+    [BalanceType.AVAILABLE]: { ...currencies },
   };
 
   Object.keys(balance).forEach((type: BalanceType) => {
