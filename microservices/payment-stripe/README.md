@@ -139,19 +139,27 @@ Additionally, for complex fee and tax calculations, we have our own calculation 
 
 #### <a id="components-and-their-roles"></a>COMPONENTS AND THEIR ROLES
 #### 1. Customer
-This entity represents a recurring customer. The customer can utilize their card or bank account to purchase products or subscribe.
+This entity presents a recurring customer. The customer can utilize their card or bank account to purchase products or subscribe.
 Additionally, customers have the option to set up a Stripe connected account for accepting payments from other customers and subsequently disbursing these funds.
 You can view all your customers on the Stripe dashboard by following this link: https://dashboard.stripe.com/test/customers
 
 #### 2. Card
-This component represents a Stripe card, facilitating the storage of multiple cards on a customer for subsequent 
+This component presents a Stripe card, facilitating the storage of multiple cards on a customer for subsequent 
 charging. Similarly, it allows the storage of multiple debit cards on a recipient for future transfers. 
 Additionally, the card serves as an external account card for connected accounts. These external account cards 
 are debit cards associated with a Stripe platform's connected accounts, enabling the transfer of funds to or from 
 the connected accounts' Stripe balance. If the card is designated as an external account, users can payout funds 
 to this card. When a card is declared as the payment method, it denotes a customer card. 
-Conversely, if the card is declared with the cardId reference stored in parameters, 
+Conversely, if the card is declared with the "cardId" reference stored in parameters, 
 it indicates the external account linked to a user's connected account.
+
+### 3. Bank account
+This component presents a Stripe bank account. Similar to a card, a bank account can be used 
+as either the customer's payment method or the external account of a user's connected account. 
+If designated as an external account, users can transfer funds to this bank account. 
+When declared as the payment method, it represents a customer bank account suitable for purchasing products, etc. 
+Conversely, if specified with the "bankAccountId" reference stored in parameters, it indicates the 
+external account associated with a user's connected account.
 
 #### <a id="components-and-their-usage"></a>COMPONENTS AND THEIR USAGE
 #### 1. Customer
@@ -177,6 +185,14 @@ For instance, you can employ a SetupIntent to establish and retain your customer
 1.3 Setup Card (External account). Method "connectAccount"
 To configure a card as the external account for a user's connected account, 
 you can utilize Stripe's onboarding process. The user needs to be logged into the Stripe Form, 
+and they can achieve this by invoking the "connectAccount" method.
+
+### 3. Bank account
+You can utilize user-connected account onboarding to set up a bank account as the external account for your user's connected account.
+
+1.1 Setup Bank Account (External account). Method "connectAccount"
+To configure a bank account as the external account for a user's connected account,
+you can utilize Stripe's onboarding process. The user needs to be logged into the Stripe Form,
 and they can achieve this by invoking the "connectAccount" method.
 
 Rebuild: 1
