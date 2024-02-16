@@ -23,6 +23,7 @@ This microservice provides payments mechanism for stipe.
 - [HOW TO RUN](#how-to-run)
 - [HOW TO DEVELOP](#how-to-develop)
 - [MEMORY USAGE](#memory-usage)
+- [OVERVIEW](#overview)
 
 ### <a id="environments"></a>ENVIRONMENTS:
 - `MS_API_KEY` - Stripe api key to connect ms with stripe sdk. Default: `example`
@@ -72,14 +73,7 @@ nyc npm run test
 That is all. **Don't forget install npm dependencies**
 (in root folder & local folder run:  `npm ci`)
 
-### <a id="memory-usage"></a>MEMORY USAGE:
-
-__Run on typescript__: ~200 MB PEAK / ~160 MB  
-__Run on JS__: ~110 MB PEAK / ~80 MB
-
-### <a id="memory-usage"></a>STRIPE:
-
-Run stripe cli for test dev env:
+#### Run stripe cli for test dev env:
 1. Account events
 ```bash
 stripe listen --forward-to 'http://localhost:3000/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=account'
@@ -89,34 +83,12 @@ stripe listen --forward-to 'http://localhost:3000/webhook/payment-stripe.stripe.
 stripe listen --forward-connect-to 'http://localhost:3000/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=connect'
 ```
 
-### <a id="webhooks"></a>WEBHOOKS:
+#### Webhooks:
 1. For cloud environment: Integrate all necessary and specified webhook endpoints from the payment factory Stripe service
-into your hosted endpoint listeners in the Stripe dashboard.
-2. For local development: use stripe-cli
+   into your hosted endpoint listeners in the Stripe dashboard.
+2. For local development: use stripe-cli. See: https://docs.stripe.com/stripe-cli
 
-### <a id="definitions"></a>DEFINITIONS:
-#### <a id="definitions-fees"></a>Fees:
-1. Application fees - collected amount by Platform from transaction.
-2. Tax - collected taxes (included in application fees).
-3. Fee - Platform fee, Stripe fee (included in application fees).
-4. Platform fee - fee that grab Platform as revenue from transaction.
-5. Stripe fee - fee that Stripe takes from processing transaction.
-6. Extra fee - apply to sender or/and receiver and included in transaction application fees,
-   and in payment intent collected fees
-7. Base fee - platform + stripe + create tax transaction fee
-8. Personal fee - base fee + personal (debit or credit extra fee)
-
-#### <a id="definitions-tax"></a>Tax:
-1. Tax calculation (Tax Calculation API) - calculated by Stripe tax for transaction (e.g. payment intent)
-2. Tax transaction (Tax Transaction API) - Stripe tax transaction presented in Stripe Tax reports
-
-### <a id="testing"></a> TESTING:
-#### <a id="testing-stripe"></a> STRIPE:
-Original reference: https://stripe.com/docs/testing
-
-#### <a id="testing-stripe-cards"></a> CARDS:
-
-Use these test cards to simulate successful payments from North and South America.
+#### Use these test cards to simulate successful payments from North and South America.
 1. United States (US)	- 4242424242424242 - Visa
 
 To simulate a declined payment with a successfully attached card, use the next one.
@@ -128,5 +100,112 @@ To simulate a disputed transaction, use the test cards in this section. Then, to
 3. Inquiry	- 4000000000001976	- With default account settings, charge succeeds, only to be disputed as an inquiry.
 4. Warning	- 4000000000005423	- With default account settings, charge succeeds, only to receive an early fraud warning.
 5. Multiple disputes	- 4000000404000079	- With default account settings, charge succeeds, only to be disputed multiple times.
+
+See: https://stripe.com/docs/testing
+
+### <a id="memory-usage"></a>MEMORY USAGE:
+
+__Run on typescript__: ~200 MB PEAK / ~160 MB  
+__Run on JS__: ~110 MB PEAK / ~80 MB
+
+### <a id="overview"></a>OVERVIEW:
+
+#### Navigation
+- [INTRODUCTION](#introduction)
+- [PURPOSE AND GOALS](#purpose-and-goals)
+- [TARGET AUDIENCE](#target-audience)
+- [ARCHITECTURE HIGH-LEVEL OVERVIEW](#architecture-high-level-overview)
+- [COMPONENTS AND THEIR ROLES](#components-and-their-roles)
+- [COMPONENTS AND THEIR USAGE](#components-and-their-usage)
+
+#### <a id="introduction"></a>INTRODUCTION:
+The Payment-Stripe microservice provides APIs that enable both front-end and backend systems to interact with Stripe without requiring in-depth knowledge of Stripe documentation. 
+These APIs facilitate:
+
+1. Creation of customers, connected accounts, bank accounts, and cards.
+2. Processing of payments, payouts, refunds, and checkouts.
+3. Handling of disputes and Stripe webhooks events
+
+#### <a id="purpose-and-goals"></a>PURPOSE AND GOALS:
+The aim of this microservice is to deliver a secure, scalable, and resilient API that enables integration and development of business logic without requiring extensive knowledge of Stripe.
+
+#### <a id="target-audience"></a>TARGET AUDIENCE:
+The intended audience comprises both backend and frontend developers.
+
+#### <a id="architecture-high-level-overview"></a>ARCHITECTURE HIGH-LEVEL OVERVIEW
+The current microservice utilizes the Stripe API and relies on the Stripe package for interfacing with it. We manage Stripe webhooks as part of our system. Our payment gateway service provides APIs for Stripe interactions. Webhooks are managed through a middleware declared within the gateway microservice, with webhook handlers provided by a separate service.
+To enhance security for webhooks, we've implemented an additional route specifically for handling Stripe webhooks. This route includes a token with the role "webhook" to validate incoming requests and prevent vulnerabilities.
+Additionally, for complex fee and tax calculations, we have our own calculation service that handles this functionality.
+
+#### <a id="components-and-their-roles"></a>COMPONENTS AND THEIR ROLES
+#### 1. Customer
+This entity presents a recurring customer. The customer can utilize their card or bank account to purchase products or subscribe.
+Additionally, customers have the option to set up a Stripe connected account for accepting payments from other customers and subsequently disbursing these funds.
+You can view all your customers on the Stripe dashboard by following this link: https://dashboard.stripe.com/test/customers
+
+#### 2. Card
+This component presents a Stripe card, facilitating the storage of multiple cards on a customer for subsequent 
+charging. Similarly, it allows the storage of multiple debit cards on a recipient for future transfers. 
+Additionally, the card serves as an external account card for connected accounts. These external account cards 
+are debit cards associated with a Stripe platform's connected accounts, enabling the transfer of funds to or from 
+the connected accounts' Stripe balance. If the card is designated as an external account, users can payout funds 
+to this card. When a card is declared as the payment method, it denotes a customer card. 
+Conversely, if the card is declared with the "cardId" reference stored in parameters, 
+it indicates the external account linked to a user's connected account.
+
+#### 3. Bank account
+This component presents a Stripe bank account. Similar to a card, a bank account can be used 
+as either the customer's payment method or the external account of a user's connected account. 
+If designated as an external account, users can transfer funds to this bank account. 
+When declared as the payment method, it represents a customer bank account suitable for purchasing products, etc. 
+Conversely, if specified with the "bankAccountId" reference stored in parameters, it indicates the 
+external account associated with a user's connected account.
+
+#### 4. Transaction
+This component presents an abstract model of a Stripe transaction. 
+A Stripe transaction refers to transactions that occur through Stripe checkout or payment intent.
+
+4.1 Payment Intent
+A PaymentIntent assists you in collecting payment from your customer
+
+4.2 Checkout
+A Checkout Session presents your customer's session as they make one-time purchases or subscribe through Checkout or Payment Links.
+
+#### <a id="components-and-their-usage"></a>COMPONENTS AND THEIR USAGE
+#### 1. Customer
+For set up customer in an application you should utilize payment-gateway service.
+
+1.1 Method "createCustomer"
+This method facilitates the creation of a Stripe customer. By invoking this method, the API will generate a Stripe customer using the user information provided by you.
+
+#### 2. Card
+To establish a card within an application, you can employ either a payment-gateway service or utilize a setup intent to set up customer cards. 
+Alternatively, you can utilize user-connected account onboarding to set up a card as the external account for your user's connected account.
+
+1.1 Method "addCard"
+This function streamlines the process of generating a Stripe customer card. 
+When called, the API will create a Stripe customer card based on the user information you provide. 
+However, in this scenario, your application must adhere to 
+PCI (Payment Card Industry Data Security Standard) requirements. Ideally, this method is best suited for setting up test Stripe cards for integration testing purposes.
+
+1.2 Setup Intent Card (Payment method) template "@templates/card/setup-intent"
+A SetupIntent walks you through the steps of configuring and storing a customer's payment information for future transactions.
+For instance, you can employ a SetupIntent to establish and retain your customer's card details without promptly processing a payment
+
+1.3 Setup Card (External account). Method "connectAccount"
+To configure a card as the external account for a user's connected account, 
+you can utilize Stripe's onboarding process. The user needs to be logged into the Stripe Form, 
+and they can achieve this by invoking the "connectAccount" method.
+
+#### 3. Bank account
+You can utilize user-connected account onboarding to set up a bank account as the external account for your user's connected account.
+
+1.1 Setup Bank Account (External account). Method "connectAccount"
+To configure a bank account as the external account for a user's connected account,
+you can utilize Stripe's onboarding process. The user needs to be logged into the Stripe Form,
+and they can achieve this by invoking the "connectAccount" method.
+
+#### 4. Transaction
+For use transaction API in an application you should utilize payment-gateway service.
 
 Rebuild: 1

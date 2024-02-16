@@ -49,9 +49,7 @@ class Transaction {
 
     const isChargeUpdated = updateColumns.some(({ propertyName }) => propertyName === 'chargeId');
 
-    /**
-     * Attach required to transactions Stripe references and amount
-     */
+    // Attach required to transactions Stripe references and amount
     if (isChargeUpdated && entity.chargeId && !databaseEntity.chargeId) {
       await (await Stripe.init(manager)).attachToTransactionsChargeRefs(entity.chargeId);
     }
