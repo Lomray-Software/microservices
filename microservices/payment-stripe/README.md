@@ -165,6 +165,12 @@ external account associated with a user's connected account.
 This component presents an abstract model of a Stripe transaction. 
 A Stripe transaction refers to transactions that occur through Stripe checkout or payment intent.
 
+4.1 Payment Intent
+A PaymentIntent assists you in collecting payment from your customer
+
+4.2 Checkout
+A Checkout Session presents your customer's session as they make one-time purchases or subscribe through Checkout or Payment Links.
+
 #### <a id="components-and-their-usage"></a>COMPONENTS AND THEIR USAGE
 #### 1. Customer
 For set up customer in an application you should utilize payment-gateway service.
@@ -191,12 +197,15 @@ To configure a card as the external account for a user's connected account,
 you can utilize Stripe's onboarding process. The user needs to be logged into the Stripe Form, 
 and they can achieve this by invoking the "connectAccount" method.
 
-### 3. Bank account
+#### 3. Bank account
 You can utilize user-connected account onboarding to set up a bank account as the external account for your user's connected account.
 
 1.1 Setup Bank Account (External account). Method "connectAccount"
 To configure a bank account as the external account for a user's connected account,
 you can utilize Stripe's onboarding process. The user needs to be logged into the Stripe Form,
 and they can achieve this by invoking the "connectAccount" method.
+
+#### 4. Transaction
+For use transaction API in an application you should utilize payment-gateway service.
 
 Rebuild: 1
