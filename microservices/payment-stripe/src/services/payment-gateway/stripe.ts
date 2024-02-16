@@ -1075,9 +1075,7 @@ class Stripe extends Abstract {
     const { sender: senderCustomer, receiver: receiverCustomer } =
       await this.getAndValidateTransactionContributors(userId, receiverId);
 
-    /**
-     * Verify if customer is verified
-     */
+    // Verify if customer is verified
     const {
       userId: receiverUserId,
       params: { accountId: receiverAccountId },
@@ -1452,8 +1450,94 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Get and validate receiver and sender
+   */
+  protected async getAndValidateTransactionContributors(
+    senderId: string,
+    receiverId: string,
+  ): Promise<{ receiver: Customer; sender: Customer }> {
+    const sender = await this.customerRepository.findOne({ userId: senderId });
+    const receiver = await this.customerRepository.findOne({ userId: receiverId });
+
+    if (!sender) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Sender customer account'),
+      });
+    }
+
+    if (!receiver) {
+      throw new BaseException({
+        status: 400,
+        message: messages.getNotFoundMessage('Receiver customer account'),
+      });
+    }
+
+    const {
+      params: { accountId: receiverAccountId, isVerified: isReceiverVerified },
+    } = receiver;
+
+    if (!receiverAccountId || !isReceiverVerified) {
+      throw new BaseException({
+        status: 400,
+        message: "Receiver don't have setup or verified connected account.",
+      });
+    }
+
+    return {
+      sender,
+      receiver,
+    };
+  }
+
+  /**
+   * Returns card for charging payment
+   */
+  protected async getChargingCard(userId: string, cardId?: string): Promise<Card> {
+    let card: Card | undefined;
+
+    /**
+     * Find card that declared as the payment method
+     */
+    const cardQuery = this.cardRepository
+      .createQueryBuilder('card')
+      .where('card.userId = :userId', { userId })
+      .andWhere(
+        `(card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL)`,
+      );
+
+    if (cardId) {
+      card = await cardQuery.andWhere('card.id = :cardId', { cardId }).getOne();
+    } else {
+      card = await cardQuery.andWhere('card.isDefault = true').getOne();
+    }
+
+    if (!card) {
+      throw new BaseException({
+        status: 500,
+        message: messages.getNotFoundMessage('Failed to get charging card. Card'),
+      });
+    }
+
+    if (!CardRepository.extractPaymentMethodId(card)) {
+      throw new BaseException({
+        status: 400,
+        message: "Amount can't be charged from this card. Card isn't specified is payment method.",
+      });
+    }
+
+    if (card.params.cardId) {
+      throw new BaseException({
+        status: 400,
+        message: "Amount can't be charged from this card. Card is related to the connect account.",
+      });
+    }
+
+    return card;
+  }
+
+  /**
    * Get and calculate transfer information
-   * @protected
    */
   protected async getTransferInfo(
     entityId: string,
@@ -1491,7 +1575,6 @@ class Stripe extends Abstract {
 
   /**
    * Process webhook event
-   * @private
    */
   private async processWebhookEvent(event: StripeSdk.Event, webhookType: string): Promise<void> {
     const webhookHandlers = WebhookHandlers.init(this.manager);
@@ -1767,52 +1850,6 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Returns card for charging payment
-   */
-  private async getChargingCard(userId: string, cardId?: string): Promise<Card> {
-    let card: Card | undefined;
-
-    /**
-     * Find card that declared as the payment method
-     */
-    const cardQuery = this.cardRepository
-      .createQueryBuilder('card')
-      .where('card.userId = :userId', { userId })
-      .andWhere(
-        `(card.params ->> 'paymentMethodId' IS NOT NULL OR card."paymentMethodId" IS NOT NULL)`,
-      );
-
-    if (cardId) {
-      card = await cardQuery.andWhere('card.id = :cardId', { cardId }).getOne();
-    } else {
-      card = await cardQuery.andWhere('card.isDefault = true').getOne();
-    }
-
-    if (!card) {
-      throw new BaseException({
-        status: 500,
-        message: messages.getNotFoundMessage('Failed to get charging card. Card'),
-      });
-    }
-
-    if (!CardRepository.extractPaymentMethodId(card)) {
-      throw new BaseException({
-        status: 400,
-        message: "Amount can't be charged from this card. Card isn't specified is payment method.",
-      });
-    }
-
-    if (card.params.cardId) {
-      throw new BaseException({
-        status: 400,
-        message: "Amount can't be charged from this card. Card is related to the connect account.",
-      });
-    }
-
-    return card;
-  }
-
-  /**
    * Returns account link
    */
   private buildAccountLink(
@@ -1914,47 +1951,6 @@ class Stripe extends Abstract {
     return {
       externalAccountId: bankAccount?.params?.bankAccountId,
       isInstantPayoutAllowed: Boolean(bankAccount?.isInstantPayoutAllowed),
-    };
-  }
-
-  /**
-   * Get and validate receiver and sender
-   */
-  private async getAndValidateTransactionContributors(
-    senderId: string,
-    receiverId: string,
-  ): Promise<{ receiver: Customer; sender: Customer }> {
-    const sender = await this.customerRepository.findOne({ userId: senderId });
-    const receiver = await this.customerRepository.findOne({ userId: receiverId });
-
-    if (!sender) {
-      throw new BaseException({
-        status: 400,
-        message: messages.getNotFoundMessage('Sender customer account'),
-      });
-    }
-
-    if (!receiver) {
-      throw new BaseException({
-        status: 400,
-        message: messages.getNotFoundMessage('Receiver customer account'),
-      });
-    }
-
-    const {
-      params: { accountId: receiverAccountId, isVerified: isReceiverVerified },
-    } = receiver;
-
-    if (!receiverAccountId || !isReceiverVerified) {
-      throw new BaseException({
-        status: 400,
-        message: "Receiver don't have setup or verified connected account.",
-      });
-    }
-
-    return {
-      sender,
-      receiver,
     };
   }
 
