@@ -1537,6 +1537,66 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Returns account link
+   */
+  protected buildAccountLink(
+    accountId: string,
+    refreshUrl: string,
+    returnUrl: string,
+  ): Promise<StripeSdk.AccountLink> {
+    return this.sdk.accountLinks.create({
+      account: accountId,
+      type: 'account_onboarding',
+      // eslint-disable-next-line camelcase
+      refresh_url: refreshUrl,
+      // eslint-disable-next-line camelcase
+      return_url: returnUrl,
+    });
+  }
+
+  /**
+   * Build card data
+   */
+  protected static buildCardData({
+    cvc,
+    expired,
+    digits,
+    token,
+  }: ICardParams): TCardData | undefined {
+    if (token) {
+      return { token };
+    }
+
+    if (!expired || !digits || !cvc) {
+      return;
+    }
+
+    const { year, month } = fromExpirationDate(expired);
+
+    return {
+      // eslint-disable-next-line camelcase
+      exp_month: month,
+      // eslint-disable-next-line camelcase
+      exp_year: year,
+      cvc,
+      number: digits,
+    };
+  }
+
+  /**
+   * Check if transfer is object
+   */
+  protected static checkIfApplicationFeeIsObject(
+    applicationFee?: StripeSdk.ApplicationFee | string | null,
+  ): applicationFee is StripeSdk.ApplicationFee {
+    if (!applicationFee || typeof applicationFee === 'string') {
+      return false;
+    }
+
+    return 'id' in applicationFee && applicationFee.object === 'application_fee';
+  }
+
+  /**
    * Get and calculate transfer information
    */
   protected async getTransferInfo(
@@ -1850,24 +1910,6 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Returns account link
-   */
-  private buildAccountLink(
-    accountId: string,
-    refreshUrl: string,
-    returnUrl: string,
-  ): Promise<StripeSdk.AccountLink> {
-    return this.sdk.accountLinks.create({
-      account: accountId,
-      type: 'account_onboarding',
-      // eslint-disable-next-line camelcase
-      refresh_url: refreshUrl,
-      // eslint-disable-next-line camelcase
-      return_url: returnUrl,
-    });
-  }
-
-  /**
    * Returns payout method data
    */
   private async getPayoutMethodAllowances(
@@ -1952,48 +1994,6 @@ class Stripe extends Abstract {
       externalAccountId: bankAccount?.params?.bankAccountId,
       isInstantPayoutAllowed: Boolean(bankAccount?.isInstantPayoutAllowed),
     };
-  }
-
-  /**
-   * Build card data
-   */
-  private static buildCardData({
-    cvc,
-    expired,
-    digits,
-    token,
-  }: ICardParams): TCardData | undefined {
-    if (token) {
-      return { token };
-    }
-
-    if (!expired || !digits || !cvc) {
-      return;
-    }
-
-    const { year, month } = fromExpirationDate(expired);
-
-    return {
-      // eslint-disable-next-line camelcase
-      exp_month: month,
-      // eslint-disable-next-line camelcase
-      exp_year: year,
-      cvc,
-      number: digits,
-    };
-  }
-
-  /**
-   * Check if transfer is object
-   */
-  private static checkIfApplicationFeeIsObject(
-    applicationFee?: StripeSdk.ApplicationFee | string | null,
-  ): applicationFee is StripeSdk.ApplicationFee {
-    if (!applicationFee || typeof applicationFee === 'string') {
-      return false;
-    }
-
-    return 'id' in applicationFee && applicationFee.object === 'application_fee';
   }
 }
 
