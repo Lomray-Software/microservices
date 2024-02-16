@@ -153,13 +153,17 @@ to this card. When a card is declared as the payment method, it denotes a custom
 Conversely, if the card is declared with the "cardId" reference stored in parameters, 
 it indicates the external account linked to a user's connected account.
 
-### 3. Bank account
+#### 3. Bank account
 This component presents a Stripe bank account. Similar to a card, a bank account can be used 
 as either the customer's payment method or the external account of a user's connected account. 
 If designated as an external account, users can transfer funds to this bank account. 
 When declared as the payment method, it represents a customer bank account suitable for purchasing products, etc. 
 Conversely, if specified with the "bankAccountId" reference stored in parameters, it indicates the 
 external account associated with a user's connected account.
+
+#### 4. Transaction
+This component presents an abstract model of a Stripe transaction. 
+A Stripe transaction refers to transactions that occur through Stripe checkout or payment intent.
 
 #### <a id="components-and-their-usage"></a>COMPONENTS AND THEIR USAGE
 #### 1. Customer
