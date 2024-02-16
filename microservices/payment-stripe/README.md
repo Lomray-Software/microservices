@@ -23,6 +23,7 @@ This microservice provides payments mechanism for stipe.
 - [HOW TO RUN](#how-to-run)
 - [HOW TO DEVELOP](#how-to-develop)
 - [MEMORY USAGE](#memory-usage)
+- [OVERVIEW](#overview)
 
 ### <a id="environments"></a>ENVIRONMENTS:
 - `MS_API_KEY` - Stripe api key to connect ms with stripe sdk. Default: `example`
@@ -72,14 +73,7 @@ nyc npm run test
 That is all. **Don't forget install npm dependencies**
 (in root folder & local folder run:  `npm ci`)
 
-### <a id="memory-usage"></a>MEMORY USAGE:
-
-__Run on typescript__: ~200 MB PEAK / ~160 MB  
-__Run on JS__: ~110 MB PEAK / ~80 MB
-
-### <a id="memory-usage"></a>STRIPE:
-
-Run stripe cli for test dev env:
+#### Run stripe cli for test dev env:
 1. Account events
 ```bash
 stripe listen --forward-to 'http://localhost:3000/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=account'
@@ -89,34 +83,12 @@ stripe listen --forward-to 'http://localhost:3000/webhook/payment-stripe.stripe.
 stripe listen --forward-connect-to 'http://localhost:3000/webhook/payment-stripe.stripe.webhook/webhooktokenoooooooooooooooooooo?id=connect'
 ```
 
-### <a id="webhooks"></a>WEBHOOKS:
+#### Webhooks:
 1. For cloud environment: Integrate all necessary and specified webhook endpoints from the payment factory Stripe service
-into your hosted endpoint listeners in the Stripe dashboard.
-2. For local development: use stripe-cli
+   into your hosted endpoint listeners in the Stripe dashboard.
+2. For local development: use stripe-cli. See: https://docs.stripe.com/stripe-cli
 
-### <a id="definitions"></a>DEFINITIONS:
-#### <a id="definitions-fees"></a>Fees:
-1. Application fees - collected amount by Platform from transaction.
-2. Tax - collected taxes (included in application fees).
-3. Fee - Platform fee, Stripe fee (included in application fees).
-4. Platform fee - fee that grab Platform as revenue from transaction.
-5. Stripe fee - fee that Stripe takes from processing transaction.
-6. Extra fee - apply to sender or/and receiver and included in transaction application fees,
-   and in payment intent collected fees
-7. Base fee - platform + stripe + create tax transaction fee
-8. Personal fee - base fee + personal (debit or credit extra fee)
-
-#### <a id="definitions-tax"></a>Tax:
-1. Tax calculation (Tax Calculation API) - calculated by Stripe tax for transaction (e.g. payment intent)
-2. Tax transaction (Tax Transaction API) - Stripe tax transaction presented in Stripe Tax reports
-
-### <a id="testing"></a> TESTING:
-#### <a id="testing-stripe"></a> STRIPE:
-Original reference: https://stripe.com/docs/testing
-
-#### <a id="testing-stripe-cards"></a> CARDS:
-
-Use these test cards to simulate successful payments from North and South America.
+#### Use these test cards to simulate successful payments from North and South America.
 1. United States (US)	- 4242424242424242 - Visa
 
 To simulate a declined payment with a successfully attached card, use the next one.
@@ -128,5 +100,46 @@ To simulate a disputed transaction, use the test cards in this section. Then, to
 3. Inquiry	- 4000000000001976	- With default account settings, charge succeeds, only to be disputed as an inquiry.
 4. Warning	- 4000000000005423	- With default account settings, charge succeeds, only to receive an early fraud warning.
 5. Multiple disputes	- 4000000404000079	- With default account settings, charge succeeds, only to be disputed multiple times.
+
+See: https://stripe.com/docs/testing
+
+### <a id="memory-usage"></a>MEMORY USAGE:
+
+__Run on typescript__: ~200 MB PEAK / ~160 MB  
+__Run on JS__: ~110 MB PEAK / ~80 MB
+
+### <a id="overview"></a>OVERVIEW:
+
+#### Introduction
+The Payment-Stripe microservice provides APIs that enable both front-end and backend systems to interact with Stripe without requiring in-depth knowledge of Stripe documentation. 
+These APIs facilitate:
+
+1. Creation of customers, connected accounts, bank accounts, and cards.
+2. Processing of payments, payouts, refunds, and checkouts.
+3. Handling of disputes and Stripe webhooks events
+
+#### Purpose and goals of the microservice:
+The aim of this microservice is to deliver a secure, scalable, and resilient API that enables integration and development of business logic without requiring extensive knowledge of Stripe.
+
+#### Target audience
+The intended audience comprises both backend and frontend developers.
+
+#### High-level overview of the microservice architecture
+The current microservice utilizes the Stripe API and relies on the Stripe package for interfacing with it. We manage Stripe webhooks as part of our system. Our payment gateway service provides APIs for Stripe interactions. Webhooks are managed through a middleware declared within the gateway microservice, with webhook handlers provided by a separate service.
+To enhance security for webhooks, we've implemented an additional route specifically for handling Stripe webhooks. This route includes a token with the role "webhook" to validate incoming requests and prevent vulnerabilities.
+Additionally, for complex fee and tax calculations, we have our own calculation service that handles this functionality.
+
+#### Components and their roles
+1. Customer
+This entity represents a recurring customer. The customer can utilize their card or bank account to purchase products or subscribe.
+Additionally, customers have the option to set up a Stripe connected account for accepting payments from other customers and subsequently disbursing these funds.
+
+#### Components and their usage
+1. Customer
+For set up customer in an application you should utilize payment-gateway service.
+
+Methods:
+1.1 Method "createCustomer"
+This method facilitates the creation of a Stripe customer. By invoking this method, the API will generate a Stripe customer using the user information provided by you. You can view all your customers on the Stripe dashboard by following this link: https://dashboard.stripe.com/test/customers
 
 Rebuild: 1
