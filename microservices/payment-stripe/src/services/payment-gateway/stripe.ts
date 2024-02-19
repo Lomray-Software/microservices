@@ -1160,9 +1160,7 @@ class Stripe extends Abstract {
       paymentIntentAmountUnit = userUnitAmount;
     }
 
-    /**
-     * Prevent type error cause on payment intent metadata and transaction params
-     */
+    // Prevent type error cause on payment intent metadata and transaction params
     const sharedTaxData = {
       taxCreatedAt: tax?.createdAt?.toISOString(),
       taxExpiresAt: tax?.expiresAt?.toISOString(),
