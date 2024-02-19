@@ -112,6 +112,7 @@ __Run on JS__: ~110 MB PEAK / ~80 MB
 
 #### Navigation
 - [INTRODUCTION](#introduction)
+- [NOTES](#notes)
 - [REFERENCES](#references)
 - [PURPOSE AND GOALS](#purpose-and-goals)
 - [TARGET AUDIENCE](#target-audience)
@@ -119,6 +120,7 @@ __Run on JS__: ~110 MB PEAK / ~80 MB
 - [COMPONENTS AND THEIR ROLES](#components-and-their-roles)
 - [COMPONENTS AND THEIR USAGE](#components-and-their-usage)
 - [SERVICES AND THEIR ROLES](#services-and-their-usage)
+- [GUIDES](#guides)
 
 #### <a id="introduction"></a>INTRODUCTION:
 The Payment-Stripe microservice provides APIs that enable both front-end and backend systems to interact with Stripe without requiring in-depth knowledge of Stripe documentation. 
@@ -127,6 +129,14 @@ These APIs facilitate:
 1. Creation of customers, connected accounts, bank accounts, and cards.
 2. Processing of payments, payouts, refunds, and checkouts.
 3. Handling of disputes and Stripe webhooks events
+
+#### <a id="notes"></a>NOTES:
+The URLs provided in this overview are for accessing the Stripe dashboard in live (production) mode. 
+For testing purposes, please enable test mode in your Stripe dashboard settings. 
+Below are the Stripe dashboard URLs:
+
+1. Live (production) https://dashboard.stripe.com
+2. Test https://dashboard.stripe.com/test
 
 #### <a id="references"></a>REFERENCES:
 You can locate information based on the API and this documentation here:
@@ -301,5 +311,39 @@ This structure pattern is commonly employed in the Lomray Software Microservices
 Each component has its own associated service, encompassing business logic pertinent to that component. 
 These services are utilized in subscribers, endpoints, and other functionalities. For example, 
 the "update" method of the "dispute" service parses dispute webhook event data, updates transaction data, and records the dispute in the database.
+
+#### <a id="guides"></a>GUIDES:
+Here you can discover guides that will assist you in serving your customers in most situations.
+See: http-requests/payment-stripe/guides
+
+1. Setup customer account
+See: setup-customer-account.http
+
+Description:
+
+1.1 In step 1, we create a customer account.
+
+1.2 In step 2, if a user is to receive funds from another customer, set up a connected account for them.
+
+1.3 Retrieve the initial balance of the user's connected account. 
+
+Stripe dashboard. See:
+
+1.1 Created customer: https://dashboard.stripe.com/customers/${customerId}
+
+1.2 Created connected account: https://dashboard.stripe.com/test/connect/accounts/${connectedAccountId}
+
+2. Setup customer payment method (card)
+See: setup-customer-payment-method.http
+
+Description:
+
+2.1 Create setup intent (card) token
+
+2.2 Navigate to the file templates/card/setup-intent.html. 
+Paste the retrieved token into options.clientSecret. 
+Then, in the instantiation of the Stripe class, insert the Stripe public token like this: new Stripe("publicToken"). 
+You can obtain the public token from here: https://dashboard.stripe.com/apikeys.
+Open html in any browser and paste card information, you can grab test cards here: https://docs.stripe.com/testing#cards.
 
 Rebuild: 1

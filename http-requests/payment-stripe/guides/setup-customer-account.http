@@ -1,0 +1,48 @@
+## Setup customer account
+
+### Step 1. Create customer
+## UserId - user from users microservice
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "customer.create",
+  "params": {
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
+    "name": "John",
+    "email": "john@doe.com"
+  }
+}
+
+### Step 2. (Optional) Create connected account for customer
+## If a user receives funds within your application, take this action.
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.connect-account",
+  "params": {
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
+    "email": "john@doe.com",
+    "accountType": "standard",
+    "refreshUrl": "https://example.com",
+    "returnUrl": "https://example.com"
+  }
+}
+
+### Step 3. (Optional) Get connected account balance
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.balance",
+  "params": {
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3"
+  }
+}
