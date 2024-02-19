@@ -118,6 +118,7 @@ __Run on JS__: ~110 MB PEAK / ~80 MB
 - [ARCHITECTURE HIGH-LEVEL OVERVIEW](#architecture-high-level-overview)
 - [COMPONENTS AND THEIR ROLES](#components-and-their-roles)
 - [COMPONENTS AND THEIR USAGE](#components-and-their-usage)
+- [SERVICES AND THEIR ROLES](#services-and-their-usage)
 
 #### <a id="introduction"></a>INTRODUCTION:
 The Payment-Stripe microservice provides APIs that enable both front-end and backend systems to interact with Stripe without requiring in-depth knowledge of Stripe documentation. 
@@ -140,12 +141,12 @@ The aim of this microservice is to deliver a secure, scalable, and resilient API
 #### <a id="target-audience"></a>TARGET AUDIENCE:
 The intended audience comprises both backend and frontend developers.
 
-#### <a id="architecture-high-level-overview"></a>ARCHITECTURE HIGH-LEVEL OVERVIEW
+#### <a id="architecture-high-level-overview"></a>ARCHITECTURE HIGH-LEVEL OVERVIEW:
 The current microservice utilizes the Stripe API and relies on the Stripe package for interfacing with it. We manage Stripe webhooks as part of our system. Our payment gateway service provides APIs for Stripe interactions. Webhooks are managed through a middleware declared within the gateway microservice, with webhook handlers provided by a separate service.
 To enhance security for webhooks, we've implemented an additional route specifically for handling Stripe webhooks. This route includes a token with the role "webhook" to validate incoming requests and prevent vulnerabilities.
 Additionally, for complex fee and tax calculations, we have our own calculation service that handles this functionality.
 
-#### <a id="components-and-their-roles"></a>COMPONENTS AND THEIR ROLES
+#### <a id="components-and-their-roles"></a>COMPONENTS AND THEIR ROLES:
 #### 1. Customer
 This entity presents a recurring customer. The customer can utilize their card or bank account to purchase products or subscribe.
 Additionally, customers have the option to set up a Stripe connected account for accepting payments from other customers and subsequently disbursing these funds.
@@ -208,7 +209,7 @@ See: https://docs.stripe.com/disputes
 This component represents Stripe dispute (chargeback) evidence detail of the transaction.
 Evidence provided to respond to a dispute.
 
-#### <a id="components-and-their-usage"></a>COMPONENTS AND THEIR USAGE
+#### <a id="components-and-their-usage"></a>COMPONENTS AND THEIR USAGE:
 #### 1. Customer
 For set up customer in an application you should utilize payment-gateway service.
 
@@ -277,5 +278,28 @@ For handling disputes see: Webhook Handler service
 #### 8. Evidence details
 Upon occurrence of a dispute, the webhook handler service will oversee it, capturing relevant evidence details. 
 Users can then submit evidence details through the Stripe Dashboard, after which the API will synchronize this data in the database.
+
+#### <a id="services-and-their-roles"></a>SERVICES AND THEIR ROLES:
+In this section, we will review the common services provided by the microservice and discuss their necessity.
+
+#### 1. Payment gateway
+This is a fundamental microservice providing an API for interacting with Stripe. 
+Here, you can access methods for creating customers, cards, transactions, checkouts, payouts, and more. 
+Additionally, this service defines methods that rely on the webhook handler service for managing incoming webhook events from Stripe.
+
+#### 2. Webhook handlers
+This is a foundational service designed to manage incoming webhooks from Stripe. 
+For each Stripe object, this service defines its own handler that deals with related events. 
+For example, there's a handler for "customer" events corresponding to the customer model, 
+and another for "payout" events related to Stripe payout objects.
+
+### 3. Calculation
+This service provides sophisticated calculation helpers for Stripe transaction fees, taxes, and other related calculations.
+
+### 4. Other components services
+This structure pattern is commonly employed in the Lomray Software Microservices API.
+Each component has its own associated service, encompassing business logic pertinent to that component. 
+These services are utilized in subscribers, endpoints, and other functionalities. For example, 
+the "update" method of the "dispute" service parses dispute webhook event data, updates transaction data, and records the dispute in the database.
 
 Rebuild: 1
