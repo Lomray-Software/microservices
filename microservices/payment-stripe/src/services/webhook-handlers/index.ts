@@ -68,7 +68,6 @@ class WebhookHandlers {
 
   /**
    * @constructor
-   * @private
    */
   private constructor(manager: EntityManager) {
     this.customer = new Customer(manager);
@@ -87,7 +86,7 @@ class WebhookHandlers {
    * Init service
    */
   public static init(manager: EntityManager): WebhookHandlers {
-    return new WebhookHandlers(manager);
+    return new this(manager);
   }
 }
 
