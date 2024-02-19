@@ -319,6 +319,8 @@ See: http-requests/payment-stripe/guides
 #### Navigation
 - [SETUP CUSTOMER ACCOUNT](#setup-customer-account)
 - [SETUP CUSTOMER PAYMENT METHOD (CARD)](#setup-customer-payment-method-card)
+- [LOGIN CUSTOMER IN BOARDING](#login-customer-in-onboarding)
+- [LOGIN CUSTOMER IN EXPRESS DASHBOARD](#login-customer-in-express-dashboard)
 
 #### <a id="setup-customer-account"></a>SETUP CUSTOMER ACCOUNT
 See: setup-customer-account.http
@@ -328,6 +330,8 @@ Description:
 1.1 In step 1, we create a customer account.
 
 1.2 In step 2, if a user is to receive funds from another customer, set up a connected account for them.
+This endpoint will provide a link to the onboarding dashboard. 
+Users will need to follow the link and fill in the required information.
 
 1.3 Retrieve the initial balance of the user's connected account. 
 
@@ -349,5 +353,20 @@ Paste the retrieved token into options.clientSecret.
 Then, in the instantiation of the Stripe class, insert the Stripe public token like this: new Stripe("publicToken"). 
 You can obtain the public token from here: https://dashboard.stripe.com/apikeys.
 Open html in any browser and paste card information, you can grab test cards here: https://docs.stripe.com/testing#cards.
+
+#### <a id="login-customer-in-onboarding"></a>LOGIN CUSTOMER IN BOARDING
+See: login-customer-in-onboarding.http
+
+Description:
+
+2.1 Return link by following which user will be logged into the onboarding.
+
+#### <a id="login-customer-in-express-dashboard"></a>LOGIN CUSTOMER IN EXPRESS DASHBOARD
+See: login-customer-in-express-dashboard.http
+
+Description:
+If user set upped express connected account Stripe will create for him Express Dashboard.
+
+2.1 Return link by following which user will be logged into the express dashboard
 
 Rebuild: 1

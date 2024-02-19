@@ -18,6 +18,8 @@ Content-Type: application/json
 
 ### Step 2. (Optional) Create connected account for customer
 ## If a user receives funds within your application, take this action.
+## Accout type: express, standard or custom
+## Proceed by following the generated link and completing the required information.
 POST http://127.0.0.1:8001/ms/payment-stripe
 Accept: application/json
 Content-Type: application/json
@@ -28,7 +30,7 @@ Content-Type: application/json
   "params": {
     "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3",
     "email": "john@doe.com",
-    "accountType": "standard",
+    "accountType": "express",
     "refreshUrl": "https://example.com",
     "returnUrl": "https://example.com"
   }
