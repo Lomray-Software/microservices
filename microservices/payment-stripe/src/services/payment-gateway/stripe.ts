@@ -768,6 +768,9 @@ class Stripe extends Abstract {
       throw new BaseException({
         status: 500,
         message: 'Stripe instant payout was failed.',
+        payload: {
+          message: error.message,
+        },
       });
     }
 
