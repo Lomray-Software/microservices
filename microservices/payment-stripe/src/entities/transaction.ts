@@ -187,12 +187,9 @@ class Transaction {
   @IsNullable()
   cardId: string | null;
 
-  /**
-   * Setup intent don't have card or bank account id
-   */
   @JSONSchema({
     description: `Payment method that was used to charge, for instance: card, bank account, etc.. Payment method is
-     stripe entity that attached to customer`,
+     stripe entity that attached to customer. Setup intent don't have card or bank account id`,
     example: 'pm_1N0vl32eZvKYlo2CiORpHAvo',
   })
   @Column({ type: 'varchar', length: 27, default: null })
