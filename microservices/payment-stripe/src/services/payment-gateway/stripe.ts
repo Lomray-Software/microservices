@@ -1323,18 +1323,16 @@ class Stripe extends Abstract {
    * Returns positive int amount
    * @description Should return the positive integer representing how much
    * to charge in the smallest currency unit
+   * @TODO: remove. use client api parser
    */
   public toSmallestCurrencyUnit(amount: number | string): number {
-    /**
-     * Convert the amount to a number if it's a string
-     */
-    const parsedAmount = typeof amount === 'string' ? Number(amount) : amount;
-
-    return parsedAmount * 100;
+    // Convert the amount to a number if it's a string
+    return Number(amount) * 100;
   }
 
   /**
    * Returns float value from unit
+   * @TODO: remove. use client api parser
    */
   public fromSmallestCurrencyUnit(amount: number): number {
     return amount / 100;
@@ -1722,6 +1720,7 @@ class Stripe extends Abstract {
 
   /**
    * Process webhook event
+   * @TODO: make this extendable
    */
   protected async processWebhookEvent(event: StripeSdk.Event, webhookType: string): Promise<void> {
     const webhookHandlers = WebhookHandlers.init(this.manager);
@@ -1943,7 +1942,7 @@ class Stripe extends Abstract {
   /**
    * Validate and transform coupon duration input
    */
-  private static validateAndTransformCouponDurationInput({
+  protected static validateAndTransformCouponDurationInput({
     duration,
     durationInMonths,
   }: Pick<IStripeCouponParams, 'duration' | 'durationInMonths'>): Pick<
@@ -1967,7 +1966,7 @@ class Stripe extends Abstract {
   /**
    * Validate and transform coupon discount input
    */
-  private static validateAndTransformCouponDiscountInput({
+  protected static validateAndTransformCouponDiscountInput({
     percentOff,
     amountOff,
   }: Pick<IStripeCouponParams, 'percentOff' | 'amountOff'>): Pick<
