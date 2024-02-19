@@ -323,7 +323,7 @@ See: http-requests/payment-stripe/guides
 - [LOGIN CUSTOMER IN EXPRESS DASHBOARD](#login-customer-in-express-dashboard)
 
 #### <a id="setup-customer-account"></a>SETUP CUSTOMER ACCOUNT
-See: setup-customer-account.http
+#### See: setup-customer-account.http
 
 Description:
 
@@ -342,7 +342,7 @@ Stripe dashboard. See:
 1.2 Created connected account: https://dashboard.stripe.com/test/connect/accounts/${connectedAccountId}
 
 #### <a id="setup-customer-payment-method-card"></a>SETUP CUSTOMER PAYMENT METHOD (CARD)
-See: setup-customer-payment-method.http
+#### See: setup-customer-payment-method.http
 
 Description:
 
@@ -355,14 +355,14 @@ You can obtain the public token from here: https://dashboard.stripe.com/apikeys.
 Open html in any browser and paste card information, you can grab test cards here: https://docs.stripe.com/testing#cards.
 
 #### <a id="login-customer-in-onboarding"></a>LOGIN CUSTOMER IN BOARDING
-See: login-customer-in-onboarding.http
+#### See: login-customer-in-onboarding.http
 
 Description:
 
 2.1 Return link by following which user will be logged into the onboarding.
 
 #### <a id="login-customer-in-express-dashboard"></a>LOGIN CUSTOMER IN EXPRESS DASHBOARD
-See: login-customer-in-express-dashboard.http
+#### See: login-customer-in-express-dashboard.http
 
 Description:
 If user set upped express connected account Stripe will create for him Express Dashboard.
