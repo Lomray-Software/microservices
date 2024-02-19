@@ -38,7 +38,7 @@ import TCurrency from '@interfaces/currency';
 import IFees from '@interfaces/fees';
 import type ITax from '@interfaces/tax';
 import CardRepository from '@repositories/card';
-import Calculation from '@services/calculation';
+import Calculation from '@services/common/calculation';
 import Parser from '@services/parser';
 import WebhookHandlers from '@services/webhook-handlers';
 import type {
