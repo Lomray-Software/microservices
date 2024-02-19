@@ -112,6 +112,7 @@ __Run on JS__: ~110 MB PEAK / ~80 MB
 
 #### Navigation
 - [INTRODUCTION](#introduction)
+- [REFERENCES](#references)
 - [PURPOSE AND GOALS](#purpose-and-goals)
 - [TARGET AUDIENCE](#target-audience)
 - [ARCHITECTURE HIGH-LEVEL OVERVIEW](#architecture-high-level-overview)
@@ -125,6 +126,13 @@ These APIs facilitate:
 1. Creation of customers, connected accounts, bank accounts, and cards.
 2. Processing of payments, payouts, refunds, and checkouts.
 3. Handling of disputes and Stripe webhooks events
+
+#### <a id="references"></a>REFERENCES:
+You can locate information based on the API and this documentation here:
+
+1. Stripe API - https://docs.stripe.com/api
+2. Stripe common documentation - https://docs.stripe.com
+3. Stripe FAQ - https://support.stripe.com/questions/payouts-faq
 
 #### <a id="purpose-and-goals"></a>PURPOSE AND GOALS:
 The aim of this microservice is to deliver a secure, scalable, and resilient API that enables integration and development of business logic without requiring extensive knowledge of Stripe.
@@ -164,12 +172,41 @@ external account associated with a user's connected account.
 #### 4. Transaction
 This component presents an abstract model of a Stripe transaction. 
 A Stripe transaction refers to transactions that occur through Stripe checkout or payment intent.
+You can see all transaction that occur in you Stripe environment by following this link:
+https://dashboard.stripe.com/payments
 
 4.1 Payment Intent
 A PaymentIntent assists you in collecting payment from your customer
 
 4.2 Checkout
 A Checkout Session presents your customer's session as they make one-time purchases or subscribe through Checkout or Payment Links.
+
+#### 5. Refund
+This component represents Stripe refund.
+Refund objects enable you to reimburse a charge that was previously made but not yet refunded. 
+The funds are returned to the original credit or debit card used for the initial transaction.
+See: https://docs.stripe.com/refunds
+
+#### 6. Payout
+This component represents Stripe payout.
+Created when user initiate a payout to either a bank account or debit card of a connected Stripe account.
+See: https://docs.stripe.com/payouts
+
+1.1 Instant payout
+Instant Payouts allow for the immediate transfer of funds to a supported debit card or bank account.
+You can request Instant Payouts at any time, even on weekends and holidays, and typically, the funds will appear in the associated bank account within 30 minutes. However, new Stripe users are not immediately eligible for Instant Payouts.
+
+1.2 Default payout
+
+#### 7. Dispute
+This component represents Stripe disputes in other words transaction chargeback.
+Card issuer have the ability to challenge transactions that the cardholder does not recognize, 
+suspects to be fraudulent, or encounters other issues with.
+See: https://docs.stripe.com/disputes
+
+#### 8. Evidence details
+This component represents Stripe dispute (chargeback) evidence detail of the transaction.
+Evidence provided to respond to a dispute.
 
 #### <a id="components-and-their-usage"></a>COMPONENTS AND THEIR USAGE
 #### 1. Customer
@@ -207,5 +244,38 @@ and they can achieve this by invoking the "connectAccount" method.
 
 #### 4. Transaction
 For use transaction API in an application you should utilize payment-gateway service.
+
+1.1 Method "createCheckout"
+Generate a checkout session and provide a URL to redirect the user for payment.
+
+#### 5. Refund
+Every refund will be detected by the webhook handler service and documented in the refund table. 
+For refunds related to an existing transaction record, the transaction status, refunded amount, and transferred amount will be recalculated.
+Also, for handling refunds see: Webhook Handler service
+
+5.1 Partial refund
+Partial transaction amount was refunded.
+
+5.2 Full refund
+Full transaction amount was refunded.
+
+#### 6. Payout
+Every payout will be detected by the webhook handler service and documented in the payout table.
+Also, for handling disputes see: Webhook Handler service
+
+1.1 Method "instantPayout"
+Validates the eligibility of a user's connected account for instant payouts, confirming available funds and other relevant criteria. 
+At the end of the day, initiates an instant payout to the user associated with the connected account's external account, whether it be a bank account or card.
+
+1.2 Method "payout"
+
+#### 7. Dispute
+Each dispute will be identified by the webhook handler service and recorded in the disputes table along with related evidence details. 
+If a dispute occurs for a recorded transaction, the transaction will be flagged as disputed in the "isDisputed" column of the transaction model.
+For handling disputes see: Webhook Handler service
+
+#### 8. Evidence details
+Upon occurrence of a dispute, the webhook handler service will oversee it, capturing relevant evidence details. 
+Users can then submit evidence details through the Stripe Dashboard, after which the API will synchronize this data in the database.
 
 Rebuild: 1
