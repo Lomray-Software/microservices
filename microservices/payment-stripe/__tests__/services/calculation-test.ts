@@ -7,9 +7,9 @@ import { configMock } from '@__mocks__/config';
 import * as remoteConfig from '@config/remote';
 import TaxBehaviour from '@constants/tax-behaviour';
 import TransactionRole from '@constants/transaction-role';
-import Calculation from '@services/calculation';
+import Calculation from '@services/common/calculation';
 
-describe('services/calculation', () => {
+describe('services/common/calculation', () => {
   const sandbox = sinon.createSandbox();
   const mathRoundSpy = sinon.spy(Math, 'round');
   const remoteConfigStub = sinon.stub().resolves(configMock);

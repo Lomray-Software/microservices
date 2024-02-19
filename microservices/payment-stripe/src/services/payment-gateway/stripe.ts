@@ -38,7 +38,7 @@ import TCurrency from '@interfaces/currency';
 import IFees from '@interfaces/fees';
 import type ITax from '@interfaces/tax';
 import CardRepository from '@repositories/card';
-import Calculation from '@services/calculation';
+import Calculation from '@services/common/calculation';
 import Parser from '@services/parser';
 import WebhookHandlers from '@services/webhook-handlers';
 import type {
@@ -1324,18 +1324,16 @@ class Stripe extends Abstract {
    * Returns positive int amount
    * @description Should return the positive integer representing how much
    * to charge in the smallest currency unit
+   * @TODO: remove. use client api parser
    */
   public toSmallestCurrencyUnit(amount: number | string): number {
-    /**
-     * Convert the amount to a number if it's a string
-     */
-    const parsedAmount = typeof amount === 'string' ? Number(amount) : amount;
-
-    return parsedAmount * 100;
+    // Convert the amount to a number if it's a string
+    return Number(amount) * 100;
   }
 
   /**
    * Returns float value from unit
+   * @TODO: remove. use client api parser
    */
   public fromSmallestCurrencyUnit(amount: number): number {
     return amount / 100;
@@ -1492,6 +1490,93 @@ class Stripe extends Abstract {
   }
 
   /**
+   * Returns payout method data
+   */
+  protected async getPayoutMethodAllowances(
+    userId: string,
+    payoutMethod?: IPayoutMethod,
+  ): Promise<{ externalAccountId: string; isInstantPayoutAllowed: boolean } | undefined> {
+    const externalAccountNotFoundError = messages.getNotFoundMessage(
+      'External account for instant payout',
+    );
+
+    if (!payoutMethod) {
+      const queries = [
+        this.bankAccountRepository.createQueryBuilder('pm'),
+        this.cardRepository.createQueryBuilder('pm'),
+      ];
+
+      const selectQueries = queries.map((query) =>
+        query
+          .where('pm.userId = :userId AND pm."isInstantPayoutAllowed" = true', { userId })
+          .getOne(),
+      );
+
+      const results = await Promise.all(selectQueries);
+
+      if (!results.length) {
+        throw new BaseException({
+          status: 500,
+          message: 'User does not have any available instant payout method.',
+        });
+      }
+
+      const [bankAccount, card] = results as [BankAccount | undefined, Card | undefined];
+
+      const externalAccountId = bankAccount?.params?.bankAccountId || card?.params?.cardId;
+
+      if (!externalAccountId) {
+        throw new BaseException({
+          status: 500,
+          message: externalAccountNotFoundError,
+        });
+      }
+
+      return {
+        externalAccountId,
+        isInstantPayoutAllowed:
+          Boolean(bankAccount?.isInstantPayoutAllowed) || Boolean(card?.isInstantPayoutAllowed),
+      };
+    }
+
+    const { method, id } = payoutMethod;
+
+    if (method === PayoutMethodType.CARD) {
+      const card = await this.cardRepository.findOne(id, {
+        select: ['id', 'params'],
+      });
+
+      if (!card?.params?.cardId) {
+        throw new BaseException({
+          status: 500,
+          message: externalAccountNotFoundError,
+        });
+      }
+
+      return {
+        externalAccountId: card.params.cardId,
+        isInstantPayoutAllowed: Boolean(card?.isInstantPayoutAllowed),
+      };
+    }
+
+    const bankAccount = await this.bankAccountRepository.findOne(id, {
+      select: ['id', 'params'],
+    });
+
+    if (!bankAccount?.params?.bankAccountId) {
+      throw new BaseException({
+        status: 500,
+        message: externalAccountNotFoundError,
+      });
+    }
+
+    return {
+      externalAccountId: bankAccount?.params?.bankAccountId,
+      isInstantPayoutAllowed: Boolean(bankAccount?.isInstantPayoutAllowed),
+    };
+  }
+
+  /**
    * Returns card for charging payment
    */
   protected async getChargingCard(userId: string, cardId?: string): Promise<Card> {
@@ -1636,8 +1721,9 @@ class Stripe extends Abstract {
 
   /**
    * Process webhook event
+   * @TODO: make this extendable
    */
-  private async processWebhookEvent(event: StripeSdk.Event, webhookType: string): Promise<void> {
+  protected async processWebhookEvent(event: StripeSdk.Event, webhookType: string): Promise<void> {
     const webhookHandlers = WebhookHandlers.init(this.manager);
 
     switch (event.type) {
@@ -1857,7 +1943,7 @@ class Stripe extends Abstract {
   /**
    * Validate and transform coupon duration input
    */
-  private static validateAndTransformCouponDurationInput({
+  protected static validateAndTransformCouponDurationInput({
     duration,
     durationInMonths,
   }: Pick<IStripeCouponParams, 'duration' | 'durationInMonths'>): Pick<
@@ -1881,7 +1967,7 @@ class Stripe extends Abstract {
   /**
    * Validate and transform coupon discount input
    */
-  private static validateAndTransformCouponDiscountInput({
+  protected static validateAndTransformCouponDiscountInput({
     percentOff,
     amountOff,
   }: Pick<IStripeCouponParams, 'percentOff' | 'amountOff'>): Pick<
@@ -1907,93 +1993,6 @@ class Stripe extends Abstract {
       amount_off: amountOff,
       // eslint-disable-next-line camelcase
       percent_off: percentOff,
-    };
-  }
-
-  /**
-   * Returns payout method data
-   */
-  private async getPayoutMethodAllowances(
-    userId: string,
-    payoutMethod?: IPayoutMethod,
-  ): Promise<{ externalAccountId: string; isInstantPayoutAllowed: boolean } | undefined> {
-    const externalAccountNotFoundError = messages.getNotFoundMessage(
-      'External account for instant payout',
-    );
-
-    if (!payoutMethod) {
-      const queries = [
-        this.bankAccountRepository.createQueryBuilder('pm'),
-        this.cardRepository.createQueryBuilder('pm'),
-      ];
-
-      const selectQueries = queries.map((query) =>
-        query
-          .where('pm.userId = :userId AND pm."isInstantPayoutAllowed" = true', { userId })
-          .getOne(),
-      );
-
-      const results = await Promise.all(selectQueries);
-
-      if (!results.length) {
-        throw new BaseException({
-          status: 500,
-          message: 'User does not have any available instant payout method.',
-        });
-      }
-
-      const [bankAccount, card] = results as [BankAccount | undefined, Card | undefined];
-
-      const externalAccountId = bankAccount?.params?.bankAccountId || card?.params?.cardId;
-
-      if (!externalAccountId) {
-        throw new BaseException({
-          status: 500,
-          message: externalAccountNotFoundError,
-        });
-      }
-
-      return {
-        externalAccountId,
-        isInstantPayoutAllowed:
-          Boolean(bankAccount?.isInstantPayoutAllowed) || Boolean(card?.isInstantPayoutAllowed),
-      };
-    }
-
-    const { method, id } = payoutMethod;
-
-    if (method === PayoutMethodType.CARD) {
-      const card = await this.cardRepository.findOne(id, {
-        select: ['id', 'params'],
-      });
-
-      if (!card?.params?.cardId) {
-        throw new BaseException({
-          status: 500,
-          message: externalAccountNotFoundError,
-        });
-      }
-
-      return {
-        externalAccountId: card.params.cardId,
-        isInstantPayoutAllowed: Boolean(card?.isInstantPayoutAllowed),
-      };
-    }
-
-    const bankAccount = await this.bankAccountRepository.findOne(id, {
-      select: ['id', 'params'],
-    });
-
-    if (!bankAccount?.params?.bankAccountId) {
-      throw new BaseException({
-        status: 500,
-        message: externalAccountNotFoundError,
-      });
-    }
-
-    return {
-      externalAccountId: bankAccount?.params?.bankAccountId,
-      isInstantPayoutAllowed: Boolean(bankAccount?.isInstantPayoutAllowed),
     };
   }
 }
