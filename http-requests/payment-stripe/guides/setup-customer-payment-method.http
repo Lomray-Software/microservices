@@ -1,0 +1,18 @@
+## Add customer payment emthod
+
+## Setup customer card as payment method
+### Step 1. Get setup token
+POST http://127.0.0.1:8001/ms/payment-stripe
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": "1",
+  "method": "stripe.setup-intent",
+  "params": {
+    "userId": "userf8f1-17f8-4501-9de2-a6e775ea39f3"
+  }
+}
+
+### Step 2. Paste token to setup intent template
+

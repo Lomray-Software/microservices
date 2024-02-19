@@ -768,6 +768,9 @@ class Stripe extends Abstract {
       throw new BaseException({
         status: 500,
         message: 'Stripe instant payout was failed.',
+        payload: {
+          message: error.message,
+        },
       });
     }
 
@@ -1160,9 +1163,7 @@ class Stripe extends Abstract {
       paymentIntentAmountUnit = userUnitAmount;
     }
 
-    /**
-     * Prevent type error cause on payment intent metadata and transaction params
-     */
+    // Prevent type error cause on payment intent metadata and transaction params
     const sharedTaxData = {
       taxCreatedAt: tax?.createdAt?.toISOString(),
       taxExpiresAt: tax?.expiresAt?.toISOString(),

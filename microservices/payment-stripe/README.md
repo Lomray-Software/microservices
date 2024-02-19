@@ -112,11 +112,15 @@ __Run on JS__: ~110 MB PEAK / ~80 MB
 
 #### Navigation
 - [INTRODUCTION](#introduction)
+- [NOTES](#notes)
+- [REFERENCES](#references)
 - [PURPOSE AND GOALS](#purpose-and-goals)
 - [TARGET AUDIENCE](#target-audience)
 - [ARCHITECTURE HIGH-LEVEL OVERVIEW](#architecture-high-level-overview)
 - [COMPONENTS AND THEIR ROLES](#components-and-their-roles)
 - [COMPONENTS AND THEIR USAGE](#components-and-their-usage)
+- [SERVICES AND THEIR ROLES](#services-and-their-usage)
+- [GUIDES](#guides)
 
 #### <a id="introduction"></a>INTRODUCTION:
 The Payment-Stripe microservice provides APIs that enable both front-end and backend systems to interact with Stripe without requiring in-depth knowledge of Stripe documentation. 
@@ -126,18 +130,33 @@ These APIs facilitate:
 2. Processing of payments, payouts, refunds, and checkouts.
 3. Handling of disputes and Stripe webhooks events
 
+#### <a id="notes"></a>NOTES:
+The URLs provided in this overview are for accessing the Stripe dashboard in live (production) mode. 
+For testing purposes, please enable test mode in your Stripe dashboard settings. 
+Below are the Stripe dashboard URLs:
+
+1. Live (production) https://dashboard.stripe.com
+2. Test https://dashboard.stripe.com/test
+
+#### <a id="references"></a>REFERENCES:
+You can locate information based on the API and this documentation here:
+
+1. Stripe API - https://docs.stripe.com/api
+2. Stripe common documentation - https://docs.stripe.com
+3. Stripe FAQ - https://support.stripe.com/questions/payouts-faq
+
 #### <a id="purpose-and-goals"></a>PURPOSE AND GOALS:
 The aim of this microservice is to deliver a secure, scalable, and resilient API that enables integration and development of business logic without requiring extensive knowledge of Stripe.
 
 #### <a id="target-audience"></a>TARGET AUDIENCE:
 The intended audience comprises both backend and frontend developers.
 
-#### <a id="architecture-high-level-overview"></a>ARCHITECTURE HIGH-LEVEL OVERVIEW
+#### <a id="architecture-high-level-overview"></a>ARCHITECTURE HIGH-LEVEL OVERVIEW:
 The current microservice utilizes the Stripe API and relies on the Stripe package for interfacing with it. We manage Stripe webhooks as part of our system. Our payment gateway service provides APIs for Stripe interactions. Webhooks are managed through a middleware declared within the gateway microservice, with webhook handlers provided by a separate service.
 To enhance security for webhooks, we've implemented an additional route specifically for handling Stripe webhooks. This route includes a token with the role "webhook" to validate incoming requests and prevent vulnerabilities.
 Additionally, for complex fee and tax calculations, we have our own calculation service that handles this functionality.
 
-#### <a id="components-and-their-roles"></a>COMPONENTS AND THEIR ROLES
+#### <a id="components-and-their-roles"></a>COMPONENTS AND THEIR ROLES:
 #### 1. Customer
 This entity presents a recurring customer. The customer can utilize their card or bank account to purchase products or subscribe.
 Additionally, customers have the option to set up a Stripe connected account for accepting payments from other customers and subsequently disbursing these funds.
@@ -164,6 +183,8 @@ external account associated with a user's connected account.
 #### 4. Transaction
 This component presents an abstract model of a Stripe transaction. 
 A Stripe transaction refers to transactions that occur through Stripe checkout or payment intent.
+You can see all transaction that occur in you Stripe environment by following this link:
+https://dashboard.stripe.com/payments
 
 4.1 Payment Intent
 A PaymentIntent assists you in collecting payment from your customer
@@ -171,7 +192,34 @@ A PaymentIntent assists you in collecting payment from your customer
 4.2 Checkout
 A Checkout Session presents your customer's session as they make one-time purchases or subscribe through Checkout or Payment Links.
 
-#### <a id="components-and-their-usage"></a>COMPONENTS AND THEIR USAGE
+#### 5. Refund
+This component represents Stripe refund.
+Refund objects enable you to reimburse a charge that was previously made but not yet refunded. 
+The funds are returned to the original credit or debit card used for the initial transaction.
+See: https://docs.stripe.com/refunds
+
+#### 6. Payout
+This component represents Stripe payout.
+Created when user initiate a payout to either a bank account or debit card of a connected Stripe account.
+See: https://docs.stripe.com/payouts
+
+1.1 Instant payout
+Instant Payouts allow for the immediate transfer of funds to a supported debit card or bank account.
+You can request Instant Payouts at any time, even on weekends and holidays, and typically, the funds will appear in the associated bank account within 30 minutes. However, new Stripe users are not immediately eligible for Instant Payouts.
+
+1.2 Default payout
+
+#### 7. Dispute
+This component represents Stripe disputes in other words transaction chargeback.
+Card issuer have the ability to challenge transactions that the cardholder does not recognize, 
+suspects to be fraudulent, or encounters other issues with.
+See: https://docs.stripe.com/disputes
+
+#### 8. Evidence details
+This component represents Stripe dispute (chargeback) evidence detail of the transaction.
+Evidence provided to respond to a dispute.
+
+#### <a id="components-and-their-usage"></a>COMPONENTS AND THEIR USAGE:
 #### 1. Customer
 For set up customer in an application you should utilize payment-gateway service.
 
@@ -207,5 +255,118 @@ and they can achieve this by invoking the "connectAccount" method.
 
 #### 4. Transaction
 For use transaction API in an application you should utilize payment-gateway service.
+
+1.1 Method "createCheckout"
+Generate a checkout session and provide a URL to redirect the user for payment.
+
+#### 5. Refund
+Every refund will be detected by the webhook handler service and documented in the refund table. 
+For refunds related to an existing transaction record, the transaction status, refunded amount, and transferred amount will be recalculated.
+Also, for handling refunds see: Webhook Handler service
+
+5.1 Partial refund
+Partial transaction amount was refunded.
+
+5.2 Full refund
+Full transaction amount was refunded.
+
+#### 6. Payout
+Every payout will be detected by the webhook handler service and documented in the payout table.
+Also, for handling disputes see: Webhook Handler service
+
+1.1 Method "instantPayout"
+Validates the eligibility of a user's connected account for instant payouts, confirming available funds and other relevant criteria. 
+At the end of the day, initiates an instant payout to the user associated with the connected account's external account, whether it be a bank account or card.
+
+1.2 Method "payout"
+
+#### 7. Dispute
+Each dispute will be identified by the webhook handler service and recorded in the disputes table along with related evidence details. 
+If a dispute occurs for a recorded transaction, the transaction will be flagged as disputed in the "isDisputed" column of the transaction model.
+For handling disputes see: Webhook Handler service
+
+#### 8. Evidence details
+Upon occurrence of a dispute, the webhook handler service will oversee it, capturing relevant evidence details. 
+Users can then submit evidence details through the Stripe Dashboard, after which the API will synchronize this data in the database.
+
+#### <a id="services-and-their-roles"></a>SERVICES AND THEIR ROLES:
+In this section, we will review the common services provided by the microservice and discuss their necessity.
+
+#### 1. Payment gateway
+This is a fundamental microservice providing an API for interacting with Stripe. 
+Here, you can access methods for creating customers, cards, transactions, checkouts, payouts, and more. 
+Additionally, this service defines methods that rely on the webhook handler service for managing incoming webhook events from Stripe.
+
+#### 2. Webhook handlers
+This is a foundational service designed to manage incoming webhooks from Stripe. 
+For each Stripe object, this service defines its own handler that deals with related events. 
+For example, there's a handler for "customer" events corresponding to the customer model, 
+and another for "payout" events related to Stripe payout objects.
+
+### 3. Calculation
+This service provides sophisticated calculation helpers for Stripe transaction fees, taxes, and other related calculations.
+
+### 4. Other components services
+This structure pattern is commonly employed in the Lomray Software Microservices API.
+Each component has its own associated service, encompassing business logic pertinent to that component. 
+These services are utilized in subscribers, endpoints, and other functionalities. For example, 
+the "update" method of the "dispute" service parses dispute webhook event data, updates transaction data, and records the dispute in the database.
+
+#### <a id="guides"></a>GUIDES:
+Here you can discover guides that will assist you in serving your customers in most situations.
+See: http-requests/payment-stripe/guides
+
+#### Navigation
+- [SETUP CUSTOMER ACCOUNT](#setup-customer-account)
+- [SETUP CUSTOMER PAYMENT METHOD (CARD)](#setup-customer-payment-method-card)
+- [LOGIN CUSTOMER IN BOARDING](#login-customer-in-onboarding)
+- [LOGIN CUSTOMER IN EXPRESS DASHBOARD](#login-customer-in-express-dashboard)
+
+#### <a id="setup-customer-account"></a>SETUP CUSTOMER ACCOUNT
+#### See: setup-customer-account.http
+
+Description:
+
+1.1 In step 1, we create a customer account.
+
+1.2 In step 2, if a user is to receive funds from another customer, set up a connected account for them.
+This endpoint will provide a link to the onboarding dashboard. 
+Users will need to follow the link and fill in the required information.
+
+1.3 Retrieve the initial balance of the user's connected account. 
+
+Stripe dashboard. See:
+
+1.1 Created customer: https://dashboard.stripe.com/customers/${customerId}
+
+1.2 Created connected account: https://dashboard.stripe.com/test/connect/accounts/${connectedAccountId}
+
+#### <a id="setup-customer-payment-method-card"></a>SETUP CUSTOMER PAYMENT METHOD (CARD)
+#### See: setup-customer-payment-method.http
+
+Description:
+
+2.1 Create setup intent (card) token
+
+2.2 Navigate to the file templates/card/setup-intent.html. 
+Paste the retrieved token into options.clientSecret. 
+Then, in the instantiation of the Stripe class, insert the Stripe public token like this: new Stripe("publicToken"). 
+You can obtain the public token from here: https://dashboard.stripe.com/apikeys.
+Open html in any browser and paste card information, you can grab test cards here: https://docs.stripe.com/testing#cards.
+
+#### <a id="login-customer-in-onboarding"></a>LOGIN CUSTOMER IN BOARDING
+#### See: login-customer-in-onboarding.http
+
+Description:
+
+2.1 Return link by following which user will be logged into the onboarding.
+
+#### <a id="login-customer-in-express-dashboard"></a>LOGIN CUSTOMER IN EXPRESS DASHBOARD
+#### See: login-customer-in-express-dashboard.http
+
+Description:
+If user set upped express connected account Stripe will create for him Express Dashboard.
+
+2.1 Return link by following which user will be logged into the express dashboard
 
 Rebuild: 1

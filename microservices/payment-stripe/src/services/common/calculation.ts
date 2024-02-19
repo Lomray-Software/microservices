@@ -291,17 +291,13 @@ class Calculation {
     });
     /* eslint-enable camelcase */
 
-    /**
-     * @TODO: Fix. This property exist in response, but sdk type - not
-     */
+    // @TODO: Fix. This property exist in response, but sdk type - not
     if (
       // @ts-ignore
       tax?.tax_breakdown?.some((breakdown) => breakdown?.taxability_reason === 'not_collecting') &&
       !shouldIgnoreNotCollecting
     ) {
-      /**
-       * @TODO: CHECK how to prevent register user tax from not collecting registration
-       */
+      // @TODO: CHECK how to prevent register user tax from not collecting registration
       throw new BaseException({
         status: 500,
         message: 'Failed to compute tax. One or more tax breakdown is not collecting.',
