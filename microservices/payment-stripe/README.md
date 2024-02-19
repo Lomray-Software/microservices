@@ -316,7 +316,7 @@ the "update" method of the "dispute" service parses dispute webhook event data, 
 Here you can discover guides that will assist you in serving your customers in most situations.
 See: http-requests/payment-stripe/guides
 
-1. Setup customer account
+#### 1. Setup customer account
 See: setup-customer-account.http
 
 Description:
@@ -333,7 +333,7 @@ Stripe dashboard. See:
 
 1.2 Created connected account: https://dashboard.stripe.com/test/connect/accounts/${connectedAccountId}
 
-2. Setup customer payment method (card)
+#### 2. Setup customer payment method (card)
 See: setup-customer-payment-method.http
 
 Description:
