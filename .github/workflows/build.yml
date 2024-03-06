@@ -15,7 +15,7 @@ jobs:
       docker-tag: ${{ steps.other-params.outputs.docker-tag }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 30
 
@@ -43,7 +43,7 @@ jobs:
 
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v35
+        uses: tj-actions/changed-files@v42
         with:
           json: true
           dir_names: true
@@ -65,13 +65,13 @@ jobs:
       ONLY: ${{ needs.changed-microservices.outputs.microservices-spaced }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: '18.13.0'
+          node-version: '18.19.0'
           cache: 'npm'
 
       - name: Install global dependencies
@@ -141,7 +141,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
 
@@ -196,7 +196,7 @@ jobs:
       WORK_DIR: "microservices/${{ matrix.microservice }}"
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
