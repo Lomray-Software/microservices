@@ -1,6 +1,7 @@
 import { Log } from '@lomray/microservice-helpers';
 import { BaseException, Microservice } from '@lomray/microservice-nodejs-lib';
 import Event from '@lomray/microservices-client-api/constants/events/payment-stripe';
+import fromSmallestUnit from '@lomray/microservices-client-api/helpers/parsers/from-smallest-unit';
 import toSmallestUnit from '@lomray/microservices-client-api/helpers/parsers/to-smallest-unit';
 import { validate } from 'class-validator';
 import StripeSdk from 'stripe';
@@ -1098,7 +1099,14 @@ class Stripe extends Abstract {
     const { id: paymentMethodCardId } = chargeCard;
 
     // Get parsed entity cost
-    const entityUnitCost = this.toSmallestCurrencyUnit(entityCost);
+    const entityUnitCost = toSmallestUnit(entityCost);
+
+    if (!entityUnitCost) {
+      throw new BaseException({
+        status: 500,
+        message: 'Failed to calculate entity cost unit amount.',
+      });
+    }
 
     // Calculate not-tax transaction fees
     const {
@@ -1181,40 +1189,36 @@ class Stripe extends Abstract {
     const stripePaymentIntent: StripeSdk.PaymentIntent = await this.sdk.paymentIntents.create({
       ...(title ? { description: title } : {}),
       metadata: {
+        feesPayer,
+        senderId: senderCustomer.userId,
+        cardId: paymentMethodCardId,
+        receiverId: receiverUserId,
         // Original float entity cost
         entityCost,
-        stripeFee: this.fromSmallestCurrencyUnit(stripeFeeUnit),
-        platformFee: this.fromSmallestCurrencyUnit(platformUnitFee),
-        receiverExtraFee: this.fromSmallestCurrencyUnit(receiverAdditionalFee),
-        senderExtraFee: this.fromSmallestCurrencyUnit(senderAdditionalFee),
-        receiverExtraRevenue: this.fromSmallestCurrencyUnit(extraReceiverUnitRevenue),
-        cardId: paymentMethodCardId,
-        fee: this.fromSmallestCurrencyUnit(collectedFeeUnit),
-        feesPayer,
-        receiverRevenue: this.fromSmallestCurrencyUnit(receiverUnitRevenue),
-        baseFee: this.fromSmallestCurrencyUnit(baseFeeUnit),
-        senderPersonalFee: this.fromSmallestCurrencyUnit(senderPersonalFeeUnit),
-        receiverPersonalFee: this.fromSmallestCurrencyUnit(receiverPersonalFeeUnit),
-        senderId: senderCustomer.userId,
-        receiverId: receiverUserId,
+        stripeFee: fromSmallestUnit(stripeFeeUnit)!,
+        platformFee: fromSmallestUnit(platformUnitFee)!,
+        receiverExtraFee: fromSmallestUnit(receiverAdditionalFee)!,
+        senderExtraFee: fromSmallestUnit(senderAdditionalFee)!,
+        receiverExtraRevenue: fromSmallestUnit(extraReceiverUnitRevenue)!,
+        receiverRevenue: fromSmallestUnit(receiverUnitRevenue)!,
+        baseFee: fromSmallestUnit(baseFeeUnit)!,
+        senderPersonalFee: fromSmallestUnit(senderPersonalFeeUnit)!,
+        receiverPersonalFee: fromSmallestUnit(receiverPersonalFeeUnit)!,
+        fee: fromSmallestUnit(collectedFeeUnit)!,
         ...(entityId ? { entityId } : {}),
         ...(title ? { description: title } : {}),
         ...(tax?.id ? { taxCalculationId: tax?.id } : {}),
         ...(Object.keys(sharedTaxData).length !== 0 ? { ...sharedTaxData } : {}),
         ...(taxAutoCalculateFeeUnit
-          ? { taxAutoCalculateFee: this.fromSmallestCurrencyUnit(taxAutoCalculateFeeUnit) }
+          ? { taxAutoCalculateFee: fromSmallestUnit(taxAutoCalculateFeeUnit) }
           : {}),
-        ...(taxFeeUnit ? { taxFee: this.fromSmallestCurrencyUnit(taxFeeUnit) } : {}),
+        ...(taxFeeUnit ? { taxFee: fromSmallestUnit(taxFeeUnit) } : {}),
         ...(tax?.transactionAmountWithTaxUnit
           ? {
-              taxTransactionAmountWithTax: this.fromSmallestCurrencyUnit(
-                tax?.transactionAmountWithTaxUnit,
-              ),
+              taxTransactionAmountWithTax: fromSmallestUnit(tax?.transactionAmountWithTaxUnit),
             }
           : {}),
-        ...(tax?.totalAmountUnit
-          ? { taxTotalAmount: this.fromSmallestCurrencyUnit(tax?.totalAmountUnit) }
-          : {}),
+        ...(tax?.totalAmountUnit ? { taxTotalAmount: fromSmallestUnit(tax?.totalAmountUnit) } : {}),
       },
       payment_method_types: [StripePaymentMethods.CARD],
       confirm: true,
