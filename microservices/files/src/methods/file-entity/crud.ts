@@ -8,7 +8,6 @@ import FileEntity from '@entities/file-entity';
 const crud = Endpoint.controller(() => getRepository(FileEntity), {
   restore: false,
   view: false,
-  list: false,
 });
 
 export default crud;
