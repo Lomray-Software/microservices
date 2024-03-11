@@ -5,6 +5,7 @@ import {
   removeResult,
   createResult,
   updateResult,
+  listResult,
 } from '@lomray/microservice-helpers/test-helpers';
 import { expect } from 'chai';
 import rewiremock from 'rewiremock';
@@ -27,6 +28,12 @@ describe('methods/file-entity/crud', () => {
     const res = await Crud.count?.({}, endpointOptions);
 
     expect(res).to.deep.equal(countResult());
+  });
+
+  it('should correctly return list', async () => {
+    const res = await Crud.list?.({}, endpointOptions);
+
+    expect(res).to.deep.equal(listResult());
   });
 
   it('should correctly entity create', async () => {
@@ -82,10 +89,6 @@ describe('methods/file-entity/crud', () => {
 
   it("should haven't restore method", () => {
     expect(Crud.restore).to.be.undefined;
-  });
-
-  it("should haven't list method", () => {
-    expect(Crud.list).to.be.undefined;
   });
 
   it("should haven't view method", () => {
