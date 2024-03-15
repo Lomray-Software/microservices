@@ -1,9 +1,10 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
+import fromSmallestUnit from '@lomray/microservices-client-api/helpers/parsers/from-smallest-unit';
+import toSmallestUnit from '@lomray/microservices-client-api/helpers/parsers/to-smallest-unit';
 import { IsBoolean, IsEnum, IsNumber } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
 import TransactionRole from '@constants/transaction-role';
 import Calculation from '@services/common/calculation';
-import Stripe from '@services/payment-gateway/stripe';
 
 class PaymentIntentFeesInput {
   @IsNumber()
@@ -85,9 +86,7 @@ const paymentIntentFees = Endpoint.custom(
     shouldEstimateTax,
     withStripeFee,
   }) => {
-    const service = await Stripe.init();
-
-    const entityUnitCost = service.toSmallestCurrencyUnit(entityCost);
+    const entityUnitCost = toSmallestUnit(entityCost)!;
 
     const unitFees = await Calculation.getPaymentIntentFees({
       entityUnitCost,
@@ -103,10 +102,7 @@ const paymentIntentFees = Endpoint.custom(
       Object.entries(unitFees).map(([title, amount]) => {
         const newKey = title.replace('Unit', '');
 
-        return [
-          newKey,
-          !newKey.includes('Percent') ? service.fromSmallestCurrencyUnit(amount as number) : amount,
-        ];
+        return [newKey, !newKey.includes('Percent') ? fromSmallestUnit(amount as number) : amount];
       }),
     ) as unknown as PaymentIntentFeesOutput;
   },

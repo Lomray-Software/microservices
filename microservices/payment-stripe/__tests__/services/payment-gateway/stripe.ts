@@ -246,31 +246,6 @@ describe('services/payment-gateway/stripe', () => {
       );
     });
 
-    it('should multiply the amount by 100 for valid inputs', () => {
-      const testCases = [
-        { input: 10, expected: 1000 },
-        { input: '20.5', expected: 2050 },
-        { input: ' 30.75 ', expected: 3075 },
-        { input: '1000.25', expected: 100025 },
-      ];
-
-      testCases.forEach(({ input, expected }) => {
-        const result = service.toSmallestCurrencyUnit(input);
-
-        expect(result).to.equal(expected);
-      });
-    });
-
-    it('should return NaN for invalid inputs', () => {
-      const testCases = ['invalid', '1.2.3'];
-
-      testCases.forEach((input) => {
-        const result = service.toSmallestCurrencyUnit(input);
-
-        expect(result).to.be.NaN;
-      });
-    });
-
     it('should correctly remove customer', async () => {
       StripeInstanceParamStub.value(stripeMock());
       TypeormMock.entityManager.findOne.resolves(userMock);
