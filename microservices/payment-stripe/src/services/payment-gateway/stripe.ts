@@ -1325,25 +1325,6 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Returns positive int amount
-   * @description Should return the positive integer representing how much
-   * to charge in the smallest currency unit
-   * @TODO: remove. use client api parser
-   */
-  public toSmallestCurrencyUnit(amount: number | string): number {
-    // Convert the amount to a number if it's a string
-    return Number(amount) * 100;
-  }
-
-  /**
-   * Returns float value from unit
-   * @TODO: remove. use client api parser
-   */
-  public fromSmallestCurrencyUnit(amount: number): number {
-    return amount / 100;
-  }
-
-  /**
    * Set default customer payment method
    */
   public async setDefaultCustomerPaymentMethod(
