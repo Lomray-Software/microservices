@@ -59,7 +59,10 @@ jobs:
       - name: Run microservices tests with coverage
         run: npx @lomray/microservices-cli test --coverage
 
-      - name: Find and create highest version entry point
+      - name: Compile microservices
+        run: npx @lomray/microservices-cli build
+
+      - name: Discover and create entry point for release with the highest version
         run: npx @lomray/microservices-cli semantic-release --dry-run
         env:
           GIT_BRANCH: ${{ needs.prepare.outputs.branch }}
@@ -67,9 +70,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           PERFORM_PROD_PLUGIN: 1
-
-      - name: Compile microservices
-        run: npx @lomray/microservices-cli build
 
       # note: this also update package.json version
       - name: Publish npm packages / create github release
