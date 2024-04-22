@@ -12,7 +12,6 @@ jobs:
       microservices: ${{ steps.microservices.outputs.list }}
       microservices-spaced: ${{ steps.microservices.outputs.list-spaced }}
       branch: ${{ steps.other-params.outputs.branch }}
-      docker-tag: ${{ steps.other-params.outputs.docker-tag }}
 
     steps:
       - uses: actions/checkout@v4
@@ -121,10 +120,10 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@v5
         env:
-          FROM_TAG: "latest${{ needs.prepare.outputs.docker-tag }}"
+          FROM_TAG: "latest"
         with:
           name: "Lomray-Software/microservices/${{ env.MICROSERVICE_NAME }}"
-          tags: "latest${{ needs.prepare.outputs.docker-tag }},${{ steps.package-version.outputs.version}}"
+          tags: ${{ steps.package-version.outputs.version}}"
           dockerfile: ${{ steps.docker-file.outputs.path }}
           context: ${{ env.WORK_DIR }}
           buildoptions: "--compress --force-rm --no-cache"
