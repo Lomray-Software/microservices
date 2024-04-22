@@ -21,6 +21,13 @@ jobs:
       - id: microservices
         run: npx @lomray/microservices-cli microservices-list
 
+      - name: Branch name & docker tag & latest release sha
+        id: other-params
+        shell: bash
+        run: |
+            branch=$(echo ${GITHUB_REF#refs/heads/})
+            echo "branch=$branch" >> $GITHUB_OUTPUT
+
   checks-compile:
     name: Code checks & compile & npm publish
     needs: prepare
