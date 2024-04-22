@@ -21,6 +21,15 @@ jobs:
       - id: microservices
         run: npx @lomray/microservices-cli microservices-list
 
+      - name: Iterate through all microservice and get highest version
+        run: npx @lomray/microservices-cli semantic-release --dry-run
+        env:
+          GIT_BRANCH: ${{ needs.prepare.outputs.branch }}
+          PUBLISH_PACKAGE: ${{ secrets.PUBLISH_PACKAGE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PERFORM_PROD_PLUGIN: 1
+
       - name: Branch name & docker tag & latest release sha
         id: other-params
         shell: bash
@@ -70,7 +79,6 @@ jobs:
           PUBLISH_PACKAGE: ${{ secrets.PUBLISH_PACKAGE }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          PERFORM_PROD_PLUGIN: 1
 
       - name: Archive microservices artifacts
         uses: actions/upload-artifact@v3
