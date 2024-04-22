@@ -33,8 +33,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
-
       - uses: actions/setup-node@v4
         with:
           node-version: '18.19.0'
@@ -99,8 +97,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
 
       - uses: actions/download-artifact@v3
         with:
