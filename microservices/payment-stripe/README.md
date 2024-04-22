@@ -369,4 +369,4 @@ If user set upped express connected account Stripe will create for him Express D
 
 2.1 Return link by following which user will be logged into the express dashboard
 
-Rebuild: 1
+Rebuild: 2
