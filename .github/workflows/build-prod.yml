@@ -1,0 +1,138 @@
+name: Build prod
+
+on:
+  push:
+    branches: [ prod ]
+
+jobs:
+  all-microservices:
+    name: Get all microservices
+    runs-on: ubuntu-latest
+    outputs:
+      microservices: ${{ steps.microservices.outputs.list }}
+      microservices-spaced: ${{ steps.microservices.outputs.list-spaced }}
+      branch: ${{ steps.other-params.outputs.branch }}
+      docker-tag: ${{ steps.other-params.outputs.docker-tag }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 30
+
+      - id: microservices
+        run: npx @lomray/microservices-cli microservices-list
+
+  checks-compile:
+    name: Code checks & compile & npm publish
+    needs: all-microservices
+    runs-on: ubuntu-latest
+
+    env:
+      ONLY: ${{ needs.all-microservices.outputs.microservices-spaced }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18.19.0'
+          cache: 'npm'
+
+      - name: Install global dependencies
+        run: npm ci
+
+      - name: Install microservices dependencies
+        run: npx @lomray/microservices-cli global-install
+
+      - name: Check microservice eslint
+        run: npx @lomray/microservices-cli lint
+
+      - name: Check microservice typescript
+        run: npx @lomray/microservices-cli ts-check
+
+      - name: Run microservices tests with coverage
+        run: npx @lomray/microservices-cli test --coverage
+
+      - name: Compile microservices
+        run: npx @lomray/microservices-cli build
+
+      # note: this also update package.json version
+      - name: Publish npm packages / create github release
+        run: npx @lomray/microservices-cli semantic-release
+        env:
+          GIT_BRANCH: ${{ needs.all-microservices.outputs.branch }}
+          PUBLISH_PACKAGE: ${{ secrets.PUBLISH_PACKAGE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PERFORM_PROD_PLUGIN: 1
+
+      - name: Archive microservices artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: microservice-artifacts
+          path: |
+            microservices/*/lib/*
+            # keep update version
+            microservices/*/package.json
+
+      - name: Archive Dockerfile
+        uses: actions/upload-artifact@v3
+        with:
+          name: dockerfile
+          path: node_modules/@lomray/microservice-config/Dockerfile-nodejs
+
+  build-docker:
+    name: Build docker images
+    needs: [all-microservices, checks-compile]
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        microservice: ${{ fromJson(needs.all-microservices.outputs.microservices) }}
+
+    env:
+      MICROSERVICE_NAME: ${{ matrix.microservice }}
+      WORK_DIR: "microservices/${{ matrix.microservice }}"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: microservice-artifacts
+          path: microservices
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: dockerfile
+
+      - id: package-version
+        run: npx @lomray/microservices-cli package-version
+        env:
+          WORK_DIR: ${{ env.WORK_DIR }}
+
+      - name: Detect dockerfile
+        id: docker-file
+        run: npx @lomray/microservices-cli detect-docker-file
+        env:
+          WORK_DIR: '${{ env.WORK_DIR }}'
+
+      - name: Publish to Registry
+        uses: elgohr/Publish-Docker-Github-Action@v5
+        env:
+          FROM_TAG: "latest${{ needs.all-microservices.outputs.docker-tag }}"
+        with:
+          name: "Lomray-Software/microservices/${{ env.MICROSERVICE_NAME }}"
+          tags: "latest${{ needs.all-microservices.outputs.docker-tag }},${{ steps.package-version.outputs.version}}"
+          dockerfile: ${{ steps.docker-file.outputs.path }}
+          context: ${{ env.WORK_DIR }}
+          buildoptions: "--compress --force-rm --no-cache"
+          buildargs: FROM_TAG
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io

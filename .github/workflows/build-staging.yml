@@ -1,8 +1,8 @@
-name: Build microservices
+name: Build staging
 
 on:
   push:
-    branches: [ staging, prod ]
+    branches: [ staging ]
 
 jobs:
   changed-microservices:
