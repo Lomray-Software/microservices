@@ -21,15 +21,6 @@ jobs:
       - id: microservices
         run: npx @lomray/microservices-cli microservices-list
 
-      - name: Iterate through all microservice and get highest version
-        run: npx @lomray/microservices-cli semantic-release --dry-run
-        env:
-          GIT_BRANCH: ${{ needs.prepare.outputs.branch }}
-          PUBLISH_PACKAGE: ${{ secrets.PUBLISH_PACKAGE }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          PERFORM_PROD_PLUGIN: 1
-
       - name: Branch name & docker tag & latest release sha
         id: other-params
         shell: bash
@@ -67,6 +58,15 @@ jobs:
 
       - name: Run microservices tests with coverage
         run: npx @lomray/microservices-cli test --coverage
+
+      - name: Find and create highest version entry point
+        run: npx @lomray/microservices-cli semantic-release --dry-run
+        env:
+          GIT_BRANCH: ${{ needs.prepare.outputs.branch }}
+          PUBLISH_PACKAGE: ${{ secrets.PUBLISH_PACKAGE }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PERFORM_PROD_PLUGIN: 1
 
       - name: Compile microservices
         run: npx @lomray/microservices-cli build
