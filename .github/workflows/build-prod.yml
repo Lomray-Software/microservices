@@ -69,7 +69,7 @@ jobs:
           PUBLISH_PACKAGE: ${{ secrets.PUBLISH_PACKAGE }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          PERFORM_PROD_PLUGIN: 1
+          PREPARE_PROD_PLUGIN: 1
 
       # note: this also update package.json version
       - name: Publish npm packages / create github release
@@ -79,6 +79,7 @@ jobs:
           PUBLISH_PACKAGE: ${{ secrets.PUBLISH_PACKAGE }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PERFORM_PROD_PLUGIN: 1
 
       - name: Archive microservices artifacts
         uses: actions/upload-artifact@v3
