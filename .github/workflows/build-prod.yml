@@ -135,10 +135,10 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@v5
         env:
-          FROM_TAG: "latest"
+          FROM_TAG: latest
         with:
           name: "Lomray-Software/microservices/${{ env.MICROSERVICE_NAME }}"
-          tags: ${{ steps.package-version.outputs.version}}
+          tags: ${{ steps.package-version.outputs.version }}
           dockerfile: ${{ steps.docker-file.outputs.path }}
           context: ${{ env.WORK_DIR }}
           buildoptions: "--compress --force-rm --no-cache"
