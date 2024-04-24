@@ -171,7 +171,7 @@ jobs:
           FROM_TAG: "latest${{ needs.changed-microservices.outputs.docker-tag }}"
         with:
           name: "Lomray-Software/microservices/${{ env.MICROSERVICE_NAME }}"
-          tags: "latest${{ needs.changed-microservices.outputs.docker-tag }},${{ steps.package-version.outputs.version}}"
+          tags: "latest${{ needs.changed-microservices.outputs.docker-tag }},${{ steps.package-version.outputs.version }}"
           dockerfile: ${{ steps.docker-file.outputs.path }}
           context: ${{ env.WORK_DIR }}
           buildoptions: "--compress --force-rm --no-cache"
