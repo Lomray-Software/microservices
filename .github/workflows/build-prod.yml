@@ -135,7 +135,7 @@ jobs:
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@v5
         env:
-          FROM_TAG: latest
+          FROM_TAG: "latest"
         with:
           name: "Lomray-Software/microservices/${{ env.MICROSERVICE_NAME }}"
           tags: "latest,${{ steps.package-version.outputs.version}}"
