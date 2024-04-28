@@ -1,5 +1,6 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
 import { IsEnum, IsString, Length } from 'class-validator';
+import AgreementType from '@constants/agreement-type';
 import BusinessType from '@constants/business-type';
 import StripeAccountTypes from '@constants/stripe-account-types';
 import Stripe from '@services/payment-gateway/stripe';
@@ -24,6 +25,14 @@ class ConnectAccountInput {
   @IsEnum(BusinessType)
   @IsUndefinable()
   businessType?: BusinessType;
+
+  @IsString()
+  @IsUndefinable()
+  country?: string;
+
+  @IsEnum(AgreementType)
+  @IsUndefinable()
+  serviceAgreement?: AgreementType;
 }
 
 class ConnectAccountOutput {
@@ -40,7 +49,16 @@ const connectAccount = Endpoint.custom(
     output: ConnectAccountOutput,
     description: 'Create new connected account with link',
   }),
-  async ({ userId, email, accountType, refreshUrl, returnUrl, businessType }) => {
+  async ({
+    userId,
+    email,
+    accountType,
+    refreshUrl,
+    returnUrl,
+    businessType,
+    country,
+    serviceAgreement,
+  }) => {
     const service = await Stripe.init();
 
     return {
@@ -51,6 +69,8 @@ const connectAccount = Endpoint.custom(
         refreshUrl,
         returnUrl,
         businessType,
+        country,
+        serviceAgreement,
       ),
     };
   },

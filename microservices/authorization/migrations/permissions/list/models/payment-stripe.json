@@ -1185,6 +1185,22 @@
         "out": {
           "admin": "allow"
         }
+      },
+      "country": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "serviceAgreement": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
       }
     },
     "createdAt": "2023-05-26T13:01:39.186Z"
