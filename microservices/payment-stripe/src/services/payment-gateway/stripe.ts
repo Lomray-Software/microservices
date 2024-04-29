@@ -7,6 +7,7 @@ import { validate } from 'class-validator';
 import StripeSdk from 'stripe';
 import { EntityManager, getManager } from 'typeorm';
 import remoteConfig from '@config/remote';
+import AgreementType from '@constants/agreement-type';
 import BalanceType from '@constants/balance-type';
 import BusinessType from '@constants/business-type';
 import CouponDuration from '@constants/coupon-duration';
@@ -536,20 +537,37 @@ class Stripe extends Abstract {
     refreshUrl: string,
     returnUrl: string,
     businessType?: BusinessType,
+    country?: string,
+    serviceAgreement?: string,
   ): Promise<string> {
     const customer = await super.getCustomer(userId);
+    const isRecipient = serviceAgreement === AgreementType.RECIPIENT;
 
     if (!customer.params.accountId) {
+      const accountCapabilities = isRecipient
+        ? {
+            capabilities: {
+              transfers: {
+                requested: true,
+              },
+            },
+          }
+        : {};
+
       const stripeConnectAccount: StripeSdk.Account = await this.sdk.accounts.create({
         type: accountType,
-        country: 'US',
+        country,
+        ...accountCapabilities,
+        // eslint-disable-next-line camelcase
+        ...(serviceAgreement ? { tos_acceptance: { service_agreement: serviceAgreement } } : {}),
         email,
         // eslint-disable-next-line camelcase
         ...(businessType ? { business_type: businessType } : {}),
         settings: {
           payouts: {
+            // Recipient accounts cannot have debit_negative_balances = true
             // eslint-disable-next-line camelcase
-            debit_negative_balances: true,
+            debit_negative_balances: !isRecipient,
             // eslint-disable-next-line camelcase
             schedule: { interval: 'manual' },
           },
