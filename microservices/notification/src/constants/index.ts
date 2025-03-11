@@ -13,6 +13,7 @@ const constants = {
     packageName: name,
     withDb: true,
     withAWS: true,
+    withFirebase: true,
   }),
   EMAIL_PROVIDER: process.env.EMAIL_PROVIDER ?? EmailProvider.SIMPLE,
   EMAIL_DEFAULT_FROM: process.env.EMAIL_DEFAULT_FROM,

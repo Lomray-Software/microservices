@@ -321,5 +321,44 @@
     "createdAt": "2023-11-28T08:24:13.755Z",
     "modelOut": "notification.ProcessOutput",
     "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "fcm-token.remove",
+    "description": "Remove FCM token",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2025-03-10T18:03:29.296Z",
+    "modelIn": "notification.FcmTokenRemoveInput",
+    "modelOut": "notification.FcmTokenRemoveOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "fcm-token.save",
+    "description": "Save FCM token for user",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2025-03-10T18:03:29.296Z",
+    "modelIn": "notification.FcmTokenSaveInput",
+    "modelOut": "notification.FcmTokenSaveOutput",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "fcm-token.remove-user-tokens",
+    "description": "Remove all FCM tokens for a user",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2025-03-10T19:45:43.110Z",
+    "modelIn": "notification.FcmTokenRemoveUserTokensInput",
+    "modelOut": "notification.FcmTokenRemoveUserTokensOutput",
+    "methodFilters": []
   }
 ]

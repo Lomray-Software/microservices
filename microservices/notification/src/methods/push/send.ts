@@ -1,14 +1,26 @@
-import { Endpoint } from '@lomray/microservice-helpers';
-import { IsBoolean, MaxLength } from 'class-validator';
+import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsString, IsArray, MaxLength, IsObject, IsBoolean } from 'class-validator';
+import { getRepository } from 'typeorm';
+import FcmToken from '@entities/fcm-token';
+import FCMService from '@services/firebase';
 
 class PushSendInput {
-  @MaxLength(20, {
-    each: true,
-  })
+  @IsArray()
+  @IsString({ each: true })
+  @MaxLength(36, { each: true })
   to: string[];
 
-  @MaxLength(100)
+  @IsString()
+  @MaxLength(255)
+  title: string;
+
+  @IsString()
+  @MaxLength(1000)
   message: string;
+
+  @IsObject()
+  @IsUndefinable()
+  data?: Record<string, string>;
 }
 
 class PushSendOutput {
@@ -25,12 +37,14 @@ const send = Endpoint.custom(
     output: PushSendOutput,
     description: 'Send push notification to user device',
   }),
-  () => {
-    throw new Error('Method not implemented.');
+  async ({ to, title, message, data }) => {
+    const fcmService = new FCMService(getRepository(FcmToken));
 
-    // return {
-    //   isSent: false,
-    // };
+    await fcmService.sendNotification(to, title, message, data);
+
+    return {
+      isSent: true,
+    };
   },
 );
 
