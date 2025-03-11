@@ -453,7 +453,23 @@
           "admin": "allow"
         }
       },
+      "title": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
       "message": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "data": {
         "in": {
           "admin": "allow"
         },
@@ -740,5 +756,117 @@
       "message": "notification.Message"
     },
     "createdAt": "2023-11-30T08:10:03.620Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.FcmTokenSaveInput",
+    "title": "Fcm Token Save Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "token": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userAgent": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2025-03-10T18:03:29.296Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.FcmTokenSaveOutput",
+    "title": "Fcm Token Save Output",
+    "schema": {
+      "success": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2025-03-10T18:03:29.296Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.FcmTokenRemoveInput",
+    "title": "Fcm Token Remove Input",
+    "schema": {
+      "token": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2025-03-10T18:03:29.296Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.FcmTokenRemoveOutput",
+    "title": "Fcm Token Remove Output",
+    "schema": {
+      "success": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2025-03-10T18:03:29.296Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.FcmTokenRemoveUserTokensInput",
+    "title": "Fcm Token Remove User Tokens Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2025-03-10T19:45:43.110Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.FcmTokenRemoveUserTokensOutput",
+    "title": "Fcm Token Remove User Tokens Output",
+    "schema": {
+      "success": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2025-03-10T19:45:43.110Z"
   }
 ]
