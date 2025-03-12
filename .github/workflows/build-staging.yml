@@ -102,7 +102,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Archive microservices artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: microservice-artifacts
           path: |
@@ -111,13 +111,13 @@ jobs:
             microservices/*/package.json
 
       - name: Archive Dockerfile
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dockerfile
           path: node_modules/@lomray/microservice-config/Dockerfile-nodejs
 
       - name: Archive code coverage artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # only for staging
         if: ${{ needs.changed-microservices.outputs.branch }} == "staging"
         with:
@@ -145,12 +145,12 @@ jobs:
 
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: microservice-artifacts
           path: microservices
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: dockerfile
 
@@ -200,7 +200,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: coverage-artifacts
           path: microservices
