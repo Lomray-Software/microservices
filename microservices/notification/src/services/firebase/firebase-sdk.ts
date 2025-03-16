@@ -7,7 +7,7 @@ export type TFirebaseAdmin = typeof FirebaseAdmin;
 let isInit = false;
 
 export default async (): Promise<TFirebaseAdmin> => {
-  if (!isInit) {
+  if (!isInit && !FirebaseAdmin.apps.length) {
     const { credential } = await firebaseConfig(CONST);
 
     FirebaseAdmin.initializeApp({
