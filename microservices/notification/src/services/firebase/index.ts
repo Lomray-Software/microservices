@@ -71,14 +71,14 @@ class FCMService {
           default:
             throw new BaseException({
               status: 500,
-              message: 'Failed to send notification batch',
+              message: `Failed to send notification batch. ${JSON.stringify(error)}`,
             });
         }
       }
 
       throw new BaseException({
         status: 500,
-        message: 'Failed to send notification batch',
+        message: `Failed to send notification batch. ${JSON.stringify(error)}`,
       });
     }
   }
