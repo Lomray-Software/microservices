@@ -155,14 +155,13 @@ class FCMService {
   /**
    * Save or update FCM token for a user
    */
-  public async saveToken(userId: string, token: string, userAgent?: string): Promise<FcmToken> {
+  public async saveToken(userId: string, token: string, userAgent: string): Promise<FcmToken> {
     // Check if token already exists
-    let fcmToken = await this.tokenRepository.findOne({ where: { token } });
+    let fcmToken = await this.tokenRepository.findOne({ where: { userId, userAgent } });
 
     if (fcmToken) {
       // Update existing token
-      fcmToken.userId = userId;
-      fcmToken.userAgent = userAgent;
+      fcmToken.token = token;
 
       return this.tokenRepository.save(fcmToken);
     }
@@ -175,56 +174,6 @@ class FCMService {
     });
 
     return this.tokenRepository.save(fcmToken);
-  }
-
-  /**
-   * Remove FCM token
-   */
-  public async removeToken(token: string): Promise<void> {
-    try {
-      const result = await this.tokenRepository.delete({ token });
-
-      if (result.affected === 0) {
-        throw new BaseException({
-          status: 404,
-          message: 'FCM token not found',
-        });
-      }
-    } catch (error) {
-      if (error instanceof BaseException) {
-        throw error;
-      }
-
-      throw new BaseException({
-        status: 500,
-        message: 'Failed to remove FCM token',
-      });
-    }
-  }
-
-  /**
-   * Remove all FCM tokens for a user
-   */
-  public async removeUserTokens(userId: string): Promise<void> {
-    try {
-      const result = await this.tokenRepository.delete({ userId });
-
-      if (result.affected === 0) {
-        throw new BaseException({
-          status: 404,
-          message: 'No FCM tokens found for this user',
-        });
-      }
-    } catch (error) {
-      if (error instanceof BaseException) {
-        throw error;
-      }
-
-      throw new BaseException({
-        status: 500,
-        message: 'Failed to remove user FCM tokens',
-      });
-    }
   }
 }
 

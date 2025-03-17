@@ -325,14 +325,14 @@
   {
     "microservice": "notification",
     "method": "fcm-token.remove",
-    "description": "Remove FCM token",
+    "description": "Remove FcmToken by given condition",
     "allowGroup": [
       "admin"
     ],
     "denyGroup": [],
-    "createdAt": "2025-03-10T18:03:29.296Z",
-    "modelIn": "notification.FcmTokenRemoveInput",
-    "modelOut": "notification.FcmTokenRemoveOutput",
+    "createdAt": "2025-03-17T09:02:17.638Z",
+    "modelIn": "RemoveRequestParams",
+    "modelOut": "notification.RemoveOutputParams.7e57e480187ae365dff017e73a6af35c",
     "methodFilters": []
   },
   {
@@ -340,7 +340,7 @@
     "method": "fcm-token.save",
     "description": "Save FCM token for user",
     "allowGroup": [
-      "admin"
+      "user"
     ],
     "denyGroup": [],
     "createdAt": "2025-03-10T18:03:29.296Z",
@@ -350,15 +350,41 @@
   },
   {
     "microservice": "notification",
-    "method": "fcm-token.remove-user-tokens",
-    "description": "Remove all FCM tokens for a user",
+    "method": "fcm-token.list",
+    "description": "Returns list of FcmToken by given condition",
     "allowGroup": [
       "admin"
     ],
     "denyGroup": [],
-    "createdAt": "2025-03-10T19:45:43.110Z",
-    "modelIn": "notification.FcmTokenRemoveUserTokensInput",
-    "modelOut": "notification.FcmTokenRemoveUserTokensOutput",
+    "createdAt": "2025-03-17T09:02:17.638Z",
+    "modelIn": "ListRequestParams",
+    "modelOut": "notification.ListOutputParams.07cb21604c24f47f2672215971731023",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "fcm-token.view",
+    "description": "Returns FcmToken by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2025-03-17T09:02:17.638Z",
+    "modelIn": "ViewRequestParams",
+    "modelOut": "notification.ViewOutputParams.c7183e89e574222a2a3d0fca89605104",
+    "methodFilters": []
+  },
+  {
+    "microservice": "notification",
+    "method": "fcm-token.count",
+    "description": "Returns count of FcmToken by given condition",
+    "allowGroup": [
+      "admin"
+    ],
+    "denyGroup": [],
+    "createdAt": "2025-03-17T09:02:17.638Z",
+    "modelIn": "CountRequestParams",
+    "modelOut": "CountOutputParams",
     "methodFilters": []
   }
 ]

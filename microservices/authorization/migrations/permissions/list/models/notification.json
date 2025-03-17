@@ -111,7 +111,7 @@
       "task": "notification.Task",
       "recipient": "notification.Recipient"
     },
-    "createdAt": "2022-04-14T05:34:31.136Z"
+    "createdAt": "2025-03-17T09:02:17.638Z"
   },
   {
     "microservice": "notification",
@@ -128,7 +128,7 @@
         }
       }
     },
-    "createdAt": "2022-04-14T05:34:31.136Z"
+    "createdAt": "2025-03-17T09:02:17.638Z"
   },
   {
     "microservice": "notification",
@@ -807,8 +807,8 @@
   },
   {
     "microservice": "notification",
-    "alias": "notification.FcmTokenRemoveInput",
-    "title": "Fcm Token Remove Input",
+    "alias": "notification.FcmToken",
+    "title": "Fcm Token",
     "schema": {
       "token": {
         "in": {
@@ -817,48 +817,34 @@
         "out": {
           "admin": "allow"
         }
-      }
-    },
-    "createdAt": "2025-03-10T18:03:29.296Z"
-  },
-  {
-    "microservice": "notification",
-    "alias": "notification.FcmTokenRemoveOutput",
-    "title": "Fcm Token Remove Output",
-    "schema": {
-      "success": {
-        "in": {
-          "admin": "allow"
-        },
-        "out": {
-          "admin": "allow"
-        }
-      }
-    },
-    "createdAt": "2025-03-10T18:03:29.296Z"
-  },
-  {
-    "microservice": "notification",
-    "alias": "notification.FcmTokenRemoveUserTokensInput",
-    "title": "Fcm Token Remove User Tokens Input",
-    "schema": {
+      },
       "userId": {
         "in": {
+          "user": {
+            "condition": "Fields: user owner"
+          }
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "userAgent": {
+        "in": {
           "admin": "allow"
         },
         "out": {
           "admin": "allow"
         }
-      }
-    },
-    "createdAt": "2025-03-10T19:45:43.110Z"
-  },
-  {
-    "microservice": "notification",
-    "alias": "notification.FcmTokenRemoveUserTokensOutput",
-    "title": "Fcm Token Remove User Tokens Output",
-    "schema": {
-      "success": {
+      },
+      "createdAt": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      },
+      "updatedAt": {
         "in": {
           "admin": "allow"
         },
@@ -867,6 +853,42 @@
         }
       }
     },
-    "createdAt": "2025-03-10T19:45:43.110Z"
+    "createdAt": "2025-03-17T09:02:17.638Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.ListOutputParams.07cb21604c24f47f2672215971731023",
+    "title": "List Output Params",
+    "schema": {
+      "list": "notification.FcmToken",
+      "count": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
+    },
+    "createdAt": "2025-03-17T09:02:17.638Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.ViewOutputParams.c7183e89e574222a2a3d0fca89605104",
+    "title": "View Output Params",
+    "schema": {
+      "entity": "notification.FcmToken"
+    },
+    "createdAt": "2025-03-17T09:02:17.638Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.RemoveOutputParams.7e57e480187ae365dff017e73a6af35c",
+    "title": "Remove Output Params",
+    "schema": {
+      "deleted": "notification.FcmToken",
+      "entities": "notification.FcmToken"
+    },
+    "createdAt": "2025-03-17T09:02:17.638Z"
   }
 ]
