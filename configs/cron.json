@@ -54,6 +54,33 @@
     }
   },
   {
+    "rule": "0 1 * * *",
+    "method": "notification.fcm-token.remove",
+    "description": "Cleanup 2 months old fcm tokens",
+    "payload": {
+      "params": {
+        "query": {
+          "where": {
+            "updatedAt": {
+              "<": "<%= new Date().setMonth(new Date().getMonth() - 2) %>"
+            }
+          }
+        },
+        "payload": {
+          "authorization": {
+            "filter": {
+              "methodOptions": {
+                "isAllowMultiple": true
+              }
+            }
+          }
+        }
+      },
+      "allowErrorCodes": [-33485],
+      "responseTemplate": "<%= `deleted: ${deleted.length}` %>"
+    }
+  },
+  {
     "rule": "* * * * *",
     "method": "notification.job.task.process",
     "description": "Process tasks",

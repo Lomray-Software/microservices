@@ -1,29 +1,29 @@
-import { IsTypeormDate, IsUndefinable } from '@lomray/microservice-helpers';
+import { IsTypeormDate } from '@lomray/microservice-helpers';
 import { IsString, Length } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
-import { Entity, Column, CreateDateColumn, Index, UpdateDateColumn, PrimaryColumn } from 'typeorm';
+import { Entity, Column, CreateDateColumn, UpdateDateColumn, PrimaryColumn, Unique } from 'typeorm';
 
 @JSONSchema({
   title: 'FCM Token',
 })
 @Entity()
 class FcmToken {
-  @PrimaryColumn({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   @Length(1, 255)
   @IsString()
+  @Unique(['token'])
   token: string;
 
-  @Index('IDX_fcm_token_userId', ['userId'])
-  @Column({ type: 'varchar', length: 36 })
+  @PrimaryColumn({ type: 'varchar', length: 36 })
   @Length(1, 36)
   @IsString()
   userId: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255 })
   @Length(1, 255)
   @IsString()
-  @IsUndefinable()
-  userAgent?: string;
+  @PrimaryColumn()
+  userAgent: string;
 
   @IsTypeormDate()
   @CreateDateColumn()

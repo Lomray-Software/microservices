@@ -2,8 +2,7 @@ import MetaEndpoint from '@lomray/microservice-helpers/methods/meta';
 import type { Microservice, IEndpointHandler } from '@lomray/microservice-nodejs-lib';
 import CONST from '@constants/index';
 import EmailSend from '@methods/email/send';
-import FcmTokenRemove from '@methods/fcm-token/remove';
-import FcmTokenRemoveUserTokens from '@methods/fcm-token/remove-user-tokens';
+import FcmTokenCrud from '@methods/fcm-token/crud';
 import FcmTokenSave from '@methods/fcm-token/save';
 import CrudMessage from '@methods/messages/crud';
 import CrudNotice from '@methods/notice/crud';
@@ -23,6 +22,10 @@ export default (ms: Microservice): void => {
       'hide-all': NoticeHideAll,
     },
     task: CrudTask,
+    'fcm-token': {
+      ...FcmTokenCrud,
+      save: FcmTokenSave,
+    },
   };
 
   /**
@@ -48,13 +51,6 @@ export default (ms: Microservice): void => {
    * Push methods
    */
   ms.addEndpoint('push.send', PushSend);
-
-  /**
-   * FCM Token methods
-   */
-  ms.addEndpoint('fcm-token.save', FcmTokenSave);
-  ms.addEndpoint('fcm-token.remove', FcmTokenRemove);
-  ms.addEndpoint('fcm-token.remove-user-tokens', FcmTokenRemoveUserTokens);
 
   /**
    * Microservice metadata endpoint
