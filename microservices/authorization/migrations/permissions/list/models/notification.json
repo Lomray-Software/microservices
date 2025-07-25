@@ -527,7 +527,10 @@
     "schema": {
       "userId": {
         "in": {
-          "user": "allow"
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
         },
         "out": {
           "user": "allow"
