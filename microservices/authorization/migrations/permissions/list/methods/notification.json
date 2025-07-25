@@ -234,6 +234,25 @@
   },
   {
     "microservice": "notification",
+    "method": "notice.view-all",
+    "description": "Notifications multiple set as viewed",
+    "allowGroup": [
+      "user"
+    ],
+    "denyGroup": [],
+    "createdAt": "2025-07-24T12:00:00.000Z",
+    "modelOut": "notification.ViewAllOutput",
+    "methodFilters": [
+      {
+        "filterTitle": "By userId",
+        "operator": "and",
+        "roleAlias": "guest",
+        "createdAt": "2022-03-15T06:18:07.204Z"
+      }
+    ]
+  },
+  {
+    "microservice": "notification",
     "method": "task.count",
     "description": "Returns count of Task by given condition",
     "allowGroup": [

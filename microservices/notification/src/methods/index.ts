@@ -8,6 +8,7 @@ import FcmTokenSave from '@methods/fcm-token/save';
 import CrudMessage from '@methods/messages/crud';
 import CrudNotice from '@methods/notice/crud';
 import { hideAll as NoticeHideAll } from '@methods/notice/hide-all';
+import { viewAll as NoticeViewAll } from '@methods/notice/view-all';
 import PhoneSend from '@methods/phone/send';
 import PushSend from '@methods/push/send';
 import CrudTask from '@methods/task/crud';
@@ -21,6 +22,7 @@ export default (ms: Microservice): void => {
     notice: {
       ...CrudNotice,
       'hide-all': NoticeHideAll,
+      'view-all': NoticeViewAll,
     },
     task: CrudTask,
   };
