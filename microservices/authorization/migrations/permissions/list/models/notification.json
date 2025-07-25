@@ -522,6 +522,49 @@
   },
   {
     "microservice": "notification",
+    "alias": "notification.ViewAllInput",
+    "title": "View All Input",
+    "schema": {
+      "userId": {
+        "in": {
+          "admin": "allow",
+          "user": {
+            "condition": "Fields: user owner"
+          }
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2025-07-24T12:00:00.000Z"
+  },
+  {
+    "microservice": "notification",
+    "alias": "notification.ViewAllOutput",
+    "title": "View All Output",
+    "schema": {
+      "status": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      },
+      "affected": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
+    },
+    "createdAt": "2025-07-24T12:00:00.000Z"
+  },
+  {
+    "microservice": "notification",
     "alias": "notification.Task",
     "title": "Task",
     "schema": {
