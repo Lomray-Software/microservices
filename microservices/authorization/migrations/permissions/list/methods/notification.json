@@ -241,15 +241,9 @@
     ],
     "denyGroup": [],
     "createdAt": "2025-07-24T12:00:00.000Z",
+    "modelIn": "notification.ViewAllInput",
     "modelOut": "notification.ViewAllOutput",
-    "methodFilters": [
-      {
-        "filterTitle": "By userId",
-        "operator": "and",
-        "roleAlias": "guest",
-        "createdAt": "2022-03-15T06:18:07.204Z"
-      }
-    ]
+    "methodFilters": []
   },
   {
     "microservice": "notification",

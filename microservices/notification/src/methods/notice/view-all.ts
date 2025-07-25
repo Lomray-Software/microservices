@@ -1,6 +1,11 @@
 import { Endpoint, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsBoolean, IsNumber } from 'class-validator';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 import Notice from '@services/notice';
+
+class ViewAllInput {
+  @IsString()
+  userId: string;
+}
 
 class ViewAllOutput {
   @IsBoolean()
@@ -16,10 +21,11 @@ class ViewAllOutput {
  */
 const viewAll = Endpoint.custom(
   () => ({
+    input: ViewAllInput,
     output: ViewAllOutput,
     description: 'Notifications multiple view',
   }),
-  ({ payload }) => Notice.init().viewAll(payload?.authentication?.userId as string),
+  ({ userId }) => Notice.init().viewAll(userId),
 );
 
-export { viewAll, ViewAllOutput };
+export { viewAll, ViewAllOutput, ViewAllInput };

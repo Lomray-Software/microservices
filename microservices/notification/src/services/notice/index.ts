@@ -1,7 +1,7 @@
 import { EntityManager, getManager } from 'typeorm';
 import NoticeEntity from '@entities/notice';
 import type { HideAllOutput } from '@methods/notice/hide-all';
-import type { ViewAllOutput } from '@methods/notice/view-all';
+import type { ViewAllInput, ViewAllOutput } from '@methods/notice/view-all';
 
 /**
  * Notice service
@@ -56,7 +56,7 @@ class Notice {
   /**
    * View all user's notifications
    */
-  public async viewAll(userId?: string): Promise<ViewAllOutput> {
+  public async viewAll(userId?: ViewAllInput['userId']): Promise<ViewAllOutput> {
     if (!userId) {
       return {
         status: false,
