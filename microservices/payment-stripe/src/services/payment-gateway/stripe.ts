@@ -389,9 +389,29 @@ class Stripe extends Abstract {
         productId,
         currency,
         unitAmount,
+        metadata,
       },
       id,
     );
+  }
+
+  /**
+   * Validate PWYW custom amount against minimum price
+   */
+  private validatePWYWAmount(customAmount: number, price: Price): void {
+    if (price.metadata?.isPWYW === 'true') {
+      const minimumPrice = price.metadata?.minimumPrice ? Number(price.metadata.minimumPrice) : 0;
+
+      if (customAmount < minimumPrice) {
+        Log.error(
+          `Custom amount ${customAmount} is below minimum price ${minimumPrice} for PWYW show`,
+        );
+        throw new BaseException({
+          status: 400,
+          message: `Amount must be at least $${(minimumPrice / 100).toFixed(2)}`,
+        });
+      }
+    }
   }
 
   /**
@@ -409,6 +429,11 @@ class Stripe extends Abstract {
       return null;
     }
 
+    // Validate PWYW minimum price if custom amount is provided
+    if (customAmount) {
+      this.validatePWYWAmount(customAmount, price);
+    }
+
     /* eslint-disable camelcase */
     const sessionParams: StripeSdk.Checkout.SessionCreateParams = {
       mode: 'payment',
@@ -423,9 +448,9 @@ class Stripe extends Abstract {
       sessionParams.line_items = [
         {
           price_data: {
-            currency: 'usd',
+            currency: price.currency,
             product: price.productId,
-            unit_amount: customAmount * 100, // Convert to cents
+            unit_amount: customAmount,
           },
           quantity: 1,
         },
@@ -446,12 +471,12 @@ class Stripe extends Abstract {
     await this.createTransaction(
       {
         type: TransactionType.CREDIT,
-        amount: customAmount ? customAmount * 100 : price.unitAmount, // Store in cents
+        amount: customAmount ? customAmount : price.unitAmount,
         userId,
         productId: price.productId,
         entityId: price.product.entityId,
         status: TransactionStatus.INITIAL,
-        customAmount: customAmount ? customAmount * 100 : undefined, // Store custom amount in cents
+        customAmount: customAmount ? customAmount : undefined, // Store custom amount
       },
       id,
     );

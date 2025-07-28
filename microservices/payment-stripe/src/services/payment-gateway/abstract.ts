@@ -245,7 +245,7 @@ abstract class Abstract {
    * Create new price
    */
   public async createPrice(params: IPriceParams, priceId: string = uuid()): Promise<Price> {
-    const { productId, currency, unitAmount, userId } = params;
+    const { productId, currency, unitAmount, userId, metadata } = params;
 
     const price = this.priceRepository.create({
       priceId,
@@ -253,6 +253,7 @@ abstract class Abstract {
       userId,
       currency,
       unitAmount,
+      ...(metadata ? { metadata } : {}),
     });
 
     await this.priceRepository.save(price);
