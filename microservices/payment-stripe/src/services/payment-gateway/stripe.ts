@@ -99,6 +99,7 @@ interface ICheckoutParams {
   successUrl: string;
   cancelUrl: string;
   isAllowPromoCode?: boolean;
+  customAmount?: number;
 }
 
 interface ICheckoutEvent {
@@ -369,16 +370,17 @@ class Stripe extends Abstract {
   }
 
   /**
-   * Create Price entity
+   * Create new price
    */
   public async createPrice(params: IPriceParams): Promise<Price> {
-    const { currency, unitAmount, productId, userId } = params;
+    const { currency, unitAmount, productId, userId, metadata } = params;
 
     const { id }: StripeSdk.Price = await this.sdk.prices.create({
       currency,
       product: productId,
       // eslint-disable-next-line camelcase
       unit_amount: unitAmount,
+      ...(metadata ? { metadata } : {}),
     });
 
     return super.createPrice(
@@ -396,7 +398,7 @@ class Stripe extends Abstract {
    * Create checkout session and return url to redirect user for payment
    */
   public async createCheckout(params: ICheckoutParams): Promise<string | null> {
-    const { priceId, userId, successUrl, cancelUrl, isAllowPromoCode } = params;
+    const { priceId, userId, successUrl, cancelUrl, isAllowPromoCode, customAmount } = params;
 
     const { customerId } = await super.getCustomer(userId);
     const price = await this.priceRepository.findOne({ priceId }, { relations: ['product'] });
@@ -408,29 +410,48 @@ class Stripe extends Abstract {
     }
 
     /* eslint-disable camelcase */
-    const { id, url } = await this.sdk.checkout.sessions.create({
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+    const sessionParams: StripeSdk.Checkout.SessionCreateParams = {
       mode: 'payment',
       customer: customerId,
       success_url: successUrl,
       cancel_url: cancelUrl,
-      allow_promotion_codes: isAllowPromoCode,
-    });
+      allow_promotion_codes: isAllowPromoCode && !customAmount, // No promo codes for PWYW
+    };
+
+    if (customAmount) {
+      // PWYW mode - create custom line item with user-defined amount
+      sessionParams.line_items = [
+        {
+          price_data: {
+            currency: 'usd',
+            product: price.productId,
+            unit_amount: customAmount * 100, // Convert to cents
+          },
+          quantity: 1,
+        },
+      ];
+    } else {
+      // Fixed price mode
+      sessionParams.line_items = [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ];
+    }
+
+    const { id, url } = await this.sdk.checkout.sessions.create(sessionParams);
     /* eslint-enable camelcase */
 
     await this.createTransaction(
       {
         type: TransactionType.CREDIT,
-        amount: price.unitAmount,
+        amount: customAmount ? customAmount * 100 : price.unitAmount, // Store in cents
         userId,
         productId: price.productId,
         entityId: price.product.entityId,
         status: TransactionStatus.INITIAL,
+        customAmount: customAmount ? customAmount * 100 : undefined, // Store custom amount in cents
       },
       id,
     );
