@@ -406,7 +406,10 @@ class Stripe extends Abstract {
         Log.error(
           `Custom amount ${customAmount} is below minimum price ${minimumPrice} for PWYW show`,
         );
-        throw new Error(`Amount must be at least $${(minimumPrice / 100).toFixed(2)}`);
+        throw new BaseException({
+          status: 400,
+          message: `Amount must be at least $${(minimumPrice / 100).toFixed(2)}`,
+        });
       }
     }
   }
