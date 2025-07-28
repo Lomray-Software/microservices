@@ -41,6 +41,12 @@ class Price {
   @IsNumber()
   unitAmount: number;
 
+  @JSONSchema({
+    description: 'Metadata for storing custom data like PWYW information',
+  })
+  @Column({ type: 'jsonb', default: null })
+  metadata: Record<string, any> | null;
+
   @IsTypeormDate()
   @CreateDateColumn()
   createdAt: Date;

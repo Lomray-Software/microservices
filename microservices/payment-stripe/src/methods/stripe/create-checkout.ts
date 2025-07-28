@@ -1,5 +1,5 @@
 import { Endpoint, IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsBoolean, IsNumber, IsString, Length } from 'class-validator';
+import { IsBoolean, IsNumber, IsString, Length, Min } from 'class-validator';
 import Stripe from '@services/payment-gateway/stripe';
 
 class CreateCheckoutInput {
@@ -21,6 +21,7 @@ class CreateCheckoutInput {
   isAllowPromoCode?: boolean;
 
   @IsNumber()
+  @Min(0)
   @IsUndefinable()
   customAmount?: number;
 }
