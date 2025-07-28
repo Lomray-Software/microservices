@@ -1,6 +1,6 @@
 import { Endpoint } from '@lomray/microservice-helpers';
 import { Type } from 'class-transformer';
-import { IsNumber, IsObject, IsString } from 'class-validator';
+import { IsNumber, IsObject, IsString, IsOptional } from 'class-validator';
 import Price from '@entities/price';
 import Stripe from '@services/payment-gateway/stripe';
 
@@ -16,6 +16,10 @@ class PriceCreateInput {
 
   @IsNumber()
   unitAmount: number;
+
+  @IsObject()
+  @IsOptional()
+  metadata?: Record<string, string>;
 }
 
 class PriceCreateOutput {

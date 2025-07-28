@@ -41,6 +41,7 @@ export interface IPriceParams {
   userId: string;
   currency: string;
   unitAmount: number;
+  metadata?: Record<string, string>;
 }
 
 export interface ITransactionParams {
@@ -56,6 +57,7 @@ export interface ITransactionParams {
   tax?: number;
   fee?: number;
   params?: ITransactionEntityParams;
+  customAmount?: number;
 }
 
 export interface IProductParams {

@@ -63,7 +63,15 @@
           "admin": "allow"
         }
       },
-      "product": "payment-stripe.Product"
+      "product": "payment-stripe.Product",
+      "metadata": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "admin": "allow"
+        }
+      }
     },
     "createdAt": "2023-05-26T13:01:39.186Z"
   },
@@ -306,7 +314,15 @@
         }
       },
       "customer": "payment-stripe.Customer",
-      "product": "payment-stripe.Product"
+      "product": "payment-stripe.Product",
+      "customAmount": {
+        "in": {
+          "admin": "allow"
+        },
+        "out": {
+          "user": "allow"
+        }
+      }
     },
     "createdAt": "2023-05-26T13:01:39.186Z"
   },
