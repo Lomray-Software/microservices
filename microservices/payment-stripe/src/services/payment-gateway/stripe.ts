@@ -99,7 +99,6 @@ interface ICheckoutParams {
   successUrl: string;
   cancelUrl: string;
   isAllowPromoCode?: boolean;
-  customAmount?: number;
 }
 
 interface ICheckoutEvent {
@@ -128,9 +127,7 @@ interface ICheckoutCart {
   clientSecret: string | null;
 }
 
-type TCardData =
-  | StripeSdk.PaymentMethodCreateParams.Card1
-  | StripeSdk.PaymentMethodCreateParams.Card2;
+type TCardData = StripeSdk.PaymentMethodCreateParams.Card;
 
 interface IStripeCouponParams extends ICouponParams {
   currency?: TCurrency;
@@ -373,15 +370,18 @@ class Stripe extends Abstract {
    * Create new price
    */
   public async createPrice(params: IPriceParams): Promise<Price> {
-    const { currency, unitAmount, productId, userId, metadata } = params;
+    const { currency, unitAmount, productId, userId, metadata, customUnitAmount } = params;
 
+    /* eslint-disable camelcase */
     const { id }: StripeSdk.Price = await this.sdk.prices.create({
       currency,
       product: productId,
-      // eslint-disable-next-line camelcase
-      unit_amount: unitAmount,
       ...(metadata ? { metadata } : {}),
+      ...(customUnitAmount
+        ? { custom_unit_amount: customUnitAmount }
+        : { unit_amount: unitAmount }),
     });
+    /* eslint-enable camelcase */
 
     return super.createPrice(
       {
@@ -390,35 +390,17 @@ class Stripe extends Abstract {
         currency,
         unitAmount,
         metadata,
+        customUnitAmount,
       },
       id,
     );
   }
 
   /**
-   * Validate PWYW custom amount against minimum price
-   */
-  private validatePWYWAmount(customAmount: number, price: Price): void {
-    if (price.metadata?.isPWYW === 'true') {
-      const minimumPrice = price.metadata?.minimumPrice ? Number(price.metadata.minimumPrice) : 0;
-
-      if (customAmount < minimumPrice) {
-        Log.error(
-          `Custom amount ${customAmount} is below minimum price ${minimumPrice} for PWYW show`,
-        );
-        throw new BaseException({
-          status: 400,
-          message: `Amount must be at least $${(minimumPrice / 100).toFixed(2)}`,
-        });
-      }
-    }
-  }
-
-  /**
    * Create checkout session and return url to redirect user for payment
    */
   public async createCheckout(params: ICheckoutParams): Promise<string | null> {
-    const { priceId, userId, successUrl, cancelUrl, isAllowPromoCode, customAmount } = params;
+    const { priceId, userId, successUrl, cancelUrl, isAllowPromoCode } = params;
 
     const { customerId } = await super.getCustomer(userId);
     const price = await this.priceRepository.findOne({ priceId }, { relations: ['product'] });
@@ -429,41 +411,20 @@ class Stripe extends Abstract {
       return null;
     }
 
-    // Validate PWYW minimum price if custom amount is provided
-    if (customAmount) {
-      this.validatePWYWAmount(customAmount, price);
-    }
-
     /* eslint-disable camelcase */
     const sessionParams: StripeSdk.Checkout.SessionCreateParams = {
       mode: 'payment',
       customer: customerId,
       success_url: successUrl,
       cancel_url: cancelUrl,
-      allow_promotion_codes: isAllowPromoCode && !customAmount, // No promo codes for PWYW
-    };
-
-    if (customAmount) {
-      // PWYW mode - create custom line item with user-defined amount
-      sessionParams.line_items = [
-        {
-          price_data: {
-            currency: price.currency,
-            product: price.productId,
-            unit_amount: customAmount,
-          },
-          quantity: 1,
-        },
-      ];
-    } else {
-      // Fixed price mode
-      sessionParams.line_items = [
+      allow_promotion_codes: isAllowPromoCode,
+      line_items: [
         {
           price: priceId,
           quantity: 1,
         },
-      ];
-    }
+      ],
+    };
 
     const { id, url } = await this.sdk.checkout.sessions.create(sessionParams);
     /* eslint-enable camelcase */
@@ -471,12 +432,11 @@ class Stripe extends Abstract {
     await this.createTransaction(
       {
         type: TransactionType.CREDIT,
-        amount: customAmount ? customAmount : price.unitAmount,
+        amount: price.unitAmount,
         userId,
         productId: price.productId,
         entityId: price.product.entityId,
         status: TransactionStatus.INITIAL,
-        customAmount: customAmount ? customAmount : undefined, // Store custom amount
       },
       id,
     );
@@ -1789,38 +1749,38 @@ class Stripe extends Abstract {
        * Account events
        */
       case 'account.updated': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           connect: () => webhookHandlers.account.handleAccountUpdated(event),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
       case 'account.external_account.created': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           connect: () => webhookHandlers.externalAccount.handleExternalAccountCreated(event),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
       case 'account.external_account.updated': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           connect: () => webhookHandlers.externalAccount.handleExternalAccountUpdated(event),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
       case 'account.external_account.deleted': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           connect: () => webhookHandlers.externalAccount.handleExternalAccountDeleted(event),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
@@ -1828,30 +1788,30 @@ class Stripe extends Abstract {
        * Payment method events
        */
       case 'setup_intent.succeeded': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           account: () => webhookHandlers.setupIntent.handleSetupIntentSucceed(event, this.sdk),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
       case 'payment_method.updated':
       case 'payment_method.automatically_updated': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           account: () => webhookHandlers.paymentMethod.handlePaymentMethodUpdated(event),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
       case 'payment_method.detached': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           account: () => webhookHandlers.paymentMethod.handlePaymentMethodDetached(event),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
@@ -1859,11 +1819,11 @@ class Stripe extends Abstract {
        * Transfer events
        */
       case 'transfer.reversed': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           account: () => webhookHandlers.transfer.transferReversed(event),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
@@ -1873,21 +1833,21 @@ class Stripe extends Abstract {
       case 'payment_intent.processing':
       case 'payment_intent.succeeded':
       case 'payment_intent.canceled': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           account: () => webhookHandlers.paymentIntent.handlePaymentIntent(event, this.sdk),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
       case 'payment_intent.payment_failed': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           account: () =>
             webhookHandlers.paymentIntent.handlePaymentIntentPaymentFailed(event, this.sdk),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
@@ -1895,21 +1855,21 @@ class Stripe extends Abstract {
        * Application fee events
        */
       case 'application_fee.refund.updated': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           account: () =>
             webhookHandlers.applicationFee.handleApplicationFeeRefundUpdated(event, this.sdk),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
       case 'application_fee.refunded': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           account: () => webhookHandlers.applicationFee.handleApplicationFeeRefunded(event),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
@@ -1917,11 +1877,11 @@ class Stripe extends Abstract {
        * Refund events
        */
       case 'charge.refund.updated': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           account: () => webhookHandlers.charge.handleRefundUpdated(event, this.manager, this.sdk),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
@@ -1929,31 +1889,31 @@ class Stripe extends Abstract {
        * Charge events
        */
       case 'charge.refunded': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           account: () => webhookHandlers.charge.handleChargeRefunded(event, this.manager, this.sdk),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
       case 'charge.dispute.created': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           account: () => webhookHandlers.charge.handleChargeDisputeCreated(event, this.manager),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
       case 'charge.dispute.updated':
       case 'charge.dispute.closed':
       case 'charge.dispute.funds_reinstated': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           account: () => webhookHandlers.charge.handleChargeDisputeUpdated(event, this.manager),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
@@ -1961,11 +1921,11 @@ class Stripe extends Abstract {
        * Customer events
        */
       case 'customer.updated': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           account: () => webhookHandlers.customer.handleCustomerUpdated(event, this.manager),
         };
 
-        await handlers?.[webhookType]();
+        await handlers[webhookType]?.();
         break;
       }
 
@@ -1978,12 +1938,12 @@ class Stripe extends Abstract {
       case 'payout.canceled':
       case 'payout.reconciliation_completed':
       case 'payout.paid': {
-        const handlers = {
+        const handlers: Record<string, () => Promise<void>> = {
           // Handle payout of connected account
           connect: () => webhookHandlers.payout.handlePayoutOccur(event),
         };
 
-        await handlers?.[webhookType]?.();
+        await handlers[webhookType]?.();
         break;
       }
     }

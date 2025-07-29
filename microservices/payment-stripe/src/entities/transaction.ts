@@ -216,15 +216,6 @@ class Transaction {
   amount: number;
 
   @JSONSchema({
-    description: 'Custom amount paid by user for PWYW transactions (in cents)',
-  })
-  @Column({ type: 'int', default: null })
-  @IsUndefinable()
-  @IsNullable()
-  @IsNumber()
-  customAmount: number | null;
-
-  @JSONSchema({
     description: `Sales tax or other, that should be paid to the government by tax collector. Tax included in the
       payment intent amount and storing as collected fees amount.`,
   })

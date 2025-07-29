@@ -8,7 +8,7 @@ const msNameDefault = 'payment-stripe';
 const constants = {
   ...GetConstants({ msNameDefault, version, isBuild, packageName: name, withDb: true }),
   MS_API_KEY: process.env.MS_API_KEY ?? '',
-  MS_CONFIG: JSON.parse(process.env.MS_CONFIG ?? '{"apiVersion": "2022-11-15"}'),
+  MS_CONFIG: JSON.parse(process.env.MS_CONFIG ?? '{"apiVersion": "2025-06-30.basil"}'),
   MS_PAYMENT_METHODS: JSON.parse(process.env.MS_PAYMENT_METHODS ?? '["bancontact", "card"]'),
   MS_WEBHOOK_KEYS: JSON.parse(process.env.MS_WEBHOOK_KEYS ?? '{}'),
   MS_PAYOUT_COEFF: Number(process.env.MS_PAYOUT_COEFF) ?? 0.3,

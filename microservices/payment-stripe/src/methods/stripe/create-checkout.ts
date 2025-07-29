@@ -1,5 +1,5 @@
 import { Endpoint, IsNullable, IsUndefinable } from '@lomray/microservice-helpers';
-import { IsBoolean, IsNumber, IsString, Length, Min } from 'class-validator';
+import { IsBoolean, IsString, Length } from 'class-validator';
 import Stripe from '@services/payment-gateway/stripe';
 
 class CreateCheckoutInput {
@@ -19,11 +19,6 @@ class CreateCheckoutInput {
   @IsBoolean()
   @IsUndefinable()
   isAllowPromoCode?: boolean;
-
-  @IsNumber()
-  @Min(0)
-  @IsUndefinable()
-  customAmount?: number;
 }
 
 class CreateCheckoutOutput {
@@ -41,7 +36,7 @@ const createCheckout = Endpoint.custom(
     output: CreateCheckoutOutput,
     description: 'Setup intent and return client secret key',
   }),
-  async ({ priceId, successUrl, cancelUrl, userId, isAllowPromoCode, customAmount }) => {
+  async ({ priceId, successUrl, cancelUrl, userId, isAllowPromoCode }) => {
     const service = await Stripe.init();
 
     return {
@@ -51,7 +46,6 @@ const createCheckout = Endpoint.custom(
         successUrl,
         cancelUrl,
         isAllowPromoCode,
-        customAmount,
       }),
     };
   },
