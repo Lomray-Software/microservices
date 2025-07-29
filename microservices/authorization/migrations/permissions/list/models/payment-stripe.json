@@ -73,10 +73,10 @@
       },
       "customUnitAmount": {
         "in": {
-          "user": "allow"
+          "admin": "allow"
         },
         "out": {
-          "user": "allow"
+          "admin": "allow"
         }
       },
       "product": "payment-stripe.Product"
