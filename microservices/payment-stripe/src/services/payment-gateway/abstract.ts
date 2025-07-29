@@ -40,8 +40,14 @@ export interface IPriceParams {
   productId: string;
   userId: string;
   currency: string;
-  unitAmount: number;
+  unitAmount?: number; // Optional when customUnitAmount is provided
   metadata?: Record<string, string>;
+  customUnitAmount?: {
+    enabled: boolean;
+    preset?: number;
+    minimum?: number;
+    maximum?: number;
+  };
 }
 
 export interface ITransactionParams {
@@ -57,7 +63,6 @@ export interface ITransactionParams {
   tax?: number;
   fee?: number;
   params?: ITransactionEntityParams;
-  customAmount?: number;
 }
 
 export interface IProductParams {
@@ -245,7 +250,7 @@ abstract class Abstract {
    * Create new price
    */
   public async createPrice(params: IPriceParams, priceId: string = uuid()): Promise<Price> {
-    const { productId, currency, unitAmount, userId, metadata } = params;
+    const { productId, currency, unitAmount = 0, userId, metadata, customUnitAmount } = params;
 
     const price = this.priceRepository.create({
       priceId,
@@ -254,6 +259,7 @@ abstract class Abstract {
       currency,
       unitAmount,
       ...(metadata ? { metadata } : {}),
+      ...(customUnitAmount ? { customUnitAmount } : {}),
     });
 
     await this.priceRepository.save(price);

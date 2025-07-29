@@ -47,6 +47,16 @@ class Price {
   @Column({ type: 'jsonb', default: null })
   metadata: Record<string, any> | null;
 
+  @JSONSchema({
+    description: 'Custom unit amount configuration for Pay What You Want pricing',
+  })
+  @Column({ type: 'jsonb', default: null })
+  customUnitAmount: {
+    preset?: number;
+    minimum?: number;
+    maximum?: number;
+  } | null;
+
   @IsTypeormDate()
   @CreateDateColumn()
   createdAt: Date;

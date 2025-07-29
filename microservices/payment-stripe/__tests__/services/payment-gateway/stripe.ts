@@ -26,11 +26,11 @@ interface IStripeMockParams {
 describe('services/payment-gateway/stripe', () => {
   const sandbox = sinon.createSandbox();
   const config: StripeTypes.StripeConfig = {
-    apiVersion: '2022-11-15',
+    apiVersion: '2025-06-30.basil',
   };
   const remoteConfigMock = {
     config: {
-      apiVersion: '2022-11-15',
+      apiVersion: '2025-06-30.basil',
     },
     paymentMethods: ['bancontact', 'card'],
     apiKey: 'fake-api-key',
