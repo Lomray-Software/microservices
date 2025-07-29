@@ -1838,7 +1838,7 @@
           "user": "allow"
         }
       },
-      "custom_unit_amount": {
+      "customUnitAmount": {
         "in": {
           "admin": "allow"
         },
