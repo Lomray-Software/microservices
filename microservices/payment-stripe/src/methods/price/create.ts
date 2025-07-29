@@ -15,7 +15,17 @@ class PriceCreateInput {
   userId: string;
 
   @IsNumber()
-  unitAmount: number;
+  @IsOptional()
+  unitAmount?: number;
+
+  @IsObject()
+  @IsOptional()
+  customUnitAmount?: {
+    enabled: boolean;
+    preset?: number;
+    minimum?: number;
+    maximum?: number;
+  };
 
   @IsObject()
   @IsOptional()
