@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { test } = require('node:test');
-const { inventory, selectServices, changedFiles } = require('./service-matrix.cjs');
+const { inventory, selectServices, changedFiles, validateTestedTree } = require('./service-matrix.cjs');
 
 const services = ['authentication', 'users', 'users-admin'];
 const fixtureScripts = { 'lint:check': 'echo lint', 'ts:check': 'echo types', test: 'echo test' };
@@ -114,15 +114,23 @@ test('CLI emits explicit empty output, nonempty matrix and no output on failure'
   const output = path.join(outputDirectory, 'output');
   const run = (extra = {}) => {
     fs.writeFileSync(output, '');
-    return spawnSync(process.execPath, [script], { cwd: f.root, env: { ...process.env, BASE_SHA: base, HEAD_SHA: head, GITHUB_OUTPUT: output, ...extra }, encoding: 'utf8' });
+    f.git('checkout', '--quiet', '--detach', base);
+    f.git('-c', 'core.hooksPath=/dev/null', 'merge', '--quiet', '--no-ff', '--no-edit', head);
+    const tested = f.git('rev-parse', 'HEAD');
+    const result = spawnSync(process.execPath, [script], { cwd: f.root, env: { ...process.env, BASE_SHA: base, HEAD_SHA: head, TESTED_SHA: tested, GITHUB_OUTPUT: output, ...extra }, encoding: 'utf8' });
+    result.tested = tested;
+    f.git('checkout', '--quiet', '--detach', head);
+    return result;
   };
-  assert.equal(run().status, 0);
-  assert.equal(fs.readFileSync(output, 'utf8'), 'list=[]\nhas-services=false\n');
+  const empty = run();
+  assert.equal(empty.status, 0, empty.stderr);
+  assert.equal(fs.readFileSync(output, 'utf8'), `list=[]\nhas-services=false\ntested-sha=${empty.tested}\n`);
   f.write('microservices/users/src/file with spaces.ts', 'source');
   head = f.commit();
-  assert.equal(run().status, 0);
-  assert.equal(fs.readFileSync(output, 'utf8'), 'list=["users"]\nhas-services=true\n');
-  for (const extra of [{ BASE_SHA: '' }, { HEAD_SHA: base }, { BASE_SHA: 'f'.repeat(40) }, { BASE_SHA: '--help' }, { GITHUB_OUTPUT: '' }]) {
+  const nonempty = run();
+  assert.equal(nonempty.status, 0, nonempty.stderr);
+  assert.equal(fs.readFileSync(output, 'utf8'), `list=["users"]\nhas-services=true\ntested-sha=${nonempty.tested}\n`);
+  for (const extra of [{ BASE_SHA: '' }, { TESTED_SHA: '' }, { TESTED_SHA: head }, { HEAD_SHA: base }, { BASE_SHA: 'f'.repeat(40) }, { BASE_SHA: '--help' }, { GITHUB_OUTPUT: '' }]) {
     assert.notEqual(run(extra).status, 0);
     assert.equal(fs.readFileSync(output, 'utf8'), '');
   }
@@ -167,7 +175,7 @@ test('workflow keeps checks, gates both matrices and isolates Sonar concurrency'
   assert.equal((workflow.match(/if: needs\.changed-microservices\.outputs\.has-services == 'true'/g) || []).length, 2);
   assert.equal((workflow.match(/microservice: \$\{\{ fromJson\(needs\.changed-microservices\.outputs\.microservices\) \}\}/g) || []).length, 2);
   assert.match(workflow, /run: node --test \.github\/scripts\/service-matrix\.test\.cjs/);
-  assert.match(workflow, /ref: \$\{\{ github\.event\.pull_request\.head\.sha \}\}\n          fetch-depth: 0/);
+  assert.match(workflow, /ref: \$\{\{ github\.sha \}\}\n          fetch-depth: 0/);
   const checks = workflow.split('\n  checks:')[1].split('\n  sonarcube:')[0];
   for (const command of ['npm install', 'npm run lint:check', 'npm run ts:check', 'npm run test']) {
     assert.ok(checks.includes(`run: ${command}\n        working-directory: microservices/\${{ matrix.microservice }}`), command);
@@ -178,4 +186,43 @@ test('workflow keeps checks, gates both matrices and isolates Sonar concurrency'
   assert.match(workflow, /group:.*sonarcube-\$\{\{ matrix.microservice \}\}/);
   assert.match(workflow, /uses: SonarSource\/sonarcloud-github-action@master/);
   assert.match(workflow, /SONAR_TOKEN: \$\{\{ secrets\.SONAR_CLOUD_TOKEN \}\}/);
+});
+
+
+test('inventory rejects a symlink or file at its root', (t) => {
+  const f = fixture(t);
+  fs.renameSync(path.join(f.root, 'microservices'), path.join(f.root, 'external-services'));
+  fs.symlinkSync('external-services', path.join(f.root, 'microservices'));
+  assert.throws(() => inventory(f.root), /real directory/);
+  fs.unlinkSync(path.join(f.root, 'microservices'));
+  f.write('microservices', 'not a directory');
+  assert.throws(() => inventory(f.root), /real directory/);
+});
+
+test('shared changes cover a base-added service in the pinned tested merge', (t) => {
+  const f = repository(t);
+  const common = f.commit();
+  f.write('package.json', '{}');
+  const head = f.commit();
+  f.git('checkout', '--quiet', '--detach', common);
+  f.write('microservices/new-worker/package.json', JSON.stringify({ scripts: fixtureScripts }));
+  const base = f.commit();
+  f.git('-c', 'core.hooksPath=/dev/null', 'merge', '--quiet', '--no-ff', '--no-edit', head);
+  const tested = f.git('rev-parse', 'HEAD');
+  validateTestedTree(f.root, base, head, tested);
+  assert.deepEqual(selectServices(changedFiles(f.root, base, head), inventory(f.root)), [...services, 'new-worker'].sort());
+  assert.throws(() => validateTestedTree(f.root, common, head, tested), /exact event base/);
+  assert.throws(() => validateTestedTree(f.root, base, head, head), /Checkout/);
+  f.git('checkout', '--quiet', '--detach', head);
+  assert.throws(() => validateTestedTree(f.root, base, head, tested), /Checkout/);
+});
+
+test('both consumers use the exact selector-validated tree', () => {
+  const workflow = fs.readFileSync(path.join(__dirname, '../workflows/pr-check.yml'), 'utf8');
+  assert.match(workflow, /TESTED_SHA: \$\{\{ github\.sha \}\}/);
+  assert.match(workflow, /tested-sha: \$\{\{ steps\.microservices\.outputs\.tested-sha \}\}/);
+  for (const job of ['checks', 'sonarcube']) {
+    const block = workflow.split(`\n  ${job}:`)[1].split(/\n  [a-z][a-z-]*:/)[0];
+    assert.match(block, /uses: actions\/checkout@v4\n        with:\n          ref: \$\{\{ needs\.changed-microservices\.outputs\.tested-sha \}\}/);
+  }
 });

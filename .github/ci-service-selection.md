@@ -1,8 +1,11 @@
 # Pull-request service checks
 
 `pr-check.yml` always runs the dependency-free selector tests and PR-title check.
-The selector checks out the exact PR head, compares `base...head` with Git, and
-emits a validated JSON `list` and a `has-services` boolean. Neither missing output
+The selector checks out the event's immutable merge SHA and verifies its two parents
+are the exact event base and PR head. It computes the PR paths with `base...head`,
+but inventories services from that tested merge tree. It emits a validated JSON
+`list`, a `has-services` boolean and `tested-sha`; both consumers check out that
+same SHA. A new service added on base is therefore included for shared changes. Neither missing output
 nor malformed input counts as a successful docs-only classification: a selector
 error fails the upstream job. Run its tests locally with:
 

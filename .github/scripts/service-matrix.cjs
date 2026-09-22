@@ -17,6 +17,10 @@ const serviceName = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function inventory(root) {
   const directory = join(root, 'microservices');
+  const rootEntry = lstatSync(directory);
+  if (rootEntry.isSymbolicLink() || !rootEntry.isDirectory()) {
+    throw new Error('Service inventory root must be a real directory, not a symlink');
+  }
   const services = [];
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     if (entry.isSymbolicLink()) throw new Error('Service inventory contains a symlink');
@@ -68,9 +72,6 @@ function changedFiles(root, base, head) {
   }
   const git = (args) => execFileSync('git', args, { cwd: root, maxBuffer: 16 * 1024 * 1024 });
   for (const sha of [base, head]) git(['rev-parse', '--verify', `${sha}^{commit}`]);
-  if (git(['rev-parse', 'HEAD']).toString('utf8').trim() !== head) {
-    throw new Error('Checkout does not match the requested PR head');
-  }
   const raw = git(['diff', '--no-ext-diff', '--no-textconv', '--name-only', '--no-renames', '-z', `${base}...${head}`, '--']);
   if (!raw.length) return [];
   const text = new TextDecoder('utf-8', { fatal: true }).decode(raw);
@@ -78,11 +79,27 @@ function changedFiles(root, base, head) {
   return text.slice(0, -1).split('\0');
 }
 
+function validateTestedTree(root, base, head, tested) {
+  if (![base, head, tested].every((sha) => typeof sha === 'string' && /^[a-f0-9]{40}$/.test(sha))) {
+    throw new Error('Base, head and tested tree must be full commit SHAs');
+  }
+  const git = (args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
+  if (git(['rev-parse', 'HEAD']) !== tested) {
+    throw new Error('Checkout does not match the tested merge SHA');
+  }
+  const parents = git(['show', '-s', '--format=%P', tested]).split(' ');
+  if (parents.length !== 2 || parents[0] !== base || parents[1] !== head) {
+    throw new Error('Tested tree must merge the exact event base and PR head');
+  }
+}
+
 function main() {
   const root = process.cwd();
+  const tested = process.env.TESTED_SHA;
+  validateTestedTree(root, process.env.BASE_SHA, process.env.HEAD_SHA, tested);
   const files = changedFiles(root, process.env.BASE_SHA, process.env.HEAD_SHA);
   const selected = selectServices(files, inventory(root));
-  const output = `list=${JSON.stringify(selected)}\nhas-services=${selected.length > 0}\n`;
+  const output = `list=${JSON.stringify(selected)}\nhas-services=${selected.length > 0}\ntested-sha=${tested}\n`;
   if (!process.env.GITHUB_OUTPUT) throw new Error('GITHUB_OUTPUT is required');
   // Nothing is emitted before the complete input and inventory have been validated.
   appendFileSync(process.env.GITHUB_OUTPUT, output);
@@ -96,4 +113,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { inventory, selectServices, changedFiles };
+module.exports = { inventory, selectServices, changedFiles, validateTestedTree };
