@@ -28,16 +28,15 @@ function validate(result, enabled) {
     { extension: 'ts', negative: true, status: 1 },
     { extension: 'mjs', negative: false, status: 1 },
   ]);
-  const summary = { tests: 3, suites: 0, pass: enabled ? 0 : 3,
-    fail: enabled ? 1 : 0, cancelled: 0, skipped: enabled ? 2 : 0, todo: 0 };
+  const summary = { tests: enabled ? 1 : 3, suites: 0, pass: enabled ? 0 : 3,
+    fail: enabled ? 1 : 0, cancelled: 0, skipped: 0, todo: 0 };
   for (const [key, value] of Object.entries(summary)) {
     const rows = comments.filter(line => new RegExp(`^${key} \\d+$`).test(line));
     assert.deepEqual(rows, [`${key} ${value}`]);
   }
   const outcomes = text.split('\n').filter(line => /^(?:not )?ok \d+ - /.test(line));
-  assert.deepEqual(outcomes, names.map((name, index) =>
-    `${enabled && index === 0 ? 'not ok' : 'ok'} ${index + 1} - ${name}` +
-    (enabled && index > 0 ? ' # SKIP test name does not match pattern' : '')));
+  assert.deepEqual(outcomes, (enabled ? names.slice(0, 1) : names).map((name, index) =>
+    `${enabled ? 'not ok' : 'ok'} ${index + 1} - ${name}`));
   if (enabled) {
     // Inspect only fixture console output, not the expected outer node:test assertion.
     const child = comments.slice(0, comments.findIndex(line => line.startsWith('Subtest:')))
