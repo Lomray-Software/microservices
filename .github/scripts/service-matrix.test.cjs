@@ -181,7 +181,9 @@ test('workflow keeps checks, gates both matrices and isolates Sonar concurrency'
     assert.ok(checks.includes(`run: ${command}\n        working-directory: microservices/\${{ matrix.microservice }}`), command);
   }
   assert.match(checks, /run: npm ci/);
-  assert.match(checks, /node-version: '22'/);
+  assert.match(checks, /node-version: '22\.23\.2'/);
+  assert.match(checks, /fail-fast: false/);
+  assert.match(checks, /run: node \.github\/scripts\/test-loader-differential\.cjs/);
   assert.doesNotMatch(workflow, /continue-on-error|@lomray\/microservices-cli|tj-actions\/changed-files/);
   assert.match(workflow, /group:.*sonarcube-\$\{\{ matrix.microservice \}\}/);
   assert.match(workflow, /uses: SonarSource\/sonarcloud-github-action@master/);

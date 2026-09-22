@@ -53,6 +53,7 @@ jobs:
     if: needs.changed-microservices.outputs.has-services == 'true'
 
     strategy:
+      fail-fast: false
       matrix:
         microservice: ${{ fromJson(needs.changed-microservices.outputs.microservices) }}
 
@@ -66,7 +67,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '22.23.2'
 
       - name: Show toolchain
         run: node --version && npm --version
@@ -79,6 +80,21 @@ jobs:
       - name: Install microservice dependencies
         run: npm install
         working-directory: microservices/${{ matrix.microservice }}
+
+      - name: Record installed test loader paths
+        run: |
+          node -e "for (const name of ['mocha', 'ts-node', 'rewiremock', 'typescript', '@lomray/microservice-config']) console.log(name, require.resolve(name + '/package.json'))"
+        working-directory: microservices/${{ matrix.microservice }}
+
+      - name: Test loader differential validator
+        if: matrix.microservice == 'blog'
+        run: node --test .github/scripts/test-loader-differential.test.cjs
+
+      - name: Characterize Node22 native and ts-node loaders
+        if: matrix.microservice == 'blog'
+        run: node .github/scripts/test-loader-differential.cjs
+        env:
+          TESTED_SHA: ${{ needs.changed-microservices.outputs.tested-sha }}
 
       - name: Check microservice eslint
         run: npm run lint:check
