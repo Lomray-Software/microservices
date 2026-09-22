@@ -1,0 +1,28 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "microservices",
+  "description": "Deployable Node.js services using the Lomray RPC stack.",
+  "branch": "prod",
+  "folders": [
+    "microservices"
+  ],
+  "excludeFolders": [
+    "node_modules",
+    ".github",
+    "template",
+    "tests",
+    "configs",
+    "http-requests",
+    "**/__tests__",
+    "**/__mocks__"
+  ],
+  "excludeFiles": [
+    "CHANGELOG.md",
+    "LICENSE",
+    "CODE_OF_CONDUCT.md"
+  ],
+  "rules": [
+    "Use prod documentation for the stable service releases. Root, tests and template manifests are not runtime packages.",
+    "Service entry points start services and need infrastructure; npm installation alone does not configure a deployment."
+  ]
+}

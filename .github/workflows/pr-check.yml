@@ -11,24 +11,28 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       microservices: ${{ steps.microservices.outputs.list }}
+      has-services: ${{ steps.microservices.outputs.has-services }}
+      tested-sha: ${{ steps.microservices.outputs.tested-sha }}
 
     steps:
       - uses: actions/checkout@v4
-
-      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
-
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v42
         with:
-          json: true
-          dir_names: true
-          dir_names_max_depth: 3
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Test service selection
+        run: node --test .github/scripts/service-matrix.test.cjs
 
       - id: microservices
-        run: npx @lomray/microservices-cli changed-microservices
+        run: node .github/scripts/service-matrix.cjs
         env:
-          FILES: '${{ steps.changed-files.outputs.all_changed_files }}'
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          TESTED_SHA: ${{ github.sha }}
 
   prtitle:
     name: Check PR title
@@ -46,9 +50,10 @@ jobs:
     name: Run code checks
     needs: changed-microservices
     runs-on: ubuntu-latest
-    if: needs.changed-microservices.outputs.microservices != ''
+    if: needs.changed-microservices.outputs.has-services == 'true'
 
     strategy:
+      fail-fast: false
       matrix:
         microservice: ${{ fromJson(needs.changed-microservices.outputs.microservices) }}
 
@@ -57,6 +62,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.changed-microservices.outputs.tested-sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.2'
+
+      - name: Show toolchain
+        run: node --version && npm --version
 
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
 
@@ -64,34 +78,54 @@ jobs:
         run: npm ci
 
       - name: Install microservice dependencies
-        run: npx @lomray/microservices-cli global-install
+        run: npm install
+        working-directory: microservices/${{ matrix.microservice }}
+
+      - name: Record installed test loader paths
+        run: |
+          node -e "for (const name of ['mocha', 'ts-node', 'rewiremock', 'typescript', '@lomray/microservice-config']) console.log(name, require.resolve(name + '/package.json'))"
+        working-directory: microservices/${{ matrix.microservice }}
+
+      - name: Test loader differential validator
+        if: matrix.microservice == 'blog'
+        run: node --test .github/scripts/test-loader-differential.test.cjs
+
+      - name: Characterize Node22 native and ts-node loaders
+        if: matrix.microservice == 'blog'
+        run: node .github/scripts/test-loader-differential.cjs
         env:
-          ONLY: ${{ env.MICROSERVICE_NAME }}
+          TESTED_SHA: ${{ needs.changed-microservices.outputs.tested-sha }}
 
       - name: Check microservice eslint
-        run: npx @lomray/microservices-cli lint
-        env:
-          ONLY: ${{ env.MICROSERVICE_NAME }}
+        run: npm run lint:check
+        working-directory: microservices/${{ matrix.microservice }}
 
       - name: Check microservice typescript
-        run: npx @lomray/microservices-cli ts-check
+        run: npm run ts:check
+        working-directory: microservices/${{ matrix.microservice }}
+
+      - name: Check TypeScript test loader
+        run: node --test .github/scripts/test-loader.test.cjs
         env:
-          ONLY: ${{ env.MICROSERVICE_NAME }}
+          NODE_OPTIONS: --no-experimental-strip-types
 
       - name: Run microservices tests
-        run: npx @lomray/microservices-cli test
         env:
-          ONLY: ${{ env.MICROSERVICE_NAME }}
+          NODE_OPTIONS: --no-experimental-strip-types
+        run: npm run test
+        working-directory: microservices/${{ matrix.microservice }}
 
   sonarcube:
     name: Sonarcube
     needs: [changed-microservices]
+    if: needs.changed-microservices.outputs.has-services == 'true'
     runs-on: ubuntu-latest
     concurrency:
-      group: ${{ github.ref }}-sonarcube
+      group: ${{ github.workflow }}-${{ github.ref }}-sonarcube-${{ matrix.microservice }}
       cancel-in-progress: true
 
     strategy:
+      fail-fast: false
       matrix:
         microservice: ${{ fromJson(needs.changed-microservices.outputs.microservices) }}
 
@@ -102,6 +136,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ needs.changed-microservices.outputs.tested-sha }}
           fetch-depth: 0
 
       - uses: SonarSource/sonarcloud-github-action@master
