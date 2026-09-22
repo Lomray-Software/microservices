@@ -11,24 +11,26 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       microservices: ${{ steps.microservices.outputs.list }}
+      has-services: ${{ steps.microservices.outputs.has-services }}
 
     steps:
       - uses: actions/checkout@v4
-
-      - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
-
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v42
         with:
-          json: true
-          dir_names: true
-          dir_names_max_depth: 3
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Test service selection
+        run: node --test .github/scripts/service-matrix.test.cjs
 
       - id: microservices
-        run: npx @lomray/microservices-cli changed-microservices
+        run: node .github/scripts/service-matrix.cjs
         env:
-          FILES: '${{ steps.changed-files.outputs.all_changed_files }}'
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 
   prtitle:
     name: Check PR title
@@ -46,7 +48,7 @@ jobs:
     name: Run code checks
     needs: changed-microservices
     runs-on: ubuntu-latest
-    if: needs.changed-microservices.outputs.microservices != ''
+    if: needs.changed-microservices.outputs.has-services == 'true'
 
     strategy:
       matrix:
@@ -58,37 +60,41 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Show toolchain
+        run: node --version && npm --version
+
       - run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
 
       - name: Install global dependencies
         run: npm ci
 
       - name: Install microservice dependencies
-        run: npx @lomray/microservices-cli global-install
-        env:
-          ONLY: ${{ env.MICROSERVICE_NAME }}
+        run: npm install
+        working-directory: microservices/${{ matrix.microservice }}
 
       - name: Check microservice eslint
-        run: npx @lomray/microservices-cli lint
-        env:
-          ONLY: ${{ env.MICROSERVICE_NAME }}
+        run: npm run lint:check
+        working-directory: microservices/${{ matrix.microservice }}
 
       - name: Check microservice typescript
-        run: npx @lomray/microservices-cli ts-check
-        env:
-          ONLY: ${{ env.MICROSERVICE_NAME }}
+        run: npm run ts:check
+        working-directory: microservices/${{ matrix.microservice }}
 
       - name: Run microservices tests
-        run: npx @lomray/microservices-cli test
-        env:
-          ONLY: ${{ env.MICROSERVICE_NAME }}
+        run: npm run test
+        working-directory: microservices/${{ matrix.microservice }}
 
   sonarcube:
     name: Sonarcube
     needs: [changed-microservices]
+    if: needs.changed-microservices.outputs.has-services == 'true'
     runs-on: ubuntu-latest
     concurrency:
-      group: ${{ github.ref }}-sonarcube
+      group: ${{ github.workflow }}-${{ github.ref }}-sonarcube-${{ matrix.microservice }}
       cancel-in-progress: true
 
     strategy:
